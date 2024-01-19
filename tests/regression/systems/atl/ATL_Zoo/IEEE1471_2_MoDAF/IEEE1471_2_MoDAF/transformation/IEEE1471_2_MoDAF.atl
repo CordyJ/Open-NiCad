@@ -1,0 +1,229 @@
+--@name			IEEE1471_2_MoDAF 
+--@version		1.1	
+--@domains		Architectural Description of Complex Systems
+--@authors		Albin Jossic (jossic.albin<at>gmail.com) 
+--@date			2006/05/16	
+--@description	It is a conceptual transformation between IEEE1471 Conceptual Model and MoDAF Architecture View. IEEE-1471 is a terminology that dfines View and Viewpoints concepts about Architectural Descriptions. MoDAF is an Architecture framework specifies by the British Ministry of Defense that is based on the IEEE1471 terminology.
+--@see			IEEE1471ConceptualModel.km3
+--@see			MoDAF-AV.km3
+--@see			"Recommended Practice for Architectural description of Softwrare-Intensive Systems", IEEE Std 1471-2000, IEEE, 2000.
+--@see			http://modaf.modelfutures.com/m3/
+
+
+module IEEE1471_2_MoDAF; 
+create OUT : MoDAF  from IN : IEEE1471 ;
+
+--@begin helper rationale
+helper def : rationale : 
+	String =
+		Sequence{} -> union(IEEE1471!Rationale.allInstances()) -> first().name
+		+  ', ' +
+		Sequence{} -> union(IEEE1471!Rationale.allInstances()) -> first().content 
+	;
+--@end helper rationale
+
+--@begin IEEE1471Model 2 MoDAFModel
+rule IEEE1471Model2MoDAFModel {
+	from
+		mFrom : IEEE1471!IEEE1471Model
+	to
+		mTo : MoDAF!MoDAFModel(
+			name <- mFrom.name,
+			content <- mFrom.content,
+			enterprise <- mFrom.system,
+			environment <- mFrom.environment,
+			operationalMissions <- mFrom.missions,
+			architectures <- mFrom.architecture,
+			architecturalDescription <- mFrom.architecturalDescription,
+			stakeholders <- mFrom.stakeholders,
+			architecturalFrameworks <- mFrom.libraryViewpoints -> append(default)
+		),
+		default : MoDAF!ArchitecturalFramework (
+			name <- 'Undefined Architectural Framework',
+			ownedMember <- Sequence{} 
+				-> union(IEEE1471!Viewpoint.allInstances()) 
+				-> select(vp | vp.hasSource.oclIsUndefined())
+		)		
+}
+--@end Mission 2 OperationalMission
+
+--@begin System 2 Enterprise
+rule System2Enterprise {
+	from
+		eFrom : IEEE1471!System
+	to
+		eTo : MoDAF!Enterprise(
+			name <- eFrom.name,
+			content <- eFrom.content,
+			fulfills <- eFrom.fulfills,
+			inhabits <- eFrom.inhabits
+		)		
+}
+--@end System 2 Enterprise
+
+--@begin Environment 2 Environment
+rule Environment2Environment {
+	from
+		eFrom : IEEE1471!Environment
+	to
+		eTo : MoDAF!Environment(
+			name <- eFrom.name,
+			content <- eFrom.content,
+			influences <- eFrom.influences
+		)		
+}
+--@end Environment 2 Environment
+
+--@begin Mission 2 OperationalMission
+rule Mission2OperationalMission {
+	from
+		eFrom : IEEE1471!Mission
+	to
+		eTo : MoDAF!OperationalMission(
+			name <- eFrom.name,
+			content <- eFrom.content		
+		)		
+}
+--@end Mission 2 OperationalMission
+
+--@begin Architecture 2 Architecture
+rule Architecture2Architecture {
+	from
+		eFrom : IEEE1471!Architecture
+	to
+		eTo : MoDAF!Architecture(
+			name <- eFrom.name,
+			content <- eFrom.content,
+			enterprise <- Sequence{}
+				->union(IEEE1471!System.allInstances())
+				-> first(),
+			describedBy <- eFrom.describedBy
+		)		
+}
+--@end Architecture 2 Architecture
+
+--@begin ArchitecturalDescription 2 ArchitecturalDescription
+rule AD2AD {
+	from
+		eFrom : IEEE1471!ArchitecturalDescription
+	to
+		eTo : MoDAF!ArchitecturalDescription(
+			name <- eFrom.name,
+			content <- eFrom.content,
+			products <- eFrom.organizedBy,
+			purpose <- thisModule.rationale,
+			viewpoints <- eFrom.selects
+		)		
+}
+--@end ArchitecturalDescription 2 ArchitecturalDescription
+
+--@begin Stakeholder 2 Stakeholder
+rule Stakeholder2Stakeholder {
+	from
+		eFrom : IEEE1471!Stakeholder
+	to
+		eTo : MoDAF!Stakeholder(
+			name <- eFrom.name,
+			content <- eFrom.content		
+		)		
+}
+--@end Stakeholder 2 Stakeholder
+
+--@begin Viewpoint 2 View
+rule Viewpoint2View {
+	from
+		eFrom : IEEE1471!Viewpoint
+	to
+		eTo : MoDAF!View(
+			name <- eFrom.name,
+			content <- eFrom.content,
+			viewName <- eFrom.name,
+			viewDescription <- eFrom.content,
+			framework <-
+				if eFrom.hasSource.oclIsUndefined()
+				then 'Undefined'
+				else eFrom.hasSource.name	
+				endif,
+			usedToCover <- eFrom.usedToCover,
+			definingFramework <- eFrom.hasSource			
+		)		
+}
+--@end Viewpoint 2 View
+
+--@begin View 2 ArchitecturalProduct
+rule View2ArchitecturalProduct {
+	from
+		eFrom : IEEE1471!View
+	to
+		eTo : MoDAF!ArchitecturalProduct(
+			name <- eFrom.name,
+			content <- eFrom.content,
+			description <- eFrom.name + ', ' + eFrom.content,
+			definingView <- eFrom.conformsTo,
+			addresses <- eFrom.conformsTo.usedToCover,
+			architecturalElements <- eFrom.consitsOf
+		)		
+}
+--@end View 2 ArchitecturalProduct
+
+--@begin Model 2 Elements
+rule Model2Element {
+	from
+		eFrom : IEEE1471!Model
+	to
+		eTo : MoDAF!Elements(
+			name <- eFrom.name,
+			content <- eFrom.content
+		)		
+}
+--@end Model 2 Elements
+
+--@begin Concern 2 Concern
+rule Concern2Concern {
+	from
+		eFrom : IEEE1471!Concern
+	to
+		eTo : MoDAF!Concern(
+			name <- eFrom.name,
+			content <- eFrom.content		
+		)		
+}
+--@end Concern 2 Concern
+
+--@begin LibraryViewpoint 2 ArchitecturalFramework
+rule LibraryViewpoint2ArchitecturalFramework {
+	from
+		eFrom : IEEE1471!LibraryViewpoint
+	to
+		eTo : MoDAF!ArchitecturalFramework(
+			name <- eFrom.name,
+			content <- eFrom.content,
+			ownedMember <- Sequence{}
+				-> select(e | e.isOCLTypeOf(IEEE1471!Viewpoint))
+				-> select(vp | vp.hasSource=eFrom)	
+		)		
+}
+--@end LibraryViewpoint 2 ArchitecturalFramework
+
+--@begin StakeholderHasConcern
+rule StakeholderHasConcern {
+	from
+		stakeholder : IEEE1471!Stakeholder,
+		concern : IEEE1471!Concern
+		(
+			stakeholder.has.includes(concern)
+			and
+			concern.isImportantTo.includes(stakeholder)				
+		)
+	to
+		shhc : MoDAF!StakeholderHasConcern (
+			client <- stakeholder,
+			supplier <- concern,
+			owner <- thisModule.resolveTemp(
+					  	Sequence{} -> union(IEEE1471!IEEE1471Model.allInstances()) -> first(),
+						'mTo'
+					)
+			--other solution for owner : owner <- Sequence{}->union(IEEE1471!IEEE1471Model.allInstances())->first()
+		)
+}
+--@end StakeholderHasConcern

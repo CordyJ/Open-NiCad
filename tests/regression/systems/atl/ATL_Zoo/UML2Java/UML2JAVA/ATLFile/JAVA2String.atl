@@ -1,0 +1,92 @@
+library JAVA2String;
+
+-- Please note that this ATL program serves only for demonstration purposes.
+-- The rules and functions in this program may not be complete.
+
+helper context JAVA!ClassFeature def: modifierFinal() : String =
+	if self.isFinal then
+		'final '
+	else
+		''
+	endif;
+
+helper context JAVA!ClassMember def: visibility() : String =
+	if self.isPublic then
+		'public '
+	else
+		'private '
+	endif;
+
+helper context JAVA!JavaClass def: visibility() : String =
+	if self.isPublic then
+		'public '
+	else
+		'private '
+	endif;
+
+helper context JAVA!ClassMember def: scope() : String =
+	if self.isStatic then
+		'static '
+	else
+		''
+	endif;
+
+helper context JAVA!JavaClass def: scope() : String =
+	if self.isStatic then
+		'static '
+	else
+		''
+	endif;
+
+helper context JAVA!JavaClass def: modifierAbstract() : String =
+	if self.isAbstract then
+		'abstract '
+	else
+		''
+	endif;
+
+helper context JAVA!Package def: toString() : String =
+	'package ' + self.name + ';\n\n';
+
+helper context JAVA!JavaClass def: toString() : String =
+	self.package.toString() + self.visibility() +
+	self.scope() + self.modifierAbstract() +
+	self.modifierFinal() + 'class ' + self.name + ' {\n' +
+	self.members->iterate(i; acc : String = '' |
+		acc + i.toString()
+	) +
+	'\n}\n\n';
+
+helper context JAVA!PrimitiveType def: toString() : String =
+	if self.name = 'Integer' then
+		'int '
+	else if self.name = 'Boolean' then
+		'boolean '
+	else if self.name = 'String' then
+		'java.lang.String '
+	else if self.name = 'Long' then
+		'long '
+	else
+		'void '
+	endif endif endif endif;
+
+helper context JAVA!Field def: toString() : String =
+	'\t' + self.visibility() + self.scope() + self.modifierFinal() +
+	self.type.name + ' ' + self.name + ';\n';
+
+helper context JAVA!Method def: toString() : String =
+	'\t' + self.visibility() + self.scope() + self.modifierFinal() +
+	self.type.name + ' ' + self.name + '(' +
+	self.parameters->iterate(i; acc : String = '' |
+		acc +
+		if acc = '' then
+			''
+		else
+			', '
+		endif +
+		i.toString()
+	) +
+	') {\n\t\t//Your code here\n\t}\n';
+
+helper context JAVA!FeatureParameter def: toString() : String =
+	self.type.name + ' ' + self.name;

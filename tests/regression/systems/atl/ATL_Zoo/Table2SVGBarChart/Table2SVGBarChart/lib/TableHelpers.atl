@@ -1,0 +1,115 @@
+--@atlcompiler	atl2006
+--@name			TableHelpers
+--@version		1.0
+--@domains		Table, Helpers
+--@authors		Eric Vepa (evepa <at> sodius.com) for SODIUS (www.sodius.com)
+--@date			2007/08/28
+--@description	This library contains common helpers on the Table metamodel.
+
+library TableHelpers; -- Library Template
+
+--@begin helper isInteger
+--@comments Returns true if the string contains an integer value.
+helper context String
+def : isInteger() : Boolean =
+	if self.split('\\.')->size() - 1 = 0
+		then let value : String = 
+				self->regexReplaceAll('\\d','') in
+			(value = '') or (value = '-')
+		else false
+	endif;
+--@end helper isInteger
+
+--@begin helper isReal
+--@comments Returns true if the string contains a real value (at most one dot, the first character can be a minus and the other characters are numbers).
+helper context String
+def : isReal() : Boolean =
+	let dotNb : Integer =
+		self.split('\\.')->size() - 1 in
+	if dotNb = 1
+		then let value : String = 
+				self->regexReplaceAll('\\.','')->regexReplaceAll('\\d','') in
+			(value = '') or (value = '-')
+		else false
+	endif;
+--@end helper isReal
+
+--@begin helper isPercentage
+--@comments Returns true if the string contains a percentage value (a real between 0 and 100 and ended with a '%' unit).
+helper context String
+def : isPercentage() : Boolean =
+	if self.endsWith('%') and not self.startsWith('-')
+		then let value : String =
+				self->substring(1,self->size() - 1) in
+			if value.isInteger() or value.isReal()
+				then (0 <= value.toReal()) and (value.toReal() <= 100)
+				else false
+			endif
+		else false
+	endif;
+--@end helper isPercentage
+
+--@begin helper value
+--@comments Returns the value with at most one digit after the dot for a real value.
+helper context String
+def : value() : String =
+	let dot : Integer =
+		self->indexOf('.') in
+	if self.isReal() and (dot > 0)
+		then if ((self->size() - (dot + 1)) = 1)
+				then if self->substring(dot + 2,self->size()) = '0'
+						then self->substring(1,dot)
+						else self
+					endif
+				else if ((self->size() - (dot + 1)) > 1)
+						then self->substring(1,dot + 1 + 1)
+						else self
+					endif
+			endif
+		else self
+	endif;
+--@end helper value
+
+--@begin helper value
+--@comments  Returns the value with at most one digit after the dot for a real value and .
+helper context Table!Cell
+def : value() : String =
+	if self.content.isPercentage()
+		then self.content->
+			substring(1,self.content->size() - 1).value() + '%'
+		else self.content.value()
+	endif;
+--@end helper value
+
+--@begin helper realValue
+--@comments Returns a double value (a percentage value is returned without the '%' unit and with a value between 0 and 1).
+helper context Table!Cell
+def : realValue() : Real =
+	if self.content.isPercentage()
+		then self.content->substring(1,self.content->size() - 1).toReal() / 100
+		else self.content.toReal()
+	endif;
+--@end helper realValue
+
+--@begin helper seqWithoutFirst
+--@comments The context should be Sequence(OclAny).
+--@comments Returns the sequence without the first element.
+helper context OclAny
+def : seqWithoutFirst() : Sequence(OclAny) =
+	self->subSequence(2,self->size());
+--@end helper seqWithoutFirst
+
+--@begin helper allValidTables
+--@comments Returns all valid tables, e.g tables which can be represented as charts (a table with values excluding the header row and the first cell of each other row).
+helper def : allValidTables : Sequence(Table!Table) =
+	Table!Table.allInstances()->select(t|t.rows->seqWithoutFirst()->
+			forAll(r|r.cells->seqWithoutFirst()->
+				forAll(c|(c.content.isInteger() or c.content.isReal() or
+						c.content.isPercentage()))));
+--@end helper allValidTables
+
+--@begin helper valueNotNull
+--@comments Returns true if the cell contains a non null value.
+helper context Table!Cell def : valueNotNull() : Boolean =
+	self.realValue() <> 0;
+--@end helper valueNotNull

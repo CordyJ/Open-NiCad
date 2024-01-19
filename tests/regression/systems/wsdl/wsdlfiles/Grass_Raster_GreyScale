@@ -1,0 +1,863 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://Grass_Raster_GreyScale.grass.ws.laits.gmu.edu" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://Grass_Raster_GreyScale.grass.ws.laits.gmu.edu" xmlns:intf="http://Grass_Raster_GreyScale.grass.ws.laits.gmu.edu" xmlns:tns1="http://grass.ws.laits.gmu.edu" xmlns:tns2="http://ws.laits.gmu.edu" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+	 <wsdl:types>
+
+		  <schema elementFormDefault="qualified" targetNamespace="http://Grass_Raster_GreyScale.grass.ws.laits.gmu.edu" xmlns="http://www.w3.org/2001/XMLSchema">
+
+			<!-- ELEMENTS -->
+
+			   <element name="Default_weightsElement">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Name of the element to describe input parameters.
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element minOccurs="1" name="sourceURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of input raster map. Default data format is GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element default="Byte" minOccurs="1" name="outputGeoTiffType" type="tns1:GeoTiffFileType">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Type of output GeoTIFF file. The output Format Type is specified as GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+			   <element name="Default_weightsResponse">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Return URL and Format of output raster map.
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element name="returnURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of output raster map.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element name="returnFormat" type="xsd:string">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Format of output raster map.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+			   <element name="Equal_weightsElement">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Name of the element to describe input parameters.
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element minOccurs="1" name="sourceURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of input raster map. Default data format is GeoTIFF
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element default="Byte" minOccurs="1" name="outputGeoTiffType" type="tns1:GeoTiffFileType">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Type of output GeoTIFF file. The output Format Type is specified as GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+			   <element name="Equal_weightsResponse">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Always return URL and Format of output file.
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element name="returnURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of output raster map.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element name="returnFormat" type="xsd:string">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Format of output raster map.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+			   <element name="NTSC_weightsElement">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Name of the element to describe input parameters.
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element minOccurs="1" name="sourceURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of input raster map. Default data format is GeoTIFF
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element default="Byte" minOccurs="1" name="outputGeoTiffType" type="tns1:GeoTiffFileType">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Type of output GeoTIFF file. The output Format Type is specified as GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+			   <element name="NTSC_weightsResponse">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Always return URL and Format of output file.
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element name="returnURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of output raster map.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element name="returnFormat" type="xsd:string">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Format of output raster map.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+			   <element name="Specified_weightsElement">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Name of the element to describe input parameters.
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element minOccurs="1" name="redImageURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of red raster map layer to be used for. Default data format is GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element minOccurs="1" name="greenImageURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of green raster map layer to be used for. Default data format is GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element minOccurs="1" name="blueImageURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of blue raster map layer to be used for. Default data format is GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element minOccurs="1" name="red_weights" type="xsd:float">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Weight of red map layer.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element minOccurs="1" name="green_weights" type="xsd:float">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Weight of green map layer.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element minOccurs="1" name="blue_weights" type="xsd:float">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Weight of blue map layer.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element default="Byte" minOccurs="1" name="outputGeoTiffType" type="tns1:GeoTiffFileType">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Type of output GeoTIFF file. The output Format Type is specified as GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+			   <element name="Specified_weightsResponse">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Return URL and Format of output raster map.
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element name="returnURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of output raster map.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element name="returnFormat" type="xsd:string">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Format of output raster map.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+			   <element name="fault" type="tns2:WebServiceExceptionsType"/>
+
+		  </schema>
+
+		  <schema elementFormDefault="qualified" targetNamespace="http://grass.ws.laits.gmu.edu" xmlns="http://www.w3.org/2001/XMLSchema">
+
+			   <simpleType name="GeoTiffFileType">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Type of output file if the outputFormatType is specified as GeoTIFF.
+                         </documentation>
+
+				    </annotation>
+
+				    <restriction base="string">
+
+					     <enumeration value="Byte">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be Byte - 8-bit unsigned integer.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="Int16">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be Int16 - 16-bit signed integer.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="UInt16">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be UInt16 - 16-bit unsigned integer.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="UInt32">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be UInt32 - 32-bit unsigned integer.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="Int32">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be Int32 - 32-bit signed integer.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="Float32">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be Float32 - 32-bit floating point.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="Float64">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be Float64 - 64-bit floating point.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="CInt16">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be CInt16 - Complex 16-bit signed integer (ie. two Int16's one representing the real component, and one the imaginary component).
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="CInt32">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be CInt32 - Complex 32-bit signed integer.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="CFloat32">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be CFloat32 - Complex 32-bit floating point.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="CFloat64">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be CFloat64 - Complex 64-bit floating point.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+				    </restriction>
+
+			   </simpleType>
+
+		  </schema>
+
+		  <schema elementFormDefault="qualified" targetNamespace="http://ws.laits.gmu.edu" xmlns="http://www.w3.org/2001/XMLSchema">
+
+			   <complexType name="WebServiceExceptionsType">
+
+				    <sequence>
+
+					     <element name="exception" type="xsd:string"/>
+
+				    </sequence>
+
+			   </complexType>
+
+		  </schema>
+
+	 </wsdl:types>
+
+	 <wsdl:message name="default_weightsRequest">
+
+		  <wsdl:part element="impl:Default_weightsElement" name="parameters"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="default_weightsResponse">
+
+		  <wsdl:part element="impl:Default_weightsResponse" name="return"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="equal_weightsRequest">
+
+		  <wsdl:part element="impl:Equal_weightsElement" name="parameters"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="equal_weightsResponse">
+
+		  <wsdl:part element="impl:Equal_weightsResponse" name="return"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="ntsc_weightsRequest">
+
+		  <wsdl:part element="impl:NTSC_weightsElement" name="parameters"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="ntsc_weightsResponse">
+
+		  <wsdl:part element="impl:NTSC_weightsResponse" name="return"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="specified_weightsRequest">
+
+		  <wsdl:part element="impl:Specified_weightsElement" name="parameters"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="specified_weightsResponse">
+
+		  <wsdl:part element="impl:Specified_weightsResponse" name="return"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="WebServiceExceptionsType">
+
+		  <wsdl:part element="impl:fault" name="fault"/>
+
+	 </wsdl:message>
+
+	 <wsdl:portType name="Grass_Raster_GreyScalePortType">
+
+		  <wsdl:operation name="default_weights">
+
+			   <wsdl:input message="impl:default_weightsRequest" name="default_weightsRequest"/>
+
+			   <wsdl:output message="impl:default_weightsResponse" name="default_weightsResponse"/>
+
+			   <wsdl:fault message="impl:WebServiceExceptionsType" name="WebServiceExceptionsType"/>
+
+		  </wsdl:operation>
+
+		  <wsdl:operation name="equal_weights">
+
+			   <wsdl:input message="impl:equal_weightsRequest" name="equal_weightsRequest"/>
+
+			   <wsdl:output message="impl:equal_weightsResponse" name="equal_weightsResponse"/>
+
+			   <wsdl:fault message="impl:WebServiceExceptionsType" name="WebServiceExceptionsType"/>
+
+		  </wsdl:operation>
+
+		  <wsdl:operation name="ntsc_weights">
+
+			   <wsdl:input message="impl:ntsc_weightsRequest" name="ntsc_weightsRequest"/>
+
+			   <wsdl:output message="impl:ntsc_weightsResponse" name="ntsc_weightsResponse"/>
+
+			   <wsdl:fault message="impl:WebServiceExceptionsType" name="WebServiceExceptionsType"/>
+
+		  </wsdl:operation>
+
+		  <wsdl:operation name="specified_weights">
+
+			   <wsdl:input message="impl:specified_weightsRequest" name="specified_weightsRequest"/>
+
+			   <wsdl:output message="impl:specified_weightsResponse" name="specified_weightsResponse"/>
+
+			   <wsdl:fault message="impl:WebServiceExceptionsType" name="WebServiceExceptionsType"/>
+
+		  </wsdl:operation>
+
+	 </wsdl:portType>
+
+	 <wsdl:binding name="Grass_Raster_GreyScaleSoapBinding" type="impl:Grass_Raster_GreyScalePortType">
+
+		  <wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+		  <wsdl:operation name="default_weights">
+
+			   <wsdl:documentation>
+Convert map category values to their grey scale equivalents using default weightings. It is used for the map which has a grey scale color table. Default weights are applied to compute grey level.   </wsdl:documentation>
+
+			   <wsdlsoap:operation soapAction="default_weights" style="document"/>
+
+			   <wsdl:input>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:input>
+
+			   <wsdl:output>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:output>
+
+			   <wsdl:fault name="WebServiceExceptionsType">
+
+				    <wsdlsoap:fault name="WebServiceExceptionsType" use="literal"/>
+
+			   </wsdl:fault>
+
+		  </wsdl:operation>
+
+		  <wsdl:operation name="equal_weights">
+
+			   <wsdl:documentation>
+Convert map category values to their grey scale equivalents using equal weightings.   </wsdl:documentation>
+
+			   <wsdlsoap:operation soapAction="equal_weights" style="document"/>
+
+			   <wsdl:input>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:input>
+
+			   <wsdl:output>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:output>
+
+			   <wsdl:fault name="WebServiceExceptionsType">
+
+				    <wsdlsoap:fault name="WebServiceExceptionsType" use="literal"/>
+
+			   </wsdl:fault>
+
+		  </wsdl:operation>
+
+		  <wsdl:operation name="ntsc_weights">
+
+			   <wsdl:documentation>
+Convert map category values to their grey scale equivalents using NTSC weightings.   </wsdl:documentation>
+
+			   <wsdlsoap:operation soapAction="ntsc_weights" style="document"/>
+
+			   <wsdl:input>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:input>
+
+			   <wsdl:output>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:output>
+
+			   <wsdl:fault name="WebServiceExceptionsType">
+
+				    <wsdlsoap:fault name="WebServiceExceptionsType" use="literal"/>
+
+			   </wsdl:fault>
+
+		  </wsdl:operation>
+
+		  <wsdl:operation name="specified_weights">
+
+			   <wsdl:documentation>
+Convert a color raster map including the red, green, or blue components to a grey scale equivalents. Users can specify weights for each component of the input raster map.   </wsdl:documentation>
+
+			   <wsdlsoap:operation soapAction="specified_weights" style="document"/>
+
+			   <wsdl:input>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:input>
+
+			   <wsdl:output>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:output>
+
+			   <wsdl:fault name="WebServiceExceptionsType">
+
+				    <wsdlsoap:fault name="WebServiceExceptionsType" use="literal"/>
+
+			   </wsdl:fault>
+
+		  </wsdl:operation>
+
+	 </wsdl:binding>
+
+	 <wsdl:service name="Grass_Raster_GreyScaleService">
+
+		  <wsdl:documentation>
+Convert raster map category values to their grey scale equivalents.  </wsdl:documentation>
+
+		  <wsdl:port binding="impl:Grass_Raster_GreyScaleSoapBinding" name="Grass_Raster_GreyScale">
+
+			   <wsdlsoap:address location="http://65.123.203.154:8099/axis/services/Grass_Raster_GreyScale"/>
+
+		  </wsdl:port>
+
+	 </wsdl:service>
+
+	<!--WSDL created by Apache Axis version: 1.4
+Built on Apr 22, 2006 (06:55:48 PDT)-->
+
+</wsdl:definitions>

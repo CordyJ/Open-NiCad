@@ -1,0 +1,140 @@
+--@atlcompiler	atl2006
+--@name			SVG2XML
+--@version		1.0
+--@domains		SVG, XML
+--@authors		Yu Sun
+--@email        yusun@cis.uab.edu
+--@date			2007/11/02
+--@description	This transformation is used to transform the SVG model to XML model.
+
+module SVG2XML; -- Module Template
+create OUT : XML from IN : SVG;
+
+rule Svg {
+	from 
+		svg : SVG!Svg
+	to
+		root : XML!Root (
+			name <- 'svg',
+			children <- xmlns,
+			children <- version,
+			children <- width,
+			children <- height,
+			children <- standalone,
+			children <- svg.children
+		),
+		
+		xmlns : XML!Attribute (
+			name <- 'xmlns',
+			value <- 'http://www.w3.org/2000/svg'
+		),
+		
+		version : XML!Attribute (
+			name <- 'version',
+			value <- svg.version 
+		),
+		
+		width : XML!Attribute (
+			name <- 'width',
+			value <- svg.width -> toString()
+		),
+		
+		height : XML!Attribute (
+			name <- 'height',
+			value <- svg.height -> toString()
+		),
+		
+		standalone : XML!Attribute (
+			name <- 'standalone',
+			value <- svg.standalone 
+		)
+}
+
+rule G {
+	from 
+		g : SVG!Group
+	to
+		elmt : XML!Element (
+			name <- 'g',
+			children <- transform,
+			children <- g.components
+		),
+		
+		transform : XML!Attribute (
+			name <- 'transform',
+			value <- 'translate(' + g.translate_x -> toString() + ',' + g.translate_y -> toString() + ')'
+		)
+}
+
+rule Text {
+	from 
+		t : SVG!Text
+	to
+		elmt : XML!Element (
+			name <- 'text',
+			children <- thisModule.Attribute('x', t.x->toString()),
+			children <- thisModule.Attribute('y', t.y->toString()),
+			children <- thisModule.Attribute('font-size', t.font_size -> toString()),
+			children <- txt
+		),
+		
+		txt : XML!Text (
+			value <- t.contend
+		)
+	do {
+		if (not t.fill.oclIsUndefined()) {
+			elmt.children <- thisModule.Attribute('fill', t.fill);
+		}
+		if (not t.font_family.oclIsUndefined()) {
+			elmt.children <- thisModule.Attribute('font-family', t.font_family);
+		}
+	}
+}
+
+rule Rect {
+	from 
+		r : SVG!Rect
+	to 
+		elmt : XML!Element (
+			name <- 'rect',
+			children <- thisModule.Attribute('x', r.x -> toString()),
+			children <- thisModule.Attribute('y', r.y -> toString()),
+			children <- thisModule.Attribute('width', r.width ->toString()),
+			children <- thisModule.Attribute('height', r.height->toString()),
+			children <- thisModule.Attribute('fill', r.fill)
+		)
+	do {
+		
+		if (not r.rx.oclIsUndefined()) {
+			elmt.children <- thisModule.Attribute('rx', r.rx -> toString());
+		}
+		if (not r.ry.oclIsUndefined()) {
+			elmt.children <- thisModule.Attribute('ry', r.ry -> toString());
+		}
+		if (not r.stroke_width.oclIsUndefined()) {
+			elmt.children <- thisModule.Attribute('stroke-width', r.stroke_width -> toString());
+		}
+		if (not r.stroke.oclIsUndefined()) {
+			elmt.children <- thisModule.Attribute('stroke', r.stroke);
+		} 
+		if (not r.opacity.oclIsUndefined()) {
+			elmt.children <- thisModule.Attribute('opacity', r.opacity -> toString());
+		}
+		if (not r.title.oclIsUndefined()) {
+			elmt.children <- thisModule.Attribute('title', r.title -> toString());
+		}
+	}
+}
+
+--@begin called rule Attribute
+rule Attribute(attrName : String, attrValue : String) {
+	to
+		attr : XML!Attribute (
+			name <- attrName,
+			value <- attrValue
+		)
+	do {
+		attr;
+	}
+}	
+--@end called rule Attribute

@@ -1,0 +1,303 @@
+--@atlcompiler	atl2006
+--@name			SVG2XML
+--@version		2.0
+--@domains		SVG, extractor
+--@authors		Eric Vepa (evepa <at> sodius.com) for SODIUS (www.sodius.com)
+--@date			2007/05/28
+--@description	SVG extractor for a subset of the SVG metamodel.
+
+module SVG2XML; -- Module Template
+create OUT : XML from IN : SVG;
+
+--@begin helper notNull
+--@comments Returns true if the value is not null (0 or 0.0).
+helper context Real
+def : notNull() : Boolean =
+	self <> 0 and self <> 0.0;
+--@end helper notNull
+
+--@begin helper scale
+--@comments Returns the string value for a scale transformation attribute.
+helper context SVG!Scale
+def : scale() : String =
+	if (self.sx = 1 or self.sx = 1.0)
+		then ''
+		else 'scale(' + self.sx.toString() +
+			if self.sy = self.sx
+				then ''
+				else ',' + self.sy.toString()
+			endif + ')'
+	endif;
+--@end helper scale
+
+--@begin helper translate
+--@comments Returns the string value for a translate transformation attribute.
+helper context SVG!Translate
+def : translate() : String =
+	if self.tx.notNull() or self.ty.notNull()
+		then 'translate(' + self.tx.toString() + ',' + self.ty.toString() + ')'
+		else ''
+	endif;
+--@end helper translate
+
+--@begin helper rotate
+--@comments Returns the string value for a rotate transformation attribute.
+helper context SVG!Rotate
+def : rotate() : String =
+	if self.angle.notNull()
+		then 'rotate(' + self.angle.toString() + ')'
+		else ''
+	endif;
+--@end helper rotate
+
+--@begin rule Svg
+rule Svg {
+	from
+		svg : SVG!Svg
+	to
+		root : XML!Root (
+			name <- 'svg',
+			children <- xmlns,
+			children <- version,
+			children <- thisModule.Attribute('width',
+				if not svg.size.oclIsUndefined()
+					then svg.size.width.toString()
+					else '100%'
+				endif),
+			children <- thisModule.Attribute('height',
+				if not svg.size.oclIsUndefined()
+					then svg.size.height.toString()
+					else '100%'
+				endif),
+			children <- svg.children
+		),
+		xmlns : XML!Attribute (
+			name <- 'xmlns',
+			value <- svg.namespace
+		),
+		version : XML!Attribute (
+			name <- 'version',
+			value <- svg.version
+		)
+	do {
+		if (not svg.viewBox.oclIsUndefined()) {
+			root.children <- thisModule.Attribute('viewBox', svg.viewBox);
+		}
+	}
+}	
+--@end rule Svg
+
+--@begin rule G
+rule G {
+	from
+		g : SVG!G
+	using {
+		transforms : Sequence(SVG!Transform) =
+			g.attribute->select(a|a.oclIsKindOf(SVG!Transform));
+		transformValue : String =
+			transforms->iterate(transf; str : String = ''|
+				str +
+				if transf.oclIsTypeOf(SVG!Scale)
+					then transf.scale()
+					else if transf.oclIsTypeOf(SVG!Translate)
+						then transf.translate()
+						else if transf.oclIsTypeOf(SVG!Rotate)
+							then transf.rotate()
+							else ''
+						endif
+					endif
+				endif +
+				if (transf <> transforms->last())
+					then ' '
+					else ''
+				endif);
+	}
+	to
+		elmt : XML!Element (
+			name <- 'g',
+			children <- g.groupContent
+		)
+	do {
+		if (not g.fill.oclIsUndefined()) {
+			if (g.fill <> 'black') {
+				elmt.children <- thisModule.Attribute('fill', g.fill);
+			}
+		}
+		if (transforms->notEmpty()) {
+			if (transformValue <> '') {
+				elmt.children <- thisModule.Attribute('transform',
+					transformValue);
+			}
+		}
+	}
+}	
+--@end rule G
+
+--@begin rule Rect
+rule Rect {
+	from
+		rect : SVG!Rect
+	to
+		elmt : XML!Element (
+			name <- 'rect',
+			children <- thisModule.Attribute('width',
+				if not rect.size.oclIsUndefined()
+					then rect.size.width.toString()
+					else '100%'
+				endif),
+			children <- thisModule.Attribute('height',
+				if not rect.size.oclIsUndefined()
+					then rect.size.height.toString()
+					else '100%'
+				endif)
+		)
+	do {
+		if (not rect.position.oclIsUndefined()) {
+			if (rect.position.x.notNull()) {
+				elmt.children <- thisModule.Attribute('x',
+					rect.position.x.toString());
+			}
+		}
+		if (not rect.position.oclIsUndefined()) {
+			if (rect.position.y.notNull()) {
+				elmt.children <- thisModule.Attribute('y',
+					rect.position.y.toString());
+			}
+		}
+		if (not rect.fill.oclIsUndefined()) {
+			if (rect.fill <> 'black') {
+				elmt.children <- thisModule.Attribute('fill', rect.fill);
+			}
+		}
+		if (not rect.stroke.oclIsUndefined()) {
+			if (rect.stroke <> 'none') {
+				elmt.children <- thisModule.Attribute('stroke', rect.stroke);
+			}
+		}
+	}
+}	
+--@end rule Rect
+
+--@begin rule Circle
+rule Circle {
+	from
+		circ : SVG!Circle
+	to
+		elmt : XML!Element (
+			name <- 'circle',
+			children <- thisModule.Attribute('r',
+				if not circ.size.oclIsUndefined()
+					then circ.size.width.toString()
+					else '0'
+				endif)
+		)
+	do {
+		if (not circ.position.oclIsUndefined()) {
+			if (circ.position.x.notNull()) {
+				elmt.children <- thisModule.Attribute('x',
+					circ.position.x.toString());
+			}
+		}
+		if (not circ.position.oclIsUndefined()) {
+			if (circ.position.y.notNull()) {
+				elmt.children <- thisModule.Attribute('y',
+					circ.position.y.toString());
+			}
+		}
+		if (not circ.fill.oclIsUndefined()) {
+			if (circ.fill <> 'black') {
+				elmt.children <- thisModule.Attribute('fill', circ.fill);
+			}
+		}
+		if (not circ.stroke.oclIsUndefined()) {
+			if (circ.stroke <> 'none') {
+				elmt.children <- thisModule.Attribute('stroke', circ.stroke);
+			}
+		}
+	}
+}	
+--@end rule Circle
+
+--@begin rule Path
+rule Path {
+	from
+		path : SVG!Path
+	to
+		elmt : XML!Element (
+			name <- 'path',
+			children <- thisModule.Attribute('d', path.d)
+		)
+	do {
+		if (not path.fill.oclIsUndefined()) {
+			if (path.fill <> 'black') {
+				elmt.children <- thisModule.Attribute('fill', path.fill);
+			}
+		}
+		if (not path.stroke.oclIsUndefined()) {
+			if (path.stroke <> 'none') {
+				elmt.children <- thisModule.Attribute('stroke', path.stroke);
+			}
+		}
+	}
+}	
+--@end rule Path
+
+--@begin rule Text
+rule Text {
+	from
+		text : SVG!Text
+	to
+		elmt : XML!Element (
+			name <- 'text',
+			children <- txt
+		),
+		txt : XML!Text (
+			value <- text.content
+		)
+	do {
+		if (not text.position.oclIsUndefined()) {
+			if (text.position.x.notNull()) {
+				elmt.children <- thisModule.Attribute('x',
+					text.position.x.toString());
+			}
+		}
+		if (not text.position.oclIsUndefined()) {
+			if (text.position.y.notNull()) {
+				elmt.children <- thisModule.Attribute('y',
+					text.position.y.toString());
+			}
+		}
+		if (not text.stroke.oclIsUndefined()) {
+			if (text.stroke <> 'none') {
+				elmt.children <- thisModule.Attribute('stroke', text.stroke);
+			}
+		}
+		if (not text.fontSize.oclIsUndefined()) {
+			if (text.fontSize <> 'medium') {
+				elmt.children <- thisModule.Attribute('font-size',
+					text.fontSize);
+			}
+		}
+		--@comments text-anchor value stored in lengthAdjust attribute
+		if (not text.lengthAdjust.oclIsUndefined()) {
+			if (text.lengthAdjust <> 'start') {
+				elmt.children <- thisModule.Attribute('text-anchor',
+					text.lengthAdjust);
+			}
+		}
+	}
+}	
+--@end rule Text
+
+--@begin called rule Attribute
+rule Attribute(attrName : String, attrValue : String) {
+	to
+		attr : XML!Attribute (
+			name <- attrName,
+			value <- attrValue
+		)
+	do {
+		attr;
+	}
+}	
+--@end called rule Attribute

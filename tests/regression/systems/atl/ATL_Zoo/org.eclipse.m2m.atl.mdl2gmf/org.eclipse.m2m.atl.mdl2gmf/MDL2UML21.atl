@@ -1,0 +1,471 @@
+-- @atlcompiler atl2006
+module MDL2UML21; -- Module Template
+create OUT : UML from IN : MDL;
+uses MDLHelpers;
+
+helper def: quid2Object : Map(String,MDL!Object)=
+	MDL!Object.allInstancesFrom('IN')->iterate(e; acc : Map(String, MDL!Object) = Map {} |
+		acc->including(e.getValue('quid'),e)
+	);
+	
+helper def : multiplicity : Map(String,TupleType(lower: String,upper: String))=
+	Map{
+		('*',Tuple{lower='0', upper='-1'}),
+		('1',Tuple{lower='1', upper='1'}),
+		('0..1',Tuple{lower='0', upper='1'})		
+	};
+	
+helper def: primitiveType2OutVar : Map(String, String) =
+	Map {
+		('String', 'str'),
+		('Integer', 'int'),
+		('Boolean', 'bool'),
+		('Byte', 'byte'),
+		('Currency', 'currency'),
+		('Date', 'date'),
+		('Double', 'double'),
+		('Long', 'long'),
+		('Object', 'object'),
+		('Single', 'single'),
+		('Variant', 'variant')
+	};
+	
+helper def: root : MDL!MDLFile =
+	MDL!MDLFile.allInstancesFrom('IN')->any(e | true);
+
+rule File {
+	from
+		f : MDL!MDLFile
+	to
+		m : UML!Model (
+			packagedElement <- f.elements->select(e | e.oclIsTypeOf(MDL!Object))->union(Sequence{uml,rose})
+		),
+		uml : UML!Package(
+			name<- 'UMLPrimitiveTypes',
+			packagedElement<- Sequence{str,int,bool}
+		),
+		rose : UML!Package(
+			name<-'RoseDataTypes',
+			packagedElement<- Sequence{byte,currency,date,double,long,object,single,variant}
+		),
+		--UMLPrimitiveTypes
+		str : UML!PrimitiveType(
+			name<- 'String'
+		),
+		int : UML!PrimitiveType(
+			name<- 'Integer'
+		),
+		bool : UML!PrimitiveType(
+			name<- 'Boolean'
+		),
+		--RoseDataTypes
+		byte : UML!PrimitiveType(
+			name<- 'Byte'
+		),		
+		currency : UML!PrimitiveType(
+			name<- 'Currency'
+		),		
+		date : UML!PrimitiveType(
+			name<- 'Date'
+		),		
+		double : UML!PrimitiveType(
+			name<- 'Double'
+		),		
+		long : UML!PrimitiveType(
+			name<- 'Long'
+		),		
+		object : UML!PrimitiveType(
+			name<- 'Object'
+		),		
+		single : UML!PrimitiveType(
+			name<- 'Single'
+		),		
+		variant : UML!PrimitiveType(
+			name<- 'Variant'
+		)
+		
+}
+
+rule Model{
+	from
+		o : MDL!Object(
+			o.type='Design'
+		)
+	to
+		mm : UML!Model(
+			name<- o.name,
+			packagedElement <- o.properties->any(e | e.name='root_category').value.value
+		)					
+}
+rule Package{
+	from
+		o : MDL!Object(
+			o.type='Class_Category'
+		)
+	to
+		mm : UML!Package(
+			name<- o.name,
+			packagedElement <- o.properties->select(e | e.name='logical_models'or e.name='logical_presentations' ),
+--			packagedElement <- o.properties->any(e |
+--								e.name='logical_models'
+--							).getAllObjects->union(
+--								o.properties->select(e | e.name='logical_presentations')
+--							),
+			eAnnotations<-annotation
+		),
+		annotation : UML!"ecore::EAnnotation"(
+			source<-o.getValue('quid')
+		)
+}
+rule Diagrams{
+	from
+		o : MDL!Property(
+			o.name='logical_models' 
+			or
+			o.name='logical_presentations'
+		)
+	to
+		mm : UML!Package(
+			name<- o.name,
+			packagedElement <- o.getAllObjects
+		)
+}
+rule Class{
+	from
+		o : MDL!Object(
+			o.type='Class'	
+			and	o.getValue('stereotype')<>'Interface'
+			and	o.getValue('stereotype')<>'primitive'
+			and	o.getValue('stereotype')<>'enumeration'
+		)
+		using{
+			associationEnds : Sequence(MDL!Object)= o.getAssociationEnds();
+		}
+	to
+		mm : UML!Class(
+			name<- o.name,
+			ownedAttribute <- o.getOwnedElements('class_attributes')->including(ends),--->union(o.getAssociationEnds()),
+			ownedOperation<- o.getOwnedElements('operations'),
+			nestedClassifier<- o.getOwnedElements('nestedClasses'),
+			generalization<- o.getOwnedElements('superclasses'),
+			interfaceRealization<- o.getOwnedElements('realized_interfaces'),
+			clientDependency<-o.getOwnedElements('used_nodes'),
+			eAnnotations<-annotation
+		),
+		annotation : UML!"ecore::EAnnotation"(
+			source<-o.getValue('quid')
+		),
+		ends : distinct UML!Property foreach(e in associationEnds)(
+				name<- e.name,
+				type<-e.getObjectById(e.getValue('quidu')),
+				aggregation<- let _aggregation : Boolean =not (e.getValue('is_aggregate').oclIsUndefined()) in
+							  let _containment : String = e.getValue('Containment') in
+								if(_aggregation and _containment<>'By Value')
+								then
+									#shared
+								else if(_aggregation and _containment='By Value')
+								then
+									#composite
+								else
+									#none
+								endif endif,	
+				upper<-let _value : TupleType(lower: String,upper: String)=
+							thisModule.multiplicity.get(e.getValue('client_cardinality')) in
+						if(_value.oclIsUndefined())
+						then
+							OclUndefined
+						else
+							_value.upper.toInteger()
+						endif,		
+				lower<-let _value : TupleType(lower: String,upper: String)=
+							thisModule.multiplicity.get(e.getValue('client_cardinality')) in
+						if(_value.oclIsUndefined())
+						then
+							OclUndefined
+						else
+							_value.lower.toInteger()
+						endif,	
+								
+				association<-thisModule.getOwnerObject(e)
+			)
+		
+}
+rule Interface{
+	from
+		o : MDL!Object(
+			o.type='Class'
+			and	o.getValue('stereotype')='Interface'
+			
+		)
+	to
+		mm : UML!Interface(
+			name<- o.name,
+			ownedAttribute <- o.getOwnedElements('class_attributes'),
+			ownedOperation<- o.getOwnedElements('operations'),
+			nestedClassifier<- o.getOwnedElements('nestedClasses'),
+			generalization<- o.getOwnedElements('superclasses'),
+			eAnnotations<-annotation
+		),
+		annotation : UML!"ecore::EAnnotation"(
+			source<-o.getValue('quid')
+		)
+}
+rule Primitive{
+	from
+		o : MDL!Object(
+			o.type='Class'
+			and	o.getValue('stereotype')='primitive'
+			
+		)
+	to
+		mm : UML!PrimitiveType(
+			name<- o.name
+		)
+}
+rule Enumeration{
+	from
+		o : MDL!Object(
+			o.type='Class'
+			and	o.getValue('stereotype')='enumeration'
+			
+		)
+	using{
+			ownedLiterals : Sequence(MDL!Object) = o.getOwnedElements('class_attributes');
+	}
+	to
+		mm : UML!Enumeration(
+			name<- o.name,
+			ownedLiteral <- l	,
+			eAnnotations<-annotation
+		),
+		annotation : UML!"ecore::EAnnotation"(
+			source<-o.getValue('quid')
+		),
+		l : distinct UML!EnumerationLiteral foreach(e in ownedLiterals)(
+				name<- e.name
+		)	
+}
+rule Attribute{
+	from
+		o : MDL!Object(
+			o.type='ClassAttribute'
+			and (let _object : MDL!Object = thisModule.getOwnerObject(o) in
+					if(_object.oclIsUndefined())
+					then
+						false
+					else if(_object.getValue('stereotype')<>'enumeration')
+					then
+						true
+					else
+						false
+					endif endif)
+		)
+	to
+		mm : UML!Property(
+			name<- o.name,
+			type<- o.getTypeValueByName('type'),
+			default<- o.getValue('initV'),		
+			visibility<-	let _value: String =o.getValue('exportControl') in
+							if(_value='Public')
+							then
+								#public
+							else if(_value='Protected')
+							then
+								#protected							
+							else if (_value='Implementation')
+							then
+								#package
+							else
+								OclUndefined
+							endif endif endif,
+			isStatic<- if(o.getValue('static')='TRUE')
+						then
+							true
+						else
+							false
+						endif	,
+			isDerived<-if(o.getValue('derived')='TRUE')
+						then
+							true
+						else
+							false
+						endif
+							
+		)
+}
+rule Operation {
+	from
+		o : MDL!Object(
+			o.type='Operation'			
+		)
+	to
+		mm : UML!Operation(
+			name<-o.name,
+			type<- o.getTypeValueByName('result'),			
+			ownedParameter<- o.getOwnedElements('parameters'),
+			visibility<-let _value: String =o.getValue('opExportControl') in
+							if(_value='Public')
+							then
+								#public
+							else if(_value='Protected')
+							then
+								#protected							
+							else if (_value='Implementation')
+							then
+								#package
+							else
+								OclUndefined
+							endif endif endif,
+			concurrency<- let _value: String =o.getValue('concurrency') in
+							if(_value='Sequential')
+							then
+								#sequential
+							else if(_value='Guarded')
+							then
+								#guarded							
+							else if (_value='synchronous')
+							then
+								#synchronous
+							else
+								OclUndefined
+							endif endif endif,
+			isStatic<- if(o.getValue('static')='TRUE')
+						then
+							true
+						else
+							false
+						endif
+			
+		)
+}
+rule Parameter {
+	from
+		o : MDL!Object(
+			o.type='Parameter'			
+		)
+	to
+		mm : UML!Parameter(
+			name<-o.name,
+			type<-o.getTypeValueByName('type')
+		)
+}
+rule Generalization {
+	from 
+		o: MDL!Object(
+			o.type='Inheritance_Relationship'
+		)
+	to
+		mm : UML!Generalization(
+			general<- o.getObjectById(o.getValue('quidu')),
+			eAnnotations<-annotation
+		),
+		annotation : UML!"ecore::EAnnotation"(
+			source<-o.getValue('quid')
+		)
+		
+}
+rule InterfaceRealization {
+	from 
+		o: MDL!Object(
+			o.type='Realize_Relationship'
+		)
+	to
+		mm : UML!InterfaceRealization(			
+			supplier<- o.getObjectById(o.getValue('quidu'))
+		)
+}
+rule Role {
+	from
+		o : MDL!Object(
+			o.type='Role'
+			and not o.isNavigable()
+		)
+	to
+		mm : UML!Property(
+			name<-o.name,
+			type<-o.getObjectById(o.getValue('quidu')),
+			aggregation<-let _aggregation : Boolean = not (o.getValue('is_aggregate').oclIsUndefined()) in
+							  let _containment : String = o.getValue('Containment') in
+								if(_aggregation and _containment<>'By Value')
+								then
+									#shared
+								else if(_aggregation and _containment='By Value')
+								then
+									#composite
+								else
+									#none
+								endif endif,	
+			upper<-let _value : TupleType(lower: String,upper: String)=
+							thisModule.multiplicity.get(o.getValue('client_cardinality')) in
+						if(_value.oclIsUndefined())
+						then
+							OclUndefined
+						else
+							_value.upper.toInteger()
+						endif,		
+				lower<-let _value : TupleType(lower: String,upper: String)=
+							thisModule.multiplicity.get(o.getValue('client_cardinality')) in
+						if(_value.oclIsUndefined())
+						then
+							OclUndefined
+						else
+							_value.lower.toInteger()
+						endif,	
+			association<-thisModule.getOwnerObject(o)
+			
+			
+		)
+}
+rule Association{
+	from
+		o : MDL!Object(
+			o.type='Association'
+			and o.getValue('AssociationClass').oclIsUndefined()
+		)
+	to
+		mm : UML!Association(
+			name<-o.name,
+			ownedEnd<-o.getOwnedElements('roles')->select(e|not e.isNavigable())->asSequence(),
+			eAnnotations<-annotation
+		),
+		annotation : UML!"ecore::EAnnotation"(
+			source<-o.getValue('quid')
+		)
+}
+rule AssociationClass{
+	from
+		o : MDL!Object(
+			o.type='Association'
+			and not o.getValue('AssociationClass').oclIsUndefined()
+		)
+	to
+		mm : UML!AssociationClass(
+			name<-o.name,
+			ownedEnd<-o.getOwnedElements('roles')->select(e|not e.isNavigable())->asSequence()
+		)
+}
+rule Dependency{
+	from
+		o: MDL!Object(
+			o.type='Uses_Relationship'
+		)
+	to
+		mm : UML!Dependency(
+			supplier<- o.getObjectById(o.getValue('quidu'))
+		)
+}
+rule Diagram {
+	from
+		o : MDL!Object(
+			o.type='ClassDiagram'		
+		)
+	to
+		m : UML!Package (
+			name<-o.name,
+			eAnnotations<-annotation
+		),
+		annotation : UML!"ecore::EAnnotation"(
+			source<-o.getValue('quid')
+		)
+		
+}

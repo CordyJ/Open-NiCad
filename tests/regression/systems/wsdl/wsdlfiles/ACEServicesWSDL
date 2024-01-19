@@ -1,0 +1,228 @@
+<?xml version="1.0"?>
+<!-- 2006/06/08 : Updated to try to be compatible with java's 'wscompile', using the VSO wsdl as guide. -->
+<!-- 2006/06/14 : changed SPASE namespace URL to a local static location, until the SPASE team 
+		make a static version of their schema available themselves -->
+<definitions name="ACEServices"
+	xmlns="http://schemas.xmlsoap.org/wsdl/"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+	targetNamespace="http://www.srl.caltech.edu/ACEServices"
+	xmlns:spase="http://www.srl.caltech.edu/ACE/ASC/SOAP/spase-1_0_1.xsd"
+	xmlns:vho="http://vho.nasa.gov/documents/vho_schema.xsd"
+	xmlns:asc="http://www.srl.caltech.edu/ACEServices">
+	<types>
+		<xsd:schema targetNamespace="http://www.srl.caltech.edu/ACEServices">
+
+			<xsd:complexType name="NumDenomType">
+				<xsd:sequence>
+					<xsd:element name="ParticlePhysicalQuantity" type="xsd:string" />
+					<xsd:element name="Q" minOccurs="0" maxOccurs="1" type="xsd:integer" />
+					<xsd:element name="Z" minOccurs="0" maxOccurs="1" type="xsd:integer" />
+					<xsd:element name="N" minOccurs="0" maxOccurs="1" type="xsd:integer" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="RatioType">
+				<xsd:sequence>
+					<xsd:element name="Name" type="xsd:string" />
+					<xsd:element name="Numerator" type="asc:NumDenomType" />
+					<xsd:element name="Denominator" type="asc:NumDenomType" />
+				</xsd:sequence>
+			</xsd:complexType>
+                        <xsd:complexType name="PType">
+				<xsd:sequence>
+					<xsd:element name="spase:ParticleQualifier" minOccurs="0" maxOccurs="unbounded" />
+					<xsd:element name="spase:ParticleType" />
+					<xsd:element name="Ratio" minOccurs="0" maxOccurs="1" type="asc:RatioType" />
+					<xsd:element name="spase:ParticlePhysicalQuantity" />
+					<xsd:element name="vho:EnergyRange" minOccurs="0" maxOccurs="1" />
+					<xsd:element name="Q" minOccurs="0" maxOccurs="1" type="xsd:integer" />
+					<xsd:element name="Z" minOccurs="0" maxOccurs="1" type="xsd:integer" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="MeasuredType">
+				<xsd:sequence>
+					<xsd:element name="Particle" minOccurs="0" maxOccurs="1" type="asc:PType" />
+					<xsd:element name="spase:Field" minOccurs="0" maxOccurs="1" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="PTOType">
+				<xsd:sequence>
+					<xsd:element name="Qualifier" minOccurs="0" maxOccurs="unbounded" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="SupportType">
+				<xsd:sequence>
+					<xsd:element name="Positional" minOccurs="0" maxOccurs="1" type="asc:PTOType" />
+					<xsd:element name="Temporal" minOccurs="0" maxOccurs="1" type="asc:PTOType" />
+					<xsd:element name="Other" minOccurs="0" maxOccurs="1" type="asc:PTOType" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="PhysParamType">
+				<xsd:sequence>
+					<xsd:element name="spase:Description" />
+					<xsd:element name="Measured" type="asc:MeasuredType" />
+					<xsd:element name="spase:CoordinateSystem" minOccurs="0" maxOccurs="1" />
+					<xsd:element name="Name" type="xsd:string" />
+					<xsd:element name="Support" minOccurs="0" maxOccurs="1" type="asc:SupportType" />
+					<xsd:element name="spase:Units" minOccurs="0" maxOccurs="1" />
+				</xsd:sequence>
+			</xsd:complexType>
+                        <xsd:complexType name="ContactType">
+                                <xsd:sequence>
+                                        <xsd:element name="spase:Person" />
+                                        <xsd:element name="spase:Role" minOccurs="1" maxOccurs="unbounded" />
+                                </xsd:sequence>
+                        </xsd:complexType>
+                        <xsd:complexType name="ResourceHeaderType">
+                                <xsd:sequence>
+                                        <xsd:element name="spase:Acknowledgement" />
+                                        <xsd:element name="spase:Alias" />
+                                        <xsd:element name="Contact" minOccurs="1" maxOccurs="unbounded" type="asc:ContactType" />
+                                        <xsd:element name="spase:Description" />
+                                        <xsd:element name="spase:InformationURL" minOccurs="0" maxOccurs="unbounded" />
+                                        <xsd:element name="spase:ProviderResourceName" minOccurs="0" maxOccurs="unbounded" />
+                                        <xsd:element name="spase:ResourceName" />
+                                </xsd:sequence>
+                        </xsd:complexType>
+			<xsd:complexType name="NumericalDataType">
+				<xsd:sequence>
+					<xsd:element name="spase:ObservatoryID" />
+					<xsd:element name="spase:InstrumentID"  />
+					<xsd:element name="spase:AccessRights" />
+					<xsd:element name="spase:ResourceID" />
+					<xsd:element name="spase:TemporalDescription"  minOccurs="0" />
+					<xsd:element name="spase:ProviderProcessingLevel"  minOccurs="0" />
+					<xsd:element name="spase:AccessInformation" />
+					<xsd:element name="ResourceHeader" />
+					<xsd:element name="spase:MeasurementType" minOccurs="1" maxOccurs="unbounded" />
+					<xsd:element name="spase:InstrumentRegion" minOccurs="0" maxOccurs="unbounded" />
+					<xsd:element name="spase:ObservedRegion" minOccurs="0" maxOccurs="unbounded" />
+				</xsd:sequence>
+			</xsd:complexType>
+
+			<xsd:element name="ACEDiscoverRequest" type="xsd:string" />
+
+			<xsd:element name="ACEGetDetailsRequest" type="xsd:string" />
+
+                        <xsd:complexType name="ACEGetDataRequest">
+                                <xsd:sequence>
+                                        <xsd:element name="instrument_name" type="xsd:string" />
+                                        <xsd:element name="end" type="xsd:string" />
+                                        <xsd:element name="dataitem" minOccurs="1" maxOccurs="unbounded" type="xsd:string" />
+                                        <xsd:element name="start" type="xsd:string" />
+                                        <xsd:element name="resolution" type="xsd:string" />
+                                </xsd:sequence>
+                        </xsd:complexType>
+
+			<xsd:complexType name="ACEDiscoverResponse">
+				<xsd:sequence>
+					<xsd:element name="GeneralInformation" minOccurs="1" maxOccurs="unbounded" type="asc:NumericalDataType" />
+				</xsd:sequence>
+			</xsd:complexType>
+
+			<xsd:complexType name="ACEGetDetailsResponse">
+				<xsd:sequence>
+					<xsd:element name="PhysicalParameter" minOccurs="1" maxOccurs="unbounded" type="asc:PhysParamType" />
+				</xsd:sequence>
+			</xsd:complexType>
+
+                        <xsd:element name="ACEGetDataResponse" type="xsd:string" />
+
+		</xsd:schema>
+	</types>
+	<message name="ACEDiscoverRequest">
+		<part name="body" element="asc:ACEDiscoverRequest"/>
+	</message>
+	<message name="ACEDiscoverResponse">
+		<part name="body" type="asc:ACEDiscoverResponse"/>
+	</message>
+	<message name="ACEGetDetailsRequest">
+		<part name="body" element="asc:ACEGetDetailsRequest"/>
+	</message>
+	<message name="ACEGetDetailsResponse">
+		<part name="body" type="asc:ACEGetDetailsResponse"/>
+	</message>
+        <message name="ACEGetDataRequest">
+                <part name="body" type="asc:ACEGetDataRequest"/>
+        </message>
+        <message name="ACEGetDataResponse">
+                <part name="body" element="asc:ACEGetDataResponse"/>
+        </message>
+
+	<portType name="ACEScienceCenterACEServicesPortType">
+		<operation name="ACEDiscover">
+			<input message="asc:ACEDiscoverRequest" />
+			<output message="asc:ACEDiscoverResponse" />
+		</operation>
+		<operation name="ACEGetDetails">
+			<input message="asc:ACEGetDetailsRequest" />
+			<output message="asc:ACEGetDetailsResponse" />
+		</operation>
+                <operation name="ACEGetData">
+                        <input message="asc:ACEGetDataRequest" />
+                        <output message="asc:ACEGetDataResponse" />
+                </operation>
+	</portType>
+	<binding name="ACEScienceCenterACEServicesBinding" type="asc:ACEScienceCenterACEServicesPortType">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+			<operation name="ACEDiscover">
+				<soap:operation style="document" soapAction="http://www.srl.caltech.edu/ACEServices#ACEDiscover"/>
+				<input>
+					<soap:body
+					   use="encoded"
+					   namespace="http://www.srl.caltech.edu/ACEServices"
+					   encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"					
+					/>
+				</input>
+				<output>
+					<soap:body
+					   use="encoded"
+					   namespace="http://www.srl.caltech.edu/ACEServices"
+					   encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"					
+					/>
+				</output>
+			</operation>
+			<operation name="ACEGetDetails">
+				<soap:operation style="document" soapAction="http://www.srl.caltech.edu/ACEServices#ACEGetDetails"/>
+				<input>
+					<soap:body
+					   use="encoded"
+					   namespace="http://www.srl.caltech.edu/ACEServices"
+					   encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"					
+					/>
+				</input>
+				<output>
+					<soap:body
+					   use="encoded"
+					   namespace="http://www.srl.caltech.edu/ACEServices"
+					   encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"					
+					/>
+				</output>
+			</operation>
+                        <operation name="ACEGetData">
+                                <soap:operation style="document" soapAction="http://www.srl.caltech.edu/ACEServices#ACEGetData"/>
+                                <input>
+                                        <soap:body
+					   use="encoded"
+					   namespace="http://www.srl.caltech.edu/ACEServices"
+					   encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"					
+					/>
+                                </input>
+                                <output>
+                                        <soap:body
+					   use="encoded"
+					   namespace="http://www.srl.caltech.edu/ACEServices"
+					   encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"					
+					/>
+                                </output>
+                        </operation>
+	</binding>
+	<service name="ACEServices">
+		<documentation>
+			ACE Science Center Web Services
+		</documentation>
+		<port name="ACEScienceCenterACEServicesPort" binding="asc:ACEScienceCenterACEServicesBinding">
+			<soap:address location="http://www.srl.caltech.edu/ACE/ASC/SOAP/ACE_SOAP_server.cgi"/>
+		</port>
+	</service>
+</definitions>

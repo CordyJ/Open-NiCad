@@ -1,0 +1,246 @@
+module XML2RSS; -- Module Template
+create OUT : RSS from IN : XML;
+
+-- ============================================================
+-- XML2RSS
+-- Created by: Guillaume Hillairet (g.hillairet@gmail.com)
+-- Date: 16/06/2006
+-- Version: 1
+-- ============================================================
+	
+-- ============================================================
+-- HELPERS
+-- ============================================================
+
+-- This helper gets the Attribute who has value name = name and return it to a Boolean
+-- CONTEXT: XML!Element
+-- RETURN:  Boolean
+helper context XML!Element def: getAttrBool(name : String) : Boolean =
+	let a : String = 
+    self.children->select(c | c.oclIsTypeOf(XML!Attribute) and c.name = name)->first().value
+	in if a ='true' then true else false endif;
+
+-- This helper gets the Attribute who has value name = name
+-- CONTEXT: XML!Element
+-- RETURN:  String
+helper context XML!Element def: getAttrVal(name : String) : String =
+    self.children->select(c | c.oclIsTypeOf(XML!Attribute) and c.name = name)->first().value;
+
+-- This helper gets Text from an XML!Element who has a child with a name value = name 
+-- and with a child XML!Text.
+-- CONTEXT: XML!Element
+-- RETURN:  String
+helper context XML!Element def: getText(name : String) : String =
+	let e :Sequence(XML!Element) =
+	self.children-> select(m | m.oclIsTypeOf(XML!Element) )
+	in
+	if e.isEmpty() then '' else
+		let r:Sequence(XML!Element) =
+	    e->select (f|f.name=name)
+		in
+		if r.isEmpty() then '' else
+			r-> collect(d | d.children )->flatten()
+			->select(f | f.oclIsTypeOf(XML!Text) )
+			->select ( g | g.name = '#text' )->first().value
+		endif
+	endif;
+	
+	
+-- This helper gets a Sequence of XML!Element from an XML!Element who has a child with a name value = name 
+-- CONTEXT: XML!Element
+-- RETURN:  Sequence(XML!Element)
+helper context XML!Element def: getSequence(name : String) : Sequence(XML!Element) =
+	let e :Sequence(XML!Element) = self.children-> select(m | m.oclIsTypeOf(XML!Element) )
+	in if e.isEmpty() 
+		then Sequence{} 
+		else 
+			let r : Sequence(XML!Element) = e->select (f|f.name = name)
+		in r
+	endif;
+	
+-- This helper say if an XML!Element has a child with value name = name
+-- CONTEXT: XML!Element
+-- RETURN:  Boolean
+helper context XML!Element def: hasChildren(name : String) : Boolean =
+	let a : XML!Element =
+	self.children-> select(m | m.oclIsTypeOf(XML!Element) and m.name = name )->first()
+	in if (a.oclIsTypeOf(XML!Element) and a.name = name) 
+		then true else false 
+	endif;
+
+-- This helper stores an integer value used to assign an ID to each generated
+-- CONTEXT: XML!Element
+-- RETURN:  Boolean
+--teste si l'element possede un certain XMLattribut
+helper context XML!Element def: hasAttribute(name : String) : Boolean =
+	let a : XML!Attribute =
+	self.children-> select(m | m.oclIsTypeOf(XML!Attribute) and m.name = name )->first()
+	in if not a.oclIsUndefined()
+		then (a.name = name) else false
+	endif;
+
+--
+-- Map for month
+--
+helper def: monthMap : Map(String, Integer) =
+	let m : Map(String, Integer) = 
+		Map{('January',1),('February',2),('March',3),('April',4),
+			('May',5),('June',6),('July',7),('August',8),
+			('September',9),('October',10),('November',11),('December',12)}
+	in m ;
+
+--
+-- Map for day
+--
+helper def: eDayMap : Map(String, RSS!DayKind) =
+	let m : Map(String, RSS!DayKind) = 
+		Map{('Mon',#Monday),('Tue',#Tuesday),('Wed',#Wednesday),('Thu',#Thursday),
+			('Fri',#Friday),('Sat',#Saturday),('Sun',#Sunday)}
+	in m ;
+	
+-- ============================================================
+-- RULES
+-- ============================================================
+
+rule RSS {
+	from
+		r : XML!Root
+	to
+		rss : RSS!RSS (
+			version <- r.getAttrVal('version'),
+			channel <- r.children->select( e | e.oclIsTypeOf(XML!Element) and e.name = 'channel')->first()
+		)
+}
+
+rule Channel {
+	from
+		e : XML!Element (
+			e.name = 'channel'
+		)
+	to
+		c : RSS!Channel (
+			title <- e.getText('title'),
+			link <- e.getText('link'),
+			description <- e.getText('description'),
+			language <- e.getText('language'),
+			copyright <- e.getText('copyright'),
+			managingEditor <- e.getText('managingEditor'),
+			webmaster <- e.getText('webMaster'),
+			pubDate <- e.getText('pubDate'),
+			generator <- e.getText('generator'),
+			docs <- e.getText('docs'),
+--			ttl <-  e.getText('ttl')->toInteger(),
+			rating <- e.getText('rating'),
+			textInput <- e.children->select( e | e.oclIsTypeOf(XML!Element) and e.name = 'textInput')->first(),
+			cloud <- e.children->select( e | e.oclIsTypeOf(XML!Element) and e.name = 'cloud')->first(),
+			image <- e.children->select( e | e.oclIsTypeOf(XML!Element) and e.name = 'image')->first(),
+			
+			lastBuildDate <- e.getText('lastBuildDate'),
+			category <- e.children->select( e | e.oclIsTypeOf(XML!Element) and e.name = 'category')->first(),
+			items <- e.children->select( e | e.oclIsTypeOf(XML!Element) and e.name = 'item')->asSequence()
+		)
+}
+
+
+rule Image {
+	from
+		e : XML!Element (
+			e.name = 'image'
+		)
+	to
+		i : RSS!Image (
+			url <- e.getText('url'),
+			title <- e.getText('title'),
+			link <- e.getText('link'),
+			description <- e.getText('description')
+		)
+}
+
+rule Cloud {
+	from
+		e : XML!Element (
+			e.name = 'cloud'
+		)
+	to
+		c : RSS!Cloud (
+			domain <- e.getAttrVal('domain'),
+			port <- e.getAttrVal('port').toInteger(),
+			path <- e.getAttrVal('path'),
+			registerProcedure <- e.getAttrVal('registerProcedure'),
+			protocol <- e.getAttrVal('protocol')
+		)
+}
+
+rule TextInput {
+	from
+		e : XML!Element (
+			e.name = 'textInput'
+		)
+	to
+		t : RSS!TextInput (
+			title <- e.getText('url'),
+			description <- e.getText('description'),
+			name <- e.getText('name'),
+			link <- e.getText('link')
+		)
+}
+
+rule Item {
+	from
+		e : XML!Element (
+			e.name = 'item'
+		)
+	to
+		i : RSS!Item (
+			title <- e.getText('title'),
+			link <- e.getText('link'),
+			description <- e.getText('description'),
+			author <- e.getText('author'),
+			comments <- e.getText('comments'),
+			guid <- e.getText('guid'),
+			source <- e.children->select( e | e.oclIsTypeOf(XML!Element) and e.name = 'source')->first(),
+			pubDate <- e.children->select(e | e.oclIsTypeOf(XML!Element) and e.name = 'pubDate')->first(),
+			enclosure <- e.children->select(e | e.oclIsTypeOf(XML!Element) and e.name = 'enclosure')->first(),
+			category <- e.children->select( e | e.oclIsTypeOf(XML!Element) and e.name = 'category')->first()
+		)
+}
+
+rule Category {
+	from
+		e : XML!Element (
+			e.name = 'category'
+		)
+	to
+		c : RSS!Category (
+			domain <- if e.hasAttribute('domain') 
+						then e.getAttrVal('domain')
+						else ''
+					   endif,
+			value <- e.children->select( t | t.oclIsTypeOf(XML!Text))->first().value
+		)
+}
+
+rule Source {
+	from
+		e : XML!Element (
+			e.name = 'source'
+		)
+	to
+		c : RSS!Source (
+			url <- e.getAttrVal('url'),
+			value <- e.children->select( t | t.oclIsTypeOf(XML!Text))->first().value
+		)
+}
+
+rule Enclosure {
+	from
+		e : XML!Element (
+			e.name = 'source'
+		)
+	to
+		c : RSS!Enclosure (
+			url <- e.getAttrVal('url'),
+			lenght <- e.getAttrVal('lenght').toInteger(),
+			type <- e.getAttrVal('type')
+		)
+}

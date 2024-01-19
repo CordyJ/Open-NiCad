@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://imsdemo.cr.usgs.gov/Tagging/services/MapClassService" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://imsdemo.cr.usgs.gov/Tagging/services/MapClassService" xmlns:intf="http://imsdemo.cr.usgs.gov/Tagging/services/MapClassService" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<!--WSDL created by Apache Axis version: 1.3
+Built on Oct 05, 2005 (05:23:37 EDT)-->
+
+   <wsdl:message name="ReqTag_RetrieveSetClassResponse">
+
+      <wsdl:part name="ReqTag_RetrieveSetClassReturn" type="xsd:string"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="ReqTag_RetrieveSetClassRequest">
+
+      <wsdl:part name="tidStr" type="xsd:string"/>
+
+      <wsdl:part name="ipaStr" type="xsd:string"/>
+
+      <wsdl:part name="refStr" type="xsd:string"/>
+
+   </wsdl:message>
+
+   <wsdl:portType name="MapClassService">
+
+      <wsdl:operation name="ReqTag_RetrieveSetClass" parameterOrder="tidStr ipaStr refStr">
+
+         <wsdl:input message="impl:ReqTag_RetrieveSetClassRequest" name="ReqTag_RetrieveSetClassRequest"/>
+
+         <wsdl:output message="impl:ReqTag_RetrieveSetClassResponse" name="ReqTag_RetrieveSetClassResponse"/>
+
+      </wsdl:operation>
+
+   </wsdl:portType>
+
+   <wsdl:binding name="MapClassServiceSoapBinding" type="impl:MapClassService">
+
+      <wsdlsoap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+      <wsdl:operation name="ReqTag_RetrieveSetClass">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="ReqTag_RetrieveSetClassRequest">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://edc.usgs.gov" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="ReqTag_RetrieveSetClassResponse">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://imsdemo.cr.usgs.gov/Tagging/services/MapClassService" use="encoded"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+   </wsdl:binding>
+
+   <wsdl:service name="MapClassServiceService">
+
+      <wsdl:port binding="impl:MapClassServiceSoapBinding" name="MapClassService">
+
+         <wsdlsoap:address location="http://imsdemo.cr.usgs.gov/Tagging/services/MapClassService"/>
+
+      </wsdl:port>
+
+   </wsdl:service>
+
+</wsdl:definitions>

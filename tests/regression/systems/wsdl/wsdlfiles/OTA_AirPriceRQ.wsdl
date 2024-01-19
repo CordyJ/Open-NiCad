@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2005 sp2 U (http://www.altova.com) by Maciej (Sabre Deutschland Marketing GmbH) -->
+<definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ota="http://www.opentravel.org/OTA/2003/05" xmlns:tns="https://webservices.sabre.com/websvc/ap" xmlns:eb="http://www.ebxml.org/namespaces/messageHeader" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:wsse="http://schemas.xmlsoap.org/ws/2002/12/secext" targetNamespace="https://webservices.sabre.com/websvc/ap">
+	<types>
+		<xs:schema>
+			<xs:import schemaLocation="../ebxml/msg-header-2_0.xsd" namespace="http://www.ebxml.org/namespaces/messageHeader"/>
+			<xs:import schemaLocation="../ebxml/wsse.xsd" namespace="http://schemas.xmlsoap.org/ws/2002/12/secext"/>
+		</xs:schema>
+		<xs:schema targetNamespace="http://www.opentravel.org/OTA/2003/05">
+			<xs:include schemaLocation="../ota2004.1/FS_OTA_AirPriceRQRS.xsd"/>
+		</xs:schema>
+	</types>
+	<message name="OTA_AirPriceInput">
+		<part name="ebHeader" element="eb:MessageHeader"/>
+		<part name="wsseHeader" element="wsse:Security"/>
+		<part name="bodyRQ" element="ota:OTA_AirPriceRQ"/>
+	</message>
+	<message name="OTA_AirPriceOutput">
+		<part name="ebHeader" element="eb:MessageHeader"/>
+		<part name="wsseHeader" element="wsse:Security"/>
+		<part name="bodyRS" element="ota:OTA_AirPriceRS"/>
+	</message>
+	<portType name="OTA_AirPricePortType">
+		<operation name="OTA_AirPriceRQ">
+			<input message="tns:OTA_AirPriceInput"/>
+			<output message="tns:OTA_AirPriceOutput"/>
+		</operation>
+	</portType>
+	<binding name="OTA_AirPriceBinding" type="tns:OTA_AirPricePortType">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="OTA_AirPriceRQ">
+			<soap:operation soapAction="OTA_AirPriceRQ" style="document"/>
+			<input>
+				<soap:header message="tns:OTA_AirPriceInput" part="ebHeader" use="literal"/>
+				<soap:header message="tns:OTA_AirPriceInput" part="wsseHeader" use="literal"/>
+				<soap:body parts="bodyRQ" use="literal"/>
+			</input>
+			<output>
+				<soap:header message="tns:OTA_AirPriceOutput" part="ebHeader" use="literal"/>
+				<soap:header message="tns:OTA_AirPriceOutput" part="wsseHeader" use="literal"/>
+				<soap:body parts="bodyRS" use="literal"/>
+			</output>
+		</operation>
+	</binding>
+	<service name="OTA_AirPriceService">
+		<port name="OTA_AirPricePortType" binding="tns:OTA_AirPriceBinding">
+			<soap:address location="https://webservices.sabre-merlin.de/XGateConnector/services/urn:XGate2"/>
+		</port>
+	</service>
+</definitions>

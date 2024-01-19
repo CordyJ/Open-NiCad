@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<definitions xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:s0="http://www.serviceobjects.com/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" targetNamespace="http://www.serviceobjects.com/" xmlns="http://schemas.xmlsoap.org/wsdl/">
+  <types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://www.serviceobjects.com/">
+      <s:element name="GetPhoneInfo">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="PhoneNumber" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="LicenseKey" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetPhoneInfoResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetPhoneInfoResult" type="s0:PhoneInfo" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="PhoneInfo">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Providers" type="s0:Providers" />
+          <s:element minOccurs="0" maxOccurs="1" name="Contacts" type="s0:Contacts" />
+          <s:element minOccurs="0" maxOccurs="1" name="Error" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Providers">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Provider" type="s0:Provider" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Provider">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="URL" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="City" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="State" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Contacts">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Contact" type="s0:Contact" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Contact">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Address" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="City" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="State" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Zip" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="PhoneInfo" nillable="true" type="s0:PhoneInfo" />
+    </s:schema>
+  </types>
+  <message name="GetPhoneInfoSoapIn">
+    <part name="parameters" element="s0:GetPhoneInfo" />
+  </message>
+  <message name="GetPhoneInfoSoapOut">
+    <part name="parameters" element="s0:GetPhoneInfoResponse" />
+  </message>
+  <message name="GetPhoneInfoHttpGetIn">
+    <part name="PhoneNumber" type="s:string" />
+    <part name="LicenseKey" type="s:string" />
+  </message>
+  <message name="GetPhoneInfoHttpGetOut">
+    <part name="Body" element="s0:PhoneInfo" />
+  </message>
+  <message name="GetPhoneInfoHttpPostIn">
+    <part name="PhoneNumber" type="s:string" />
+    <part name="LicenseKey" type="s:string" />
+  </message>
+  <message name="GetPhoneInfoHttpPostOut">
+    <part name="Body" element="s0:PhoneInfo" />
+  </message>
+  <portType name="GeoPhoneSoap">
+    <operation name="GetPhoneInfo">
+      <documentation>Returns reverse lookup information on a given phone number.</documentation>
+      <input message="s0:GetPhoneInfoSoapIn" />
+      <output message="s0:GetPhoneInfoSoapOut" />
+    </operation>
+  </portType>
+  <portType name="GeoPhoneHttpGet">
+    <operation name="GetPhoneInfo">
+      <documentation>Returns reverse lookup information on a given phone number.</documentation>
+      <input message="s0:GetPhoneInfoHttpGetIn" />
+      <output message="s0:GetPhoneInfoHttpGetOut" />
+    </operation>
+  </portType>
+  <portType name="GeoPhoneHttpPost">
+    <operation name="GetPhoneInfo">
+      <documentation>Returns reverse lookup information on a given phone number.</documentation>
+      <input message="s0:GetPhoneInfoHttpPostIn" />
+      <output message="s0:GetPhoneInfoHttpPostOut" />
+    </operation>
+  </portType>
+  <binding name="GeoPhoneSoap" type="s0:GeoPhoneSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document" />
+    <operation name="GetPhoneInfo">
+      <soap:operation soapAction="http://www.serviceobjects.com/GetPhoneInfo" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+  </binding>
+  <binding name="GeoPhoneHttpGet" type="s0:GeoPhoneHttpGet">
+    <http:binding verb="GET" />
+    <operation name="GetPhoneInfo">
+      <http:operation location="/GetPhoneInfo" />
+      <input>
+        <http:urlEncoded />
+      </input>
+      <output>
+        <mime:mimeXml part="Body" />
+      </output>
+    </operation>
+  </binding>
+  <binding name="GeoPhoneHttpPost" type="s0:GeoPhoneHttpPost">
+    <http:binding verb="POST" />
+    <operation name="GetPhoneInfo">
+      <http:operation location="/GetPhoneInfo" />
+      <input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </input>
+      <output>
+        <mime:mimeXml part="Body" />
+      </output>
+    </operation>
+  </binding>
+  <service name="GeoPhone">
+    <port name="GeoPhoneSoap" binding="s0:GeoPhoneSoap">
+      <soap:address location="http://ws.serviceobjects.net/gp/GeoPhone.asmx" />
+    </port>
+    <port name="GeoPhoneHttpGet" binding="s0:GeoPhoneHttpGet">
+      <http:address location="http://ws.serviceobjects.net/gp/GeoPhone.asmx" />
+    </port>
+    <port name="GeoPhoneHttpPost" binding="s0:GeoPhoneHttpPost">
+      <http:address location="http://ws.serviceobjects.net/gp/GeoPhone.asmx" />
+    </port>
+  </service>
+</definitions>

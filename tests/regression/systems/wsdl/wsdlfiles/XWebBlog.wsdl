@@ -1,0 +1,332 @@
+<definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:tns="urn:ws-xwebservices-com:XWebBlog:Blog:v2" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:import0="urn:ws-xwebservices-com:XWebBlog:Blog:v2:Messages" targetNamespace="urn:ws-xwebservices-com:XWebBlog:Blog:v2" name="XWebBlog" xmlns="http://schemas.xmlsoap.org/wsdl/">
+  <documentation>XWebBlog is an XML/SOAP based Web Service which provides integration and management of a Weblog (Blog) to client applications. For complete documentation please visit http://www.xwebservices.com/Web_Services/XWebBlog/.</documentation>
+  <types>
+    <xsd:schema>
+      <xsd:import schemaLocation="XWebBlog.xsd" namespace="urn:ws-xwebservices-com:XWebBlog:Blog:v2:Messages" />
+    </xsd:schema>
+  </types>
+  <message name="loadEntryIn">
+    <part name="messagePart" element="import0:LoadEntryRequest" />
+  </message>
+  <message name="loadEntryOut">
+    <part name="messagePart" element="import0:LoadEntryResponse" />
+  </message>
+  <message name="loadBlogIn">
+    <part name="messagePart" element="import0:LoadBlogRequest" />
+  </message>
+  <message name="loadBlogOut">
+    <part name="messagePart" element="import0:LoadBlogResponse" />
+  </message>
+  <message name="loadBlogPagedIn">
+    <part name="messagePart" element="import0:LoadBlogPagedRequest" />
+  </message>
+  <message name="loadBlogPagedOut">
+    <part name="messagePart" element="import0:LoadBlogPagedResponse" />
+  </message>
+  <message name="getNewEntryIDIn">
+    <part name="messagePart" element="import0:GetNewEntryIDRequest" />
+  </message>
+  <message name="getNewEntryIDOut">
+    <part name="messagePart" element="import0:GetNewEntryIDResponse" />
+  </message>
+  <message name="addEntryIn">
+    <part name="messagePart" element="import0:AddEntryRequest" />
+  </message>
+  <message name="addEntryOut">
+    <part name="messagePart" element="import0:AddEntryResponse" />
+  </message>
+  <message name="updateEntryIn">
+    <part name="messagePart" element="import0:UpdateEntryRequest" />
+  </message>
+  <message name="updateEntryOut">
+    <part name="messagePart" element="import0:UpdateEntryResponse" />
+  </message>
+  <message name="deleteEntryIn">
+    <part name="messagePart" element="import0:DeleteEntryRequest" />
+  </message>
+  <message name="deleteEntryOut">
+    <part name="messagePart" element="import0:DeleteEntryResponse" />
+  </message>
+  <message name="loadBlogByDateRangeIn">
+    <part name="messagePart" element="import0:LoadBlogByDateRangeRequest" />
+  </message>
+  <message name="loadBlogByDateRangeOut">
+    <part name="messagePart" element="import0:LoadBlogByDateRangeResponse" />
+  </message>
+  <message name="loadBlogByDateRangePagedIn">
+    <part name="messagePart" element="import0:LoadBlogByDateRangePagedRequest" />
+  </message>
+  <message name="loadBlogByDateRangePagedOut">
+    <part name="messagePart" element="import0:LoadBlogByDateRangePagedResponse" />
+  </message>
+  <message name="processEntryIn">
+    <part name="messagePart" element="import0:ProcessEntryRequest" />
+  </message>
+  <message name="processEntryOut">
+    <part name="messagePart" element="import0:ProcessEntryResponse" />
+  </message>
+  <message name="addReplyIn">
+    <part name="messagePart" element="import0:AddReplyRequest" />
+  </message>
+  <message name="addReplyOut">
+    <part name="messagePart" element="import0:AddReplyResponse" />
+  </message>
+  <message name="updateReplyIn">
+    <part name="messagePart" element="import0:UpdateReplyRequest" />
+  </message>
+  <message name="updateReplyOut">
+    <part name="messagePart" element="import0:UpdateReplyResponse" />
+  </message>
+  <message name="deleteReplyIn">
+    <part name="messagePart" element="import0:DeleteReplyRequest" />
+  </message>
+  <message name="deleteReplyOut">
+    <part name="messagePart" element="import0:DeleteReplyResponse" />
+  </message>
+  <message name="processReplyIn">
+    <part name="messagePart" element="import0:ProcessReplyRequest" />
+  </message>
+  <message name="processReplyOut">
+    <part name="messagePart" element="import0:ProcessReplyResponse" />
+  </message>
+  <message name="getNewReplyIDIn">
+    <part name="messagePart" element="import0:GetNewReplyIDRequest" />
+  </message>
+  <message name="getNewReplyIDOut">
+    <part name="messagePart" element="import0:GetNewReplyIDResponse" />
+  </message>
+  <message name="loadReplyIn">
+    <part name="messagePart" element="import0:LoadReplyRequest" />
+  </message>
+  <message name="loadReplyOut">
+    <part name="messagePart" element="import0:LoadReplyResponse" />
+  </message>
+  <portType name="XWebBlogInterface">
+    <documentation>XWebBlog is an XML/SOAP based Web Service which provides integration and management of a Weblog (Blog) to client applications. For complete documentation please visit http://www.xwebservices.com/Web_Services/XWebBlog/.</documentation>
+    <operation name="LoadEntry">
+      <documentation>Returns a specific Blog Entry.</documentation>
+      <input message="tns:loadEntryIn" />
+      <output message="tns:loadEntryOut" />
+    </operation>
+    <operation name="LoadBlog">
+      <documentation>Returns all Blog Entries, in the reverse chronological order the records were entered into the system.</documentation>
+      <input message="tns:loadBlogIn" />
+      <output message="tns:loadBlogOut" />
+    </operation>
+    <operation name="LoadBlogPaged">
+      <documentation>Returns 'paginated' Blog Entry records, in the reverse chronological order the records were entered into the system.</documentation>
+      <input message="tns:loadBlogPagedIn" />
+      <output message="tns:loadBlogPagedOut" />
+    </operation>
+    <operation name="GetNewEntryID">
+      <documentation>Returns a new Blog Entry record identifier.</documentation>
+      <input message="tns:getNewEntryIDIn" />
+      <output message="tns:getNewEntryIDOut" />
+    </operation>
+    <operation name="AddEntry">
+      <documentation>Adds a new Blog Entry.</documentation>
+      <input message="tns:addEntryIn" />
+      <output message="tns:addEntryOut" />
+    </operation>
+    <operation name="UpdateEntry">
+      <documentation>Updates a Blog Entry.</documentation>
+      <input message="tns:updateEntryIn" />
+      <output message="tns:updateEntryOut" />
+    </operation>
+    <operation name="DeleteEntry">
+      <documentation>Deletes a Blog Entry.</documentation>
+      <input message="tns:deleteEntryIn" />
+      <output message="tns:deleteEntryOut" />
+    </operation>
+    <operation name="LoadBlogByDateRange">
+      <documentation>Returns all Blog Entries created within a specific date range, in the reverse chronological order the records were entered into the system.</documentation>
+      <input message="tns:loadBlogByDateRangeIn" />
+      <output message="tns:loadBlogByDateRangeOut" />
+    </operation>
+    <operation name="LoadBlogByDateRangePaged">
+      <documentation>Returns 'paginated' Blog Entry records created within a specific date range, in the reverse chronological order the records were entered into the system.</documentation>
+      <input message="tns:loadBlogByDateRangePagedIn" />
+      <output message="tns:loadBlogByDateRangePagedOut" />
+    </operation>
+    <operation name="ProcessEntry">
+      <input message="tns:processEntryIn" />
+      <output message="tns:processEntryOut" />
+    </operation>
+    <operation name="AddReply">
+      <input message="tns:addReplyIn" />
+      <output message="tns:addReplyOut" />
+    </operation>
+    <operation name="UpdateReply">
+      <input message="tns:updateReplyIn" />
+      <output message="tns:updateReplyOut" />
+    </operation>
+    <operation name="DeleteReply">
+      <input message="tns:deleteReplyIn" />
+      <output message="tns:deleteReplyOut" />
+    </operation>
+    <operation name="ProcessReply">
+      <input message="tns:processReplyIn" />
+      <output message="tns:processReplyOut" />
+    </operation>
+    <operation name="GetNewReplyID">
+      <input message="tns:getNewReplyIDIn" />
+      <output message="tns:getNewReplyIDOut" />
+    </operation>
+    <operation name="LoadReply">
+      <input message="tns:loadReplyIn" />
+      <output message="tns:loadReplyOut" />
+    </operation>
+  </portType>
+  <binding name="XWebBlog" type="tns:XWebBlogInterface">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document" />
+    <operation name="LoadEntry">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebBlog:Blog:v2:loadEntryIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="LoadBlog">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebBlog:Blog:v2:loadBlogIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="LoadBlogPaged">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebBlog:Blog:v2:loadBlogPagedIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="GetNewEntryID">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebBlog:Blog:v2:getNewEntryIDIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="AddEntry">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebBlog:Blog:v2:addEntryIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="UpdateEntry">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebBlog:Blog:v2:updateEntryIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="DeleteEntry">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebBlog:Blog:v2:deleteEntryIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="LoadBlogByDateRange">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebBlog:Blog:v2:loadBlogByDateRangeIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="LoadBlogByDateRangePaged">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebBlog:Blog:v2:loadBlogByDateRangePagedIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="ProcessEntry">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebBlog:Blog:v2:processEntryIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="AddReply">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebBlog:Blog:v2:addReplyIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="UpdateReply">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebBlog:Blog:v2:updateReplyIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="DeleteReply">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebBlog:Blog:v2:deleteReplyIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="ProcessReply">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebBlog:Blog:v2:processReplyIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="GetNewReplyID">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebBlog:Blog:v2:getNewReplyIDIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="LoadReply">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebBlog:Blog:v2:loadReplyIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+  </binding>
+  <service name="Blog">
+    <port name="Blog" binding="tns:XWebBlog">
+      <soap:address location="http://ws.xwebservices.com/XWebBlog/V2/Blog.asmx" />
+    </port>
+  </service>
+</definitions>

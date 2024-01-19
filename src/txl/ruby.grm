@@ -1,0 +1,886 @@
+% TXL grammar for Ruby
+% Jim Cordy, Queen's University, Feburary 2017
+% Version 0.9, August 2018
+
+% Copyright 2017 James R. Cordy
+
+% Redistribution and use in source and binary forms, with or without
+% modification, are permitted provided that the following conditions are met:
+%
+%    Redistributions of source code must retain the above copyright notice, 
+%    this list of conditions and the following disclaimer.
+%    Redistributions in binary form must reproduce the above copyright notice,
+%    this list of conditions and the following disclaimer in the documentation
+%    and/or other materials provided with the distribution.
+%
+%    THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+%    INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+%    AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+%    AUTHORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+%    OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+%    SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+%    INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+%    CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+%    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+%    POSSIBILITY OF SUCH DAMAGE.
+
+% Known bugs - 
+%    While most Ruby source files will successfully parse with this grammar,
+%    Ruby is lexically complex and inherently non-context-free, 
+%    so no TXL grammar will ever be able to handle every Ruby file.
+
+% Modification Log:
+ 
+% v0.9, Jim Cordy, August 2018.
+%    Initial public release
+
+#pragma -newline -comment -width 1024
+
+comments
+	'#
+	=begin =end
+end comments
+
+tokens
+	ignore	...
+	   |	"\\\n"
+	   |	"\r"
+end tokens
+
+keys
+	BEGIN	 class	  ensure   nil	    self     when
+	END	 def	  'not     super    while
+	alias	 defined  for	   or	    then     yield
+	and	 do	  if	   redo     
+	begin	 else	  rescue   undef
+	break	 elsif	  module   retry    unless
+	case	 'end	  next	   return   until    
+	lambda
+end keys
+
+define program 
+	[terminator?] [statements?]
+	[html_trailer?]
+end define
+
+define comp_statement
+	[IN]
+	[statements] 
+	[EX]
+end define
+
+define statements
+	[statement] [terminator_statement*] [terminator?]
+    |	[terminator] 
+end define
+
+define html_trailer
+	'__END__
+	[repeat token_or_key]
+end define
+
+define token_or_key
+	[token] | [key]
+end define
+
+define statement_terminator
+	[statement] [terminator]
+end define
+
+define terminator_statement
+	[terminator] [statement]
+end define
+
+define statement
+	[base_statement] [statement_modifier*]
+end define
+
+define base_statement
+	[undef_definition]
+    |	[alias_definition]
+    |	[require_definition]
+    |	[BEGIN_statement]
+    |	[END_statement]
+    |	[expression]
+end define
+
+define iterator
+	'do [terminator?] [iterator_var?] [comp_statement?] 'end
+    |	'{  [terminator?] [iterator_var?] [comp_statement?] '}
+end define
+
+compounds
+	'||
+end compounds
+
+define iterator_var
+	'| [SPOFF] [block_vars] '| [SPON] [terminator?]
+    |	'|| [terminator?]
+end define
+
+define block_vars
+	[block_var,+] [', ?]
+end define
+
+define block_var
+	[terminator?] [star_amp?] [variable] [assign_primary?]
+    |	'( [block_vars] ')
+    |	[stars]
+end define
+
+define star_amp
+	[stars] | '&
+end define
+
+define statement_modifier
+    	[modifier] [terminator?] [expression]
+end define
+
+define modifier
+	'if | 'while | 'unless | 'until | 'rescue
+end define
+
+define expression
+    	[arg]  	
+end define
+
+define and_or
+	'and | 'or
+end define
+
+define function_call
+	[operation] [operation_args?] 
+end define
+
+define operation_args
+	[paren_call_args]
+    |	[not modifier_not_colon] [call_args]
+end define
+
+define modifier_not_colon
+	[modifier] [not ':] 
+end define
+
+define paren_call_args
+	'( [IN] [terminator?] [call_args] [', ?] [terminator?] [paren_or_here_doc] [EX]
+    |	'( [paren_or_here_doc]
+end define
+
+define paren_or_here_doc
+	')
+    |	[herestart] [SPOFF] ['- ?] ['~ ?] [push id] [SPON] [comma_call_args_paren_do] [IN] [token_not_popid*] [EX] [pop id] [terminator] 'end %% only 2
+    |	[here_document] [') ?]
+    |	[see here_document]	%% double embedding 
+end define
+
+define comma_call_args_paren_do
+	', [call_args] ') 'do
+end define
+
+define call_args
+    	[not terminator] [IN] [actual_args_or_assocs] [comma_block_arg?] [EX]
+    |	[block_arg]
+end define
+
+define actual_args_or_assocs
+	[actual_args] [comma_assocs?]
+    |	[assocs]
+end define
+
+define actual_args
+	[actual_arg,+]
+    |	[stars]
+end define
+
+define actual_arg
+	[terminator?] [key_arg_colon?] [star_arg]
+end define
+
+define key_arg_colon
+	[identifier] ':
+    |	[key] ':
+end define
+
+define comma_assocs
+	', [terminator?] [assocs]
+end define
+
+define block_arg
+	'& [arg]
+end define
+
+define comma_block_arg
+	', [terminator?] [block_arg]
+end define
+
+define args
+	[star_arg,+]
+end define
+
+define star_arg
+	[terminator?] 
+	[stars?] [arg]
+	[not assign_op]
+end define
+
+define arg
+	[base_arg] [binary_op_base_arg*]
+end define
+
+define base_arg
+	[reference] [assign_op_value?]
+    |	'* [reference] '= [values]
+    |	[unary_op] [base_arg]
+    |	[primary_statement]
+end define
+
+define binary_op_base_arg
+    	[binary_op] [terminator?] [base_arg]
+    |	'? [terminator?] [arg] [terminator?] ': [terminator?] [arg]
+end define
+
+define assign_op_value
+	[assign_op] [value] [comma_values?]
+    |	[LAZY] | [multiassign_values]
+end define
+
+define comma_values
+	[LAZY] | ', [values] [see terminator]
+end define
+
+define multiassign_values
+	', [mlhs_item,] [', ?] '= [values] [see terminator_or_modifier]
+end define
+
+define terminator_or_modifier
+	[terminator] | [modifier]
+end define
+
+define mlhs_item
+	[reference]
+    |	'( [mlhs_item,+] ')
+    |	'* [reference?]
+end define
+
+define value
+	[star_arg]
+end define
+
+define values
+	[value,+] 
+end define
+
+compounds
+	+=  -=  *=  '%=  **=  &=  &&=  '||=  '|=  <<=  >>=
+end compounds
+
+define assign_op
+	'= | '+= | '-= | '*= | '/ [SPOFF] '= [SPON] | '%= | '**=  |  '&=  | '&&= | '||=  | '|=
+    |	'<<= | '>>=
+end define
+
+compounds
+	..  '...  **  <=>  ==  ===  !=   =~  !~  >=  <=  >>  && '||
+end compounds
+
+define binary_op
+	'.. | '...
+    |	'+ | '-
+    |	'* | '/ | '%
+    |	'** 
+    |	'| | '^
+    |	'&
+    |	'<=> | '==  | '=== | '!=  | '=~  | '!~
+    |	'>  | '>=  | '<  | '<=
+    |	[shiftleft] | '>>
+    |	'&& | '||
+    |	'and | 'or  
+end define
+
+define unary_op
+	'+ | '-
+    |	'! | '~ 
+    |	'defined? 
+    |	'not  
+end define
+
+define primary
+	[reference]
+    |	[primary_statement] 
+end define
+
+define primary_statement
+	[if_statement] 
+    |	[unless_statement]
+    |	[while_statement]
+    |	[until_statement]
+    |	[case_statement]
+    |	[for_statement]
+    |	[begin_statement]
+    |	[class_definition] [function_call_subscript_or_field_selection*]  %% e.g., if...end.each, class...end.class_eval, ... 
+    |	[module_definition]
+    |	[method_definition]
+end define
+
+compounds
+	'[]  '[]= 
+	::
+	&.
+end compounds
+
+define reference
+	[variable_or_nonvariable] [function_call_subscript_or_field_selection*] 
+end define
+
+define variable_or_nonvariable
+	[variable]
+    |	[nonvariable]
+end define
+
+define nonvariable
+	'( [terminator?] [comp_statement] ')
+    |	'( [here_document] [') ?] 
+    |	':: [identifier]
+    |	[array_literal]
+    |	'{ [args_or_assocs?] [', ?] [terminator?] '}
+    |	'defined? [terminator?] '( [arg] [terminator?] ') 
+    |	['! ?] [function_call] [iterator?]
+    |	[literal]
+end define
+
+define function_call_subscript_or_field_selection
+    	[terminator?] [selector] [terminator?] [selection]
+    |	'[ [args?] [terminator?] ']
+    |	'[]
+end define
+
+define selector
+	'. | '&. | '::
+end define
+
+define field_selection
+    	[terminator?] '. [terminator?] [selection]
+end define
+
+define selection
+    	[variable]
+    |	[function_call] [iterator?]
+    |	[key] [paren_call_args?] [iterator?] %%
+    |	[paren_call_args] %%
+end define
+
+define literal
+	[string_literal]
+    |	[numeric_literal]
+    |	[symbol_literal]
+    |	[regular_expression]
+    |	[command_output]
+    |	[here_document]
+end define
+
+define variable
+	[varname] 
+    |	'nil
+    |	'self
+end define
+
+define identifier
+	[id]
+end define
+
+define if_statement 
+	'if [expression] [then] 
+	    [comp_statement?]	 
+	[elsif_statement*]
+	[else_statement?]
+	'end
+end define
+
+define elsif_statement 
+	'elsif [expression?] [then] 
+	    [comp_statement]
+end define
+
+define else_statement
+	[else]
+	    [comp_statement]
+end define
+
+define then
+	[terminator?] 'then [terminator?] | ': [terminator?] | [terminator] 
+end define
+
+define else
+	'else [terminator?]
+end define
+
+define unless_statement
+	'unless [expression] [then] 
+	    [comp_statement] 
+	[else_statement?]
+	'end
+end define
+
+define case_statement
+	'case [comp_statement?] [terminator]
+	[IN]
+	    [when_statement*] 
+	    [else_statement?]
+	[EX]
+	'end
+end define
+
+define when_statement
+	'when [when_args] [then] 
+	    [comp_statement?]
+end define
+
+define when_args
+	[args] 
+end define
+
+define while_statement
+	'while [expression] [do] 
+	    [comp_statement?] 
+	'end
+end define
+
+define do
+	'do [terminator?] | [terminator] 
+end define
+
+define until_statement
+	'until [expression] [do] 
+	    [comp_statement?] 
+	'end
+end define
+
+define for_statement 
+	'for [block_vars] 'in [expression] [do]
+	    [comp_statement?]
+	'end
+end define
+
+define begin_statement
+	'begin [terminator?] 
+	    [body_statement]
+	'end
+end define
+
+define body_statement
+	[comp_statement?]
+	[rescue_statement*]
+	[else_statement?]
+	[ensure_statement?]
+end define
+
+define rescue_statement
+	'rescue [terminator?] [args?] [rescue_result?] [terminator?] [then] 
+	    [comp_statement?]
+end define
+
+compounds
+	=>
+end compounds
+
+define rescue_result
+	'=> [identifier]
+end define
+
+define ensure_statement
+	'ensure [terminator?] 
+	    [comp_statement]
+end define
+
+define BEGIN_statement
+	'BEGIN '{ [terminator?] [comp_statement] '}
+end define
+
+define END_statement
+	'END '{ [terminator?] [comp_statement] '}
+end define
+
+define class_definition
+	'class [namespace*] [identifier?] [class_inheritance?] [terminator?]
+	    [body_statement?]
+	'end 
+end define 
+
+define class_inheritance
+	'< [reference]
+    |	[inherit] [reference]
+    |	[inherit] 'self
+end define
+
+define inherit
+	[shiftleft] | [herestart]
+end define
+
+define module_definition
+	'module [namespace*] [identifier] [terminator?]
+	    [body_statement]
+	'end
+end define 
+
+define namespace
+	[identifier?] '::
+end define
+
+define method_definition
+	'def [singleton_dot_or_coloncolon?] [fname] [argdecl] 
+	    [body_statement]
+	'end
+end define
+
+define singleton_dot_or_coloncolon
+	[singleton] [dot_or_coloncolon]
+end define
+
+define dot_or_coloncolon
+	'. | '::
+end define
+
+define singleton
+	[variable]
+    |	'( [expression] ')
+end define
+
+define argdecl
+	'( [terminator?] [arglist?] [terminator?] ') [terminator?]
+    |	[arglist?] [terminator]
+end define
+
+define arglist
+	[identifier_assign] [comma_star_identifier_assign*] [comma_amp_identifier?]
+    |	[star_identifier] [comma_star_identifier_assign*] [comma_amp_identifier?]
+    |	'& [identifier] 
+end define
+
+compounds
+	**
+end compounds
+
+define stars
+	'* | '**
+end define
+
+define identifier_assign
+	[identifier] [assign_primary?]
+    |	'( [identifier_assign] ')
+end define
+
+define assign_primary
+	'= [primary]
+    |	': [primary?]
+end define
+
+define comma_star_identifier_assign
+    ', [terminator?] [star_identifier_assign]
+end define
+
+define star_identifier_assign
+	[identifier_assign]
+    |	[star_identifier]
+end define
+
+define star_identifier
+	[stars] [SPOFF] [identifier?] [SPON]
+end define
+
+define comma_amp_identifier
+	', [terminator?] '& [SPOFF] [identifier] [SPON]
+end define
+
+define alias_definition
+	'alias [fname] [fname]
+    |	'alias [global_id] [global_id]
+    |	'alias [symbol_literal] [symbol_literal]
+end define
+
+define undef_definition
+	'undef [fname]
+end define
+
+define require_definition
+	'require [string_literal]
+end define
+
+define command_output
+	[backquote_stringlit]
+    |	[Xstring]
+end define
+
+tokens
+	backquote_stringlit	"`#`*`"
+        Xstring "%[Xx]?{[({[({[({[({[({[({[(\\\c)(#[\\{}])]*})(\\\c)(#[\\{}])]*})(\\\c)(#[\\{}])]*})(\\\c)(#[\\{}])]*})(\\\c)(#[\\{}])]*})(\\\c)(#[\\{}])]*})(\\\c)(#[\\{}])]*}"
+            | 	"%[Xx]?\([(\([(\([(\([(\([(\([(\([(\\\c)(#[\\\(\)])]*\))(\\\c)(#[\\\(\)])]*\))(\\\c)(#[\\\(\)])]*\))(\\\c)(#[\\\(\)])]*\))(\\\c)(#[\\\(\)])]*\))(\\\c)(#[\\\(\)])]*\))(\\\c)(#[\\\(\)])]*\)"
+            |	"%[Xx]?\[[(\[[(\[[(\[[(\[[(\[[(\[[(\\\c)(#[\\\[\]])]*\])(\\\c)(#[\\\[\]])]*\])(\\\c)(#[\\\[\]])]*\])(\\\c)(#[\\\[\]])]*\])(\\\c)(#[\\\[\]])]*\])(\\\c)(#[\\\[\]])]*\])(\\\c)(#[\\\[\]])]*\]"
+	    |	"%[Xx]/[(/#[\n/]*/)(\\\c)(#[\\/])]*/"	
+	    |	"%[Xx]<[(<#[\n>]*>)(\\\c)(#[\\>])]*>"
+	    |	"%[Xx]:[(:#[\n:]*:)(\\\c)(#[\\:])]*:"
+	    |	"%[Xx]![(!#[\n!]*!)(\\\c)(#[\\!])]*!"
+	    |	"%[Xx]'[(\\\c)(#[\\'])]*'"
+	    |	"%[Xx]\"[(\\\c)(#[\\\"])]*\""
+	    |	"%[Xx]$[(\\\c)(#[\\$])]*$"
+end tokens
+
+define regular_expression
+	[regexp]
+    |	[Rstring]
+end define
+	
+tokens
+	java_comment	"/\*#[(\*/)]*\*/"
+	%% regexp	"/[(\\\c)(\#{#}*})#[ /\\]][(\#{#}*})(\\\c)#[/\\\n]]*/[ioxmuesnp]*#\:( ?\d)"
+	regexp	"/[(\\\c)(\#{#}*})#[ /\\\n]][(\#{#}*})(\\\c)#[/\\\n]]*/[ioxmuesnp]*#\:( ?\d)"
+	    |	"/[(\\\c)(\#{#}*})#[/\\]]+/[ioxmuesnp]*\:[,\]\)\n( ?=~)]"
+	    |	"//[ioxmuesnp]*"
+        Rstring "%[Rr]?{[({[({[({[({[({[({[(\\\c)(#[\\{}])]*})(\\\c)(#[\\{}])]*})(\\\c)(#[\\{}])]*})(\\\c)(#[\\{}])]*})(\\\c)(#[\\{}])]*})(\\\c)(#[\\{}])]*})(\\\c)(#[\\{}])]*}[ioxmuesnp]*"
+            | 	"%[Rr]?\([(\([(\([(\([(\([(\([(\([(\\\c)(#[\\\(\)])]*\))(\\\c)(#[\\\(\)])]*\))(\\\c)(#[\\\(\)])]*\))(\\\c)(#[\\\(\)])]*\))(\\\c)(#[\\\(\)])]*\))(\\\c)(#[\\\(\)])]*\))(\\\c)(#[\\\(\)])]*\)[ioxmuesnp]*"
+	    |	"%[Rr]?\[[(\[[(\[[(\[[(\[[(\[[(\[[(\\\c)(#[\\\[\]])]*\])(\\\c)(#[\\\[\]])]*\])(\\\c)(#[\\\[\]])]*\])(\\\c)(#[\\\[\]])]*\])(\\\c)(#[\\\[\]])]*\])(\\\c)(#[\\\[\]])]*\])(\\\c)(#[\\\[\]])]*\][ioxmuesnp]*"
+	    |	"%[Rr]/[(/#[\n/]*/)(\\\c)(#[\\/])]*/[ioxmuesnp]*"	
+	    |	"%[Rr]<[(<#[\n>]*>)(\\\c)(#[\\>])]*>[ioxmuesnp]*"
+	    |	"%[Rr]:[(:#[\n:]*:)(\\\c)(#[\\:])]*:[ioxmuesnp]*"
+	    |	"%[Rr]![(!#[\n!]*!)(\\\c)(#[\\!])]*![ioxmuesnp]*"
+	    |	"%[Rr]|[(|#[\n|]*|)(\\\c)(#[\\|])]*|[ioxmuesnp]*"
+	    |	"%[Rr]%[(\\\c)(#[\\%])]*%[ioxmuesnp]*"
+	    |	"%[Rr]'[(\\\c)(#[\\'])]*'[ioxmuesnp]*"
+	    |	"%[Rr]\"[(\\\c)(#[\\\"])]*\"[ioxmuesnp]*"
+	    |	"%[Rr]$[(\\\c)(#[\\$])]*$"
+end tokens
+
+tokens
+	shiftleft	"<<\:[ \n\d]"
+	herestart	"<<#\: "
+	id_apostrophe	"\a+'[st]\:[ \n]"
+end tokens
+
+define here_document
+	[herestart] [SPOFF] ['- ?] ['~ ?] [push id] [SPON] [IN] [token_not_popid*] [EX] [pop id]
+    |	[herestart] [SPOFF] ['- ?] ['~ ?] [push key] [SPON] [IN] [token_not_popkey*] [EX] [pop key]
+    |	[herestart] [SPOFF] ['- ?] ['~ ?] [push stringlit] [SPON] [IN] [token_not_popid*] [EX] [pop id]
+    |	[herestart] [SPOFF] ['- ?] ['~ ?] [push charlit] [SPON] [IN] [token_not_popid*] [EX] [pop id]
+    |	[herestart] [SPOFF] ['- ?] ['~ ?] ''end;' [SPON] [IN] [token_not_endsemi*] [EX] 'end;
+    |	[herestart] [SPOFF] ['- ?] ['~ ?] '"end;" [SPON] [IN] [token_not_endsemi*] [EX] 'end;
+end define
+
+define token_not_endsemi
+	[token]
+    |	[not end_semi] [key]
+end define
+
+define end_semi
+	'end;
+end define
+
+define token_not_popid
+    	[not popid] [token]
+    |	[key]
+end define
+
+define popid
+	[pop id] [see terminator]
+end define
+
+define token_not_popkey
+	[token]
+    |	[not popkey] [key]
+end define
+
+define popkey
+	[pop key] [see terminator]
+end define
+
+tokens
+	ascii_literal	"\?\\\d\d\d"
+		|	"\?\\x[abcdefABCDEF\d][abcdefABCDEF\d]"
+		|	"\?\\u[abcdefABCDEF\d]+"
+		|	"\?\\u{[abcdefABCDEF\d]+}"
+		|	"\?\\C-\\?# "
+		|	"\?\\M-\\C-\\?# "
+		|	"\?\\M\\C-\\?# "
+		|	"\?\\M-\\?# "
+		|	"\?\\?#[ \n]"		
+		|	"\?\\ "		
+	escaped_quoteq	"\\\""
+		|	"\\'"
+end tokens
+
+tokens
+	number		"\d+(.[_\d]+)?([eE][+-]?\d+)?[ir]?"
+		|	"\d+_[_\d]+(.[_\d]+)?[ir]?"
+		|	"0[dD]\d+"			% rational
+		|	"0[bB][01_]+"			% binary
+		|	"0[oO][01234567_]+"		% octal
+		|	"0[xX][\dabcdefABCDEF_]+"	% hexadecimal
+		|	"1.0/0.0"			% inf
+end tokens
+
+define numeric_literal
+	[number] 
+    |	[plus_minus] [SPOFF] [number] [SPON]
+    |	[ascii_literal]
+end define
+
+define plus_minus
+	'+ | '-
+end define
+
+define varname
+	[global_id]
+    |	[instance_id]
+    |	[identifier]
+end define
+
+compounds
+	->
+end compounds
+
+define operation
+	[identifier] 
+    |	[operation_id]
+    |	'lambda | '-> [identifier?]	
+    |	'ensure | 'yield | 'return | 'not  | 'super | 'yield 
+    |	'return | 'break | 'next | 'redo | 'retry 
+    |	[variable] [dot_or_coloncolon] [key_or_fname] 
+end define
+
+define key_or_fname
+	[key]
+    |	[fname]
+end define
+
+define equals
+	[SPOFF] '= [SPON]
+end define
+
+tokens 
+	global_id	"$$*\i+"
+	    |		"$-\c"
+	    |		"$\c"
+	instance_id	"@@*\i+"
+	operation_id	"\i+[?!]"
+end tokens
+
+define fname
+	[operation]
+    |	[id] [SPOFF] '= [SPON]
+    | 	'..  |  '|  |  '^  |  '&
+    | 	'<=>  |  '==  |  '===  |  '=~
+    | 	'>  |  '>=  |  '<  |  '<=
+    | 	'+  |  '-  |  '*  |  '/  |  '%  |  '**
+    | 	[inherit]  |  '>>  |  '~
+    | 	'+@  |  '-@  |  '[]  |  '[]=	
+    |	'=  |  '!=
+    |	'!~
+    |	'ensure    
+    |	'alias %%    
+    |	'class %%    
+end define
+
+tokens
+	symcolon	":#\: "
+end tokens
+
+define symbol_literal
+	[symcolon] [SPOFF] [fname] [SPON]
+    |	[symcolon] [SPOFF] [varname] [SPON]
+    |	[symcolon] [SPOFF] [stringlit] [SPON]
+    |	[symcolon] [SPOFF] [charlit] [SPON]
+    |	[symcolon] [SPOFF] [key] [SPON]
+end define
+
+define array_literal
+	'[ [IN] [terminator?] [args_or_assocs?] [', ?] [terminator?] [bracket_or_here_doc] [EX] 
+    |  	'[]
+    |	[Wstring]
+    |	[Istring]
+end define
+
+define bracket_or_here_doc
+	']
+    |	[here_document] ['] ?]
+end define
+
+tokens
+        Wstring "%[Ww]?{[({[({[({[({[({[({[(\\\c)(#[\\{}])]*})(\\\c)(#[\\{}])]*})(\\\c)(#[\\{}])]*})(\\\c)(#[\\{}])]*})(\\\c)(#[\\{}])]*})(\\\c)(#[\\{}])]*})(\\\c)(#[\\{}])]*}"
+            | 	"%[Ww]?\([(\([(\([(\([(\([(\([(\([(\\\c)(#[\\\(\)])]*\))(\\\c)(#[\\\(\)])]*\))(\\\c)(#[\\\(\)])]*\))(\\\c)(#[\\\(\)])]*\))(\\\c)(#[\\\(\)])]*\))(\\\c)(#[\\\(\)])]*\))(\\\c)(#[\\\(\)])]*\)"
+            |	"%[Ww]?\[[(\[[(\[[(\[[(\[[(\[[(\[[(\\\c)(#[\\\[\]])]*\])(\\\c)(#[\\\[\]])]*\])(\\\c)(#[\\\[\]])]*\])(\\\c)(#[\\\[\]])]*\])(\\\c)(#[\\\[\]])]*\])(\\\c)(#[\\\[\]])]*\])(\\\c)(#[\\\[\]])]*\]"
+	    |	"%[Ww]/[(/#[\n/]*/)(\\\c)(#[\\/])]*/"	
+	    |	"%[Ww]<[(<#[\n>]*>)(\\\c)(#[\\>])]*>"
+	    |	"%[Ww]:[(:#[\n:]*:)(\\\c)(#[\\:])]*:"
+	    |	"%[Ww]![(!#[\n!]*!)(\\\c)(#[\\!])]*!"
+	    |	"%[Ww]'[(\\\c)(#[\\'])]*'"
+	    |	"%[Ww]\"[(\\\c)(#[\\\"])]*\""
+	    |	"%[Ww]$[(\\\c)(#[\\$])]*$"
+        Istring "%[Ii]?{[({[({[({[({[({[({[(\\\c)(#[\\{}])]*})(\\\c)(#[\\{}])]*})(\\\c)(#[\\{}])]*})(\\\c)(#[\\{}])]*})(\\\c)(#[\\{}])]*})(\\\c)(#[\\{}])]*})(\\\c)(#[\\{}])]*}"
+            | 	"%[Ii]?\([(\([(\([(\([(\([(\([(\([(\\\c)(#[\\\(\)])]*\))(\\\c)(#[\\\(\)])]*\))(\\\c)(#[\\\(\)])]*\))(\\\c)(#[\\\(\)])]*\))(\\\c)(#[\\\(\)])]*\))(\\\c)(#[\\\(\)])]*\))(\\\c)(#[\\\(\)])]*\)"
+            |	"%[Ii]?\[[(\[[(\[[(\[[(\[[(\[[(\[[(\\\c)(#[\\\[\]])]*\])(\\\c)(#[\\\[\]])]*\])(\\\c)(#[\\\[\]])]*\])(\\\c)(#[\\\[\]])]*\])(\\\c)(#[\\\[\]])]*\])(\\\c)(#[\\\[\]])]*\])(\\\c)(#[\\\[\]])]*\]"
+	    |	"%[Ii]/[(/#[\n/]*/)(\\\c)(#[\\/])]*/"	
+	    |	"%[Ii]<[(<#[\n>]*>)(\\\c)(#[\\>])]*>"
+	    |	"%[Ii]:[(:#[\n:]*:)(\\\c)(#[\\:])]*:"
+	    |	"%[Ii]![(!#[\n!]*!)(\\\c)(#[\\!])]*!"
+	    |	"%[Ii]'[(\\\c)(#[\\'])]*'"
+	    |	"%[Ii]\"[(\\\c)(#[\\\"])]*\""
+	    |	"%[Ii]$[(\\\c)(#[\\$])]*$"
+end tokens
+
+define args_or_assocs
+	[args] [comma_assocs?]
+    | 	[assocs]
+end define
+
+define assocs
+	[assoc,+] [terminator?]
+end define
+
+define assoc
+	[terminator?] [arg] [arrow_or_colon] [newline?] [arg]
+    |	[terminator?] [key] [arrow_or_colon] [newline?] [arg] 
+end define
+
+define arrow_or_colon
+	'=> | ':
+end define
+
+compounds
+	+=  -=  *=  '%=  **=  &&=  '||=
+end compounds
+
+define string_literal
+	[stringlit] [string_literal?]
+    |	[charlit] [string_literal?]
+    |	[Qstring]
+end define
+
+tokens
+	stringlit	"\"[(\#{[({[({#}*})(\\\c)#[{}\\]]*})(\\\c)#[{}\\]]*})(\\\c)#[\"\\]]*\""
+end tokens
+
+tokens
+	% double- or single-quote string
+        Qstring "%[Qq]?{[({[({[({[({[({[({[(\\\c)(#[\\{}])]*})(\\\c)(#[\\{}])]*})(\\\c)(#[\\{}])]*})(\\\c)(#[\\{}])]*})(\\\c)(#[\\{}])]*})(\\\c)(#[\\{}])]*})(\\\c)(#[\\{}])]*}"
+            | 	"%[Qq]?\([(\([(\([(\([(\([(\([(\([(\\\c)(#[\\\(\)])]*\))(\\\c)(#[\\\(\)])]*\))(\\\c)(#[\\\(\)])]*\))(\\\c)(#[\\\(\)])]*\))(\\\c)(#[\\\(\)])]*\))(\\\c)(#[\\\(\)])]*\))(\\\c)(#[\\\(\)])]*\)"
+            |	"%[Qq]?\[[(\[[(\[[(\[[(\[[(\[[(\[[(\\\c)(#[\\\[\]])]*\])(\\\c)(#[\\\[\]])]*\])(\\\c)(#[\\\[\]])]*\])(\\\c)(#[\\\[\]])]*\])(\\\c)(#[\\\[\]])]*\])(\\\c)(#[\\\[\]])]*\])(\\\c)(#[\\\[\]])]*\]"
+	    |	"%[Qq]?/[(/#[\n/]*/)(\\\c)(#[\\/])]*/"	
+	    |	"%[Qq]?<[(<#[\n>]*>)(\\\c)(#[\\>])]*>"
+	    |	"%[Qq]?:[(:#[\n:]*:)(\\\c)(#[\\:])]*:"
+	    |	"%[Qq]?![(!#[\n!]*!)(\\\c)(#[\\!])]*!"
+	    |	"%[Qq]?'[(\\\c)(#[\\'])]*'"
+	    |	"%[Qq]?\"[(\\\c)(#[\\\"])]*\""
+	    |	"%[Qq]?$[(\\\c)(#[\\$])]*$"
+end tokens
+
+define terminator
+	[semicolon_newline+]
+    |	[see '} ]  %% JC
+end define
+
+define semicolon_newline
+	'; | [newline] | [comment]
+end define
+
+define LAZY
+	[empty]
+end define
+

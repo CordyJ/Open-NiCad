@@ -1,0 +1,82 @@
+--@atlcompiler	atl2006
+--@name			MOOD4KM3
+--@version		1.0
+--@domains		KM3, MOOD, MOOD2, metrics
+--@authors		Eric Vepa (evepa <at> sodius.com) for SODIUS (www.sodius.com)
+--@date			2007/06/05
+--@description	This library provides MOOD (Metrics for Object-Oriented Design) and MOOD2 metrics suites on KM3 metamodels. Only the metrics that fit to KM3 metamodels have been implemented.
+--@see			Baroni, A.L.: Formal Definition of Object-Oriented Design Metrics. Master Thesis, Vrije University, Brussel, Belgium, 2002.
+
+library MOOD4KM3; -- Library Template
+
+-- ============================================================
+-- MOOD and MOOD2 Metrics : Intra-Specification Level Metrics =
+-- ============================================================
+
+--@begin helper MOOD::AIF
+--@comments Attributes Inheritance Factor
+--@comments Quotient between the number of inherited Attributes in all Classes of the Package and the number of available Attributes (locally defined plus inherited) for all Classes of the current Package.
+--@comments The pre-condition states that the package must have available Attributes.
+--@comments AIF() = 0 means that there is no effective Attribute inheritance (either there are no inheritance hierarchies or all inherited Attributes are redefined).
+helper context KM3!Package
+def : AIF() : Real =
+	if self.PAAN() > 0
+		then self.PIAN() / self.PAAN()
+		else 0
+	endif;
+--@end helper MOOD::AIF
+
+--@begin helper MOOD::RIF
+--@comments References Inheritance Factor
+--@comments Quotient between the number of inherited References in all Classes of the Package and the number of available References (locally defined plus inherited) for all Classes of the current Package.
+--@comments The pre-condition states that the package must have available References.
+--@comments RIF() = 0 means that there is no effective Reference inheritance (either there are no inheritance hierarchies or all inherited References are redefined).
+helper context KM3!Package
+def : RIF() : Real =
+	if self.PARN() > 0
+		then self.PIRN() / self.PARN()
+		else 0
+	endif;
+--@end helper MOOD::RIF
+
+--@begin helper MOOD2::IIF
+--@comments Internal Inheritance Factor
+--@comments Quotient between the number of inheritance links where both the base and derived Classes belong to the current Package and the total number of inheritance links originating in the current Package.
+--@comments The pre-condition states that the package must have some inheritance links defined on it.
+--@comments Inheritance links originating in the current package are those where the derived Class belongs to it.
+--@comments The inheritance link is directed from the derived Class to the base one.
+helper context KM3!Package
+def : IIF() : Real =
+	if self.IILN > 0
+		then self.IILN / self.PILN(self)
+		else 0
+	endif;
+--@end helper MOOD2::IIF
+
+--@begin helper MOOD::CCF
+--@comments Parametric Polymorphism Factor
+--@comments Quotient between the actual number of coupled class-pairs within the Package and the maximum possible number of class-pair couplings in the Package. This coupling is the one not imputable to inheritance.
+--@comments In a coupled class-pair one Class is the client and the other is the supplier.
+--@comments These clientsupplier relations can have several shapes; see the function Classifier::CoupledClasses for details.
+--@comments The pre-condition states that, with only one Class, there are no couplings within the package.
+--@comments The square root counteracts for the fact that the couplings grow quadratically with the number of Classes.
+helper context KM3!Package
+def : CCF() : Real =
+	if self.CN() > 1
+		then (self.ICLN() / (self.CN() * self.CN() - self.CN())).sqrt()
+		else 0
+	endif;
+--@end helper MOOD::CCF
+
+--@begin helper MOOD::ICF
+--@comments Internal Coupling Factor
+--@comments Quotient between the number of coupling links where both the client and supplier Classes belong to the current Package and the total number of coupling links originating in the current Package.
+--@comments Coupling links originating in the current Package are those where the client Class belongs to it.
+--@comments The coupling link is directed from the client Class to the supplier one.
+helper context KM3!Package
+def : ICF() : Real =
+	if self.ICLN() > 0
+		then self.ICLN() / self.PCLN(self)
+		else 0
+	endif;
+--@end helper MOOD::ICF

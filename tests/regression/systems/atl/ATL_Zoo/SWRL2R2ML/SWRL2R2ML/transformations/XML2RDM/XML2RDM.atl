@@ -1,0 +1,811 @@
+-- ============================================================
+-- Transforms an XML metamodel (OWL) into the RDM metamodel.
+-- Created as part of M.Sc. theses at GOOD OLD AI Laboratory
+-- Author: Milan Milanovic (milan at milanovic.org)
+-- Works for SWRL v0.6 (XML syntax)
+-- Licence: GNU General Public License, version 2
+-- ============================================================
+
+module XML2RDM;
+create OUT : RDM from IN : XML;
+
+uses strings;
+uses XMLHelpers; -- General XML metamodel helpers
+
+-------------------------------------------------------------------------------
+-- HELPERS --------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+----------------------------------------------
+-- XML2RDM Transformation specific XML helpers
+----------------------------------------------
+
+-- HELPER:	getAllRules
+-- Returns a sequence of all XML elements which name is ruleml:imp
+-- CONTEXT:	thisModule
+-- OUT:		Sequence of XML elements
+helper def: getAllRules() : Sequence(XML!Element) = 
+	XML!Element.allInstances()->select(e | e.name = 'ruleml:imp')->asSequence();
+
+-- HELPER: getRuleForElement
+-- Returns XML element (Rule) which contains contextual XML element
+-- CONTEXT:	XML!Element
+-- OUT:		XML element
+helper context XML!Element def: getRuleForElement() : XML!Element = 
+	thisModule.getAllRules()->select(c | c.allSubElements->includes(self))->asSequence()->first();
+
+-- HELPER: allSubElements
+-- Returns a sequence of all XML sub elements for XML element, recursivelly
+-- from this element to last element (children)
+-- CONTEXT:	XML!Element
+-- OUT:		Sequence of XML elements
+helper context XML!Element def : allSubElements : Sequence(XML!Element) = 
+	let subElems : Sequence(XML!Element) = 
+		XML!Element.allInstances()->select(c | 
+			c.parent = self
+		)->collect(elems | elems.allSubElements)->flatten()  in
+		subElems->union(
+			self.children->select(ch | ch.oclIsTypeOf(XML!Element) and not subElems->exists(a | a.name = ch.name)
+	    ))->flatten();
+
+-- HELPER:	getDefaultVariable
+-- Return always first Variable with value.
+-- This is necessary for unique lazy rule that creates just one 
+-- output IndividualVariable for multiple input (with same value)
+-- CONTEXT:	thisModule
+-- IN:		XML!Element, String
+-- OUT:		XML!Element
+helper def: getDefaultVariable(elem: XML!Element, value: String) : XML!Element = 
+	elem.getRuleForElement().allSubElements->select(e | e.name = 'ruleml:var')->select(e | e.children->first().value = value)->asSequence()->first();
+
+-- HELPER:	getVariables
+-- Return all variables from input file
+-- CONTEXT:	thisModule
+-- OUT:		Sequence of XML Elements
+helper def: getAllVariables() : Sequence(XML!Element) = 
+	XML!Element.allInstances()->select(e | e.name = 'ruleml:var');
+
+-- HELPER:	getDefaultClass
+-- Return default Class with same name from input file
+-- CONTEXT:	thisModule
+-- IN:		String
+-- OUT:		Sequence of XML Elements
+helper def: getDefaultClass(value : String) : Sequence(XML!Element) = 
+	XML!Element.allInstancesFrom('IN')->asSequence()->select(e | e.name = 'owlx:Class')->select(e | e.getAttrVal('owlx:name') = value)->asSequence()->first();
+
+-- HELPER:	getAllIndividualPropertyAtomsForVariable
+-- Return individual property atoms for some variable name
+-- CONTEXT:	thisModule
+-- IN:		String
+-- OUT:		Sequence of XML Elements
+helper def: getAllIndividualPropertyAtomsForVariable(name : String) : Sequence(XML!Element) =
+	XML!Element.allInstancesFrom('IN')->asSequence()->select(e | e.name = 'swrlx:individualPropertyAtom')->select(c | c.children->select(c | c.oclIsTypeOf(XML!Element))->exists(e | e.name = 'ruleml:var' and e.getTextValue() = name));
+	
+-- HELPER:	getAllObjectProperties
+-- Return all ObjectProperties
+-- CONTEXT:	thisModule
+-- OUT:		Sequence of XML Elements
+helper def: getAllObjectProperties() : Sequence(XML!Element) = 
+	XML!Element.allInstancesFrom('IN')->asSequence()->select(e | e.name = 'owlx:ObjectProperty')->asSequence();
+
+-- HELPER:	getObjectPropertyForIndividualPropertyAtom
+-- Return ObjectProperty for Individual property atom
+-- CONTEXT:	thisModule
+-- IN:		String
+-- OUT:		Sequence of XML Elements
+helper def: getObjectPropertyForIndividualPropertyAtom(property : String) : XML!Element = 
+	thisModule.getAllObjectProperties()->select(c | c.getAttrVal('owlx:name') = property)->asSequence();
+
+-- HELPER:	getClassNameForVariableInIndividualPropretyAtom
+-- Return name of class for variable in Individual Property Atom (it is needed to link Individual Property atoms with object properties)
+-- CONTEXT:	thisModule
+-- IN:		String, XML!Element
+-- OUT:		Sequence of XML Elements
+helper def: getClassNameForVariableInIndividualPropretyAtom(var : String, atom : XML!Element) : String =
+	if atom.getElementsByName('ruleml:var')->first().getTextValue() = var then
+		thisModule.getObjectPropertyForIndividualPropertyAtom(atom.getAttrVal('swrlx:property'))->first().getElementsByName('owlx:domain')->first().children->asSequence()->first().getAttrVal('owlx:name')
+	else thisModule.getObjectPropertyForIndividualPropertyAtom(atom.getAttrVal('swrlx:property'))->first().getElementsByName('owlx:range')->first().children->asSequence()->first().getAttrVal('owlx:name')
+	endif;
+	
+-------------------------------------------------------------------------------
+-- RULES ----------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- SWRL to RDM based transformations
+
+-- Rule 'Ontology'
+-- Create Ontology element from the XML Root element
+rule Ontology {
+	from i : XML!Root (
+			i.name <> 'ruleml:imp'
+		)
+	to
+		o : RDM!Ontology (
+				elements <- i.children->select(c | c.oclIsKindOf(XML!Element))
+			)
+}
+
+-- Rule 'Rule'
+-- Creates Rule from the XML Element (with name = "ruleml:imp").
+rule Rule {
+	from
+		i : XML!Element (
+				i.name = 'ruleml:imp'
+			)
+	to
+		o : RDM!Rule (
+			hasConsequent <- i.children->select(c | c.name = 'ruleml:_head' and c.oclIsKindOf(XML!Element))->asSequence()->first(),
+			hasAntecedent <- i.children->select(c | c.name = 'ruleml:_body' and c.oclIsKindOf(XML!Element))->asSequence()->first()
+		)
+}
+
+-- Rule 'Consequent'
+-- Create Consequent element from XML Element named 'ruleml:_head'
+rule Consequent {
+	from 
+		i : XML!Element (
+				i.name = 'ruleml:_head'
+			)
+	to
+		o : RDM!Consequent (
+				containsAtom <- i.children->asSequence()
+			)
+}
+
+-- Rule 'Antecedent'
+-- Create Antecedent element from XML Element named 'ruleml:_body'
+rule Antecedent {
+	from 
+		i : XML!Element (
+				i.name = 'ruleml:_body'
+			)
+	to
+		o : RDM!Antecedent (
+				containsAtom <- i.children->asSequence()
+			)
+}
+
+-- Atoms 
+
+-- Rule 'IndividualPropertyAtom'
+-- Create IndividualPropertyAtom element from XML Element named 'swrlx:individualPropertyAtom'
+rule IndividualPropertyAtom {
+	from 
+		i : XML!Element (
+				i.name = 'swrlx:individualPropertyAtom'
+			)
+	to
+		o : RDM!Atom (
+				hasPredicateSymbol <- pred, 
+				terms <- Sequence{ i.getElementsByName('ruleml:var')->select(e | thisModule.getAllVariables()->includes(e))->collect(e | thisModule.getDefaultVariable(i, e.children->first().value))->collect(e | thisModule.IndividualVariable(e)),
+				           		   i.children->select(e | not thisModule.getAllVariables()->includes(e))->asSequence()},
+			    name <- 'IndividualPropertyAtom'
+			),
+		pred : RDM!ObjectProperty (
+				name <- i.getAttrVal('swrlx:property')
+			)
+}
+
+-- Rule 'ClassAtom'
+-- Create Atom element with name 'ClassAtom' from XML Element named 'swrlx:classAtom'
+rule ClassAtom {
+	from 
+		i : XML!Element (
+				i.name = 'swrlx:classAtom'
+			)
+	to
+		o : RDM!Atom (
+				hasPredicateSymbol <- let classElem : XML!Element = i.getElementsByName('owlx:Class')->first() in
+										if classElem.oclIsUndefined()				
+									    then if i.children->select (c | c.name = 'owlx:ObjectRestriction')->size() > 0 then
+											 	i.children->select (c | c.name = 'owlx:ObjectRestriction')->collect(e | e.children)->flatten()->select(e | e.oclIsKindOf(XML!Element))->first()														
+											 else i.children->select(e | e.name <> 'ruleml:var' and e.name <> 'owlx:Individual')->first()
+											 endif
+										else if classElem.children->select(c | c.name = 'owlx:ObjectRestriction')->size() > 0 then
+												classElem.children->select(c | c.name = 'owlx:ObjectRestriction')->first().children->select(c | c.oclIsTypeOf(XML!Element))->first()
+											 else thisModule.Class(thisModule.getDefaultClass(classElem.getAttrVal('owlx:name')))
+											 endif
+										endif,
+				-- first transform variables, or other second XML element for ClassAtom
+				terms <- Sequence{ i.getElementsByName('ruleml:var')->select(e | thisModule.getAllVariables()->includes(e))->collect(e | thisModule.getDefaultVariable(i, e.children->first().value))->collect(e | thisModule.IndividualVariable(e)),
+					               i.getElementsByName('owlx:Individual')->asSequence()},
+			    name <- 'ClassAtom'
+			)
+}
+
+-- Rule 'DataRangeAtom'
+-- Create Atom element with name 'DataRangeAtom' from XML Element named 'swrlx:datarangeAtom'
+rule DataRangeAtom {
+	from 
+		i : XML!Element (
+				i.name = 'swrlx:datarangeAtom'
+			)
+	to
+		o : RDM!Atom (
+				hasPredicateSymbol <-  if i.children->select (c | c.name = 'owlx:DataRestriction')->size() > 0 then
+											i.children->select (c | c.name = 'owlx:DataRestriction')->collect(e | e.children)->flatten()->select(e | e.oclIsKindOf(XML!Element))->first()
+									   else i.children->select(e | e.name = 'owlx:Datatype' or e.name = 'owlx:OneOf')->first() -- transform Class element
+									   endif,
+				-- first transform variables, or other second XML element for ClassAtom
+				terms <- Sequence{ i.getElementsByName('ruleml:var')->select(e | thisModule.getAllVariables()->includes(e))->collect(e | thisModule.getDefaultVariable(i, e.children->first().value))->collect(e | thisModule.IndividualVariable(e)),
+				           		   i.children->select(e | not thisModule.getAllVariables()->includes(e) and e.name <> 'owlx:Datatype' and e.name <> 'owlx:OneOf' and e.name <> 'owlx:DataRestriction')->asSequence()},
+			 	name <- 'DataRangeAtom'
+			)
+}
+
+-- Rule 'DataValuedPropertyAtom'
+-- Create Atom element with name 'DataValuedPropertyAtom' from XML Element named 'swrlx:datavaluedPropertyAtom'
+rule DataValuedPropertyAtom {
+	from 
+		i : XML!Element (
+				i.name = 'swrlx:datavaluedPropertyAtom'
+			)
+	to
+		o : RDM!Atom (
+				hasPredicateSymbol <- pred, 
+				terms <- if i.getElementsByName('ruleml:var')->size() = 1 then
+						 Sequence{ i.getElementsByName('ruleml:var')->select(e | thisModule.getAllVariables()->includes(e))->collect(e | thisModule.getDefaultVariable(i, e.children->first().value))->collect(e | thisModule.IndividualVariable(e)),
+				           		   i.children->select(e | not thisModule.getAllVariables()->includes(e))->asSequence()}
+						 else
+						 Sequence{ i.getElementsByName('ruleml:var')->first()->asSequence()->select(e | thisModule.getAllVariables()->includes(e))->collect(e | thisModule.getDefaultVariable(i, e.children->first().value))->collect(e | thisModule.IndividualVariable(e)),
+						 		   i.getElementsByName('ruleml:var')->last()->asSequence()->select(e | thisModule.getAllVariables()->includes(e))->collect(e | thisModule.getDefaultVariable(i, e.children->first().value))->collect(e | thisModule.DataVariable(e)),
+				           		   i.children->select(e | not thisModule.getAllVariables()->includes(e))->asSequence()}
+						 endif,
+				name <- 'DataValuedPropertyAtom'
+			),
+		pred : RDM!DatatypeProperty (
+				name <- i.getAttrVal('swrlx:property')
+			)
+}
+
+-- Rule 'SameIndividualAtom'
+-- Create Atom element with name 'SameIndividualAtom' from XML Element named 'swrlx:sameIndividualAtom'
+rule SameIndividualAtom {
+	from 
+		i : XML!Element (
+				i.name = 'swrlx:sameIndividualAtom'
+			)
+	to
+		o : RDM!Atom (
+				hasPredicateSymbol <- same,
+				terms <- Sequence{ i.getElementsByName('ruleml:var')->select(e | thisModule.getAllVariables()->includes(e))->collect(e | thisModule.getDefaultVariable(i, e.children->first().value))->collect(e | thisModule.IndividualVariable(e)),
+				           		   i.children->select(e | not thisModule.getAllVariables()->includes(e))->asSequence()},
+				name <- 'SameIndividualAtom'
+			),
+		same : RDM!SameAs
+}
+
+-- Rule 'DifferentIndividualsAtom'
+-- Create Atom element with name 'DifferentIndividualAtom' from XML Element named 'swrlx:differentIndividualsAtom'
+rule DifferentIndividualsAtom {
+	from 
+		i : XML!Element (
+				i.name = 'swrlx:differentIndividualsAtom'
+			)
+	to
+		o : RDM!Atom (
+				hasPredicateSymbol <- different,
+				terms <- Sequence{ i.getElementsByName('ruleml:var')->select(e | thisModule.getAllVariables()->includes(e))->collect(e | thisModule.getDefaultVariable(i, e.children->first().value))->collect(e | thisModule.IndividualVariable(e)),
+				           		   i.children->select(e | not thisModule.getAllVariables()->includes(e))->asSequence()},
+				name <- 'DifferentIndividualAtom'
+			),
+		different : RDM!DifferentFrom
+}
+
+-- Rule 'BuiltinAtom'
+-- Create Atom element with name 'BuiltinAtom' from XML Element named 'swrlx:builtinAtom'
+rule BuiltinAtom {
+	from 
+		i : XML!Element (
+				i.name = 'swrlx:builtinAtom'
+			)
+	to
+		o : RDM!Atom (
+			hasPredicateSymbol <- builtIn,
+			terms <- Sequence{ i.getElementsByName('ruleml:var')->asSequence()->select(e | thisModule.getAllVariables()->includes(e))->collect(e | thisModule.getDefaultVariable(i, e.children->first().value))->collect(e | thisModule.DataVariable(e)),
+				           	   i.children->select(e | not thisModule.getAllVariables()->includes(e))->asSequence()},
+			name <- 'BuiltinAtom'
+		), 
+		builtIn : RDM!BuiltIn (
+			buildInID <- i.getAttrVal('swrlx:builtin')
+		)
+}
+
+-- Predicate Symbols for RDM Atoms (OWL -> ODM)
+
+-- Rule 'Class'
+-- Create Class element from XML Element named 'owlx:Class'
+unique lazy rule Class {
+	from 
+		i : XML!Element (
+				i.name = 'owlx:Class'
+			)
+	to
+		o : RDM!Class (
+				name <- i.getAttrVal('owlx:name')
+			)
+}
+
+-- Rule 'DataType'
+-- Create DataRange element from XML Element named 'owlx:Datatype'
+rule DataType {
+	from 
+		i : XML!Element (
+				i.name = 'owlx:Datatype'
+			)
+	to
+		o : RDM!DataRange(
+				name <- i.getAttrVal('owlx:name'),
+				datatype <- primType
+			),
+		primType : RDM!PrimitiveType (
+				name <- i.getAttrVal('owlx:name')
+			)
+}
+
+-- Rule 'Individual'
+-- Create Individual element from XML Element named 'owlx:Individual'
+rule Individual {
+	from 
+		i : XML!Element (
+				i.name = 'owlx:Individual'
+			)
+	to
+		o : RDM!Individual (
+				name <- i.getAttrVal('owlx:name')
+			)
+}
+
+-- Rule 'DataValueNotOneOf'
+-- Create DataValue element from XML Element named 'owlx:DataValue'
+-- This version of DataValue doesn't have OneOf element as parent, so
+-- it is transformed to DataValue element
+rule DataValueNotOneOf {
+	from 
+		i : XML!Element (
+				-- This must be done with condition, ATL Manual - 4.3.4 Expressions tips & tricks (page 24)
+			    if i.parent.oclIsUndefined()
+				then i.name = 'owlx:DataValue'
+				else
+					i.name = 'owlx:DataValue' and i.parent.name <> 'owlx:OneOf'
+				endif
+			)
+	to
+		o : RDM!DataValue (
+				type <- typ,
+				value <- i.children->select(c | c.name = '#text')->first().value
+			),
+		typ : RDM!PrimitiveType (
+			name <- i.getAttrVal('owlx:datatype')
+			)
+}
+
+-- Rule 'DataValueOneOf'
+-- Create DataValue element from XML Element named 'owlx:DataValue'
+-- This version of DataValue have OneOf element as parent, so
+-- it is transformed to TypedLiteral element
+rule DataValueOneOf {
+	from 
+		i : XML!Element (
+			 if i.parent.oclIsUndefined()
+			 then i.name = 'owlx:DataValue'
+			 else
+					i.name = 'owlx:DataValue' and i.parent.name = 'owlx:OneOf'
+			 endif
+			)
+	to
+		o : RDM!TypedLiteral (
+				lexicalForm <- i.children->select(e | e.name = '#text')->first().value,
+				theType <- i.getAttrVal('owlx:datatype')
+			)
+}
+
+-- Rule 'IndividualVariable'
+-- Creates IndividualVariable element from an XML!Element named 'ruleml:var'
+-- This rule is unique lazy rule, which means that is called from other rules
+unique lazy rule IndividualVariable {
+	from i : XML!Element
+	to 
+		o : RDM!IndividualVariable (
+				name <- i.children->first().value,
+				classRef <- if thisModule.getAllObjectProperties()->size() > 0 then
+								let atom : XML!Element = thisModule.getAllIndividualPropertyAtomsForVariable(i.children->first().value)->first() in
+									thisModule.Class(thisModule.getDefaultClass(thisModule.getClassNameForVariableInIndividualPropretyAtom(i.children->first().value, atom)))
+							else OclUndefined
+							endif
+			)
+}
+
+
+
+-- Rule 'DataVariable'
+-- Creates DataVariable element from an XML!Element named 'ruleml:var'
+-- This rule is unique lazy rule, which means that is called from other rules
+unique lazy rule DataVariable {
+	from i : XML!Element
+	to 
+		o : RDM!DataVariable (
+				name <- i.children->first().value
+			)
+}
+
+-- OWL -> ODM based transformations 
+
+-- Rule 'IntersectionOf'
+-- Creates IntersectionClass element from an XML!Element named 'owlx:IntersectionOf'
+rule IntersectionOf {
+	from 
+		i : XML!Element (
+				i.name = 'owlx:IntersectionOf'
+			)
+	to
+		o : RDM!IntersectionClass (
+				intersectionOf <- Sequence {  let classElem : Sequence (XML!Element) = i.getElementsByName('owlx:Class') in
+											  	if classElem->isEmpty()
+												then Sequence{}
+												else classElem->collect(c | thisModule.Class(thisModule.getDefaultClass(c.getAttrVal('owlx:name'))))
+												endif,
+											  i.children->select (c | c.name <> 'owlx:ObjectRestriction' and c.name <> 'owlx:DataRestriction' and c.name <> 'owlx:Class'),
+										      i.children->select (c | c.name = 'owlx:ObjectRestriction' or c.name = 'owlx:DataRestriction')->collect(e | e.children)->flatten()->select(e | e.oclIsKindOf(XML!Element))														
+				  				  }
+			)
+}
+
+-- Rule 'UnionOf'
+-- Creates UnionClass element from an XML!Element named 'owlx:UnionOf'
+rule UnionOf {
+	from 
+		i : XML!Element (
+				i.name = 'owlx:UnionOf'
+			)
+	to
+		o : RDM!UnionClass (
+			unionOf <- Sequence {  let classElem : Sequence (XML!Element) = i.getElementsByName('owlx:Class') in
+									if classElem->isEmpty()
+									then Sequence{}
+									else classElem->collect(c | thisModule.Class(thisModule.getDefaultClass(c.getAttrVal('owlx:name'))))
+									endif,
+				  				  i.children->select (c | c.name <> 'owlx:ObjectRestriction' and c.name <> 'owlx:DataRestriction' and c.name <> 'owlx:Class'),
+								  i.children->select (c | c.name = 'owlx:ObjectRestriction' or c.name = 'owlx:DataRestriction')->collect(e | e.children)->flatten()->select(e | e.oclIsKindOf(XML!Element))														
+				  				  }
+			)
+}
+
+-- Rule 'ComplementOf'
+-- Creates ComplementClass element from an XML!Element named 'owlx:ComplementOf'
+rule ComplementOf {
+	from 
+		i : XML!Element (
+				i.name = 'owlx:ComplementOf'
+			)
+	to
+		o : RDM!ComplementClass (
+				complementOf <-  let classElem : XML!Element = i.getElementsByName('owlx:Class')->first() in
+									if classElem.oclIsUndefined()
+									then i.children->first()
+									else thisModule.Class(thisModule.getDefaultClass(classElem.getAttrVal('owlx:name')))
+									endif		
+			)
+}
+
+-- Rule 'SomeValuesFromAttrClass'
+-- Creates SomeValuesFromRestriction element from an XML!Element named 'owlx:someValuesFrom'
+-- which have class attribute
+rule SomeValuesFromAttrClass {
+	from 
+		i : XML!Element (
+				i.name = 'owlx:someValuesFrom' and i.hasAttr('owlx:class')
+			)
+	to
+		o : RDM!SomeValuesFromRestriction (
+				someValuesFromClass <- class,
+				onProperty <- i.parent
+			),
+		class : RDM!Class (
+			name <- i.getAttrVal('owlx:class')
+			)
+}
+
+-- Rule 'SomeValuesFromAttrDatatype'
+-- Creates SomeValuesFromRestriction element from an XML!Element named 'owlx:someValuesFrom'
+-- which have datatype attribute and have one children element
+rule SomeValuesFromAttrDatatype {
+	from 
+		i : XML!Element (
+				i.name = 'owlx:someValuesFrom' and i.hasAttr('owlx:datatype') and
+				i.children->size() = 1
+			)
+	to
+		o : RDM!SomeValuesFromRestriction (
+				someValuesFromRange <- drange,
+				onProperty <- i.parent
+			),
+		drange : RDM!DataRange (
+			datatype <- type
+			),
+		type : RDM!PrimitiveType (
+			name <- i.getAttrVal('owlx:datatype')
+			)
+}
+
+-- Rule 'SomeValuesFromElemClass'
+-- Creates SomeValuesFromRestriction element from an XML!Element named 'owlx:someValuesFrom'
+-- which have class attribute and have exactly one children
+rule SomeValuesFromElemClass {
+	from 
+		i : XML!Element (
+				i.name = 'owlx:someValuesFrom' and not i.hasAttr('owlx:class') and not i.hasAttr('owlx:datatype') and
+				i.children->size() = 1
+			)
+	to
+		o : RDM!SomeValuesFromRestriction (
+				someValuesFromClass <-  let classElem : XML!Element = i.getElementsByName('owlx:Class')->first() in
+											if classElem.oclIsUndefined()
+											then i.children->first()
+											else thisModule.Class(thisModule.getDefaultClass(classElem.getAttrVal('owlx:name')))
+											endif,		
+				onProperty <- i.parent
+			)
+}
+
+-- Rule 'SomeValuesFromChild'
+-- Creates SomeValuesFromRestriction element from an XML!Element named 'owlx:someValuesFrom'
+-- which doesn't have class attribute, have more than one children and childrens are Class elements
+rule SomeValuesFromChild {
+	from 
+		i : XML!Element (
+				i.name = 'owlx:someValuesFrom' and not i.hasAttr('owlx:class') and not i.hasAttr('owlx:datatype')
+				and i.children->size() > 1 and i.children->first().name = 'owlx:Class' 
+			)
+	to
+		o : RDM!SomeValuesFromRestriction (
+				someValuesFromClass <- union,
+				onProperty <- i.parent -- dodati uslov
+			),
+		union : RDM!UnionClass (
+			unionOf <- let classElem : Sequence (XML!Element) = i.getElementsByName('owlx:Class') in
+						if classElem->isEmpty()
+						then i.children
+						else classElem->collect(c | thisModule.Class(thisModule.getDefaultClass(c.getAttrVal('owlx:name'))))
+						endif
+			)
+}
+
+-- Rule 'AllValuesFromAttrClass'
+-- Creates AllValuesFromRestriction element from an XML!Element named 'owlx:allValuesFrom'
+-- which have class attribute
+rule AllValuesFromAttrClass {
+	from 
+		i : XML!Element (
+				i.name = 'owlx:allValuesFrom' and i.hasAttr('owlx:class')
+			)
+	to
+		o : RDM!AllValuesFromRestriction (
+				allValuesFromClass <- class,
+				onProperty <- i.parent
+			),
+		class : RDM!Class (
+			name <- i.getAttrVal('owlx:class')
+			)
+}
+
+-- Rule 'AllValuesFromAttrDatatype'
+-- Creates AllValuesFromRestriction element from an XML!Element named 'owlx:allValuesFrom'
+-- which have datatype attribute and have one children element
+rule AllValuesFromAttrDatatype {
+	from 
+		i : XML!Element (
+				i.name = 'owlx:allValuesFrom' and i.hasAttr('owlx:datatype') and
+				i.children->size() = 1
+			)
+	to
+		o : RDM!AllValuesFromRestriction (
+				allValuesFromRange <- drange,
+				onProperty <- i.parent
+			),
+		drange : RDM!DataRange (
+			datatype <- type
+			),
+		type : RDM!PrimitiveType (
+			name <- i.getAttrVal('owlx:datatype')
+			)
+}
+
+-- Rule 'AllValuesFromElemClass'
+-- Creates AllValuesFromRestriction element from an XML!Element named 'owlx:allValuesFrom'
+-- which have class attribute and have exactly one children
+rule AllValuesFromElemClass {
+	from 
+		i : XML!Element (
+				i.name = 'owlx:allValuesFrom' and not i.hasAttr('owlx:class') and not i.hasAttr('owlx:datatype') and 
+				i.children->size() = 1
+			)
+	to
+		o : RDM!AllValuesFromRestriction (
+				allValuesFromClass <-let classElem : XML!Element = i.getElementsByName('owlx:Class')->first() in
+											if classElem.oclIsUndefined()
+											then i.children->first()
+											else thisModule.Class(thisModule.getDefaultClass(classElem.getAttrVal('owlx:name')))
+											endif,
+				onProperty <- i.parent
+			)
+}
+
+-- Rule 'AllValuesFromChild'
+-- Creates AllValuesFromRestriction element from an XML!Element named 'owlx:allValuesFrom'
+-- which doesn't have class attribute, have more than one children and childrens are Class elements
+rule AllValuesFromChild {
+	from 
+		i : XML!Element (
+				i.name = 'owlx:allValuesFrom' and not i.hasAttr('owlx:class') and not i.hasAttr('owlx:datatype')
+				and i.children->size() > 1 and i.children->first().name = 'owlx:Class' 
+			)
+	to
+		o : RDM!AllValuesFromRestriction (
+				allValuesFromClass <- union,
+				onProperty <- i.parent -- dodati uslov
+			),
+		union : RDM!UnionClass (
+			unionOf <- let classElem : Sequence (XML!Element) = i.getElementsByName('owlx:Class') in
+						if classElem->isEmpty()
+						then i.children
+						else classElem->collect(c | thisModule.Class(thisModule.getDefaultClass(c.getAttrVal('owlx:name'))))
+						endif
+			)
+}
+
+-- Rule 'HasValueObject'
+-- Creates HasValueRestriction element from an XML!Element named 'owlx:hasValue'
+-- which parent is ObjectRestriction
+rule HasValueObject {
+	from 
+		i : XML!Element (
+			   if i.parent.oclIsUndefined()
+			   then i.name = 'owlx:hasValue'
+			   else i.name = 'owlx:hasValue' and i.parent.name = 'owlx:ObjectRestriction'
+			   endif	
+			)
+	to
+		o : RDM!HasValueRestriction (
+				hasValue <- individual,
+				onProperty <-  if i.parent.oclIsUndefined()
+			 				   then OclUndefined
+			                   else i.parent
+						 	   endif
+			),
+		individual : RDM!Individual (
+			name <- i.getAttrVal('owlx:name')
+			)
+}
+
+-- Rule 'HasValueObject'
+-- Creates HasValueRestriction element from an XML!Element named 'owlx:hasValue'
+-- which parent is DataRestriction
+rule HasValueData {
+	from 
+		i : XML!Element (
+			   if i.parent.oclIsUndefined()
+			   then i.name = 'owlx:hasValue'
+			   else i.name = 'owlx:hasValue' and i.parent.name = 'owlx:DataRestriction'
+			   endif	
+			)
+	to
+		o : RDM!HasValueRestriction (
+				hasLiteralValue <- literal,
+				onProperty <-  if not i.parent.oclIsUndefined()
+			 				   then OclUndefined
+			                   else i.parent
+						 	   endif
+			),
+		literal : RDM!PlainLiteral (
+			lexicalForm <- i.getAttrVal('owlx:name')
+			)
+}
+
+-- Rule 'CardinalityRestriction'
+-- Creates CardinalityRestriction element from an XML!Element named 'owlx:cardinality'
+rule CardinalityRestriction {
+	from 
+		i : XML!Element (
+				i.name = 'owlx:cardinality'
+			)
+	to
+		o : RDM!CardinalityRestriction (
+				cardinality <- value,
+				onProperty <- i.parent
+			),
+		value : RDM!TypedLiteral (
+			theType <- 'integer',
+			lexicalForm <- i.getAttrVal('owlx:value')
+			)
+}
+
+-- Rule 'MinCardinalityRestriction'
+-- Creates MinCardinalityRestriction element from an XML!Element named 'owlx:minCardinality'
+rule MinCardinalityRestriction {
+	from 
+		i : XML!Element (
+				i.name = 'owlx:minCardinality'
+			)
+	to
+		o : RDM!MinCardinalityRestriction (
+				minCardinality <- value,
+				onProperty <- i.parent
+			),
+		value : RDM!TypedLiteral (
+			theType <- 'integer',
+			lexicalForm <- i.getAttrVal('owlx:value')
+			)
+}
+
+-- Rule 'MaxCardinalityRestriction'
+-- Creates MaxCardinalityRestriction element from an XML!Element named 'owlx:maxCardinality'
+rule MaxCardinalityRestriction {
+	from 
+		i : XML!Element (
+				i.name = 'owlx:maxCardinality'
+			)
+	to
+		o : RDM!MaxCardinalityRestriction (
+				maxCardinality <- value,
+				onProperty <- i.parent
+			),
+		value : RDM!TypedLiteral (
+			theType <- 'integer',
+			lexicalForm <- i.getAttrVal('owlx:value')
+			)
+}
+
+-- Rule 'ObjectRestriction'
+-- Creates ObjectRestriction element from an XML!Element named 'owlx:ObjectRestriction'
+rule ObjectRestriction {
+	from 
+		i : XML!Element (
+				i.name = 'owlx:ObjectRestriction'
+			)
+	to
+		o : RDM!ObjectProperty (
+				name <- i.getAttrVal('owlx:property')
+			)
+}
+
+-- Rule 'DataRestriction'
+-- Creates DataRestriction element from an XML!Element named 'owlx:DataRestriction'
+rule DataRestriction {
+	from 
+		i : XML!Element (
+				i.name = 'owlx:DataRestriction'
+			)
+	to
+		o : RDM!DatatypeProperty (
+				name <- i.getAttrVal('owlx:property')
+			)
+}
+
+-- Rule 'OneOfIndividual'
+-- Creates EnumeratedClass element from an XML!Element named 'owlx:OneOf' which
+-- have Individual elements as childrens
+rule OneOfIndividual {
+	from 
+		i : XML!Element (
+				i.name = 'owlx:OneOf' and i.children->first().name = 'owlx:Individual'
+			)
+	to
+		o : RDM!EnumeratedClass (
+				oneOf <- i.children
+			)
+}
+
+-- Rule 'OneOfDataValue'
+-- Creates DataRange element from an XML!Element named 'owlx:OneOf' which
+-- have DataValue elements as childrens
+rule OneOfDataValue {
+	from 
+		i : XML!Element (
+				i.name = 'owlx:OneOf' and i.children->first().name = 'owlx:DataValue'
+			)
+	to
+		o : RDM!DataRange (
+				oneOf <- i.children
+			)
+}

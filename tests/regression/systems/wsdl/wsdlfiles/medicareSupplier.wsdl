@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- edited with XMLSpy v2005 U (http://www.xmlspy.com) by Walter (WebserviceX.NET) -->
+<wsdl:definitions xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tns="http://www.webservicex.net/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" targetNamespace="http://www.webservicex.net/">
+	<wsdl:types>
+		<s:schema elementFormDefault="qualified" targetNamespace="http://www.webservicex.net/">
+			<s:element name="GetSupplierByZipCode">
+				<s:complexType>
+					<s:sequence>
+						<s:element minOccurs="0" maxOccurs="1" name="zip" type="s:string"/>
+					</s:sequence>
+				</s:complexType>
+			</s:element>
+			<s:element name="GetSupplierByZipCodeResponse">
+				<s:complexType>
+					<s:sequence>
+						<s:element minOccurs="1" maxOccurs="1" name="GetSupplierByZipCodeResult" type="s:boolean"/>
+						<s:element minOccurs="1" maxOccurs="1" name="SupplierDataLists" type="tns:SupplierDataList"/>
+					</s:sequence>
+				</s:complexType>
+			</s:element>
+			<s:complexType name="SupplierDataList">
+				<s:sequence>
+					<s:element minOccurs="0" maxOccurs="1" name="SupplierDatas" type="tns:ArrayOfSupplierData"/>
+					<s:element minOccurs="1" maxOccurs="1" name="TotalRecords" type="s:int"/>
+				</s:sequence>
+			</s:complexType>
+			<s:complexType name="ArrayOfSupplierData">
+				<s:sequence>
+					<s:element minOccurs="0" maxOccurs="unbounded" name="SupplierData" type="tns:SupplierData"/>
+				</s:sequence>
+			</s:complexType>
+			<s:complexType name="SupplierData">
+				<s:sequence>
+					<s:element minOccurs="0" maxOccurs="1" name="SupplierNumber" type="s:string"/>
+					<s:element minOccurs="0" maxOccurs="1" name="CompanyName" type="s:string"/>
+					<s:element minOccurs="0" maxOccurs="1" name="Address1" type="s:string"/>
+					<s:element minOccurs="0" maxOccurs="1" name="Address2" type="s:string"/>
+					<s:element minOccurs="0" maxOccurs="1" name="City" type="s:string"/>
+					<s:element minOccurs="0" maxOccurs="1" name="State" type="s:string"/>
+					<s:element minOccurs="0" maxOccurs="1" name="Zip" type="s:string"/>
+					<s:element minOccurs="0" maxOccurs="1" name="ZipPlus4" type="s:string"/>
+					<s:element minOccurs="0" maxOccurs="1" name="Telephone" type="s:string"/>
+					<s:element minOccurs="0" maxOccurs="1" name="Description" type="s:string"/>
+					<s:element minOccurs="0" maxOccurs="1" name="IsSupplierParticipating" type="s:string"/>
+				</s:sequence>
+			</s:complexType>
+			<s:element name="GetSupplierByCity">
+				<s:complexType>
+					<s:sequence>
+						<s:element minOccurs="0" maxOccurs="1" name="City" type="s:string"/>
+					</s:sequence>
+				</s:complexType>
+			</s:element>
+			<s:element name="GetSupplierByCityResponse">
+				<s:complexType>
+					<s:sequence>
+						<s:element minOccurs="1" maxOccurs="1" name="GetSupplierByCityResult" type="s:boolean"/>
+						<s:element minOccurs="1" maxOccurs="1" name="SupplierDataLists" type="tns:SupplierDataList"/>
+					</s:sequence>
+				</s:complexType>
+			</s:element>
+			<s:element name="GetSupplierBySupplyType">
+				<s:complexType>
+					<s:sequence>
+						<s:element minOccurs="0" maxOccurs="1" name="description" type="s:string"/>
+					</s:sequence>
+				</s:complexType>
+			</s:element>
+			<s:element name="GetSupplierBySupplyTypeResponse">
+				<s:complexType>
+					<s:sequence>
+						<s:element minOccurs="1" maxOccurs="1" name="GetSupplierBySupplyTypeResult" type="s:boolean"/>
+						<s:element minOccurs="1" maxOccurs="1" name="SupplierDataLists" type="tns:SupplierDataList"/>
+					</s:sequence>
+				</s:complexType>
+			</s:element>
+		</s:schema>
+	</wsdl:types>
+	<wsdl:message name="GetSupplierByZipCodeSoapIn">
+		<wsdl:part name="parameters" element="tns:GetSupplierByZipCode"/>
+	</wsdl:message>
+	<wsdl:message name="GetSupplierByZipCodeSoapOut">
+		<wsdl:part name="parameters" element="tns:GetSupplierByZipCodeResponse"/>
+	</wsdl:message>
+	<wsdl:message name="GetSupplierByCitySoapIn">
+		<wsdl:part name="parameters" element="tns:GetSupplierByCity"/>
+	</wsdl:message>
+	<wsdl:message name="GetSupplierByCitySoapOut">
+		<wsdl:part name="parameters" element="tns:GetSupplierByCityResponse"/>
+	</wsdl:message>
+	<wsdl:message name="GetSupplierBySupplyTypeSoapIn">
+		<wsdl:part name="parameters" element="tns:GetSupplierBySupplyType"/>
+	</wsdl:message>
+	<wsdl:message name="GetSupplierBySupplyTypeSoapOut">
+		<wsdl:part name="parameters" element="tns:GetSupplierBySupplyTypeResponse"/>
+	</wsdl:message>
+	<wsdl:portType name="MediCareSupplierSoap">
+		<wsdl:operation name="GetSupplierByZipCode">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Get Supplier details by Zip Code</documentation>
+			<wsdl:input message="tns:GetSupplierByZipCodeSoapIn"/>
+			<wsdl:output message="tns:GetSupplierByZipCodeSoapOut"/>
+		</wsdl:operation>
+		<wsdl:operation name="GetSupplierByCity">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Get Supplier details by City</documentation>
+			<wsdl:input message="tns:GetSupplierByCitySoapIn"/>
+			<wsdl:output message="tns:GetSupplierByCitySoapOut"/>
+		</wsdl:operation>
+		<wsdl:operation name="GetSupplierBySupplyType">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Get Supplier details by Supply Type</documentation>
+			<wsdl:input message="tns:GetSupplierBySupplyTypeSoapIn"/>
+			<wsdl:output message="tns:GetSupplierBySupplyTypeSoapOut"/>
+		</wsdl:operation>
+	</wsdl:portType>
+	<wsdl:binding name="MediCareSupplierSoap" type="tns:MediCareSupplierSoap">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<wsdl:operation name="GetSupplierByZipCode">
+			<soap:operation soapAction="http://www.webservicex.net/GetSupplierByZipCode" style="document"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetSupplierByCity">
+			<soap:operation soapAction="http://www.webservicex.net/GetSupplierByCity" style="document"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetSupplierBySupplyType">
+			<soap:operation soapAction="http://www.webservicex.net/GetSupplierBySupplyType" style="document"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:service name="MediCareSupplier">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/">This section provides names, addresses, and contact information for suppliers that provide services or products under the Medicare program. A supplier is an individual or entity that has agreed to provide health care equipment, items, or services under Medicare. A supplier may provide items such as: Durable Medical Equipment (wheelchairs, walkers, oxygen), Prosthetics (artificial limb replacements or dentures) or Orthotics (mechanical devices used to assist in mobility or supplement the joints and limbs). In addition, a type of supplier can also be Pharmacy/Drug Stores and Optometry/Opticians.This Supplier Directory lists Medicare enrolled pharmacies and suppliers.</documentation>
+		<wsdl:port name="MediCareSupplierSoap" binding="tns:MediCareSupplierSoap">
+			<soap:address location="http://www.webservicex.net/medicareSupplier.asmx"/>
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>

@@ -1,0 +1,129 @@
+<?xml version='1.0' encoding='UTF-8' ?> 
+<!-- Generated 04/10/01 by Microsoft SOAP Toolkit WSDL File Generator, Version 1.00.530.0 --> 
+<definitions  name ='Payment'   targetNamespace = 'http://tempuri.org/wsdl/'
+   xmlns:wsdlns='http://tempuri.org/wsdl/' 
+   xmlns:typens='http://tempuri.org/type' 
+   xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' 
+   xmlns:xsd='http://www.w3.org/2001/XMLSchema' 
+   xmlns:stk='http://schemas.microsoft.com/soap-toolkit/wsdl-extension'
+   xmlns='http://schemas.xmlsoap.org/wsdl/'> 
+  <types>
+  <schema targetNamespace='http://tempuri.org/type'
+    xmlns='http://www.w3.org/2001/XMLSchema'
+    xmlns:SOAP-ENC='http://schemas.xmlsoap.org/soap/encoding/'
+    xmlns:wsdl='http://schemas.xmlsoap.org/wsdl/'
+    elementFormDefault='qualified'>
+    <!-- 
+    ////////////////////////////////////
+    // 
+    //  Type: ArrayOfString
+    //
+    -->
+	<complexType  name ='ArrayOfstring'>
+		<sequence>
+			<element name='arrayelement' type='xsd:string' 
+		         maxOccurs='unbounded'/> 
+		</sequence>
+	</complexType>
+  </schema>
+  </types>
+  <!-- 
+  ////////////////////////////////////////////////////////////////////
+  // 
+  //  Method: GetPaymentDetail
+  //
+  -->
+  <message name='Payment.GetPaymentDetail'>
+    <part name='LogInEmail' type='xsd:string'/>
+    <part name='AccessCode' type='xsd:string'/>
+    <part name='LogInOnBehalfOf_opt_' type='xsd:string'/><!-- LogInOnBehalfOf: default LogInEmail -->
+    <part name='PaymentReference' type='xsd:string'/>
+  </message>
+  <message name='Payment.GetPaymentDetailResponse'>
+    <part name='StatusCode' type='xsd:int'/>
+    <part name='StatusDetail' type='xsd:string'/>
+    <part name='Payer' type='xsd:string'/>
+    <part name='Payee' type='xsd:string'/>
+    <part name='DueDate' type='xsd:date'/>
+    <part name='Amount' type='xsd:double'/>
+    <part name='Memo' type='xsd:string'/>
+    <part name='CheckNumber' type='xsd:int'/>
+    <part name='InvoiceNumber' type='xsd:string'/>
+    <part name='AccountWithPayee' type='xsd:string'/>
+    <part name='FundingSource' type='xsd:string'/><!-- FundingSource: returned only for payer. otherwise empty-->
+  </message>
+  <!-- 
+  ////////////////////////////////////////////////////////////////////
+  // 
+  //  Method: SendPayment
+  //
+  -->
+  <message name='Payment.SendPayment'>
+    <part name='LogInEmail' type='xsd:string'/>
+    <part name='AccessCode' type='xsd:string'/>
+    <part name='LogInOnBehalfOf_opt_' type='xsd:string'/><!-- LogInOnBehalfOf: default LogInEmail -->
+    <part name='PayeeEmail_opt_' type='xsd:string'/><!-- PayeeEmail: If it matches a member, payment will be ACH -->
+    <!-- PayeeAddress: BEGIN -->
+    <part name='Name_opt_' type='xsd:string'/>
+    <part name='Address1_opt_' type='xsd:string'/>
+    <part name='Address2_opt_' type='xsd:string'/>
+    <part name='City_opt_' type='xsd:string'/>
+    <part name='State_opt_' type='xsd:string'/>
+    <part name='Zip_opt_' type='xsd:string'/>
+    <part name='Country_opt_' type='xsd:string'/>
+    <!-- PayeeAddress: END -->
+
+    <part name='DueDate_opt_' type='xsd:anyType'/><!-- DueDate: default earliest -->
+    <part name='Amount' type='xsd:double'/><!-- Amount: numbers beyond 2nd decimal place are ignored -->
+    <part name='Memo_opt_' type='xsd:string'/>
+    <part name='CheckNumber_opt_' type='xsd:anyType'/>
+    <part name='InvoiceNumber_opt_' type='xsd:string'/>
+    <part name='AccountWithPayee_opt_' type='xsd:string'/>
+    <part name='FundingSource_opt_' type='xsd:string'/>
+    <part name='VendorNumber_opt_' type='xsd:string'/>
+  </message>
+  <message name='Payment.SendPaymentResponse'>
+    <part name='Result' type='xsd:string'/>
+  </message>
+  <portType name='PaymentSoapPort'>
+    <operation name='GetPaymentDetail' parameterOrder='LogInEmail AccessCode LogInOnBehalfOf_opt_ PaymentReference StatusCode StatusDetail Payer Payee DueDate Amount Memo CheckNumber InvoiceNumber AccountWithPayee FundingSource'>
+      <input message='wsdlns:Payment.GetPaymentDetail' />
+      <output message='wsdlns:Payment.GetPaymentDetailResponse' />
+    </operation>
+    <operation name='SendPayment' parameterOrder='LogInEmail AccessCode LogInOnBehalfOf_opt_ PayeeEmail_opt_ Name_opt_ Address1_opt_ Address2_opt_ City_opt_ State_opt_ Zip_opt_ Country_opt_ DueDate_opt_ Amount Memo_opt_ CheckNumber_opt_ InvoiceNumber_opt_ AccountWithPayee_opt_ FundingSource_opt_ VendorNumber_opt_'>
+      <input message='wsdlns:Payment.SendPayment' />
+      <output message='wsdlns:Payment.SendPaymentResponse' />
+    </operation>
+  </portType>
+  <binding name='PaymentSoapBinding' type='wsdlns:PaymentSoapPort' >
+    <stk:binding preferredEncoding='UTF-8'/>
+    <soap:binding style='rpc' transport='http://schemas.xmlsoap.org/soap/http' />
+    <operation name='GetPaymentDetail' >
+      <soap:operation soapAction='http://tempuri.org/action/Payment.GetPaymentDetail' />
+      <input>
+        <soap:body use='encoded' namespace='http://tempuri.org/message/'
+    	  encodingStyle='http://schemas.xmlsoap.org/soap/encoding/' />
+      </input>
+      <output>
+        <soap:body use='encoded' namespace='http://tempuri.org/message/'
+    	  encodingStyle='http://schemas.xmlsoap.org/soap/encoding/' />
+      </output>
+    </operation>
+    <operation name='SendPayment' >
+      <soap:operation soapAction='http://tempuri.org/action/Payment.SendPayment' />
+      <input>
+        <soap:body use='encoded' namespace='http://tempuri.org/message/'
+    	  encodingStyle='http://schemas.xmlsoap.org/soap/encoding/' />
+      </input>
+      <output>
+        <soap:body use='encoded' namespace='http://tempuri.org/message/'
+    	  encodingStyle='http://schemas.xmlsoap.org/soap/encoding/' />
+      </output>
+    </operation>
+  </binding>
+  <service name='Payment' >
+    <port name='PaymentSoapPort' binding='wsdlns:PaymentSoapBinding' >
+      <soap:address location='https://www.Fidesic.com/webservices/payment.asp' />
+    </port>
+  </service>
+</definitions>

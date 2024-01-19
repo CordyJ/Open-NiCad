@@ -1,0 +1,32 @@
+% NiCad literal renaming for Python
+% Jim Cordy, May 2020
+
+rule renameLiterals
+    replace $ [literal]
+        L [literal]
+    by
+        L [renameIntegerLiterals]
+          [renameFloatLiterals]
+          [renameStringLiterals]
+end rule
+
+function renameIntegerLiterals
+    replace [literal]
+        I [integerliteral]
+    by
+        1
+end function
+
+function renameFloatLiterals
+    replace [literal]
+        F [floatliteral]
+    by
+        1.0
+end function
+
+function renameStringLiterals
+    replace [literal]
+        S [stringliteral] _ [repeat more_stringliteral]
+    by
+        '"x"
+end function

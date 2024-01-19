@@ -1,0 +1,580 @@
+--@atlcompiler atl2006
+
+--------------------------------------------------------------------------------
+-- Transforms a WSDL metamodel to XML metamodel.
+-- Created as part of M.Sc. theses at GOOD OLD AI Research Group
+-- Author: Marko Ribaric
+-- Works for WSDL Metamodel v0.1 (by prof. Gerd Wagner)
+--------------------------------------------------------------------------------
+-- Version: 0.1 - 01.01.2007.
+--
+-- TODO:
+--------------------------------------------------------------------------------
+
+module WSDL2XML; -- Module Template
+create OUT : XML from IN : WSDL;
+
+
+-------------------------------------------------------------------------------
+-- HELPERS --------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- HELPER:	resolveMEP
+-- resolve the MEP type
+-- CONTEXT:	thisModule
+-- IN:		String
+-- OUT:		String
+helper def: resolveMEP(value : String) : String =
+	
+	if value = #inout then
+			'http://www.w3.org/2006/01/wsdl/in-out'
+		else if value = #inonly then
+				'http://www.w3.org/2006/01/wsdl/inonly'
+			else if value = #outin then
+					'http://www.w3.org/2006/01/wsdl/out-in'
+				else if value = #robustoutonly then
+						'http://www.w3.org/2006/01/wsdl/robustoutonly'
+					else if value = #outonly then
+							'http://www.w3.org/2006/01/wsdl/outonly'
+						else if value = #robust_in_only then
+								'http://www.w3.org/2006/01/wsdl/robustinonly'
+							else if value = #outoptionalin then
+									'http://www.w3.org/2006/01/wsdl/outoptionalin'
+								else if value = #inoptionalout then
+										'http://www.w3.org/2006/01/wsdl/inoptionalout'
+								else OclUndefined
+								endif
+							endif
+						endif
+					endif
+				endif
+			endif
+		endif
+	endif;
+							
+	
+-- HELPER:	resolveMessageFormat
+-- resolve the MessageFormat type
+-- CONTEXT:	thisModule
+-- IN:		String
+-- OUT:		String
+helper def: resolveMessageFormat(value : String) : String =
+
+	if value = #SOAP12  then
+			'http://www.w3.org/2006/01/wsdl/soap'
+		else if value = #HTTP then
+				'http://www.w3.org/2006/01/wsdl/HTTP'
+			else if value = #SOAP11 then 
+					OclUndefined				-- ???
+				  else OclUndefined
+				  endif
+			endif
+	endif;
+
+-- HELPER:	resolveProtocol
+-- resolve the Protocol type
+-- CONTEXT:	thisModule
+-- IN:		String
+-- OUT:		String
+helper def: resolveProtocol(value : String) : String =
+	
+	if value = #HTTP then
+		'http://www.w3.org/2003/05/soap/bindings/HTTP'
+	else if value = #SMTP then 
+			'http://www.w3.org/2003/05/soap/bindings/SMTP'
+		 else OclUndefined
+		 endif
+	endif;				  
+	
+
+-- HELPER:	resolveSOAPMEP
+-- resolve the SOAPMEP type
+-- CONTEXT:	thisModule
+-- IN:		String
+-- OUT:		String
+helper def: resolveSOAPMEP(value : String) : String =
+	
+	if value = #requestresponse then
+		'http://www.w3.org/2003/05/soap/mep/request-response'
+	else if value = #soapresponse then
+			'http://www.w3.org/2003/05/soap/mep/soap-response'	-- ???
+		 else OclUndefined
+		 endif
+	endif;				  
+
+-- HELPER:	resolveFaultCodeEnum
+-- resolve the FaultCodeEnum type
+-- CONTEXT:	thisModule
+-- IN:		String
+-- OUT:		String
+helper def: resolveFaultCodeEnum(value : String) : String = 
+	
+	if value = #Sender then
+		'soap:Sender'
+	else OclUndefined
+	endif;				  
+
+
+-------------------------------------------------------------------------------
+-- RULES ----------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- Rule 'Description'
+-- Create XML Root element (description) from the WSDL Description element 
+rule Description {
+	from i : WSDL!Description (
+			i.oclIsTypeOf(WSDL!Description)
+		)
+	to o : XML!Root (
+			name <- 'description',
+			children <- Sequence { xmlns, targetNamespace, tns, wsoap, soap, ex,
+						i.types, i.interface, i.binding, i.service }
+		),
+	xmlns : XML!Attribute (
+			name <- 'xmlns',
+			value <- 'http://www.w3.org/2006/01/wsdl'
+		),
+	targetNamespace : XML!Attribute (
+			name <- 'targetNamespace',
+			value <- 'http://www.bookingservice.com/?wsdl'
+		),
+	tns : XML!Attribute (
+			name <- 'xmlns:tns',
+			value <- 'http://www.bookingservice.com/?wsdl'
+		),
+	wsoap : XML!Attribute (
+			name <- 'xmlns:wsoap',
+			value <- 'http://www.w3.org/2006/01/wsdl/soap'
+		),
+	soap : XML!Attribute (
+			name <- 'xmlns:soap',
+			value <- 'http://www.w3.org/2003/05/soap-envelope'
+		),
+	ex : XML!Attribute (
+			name <- 'xmlns:ex',
+			value <- 'http://www.bookingservice.com/schema'
+		)		
+}
+
+-- Rule 'Types'
+-- Create XML element (types) from the WSDL Types element 
+rule Types {
+	from i : WSDL!ElementType (
+			i.oclIsTypeOf(WSDL!ElementType)
+		)
+	to o : XML!Element (
+			name <- 'types',
+			children <- Sequence { i.schema }
+		)
+}
+
+-- Rule 'XsSchema'
+-- Create XML element (XsSchema) from the WSDL XsSchema element 
+rule XsSchema {
+	from i : WSDL!XsSchema (
+			i.oclIsTypeOf(WSDL!XsSchema)
+		)
+	to o : XML!Element (
+			name <- 'xs:schema',
+			children <- Sequence { xs, targetNamespace, xmlns, 
+							i.typeDefinitions,
+							i.elementDeclarations->collect(e| thisModule.XsElementDeclaration(e))
+						}
+		),
+		xs : XML!Attribute (
+			name <- 'xmlns:xs',
+			value <- 'http://www.w3.org/2001/XMLSchema'
+		),
+		targetNamespace : XML!Attribute (
+			name <- 'targetNamespace',
+			value <- 'http://www.bookingservice.com/schema'
+		),
+		xmlns : XML!Attribute (
+			name <- 'xmlns',
+			value <- 'http://www.bookingservice.com/schema'
+		)
+}
+
+-- Lazy rule 'XsElementDeclaration'
+-- Create XML element (xs:element) from the WSDL XsElementDeclaration element 
+-- This rule is lazy rule, which means that is called from other rules
+lazy rule XsElementDeclaration {
+	from i : WSDL!XsElementDeclaration (
+			i.oclIsTypeOf(WSDL!XsElementDeclaration)
+		)
+	to o : XML!Element (
+		name <- 'xs:element',
+		children <- Sequence { attrName, if i.typeDefinition.oclIsUndefined() then 
+												OclUndefined
+										 else if i.typeDefinition.oclIsKindOf(WSDL!XsComplexTypeDefinition) then
+												i.typeDefinition
+										 	  else 
+										 		thisModule.XsSimpleTypeDefinition(i.typeDefinition)
+											  endif
+										 endif
+							 }
+		),
+	attrName : XML!Attribute (
+			name <- 'name',
+			value <- i.name
+		)
+}
+
+-- Lazy rule 'XsSimpleTypeDefinition'
+-- Create XML attribute (xs:complexType) from the WSDL XsComplexTypeDefinition element
+-- This rule is lazy rule, which means that is called from other rules
+lazy rule XsSimpleTypeDefinition {
+	from i : WSDL!XsSimpleTypeDefinition 
+	to o : XML!Attribute (
+			name <- 'type',
+			value <- i.name
+		)
+}
+
+-- Rule 'XsComplexTypeDefinition'
+-- Create XML element (xs:complexType) from the WSDL XsComplexTypeDefinition element 
+rule XsComplexTypeDefinition {
+	from i : WSDL!XsComplexTypeDefinition (
+			i.oclIsTypeOf(WSDL!XsComplexTypeDefinition)
+		)
+	to o : XML!Element (
+		name <- 'xs:complexType',
+		children <- Sequence { if not i.name.oclIsUndefined() then
+									attrName 
+								else OclUndefined
+								endif,
+								i.content.term
+							 }
+		),
+	attrName : XML!Attribute (
+			name <- 'name',
+			value <- i.name
+		)
+}
+
+-- Rule 'XsModelGroup'
+-- Create XML element (xs:sequence) from the WSDL XsModelGroup element 
+rule XsModelGroup {
+	from i : WSDL!XsModelGroup (
+			i.oclIsTypeOf(WSDL!XsModelGroup)
+		)
+	to o : XML!Element (
+		name <- 'xs:sequence',
+--		children <- Sequence { i.particles->asSequence()->collect(c | c.content)->flatten() }
+		children <- let el : Set (WSDL!XsElementDeclaration) = i.particles->asSequence()->collect(c | c.content)->flatten() in
+					if not el.isEmpty() then
+						el->collect(e| thisModule.XsElementDec(e))
+					else OclUndefined
+					endif
+		)
+}
+
+-- Lazy rule XsElementDec
+-- This rule is lazy rule, which means that is called from other rules
+lazy rule XsElementDec {
+	from i : WSDL!XsElementDeclaration (
+			i.oclIsTypeOf(WSDL!XsElementDeclaration)
+		)
+	to o : XML!Element (
+		name <- 'xs:element',
+		children <- Sequence {  if i.name.oclIsUndefined() then
+									OclUndefined									
+								else if i.resolvedElementDeclaration.oclIsUndefined() then
+										attrName
+					 				else OclUndefined
+					 				endif
+								endif,
+								 if i.resolvedElementDeclaration.oclIsUndefined() then
+									if i.typeDefinition.oclIsUndefined() then 
+										OclUndefined
+								 	else
+									 	thisModule.XsSimpleTypeDefinition(i.typeDefinition)
+									 endif
+								 else
+									resElemDecl
+								 endif
+							 }
+		),
+	attrName : XML!Attribute (
+			name <- 'name',
+			value <- i.name
+		),
+	resElemDecl : XML!Attribute (
+			name <- 'ref',
+			value <- if not i.resolvedElementDeclaration.oclIsUndefined() then
+						i.resolvedElementDeclaration.name
+					 else OclUndefined
+					 endif
+		)		
+}
+
+			
+-- Rule 'Interface'
+-- Create XML element (interface) from the WSDL Interface element 
+rule Interface {
+	from i : WSDL!Interface (
+			i.oclIsTypeOf(WSDL!Interface)
+		)
+	to o : XML!Element (
+			name <- 'interface',
+			children <- Sequence { name,
+								i.fault,
+								i.operation
+								}
+		),
+	name : XML!Attribute (
+			name <- 'name',
+			value <- i.name
+		)
+}
+
+			
+-- Rule 'InerfaceFault'
+-- Create XML element (fault) from the WSDL.Interface.fault element 
+rule InterfaceFault {
+	from i : WSDL!Fault
+	to o : XML!Element (
+		name <- 'fault',
+		children <- Sequence { name, element }
+		),
+	name : XML!Attribute (
+			name <- 'name',
+			value <- i.name
+		),
+	element : XML!Attribute (
+			name <- 'element',
+			value <- i.element.name
+		)
+}
+
+-- Rule 'InerfaceOperation'
+-- Create XML element (operation) from the WSDL.Interface.operation element 
+rule InterfaceOperation {
+	from i : WSDL!Operation
+	to o : XML!Element (
+		name <- 'operation',
+		children <- Sequence { name, pattern,
+								i.input,
+								i.output,
+								i.infault,
+								i.outfault
+							 }
+		),
+	name : XML!Attribute (
+			name <- 'name',
+			value <- i.name
+		),
+	pattern : XML!Attribute (
+			name <- 'pattern',
+			value <- thisModule.resolveMEP(i.pattern)
+		)
+}
+
+-- Rule 'Input'
+-- Create XML element (input) from the WSDL Input element 
+rule Input {
+	from i : WSDL!Input (
+			i.oclIsTypeOf(WSDL!Input)
+		)
+	to o : XML!Element (
+			name <- 'input',
+			children <- Sequence { messageLabel, element}
+		),
+	messageLabel : XML!Attribute (
+			name <- 'messageLabel',
+			value <- i.messageLabel
+		),
+	element : XML!Attribute (
+			name <- 'element',
+			value <- i.element.name
+		)
+}
+
+-- Rule 'Output'
+-- Create XML element (output) from the WSDL Output element 
+rule Output {
+	from i : WSDL!Output (
+			i.oclIsTypeOf(WSDL!Output)
+		)
+	to o : XML!Element (
+			name <- 'output',
+			children <- Sequence { messageLabel, element}
+		),
+	messageLabel : XML!Attribute (
+			name <- 'messageLabel',
+			value <- i.messageLabel
+		),
+	element : XML!Attribute (
+			name <- 'element',
+			value <- i.element.name
+		)
+}
+
+-- Rule 'Outfault'
+-- Create XML element (outfault) from the WSDL Outfault element 
+rule Outfault {
+	from i : WSDL!Outfault (
+			i.oclIsTypeOf(WSDL!Outfault)
+		)
+	to o : XML!Element (
+			name <- 'outfault',
+			children <- Sequence { messageLabel, ref}
+		),
+	messageLabel : XML!Attribute (
+			name <- 'messageLabel',
+			value <- i.messageLabel
+		),
+	ref : XML!Attribute (
+			name <- 'ref',
+			value <- i.fault.name
+		)
+}
+
+-- Rule 'Infault'
+-- Create XML element (infault) from the WSDL Infault element 
+rule Infault {
+	from i : WSDL!Infault (
+			i.oclIsTypeOf(WSDL!Infault)
+		)
+	to o : XML!Element (
+			name <- 'Infault',
+			children <- Sequence { messageLabel, ref}
+		),
+	messageLabel : XML!Attribute (
+			name <- 'messageLabel',
+			value <- i.messageLabel
+		),
+	ref : XML!Attribute (
+			name <- 'ref',
+			value <- i.fault.name
+		)
+}
+
+-- Rule 'Binding'
+-- Create XML element (binding) from the WSDL Binding element 
+rule Binding {
+	from i : WSDL!Binding (
+			i.oclIsTypeOf(WSDL!Binding)
+		)
+	to o : XML!Element (
+			name <- 'binding',
+			children <- Sequence { name, type, wsoap_protocol,
+								bindingInerface,					
+								-- thisModule.BindingInterface(i),
+								i.bindingFault,
+								i.bindingOperation
+								}
+		),
+	name : XML!Attribute (
+			name <- 'name',
+			value <- i.name
+		),
+	type : XML!Attribute (
+			name <- 'type',
+			value <- thisModule.resolveMessageFormat(i.type)
+		),
+	wsoap_protocol : XML!Attribute (
+			name <- 'wsoap_protocol',
+			value <- thisModule.resolveProtocol(i.wsoap_protocol)
+		),
+	bindingInerface : XML!Attribute (
+			name <- 'interface',
+			value <- i.interface.name
+		)
+}
+
+-- Lazy rule 'BindingFault'
+-- Create XML element (fault) from the WSDL BindingFault element 
+rule BindingFault {
+	from i : WSDL!BindingFault (
+			i.oclIsTypeOf(WSDL!BindingFault)
+		)
+	to o : XML!Element (
+		name <- 'fault',
+		children <- Sequence { ref, wsoap_code }
+		),
+	wsoap_code : XML!Attribute (
+			name <- 'wsoap:code',
+			value <- thisModule.resolveFaultCodeEnum(i.wsoap_code)
+		),
+	ref : XML!Attribute (
+			name <- 'ref',
+			value <- i.fault.name
+		)
+}
+
+-- Lazy rule 'BindingOperation'
+-- Create XML element (operation) from the WSDL BindingOperation element 
+rule BindingOperation {
+	from i : WSDL!BindingOperation (
+			i.oclIsTypeOf(WSDL!BindingOperation)
+		)
+	to o : XML!Element (
+		name <- 'operation',
+		children <- Sequence { ref, wsoap_mep }
+		),
+	wsoap_mep : XML!Attribute (
+			name <- 'wsoap:mep',
+			value <- thisModule.resolveSOAPMEP(i.wsoap_mep)
+		),
+	ref : XML!Attribute (
+			name <- 'ref',
+			value <- i.operation.name
+		)
+}
+
+
+-- Rule 'Service'
+-- Create XML element (service) from the WSDL Service element 
+rule Service {
+	from i : WSDL!Service (
+			i.oclIsTypeOf(WSDL!Service)
+		)
+	to o : XML!Element (
+			name <- 'service',
+			children <- Sequence { name, 
+ 								   interface,
+								   i.endpoint
+								}
+		),
+	name : XML!Attribute (
+			name <- 'name',
+			value <- i.name
+		),
+	interface : XML!Attribute (
+			name <- 'interface',
+			value <- i.interface.name
+		)
+}
+
+-- Rule 'Endpoint'
+-- Create XML element (endpoint) from the WSDL Endpoint element 
+rule Endpoint {
+	from i : WSDL!Endpoint (
+			i.oclIsTypeOf(WSDL!Endpoint)
+		)
+	to o : XML!Element (
+			name <- 'endpoint',
+			children <- Sequence { name, 
+ 								   binding,
+								   address
+								}
+		),
+	name : XML!Attribute (
+			name <- 'name',
+			value <- i.name
+		),
+	address : XML!Attribute (
+			name <- 'address',
+			value <- i.address
+		),
+	binding : XML!Attribute (
+			name <- 'binding',
+			value <- if not i.binding.oclIsUndefined() then
+						i.binding.name
+					 else 'temp_value'
+					 endif
+		)
+}
+
+

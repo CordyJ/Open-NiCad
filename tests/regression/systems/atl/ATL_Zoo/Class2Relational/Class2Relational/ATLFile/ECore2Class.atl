@@ -1,0 +1,34 @@
+module ECore2Class;
+create OUT : Class from IN : MOF;
+
+rule Class {
+	from
+		ic : MOF!EClass
+	to
+		oc : Class!Class (
+			name <- ic.name,
+			attr <- ic.eStructuralFeatures,
+			super <- ic.eSuperTypes
+		)
+}
+
+rule Attribute {
+	from
+		ia : MOF!EAttribute
+	to
+		oa : Class!Attribute (
+			name <- ia.name,
+			multiValued <- (ia.upperBound > 1) or (ia.upperBound = 0-1),
+			type <- ia.eType
+		)
+}
+
+rule DataType {
+	from
+		idt : MOF!EDataType
+	to
+		odt : Class!DataType (
+			name <- idt.name
+		)
+}
+

@@ -1,0 +1,40 @@
+% NiCad literal renaming for C
+% Jim Cordy, May 2020
+
+rule renameLiterals
+    replace $ [primary_expression]
+        E [primary_expression]
+    by
+        E [renameIntegerConstants]
+          [renameFloatConstants]
+          [renameCharConstants]
+          [renameStringConstants]
+end rule
+
+function renameIntegerConstants
+    replace [primary_expression]
+        I [integer_constant]
+    by
+        '1
+end function
+
+function renameFloatConstants
+    replace [primary_expression]
+        F [floating_constant]
+    by
+        1.0
+end function
+
+function renameCharConstants
+    replace [primary_expression]
+        C [character_constant]
+    by
+        ''x'
+end function
+
+function renameStringConstants
+    replace [primary_expression]
+        S [string_literal]
+    by
+        '"x"
+end function

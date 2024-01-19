@@ -1,0 +1,853 @@
+-- @atlcompiler atl2006
+module AnyLogic2XML; -- Module Template
+create OUT : XML from IN : AnyLogic  ;
+
+abstract rule ModelElement {
+	from 
+		i: AnyLogic!ModelElement
+	to
+		id: XML!Element (
+			name <- 'Id',
+			children <- Sequence{idT}
+		),
+		idT: XML!Text (
+			value <- i.id.toString()
+		),
+		name: XML!Element (
+			name <- 'Name',
+			children <- Sequence{nameT}
+		),
+		nameT: XML!Text (
+			value <- i.name
+		),
+		efb: XML!Element (
+			name <- 'ExcludeFromBuild',
+			children <- Sequence{efbT}
+		) ,
+		efbT: XML!Text (
+			value <- i.excludeFromBuild.toString()
+		)  
+}
+
+abstract rule VisualModelElement extends ModelElement {
+	from 
+		i: AnyLogic!VisualModelElement
+	to
+		positionX: XML!Element (
+			name <- 'X',
+			children <- Sequence{positionXT}
+		),
+		positionXT: XML!Text (
+			value <- i.position.x.toString()
+		) ,
+		positionY: XML!Element (
+			name <- 'Y',
+			children <- Sequence{positionYT}
+		),
+		positionYT: XML!Text (
+			value <- i.position.y.toString()
+		),
+		
+		label: XML!Element (
+			name <- 'Label',
+			children <- Sequence{labelX, labelY}			
+		),
+		labelX: XML!Element (
+			name <- 'X',
+			children <- Sequence{labelXT}
+		),
+		labelXT: XML!Text (
+			value <- i.label.x.toString()
+		) ,
+		labelY: XML!Element (
+			name <- 'Y',
+			children <- Sequence{labelYT}
+		),
+		labelYT: XML!Text (
+			value <- i.label.y.toString()
+		),
+
+		publicFlag: XML!Element (
+			name <- 'PublicFlag',
+			children <- Sequence{publicFlagT}
+		),
+		publicFlagT: XML!Text (
+			value <- i.publicFlag.toString()
+		),
+		presentationFlag: XML!Element (
+			name <- 'PresentationFlag',
+			children <- Sequence{presentationFlagT}
+		) ,
+		presentationFlagT: XML!Text (
+			value <- i.presentationFlag.toString()
+		),
+		showLabel: XML!Element (
+			name <- 'ShowLabel',
+			children <- Sequence{showLabelT}
+		) ,
+		showLabelT: XML!Text (
+			value <- i.showLabel.toString()
+		)
+ 
+}
+
+
+
+rule Model extends ModelElement {
+	from 
+		i: AnyLogic!Model
+	to
+		o: XML!Root (
+			name <- 'AnyLogicWorkspace',
+			children <- Sequence{WV_Att,ALV_Att,AV_Att,model}
+		),
+		model: XML!Element (
+			name <- 'Model',
+			children <- Sequence{id,name,efb,ev,jpn,aoClasses,experiments}
+		),
+		WV_Att: XML!Attribute (
+			name <- 'WorkspaceVersion',
+			value <- '1.9'
+		),
+		ALV_Att: XML!Attribute (
+			name <- 'AnyLogicVersion',
+			value <- '6.0.0'
+		),
+		AV_Att: XML!Attribute (
+			name <- 'AlpVersion',
+			value <- '6.0.10'
+		),
+		ev: XML!Element (
+			name <- 'EngineVersion',
+			children <- Sequence{evT}
+		),
+		evT: XML!Text (
+			value <- i.engineVersion.toString()
+		),
+		jpn: XML!Element (
+			name <- 'JavaPackageName',
+			children <- Sequence{jpnT}
+		),
+		jpnT: XML!Text (
+			value <- i.javaPackageName
+		),		
+		aoClasses : XML!Element (
+			name <- 'ActiveObjectClasses',
+			children <- i.activeObjectClasses
+		),
+		experiments : XML!Element (
+			name <- 'Experiments',
+			children <- i.experiments
+		)
+		
+}
+
+rule ActiveObjectClass extends ModelElement {
+	from
+		i: AnyLogic!ActiveObjectClass
+	to
+		aoc: XML!Element (
+			name <- 'ActiveObjectClass',
+			children <- Sequence{id,name,efb,catl,ptgp,ptgp,itgp,generic,genericP,agent,agentP,connectors,eObjects,shapes} 
+		),
+		catl: XML!Element (
+			name <- 'ClientAreaTopLeft',
+			children <- Sequence{catlX,catlY}
+		),	
+		catlX: XML!Element (
+			name <- 'X',
+			children <- Sequence{catlXT}
+		),
+		catlXT: XML!Text (
+			value <- i.clientAreaTopLeft.x.toString()
+		),
+		catlY: XML!Element (
+			name <- 'Y',
+			children <- Sequence{catlYT}
+		),
+		catlYT: XML!Text (
+			value <- i.clientAreaTopLeft.y.toString()
+		),
+        ptgp: XML!Element (
+        	name <- 'PresentationTopGroupPersistent',
+			children <- Sequence{ptgpT}
+		),
+        ptgpT: XML!Text (
+			value <- i.presentationTopGroupPersistent.toString()
+		),
+		itgp: XML!Element (
+        	name <- 'IconTopGroupPersistent',
+			children <- Sequence{itgpT}
+		),
+		itgpT: XML!Text (
+			value <- i.iconTopGroupPersistent.toString()
+		),
+		generic: XML!Element (
+        	name <- 'Generic',
+			children <- Sequence{genericT}
+		),
+		genericT: XML!Text (
+			value <- i.generic.toString()
+		),
+        genericP: XML!Element (
+        	name <- 'GenericParameters',
+			children <- Sequence{genericPT}
+		),
+	   genericPT: XML!Text (
+			value <- i.genericParameters
+		),
+        agent: XML!Element (
+        	name <- 'Agent',
+			children <- Sequence{agentT}
+		),
+        agentT: XML!Text (
+			value <- i.agent.toString()
+		),
+		agentP : XML!Element (
+			name <- 'AgentProperties',
+			children <- Sequence{edil}
+		),
+		edil : XML!Element (
+			name <- 'EnvironmentDefinesInitialLocation',
+			children <- Sequence{edilT}
+		),
+		edilT : XML!Text (
+			value <- i.environmentDefinesInitialLocation.toString()
+		),
+			
+		connectors: XML!Element (
+			name <- 'Connectors',
+			children <- i.connectors
+		),
+		
+		eObjects: XML!Element (
+			name <- 'EmbeddedObjects',
+		    children <- i.embeddedObjects
+		),
+		
+		shapes: XML!Element(
+			name <- 'Shapes',
+			children <- i.shapes
+		)
+}
+
+rule  EmbeddedObjectPresentation extends VisualModelElement{
+	from
+		i: AnyLogic!EmbeddedObjectPresentation
+	to
+		o: XML!Element (
+			name <- 'EmbeddedObjectPresentation',
+			children <- Sequence{id,name,efb,positionX,positionY,label,publicFlag,presentationFlag,showLabel,asObject,eIcon,rotation}
+		),
+		asObject: XML!Element (
+			name <- 'AsObject',
+			children <- Sequence{asObjectT}
+		),
+		asObjectT: XML!Text (
+			value <- i.asObject.toString()
+		),
+		eIcon: XML!Element (
+			name <- 'EmbeddedIcon',
+			children <- Sequence{eIconT}
+		),
+		eIconT: XML!Text (
+			value <- i.embeddedIcon.toString()
+		),
+		rotation: XML!Element (
+			name <- 'Rotation',
+			children <- Sequence{rotationT}
+		),
+		rotationT: XML!Text (
+			value <- i.rotation.toString()
+		)
+}
+
+rule Connector extends VisualModelElement {
+	from 
+		i: AnyLogic!Connector
+	to
+	    connector: XML!Element (
+	    	name <- 'Connector',
+			children <- Sequence{id,name,efb,positionX,positionY,label,publicFlag,presentationFlag,showLabel,seObject,scName,teObject,tcName,points}
+	    ),
+    	seObject: XML!Element (
+    		name <- 'SourceEmbeddedObject',
+			children <- Sequence{seObjectT}
+    	),	
+		seObjectT: XML!Text (
+			value <- i.sourceEmbeddedObject.id.toString()
+    	),	
+		scName: XML!Element (
+			name <- 'SourceConnectableName',
+			children <- Sequence{scNameT}
+		),
+		scNameT: XML!Text (
+			value <- i.sourceConnectableName
+		),
+    	teObject: XML!Element (
+    		name <- 'TargetEmbeddedObject',
+			children <- Sequence{teObjectT}
+    	),	
+		teObjectT: XML!Text (
+			value <- i.targetEmbeddedObject.id.toString()
+    	),	
+		tcName: XML!Element (
+			name <- 'TargetConnectableName',
+			children <- Sequence{tcNameT}
+		),
+		tcNameT: XML!Text (
+			value <- i.targetConnectableName
+		),
+		points: XML!Element (
+			name <- 'Points',
+			children <- i.points
+		)
+}
+
+rule Point {
+	from 
+		i: AnyLogic!Point
+	to
+		o: XML!Element (
+			name <- 'Point',
+			children <- Sequence{x,y}
+		),
+		x: XML!Element (
+			name <- 'X',
+			children <- Sequence{xT}
+		),
+		xT: XML!Text (
+			value <- i.x.toString()
+		) ,
+		y: XML!Element (
+			name <- 'Y',
+			children <- Sequence{yT}
+		),
+		yT: XML!Text (
+			value <- i.y.toString()
+		) 
+}
+   
+rule EmbeddedObject extends VisualModelElement {
+	from 
+		i: AnyLogic!EmbeddedObject
+	to
+		embeddedObject: XML!Element (
+	    	name <- 'EmbeddedObject',
+			children <- Sequence{id,name,efb,positionX,positionY,label,publicFlag,presentationFlag,showLabel,presentationId,i.activeObjectClass,gps,parameters}
+	    ),	
+		presentationId: XML!Element (
+			name <- 'PresentationId',
+			children <- Sequence{presentationIdT}
+		),
+		presentationIdT: XML!Text (
+			value <- i.presentation.id.toString()
+		),
+		gps: XML!Element (
+			name <- 'GenericParametersSubstitute',
+			children <- Sequence{gpsT}
+		),
+		gpsT: XML!Text (
+			value <- i.genericParametersSubstitute.toString()
+		),
+		
+		parameters: XML!Element (
+			name <- 'Parameters',
+			children <- i.parameters
+		)
+}
+
+	
+rule ActiveObjectClassRef {
+	from
+		i: AnyLogic!ActiveObjectClassRef
+	to
+	   o: XML!Element (
+			name <- 'ActiveObjectClass',
+			children <- Sequence{package,className}
+		),
+		package: XML!Element (
+			name <- 'PackageName',
+			children <- Sequence{packageT}
+		),
+		packageT: XML!Text (
+			value <- i.packageName
+		),
+		className: XML!Element (
+			name <- 'ClassName',
+			children <- Sequence{classNameT}
+		),
+		classNameT: XML!Text (
+			value <- i.className
+		)
+}
+
+rule Parameter {
+	from 
+		i: AnyLogic!Parameter
+	to
+	    o: XML!Element (
+			name <- 'Parameter',
+			children <- Sequence{name,value}
+		),
+		name: XML!Element (
+			name <- 'Name',
+			children <- Sequence{nameT}
+		),
+		nameT: XML!Text (
+			value <- i.name
+		),
+		value: XML!Element (
+			name <- 'Value',
+			children <- Sequence{valueT}
+		),
+		valueT: XML!Text (
+			value <- i.value
+		)
+}
+
+rule SimulationExperiment extends ModelElement {
+	from
+		i: AnyLogic!SimulationExperiment
+	to
+		o: XML!Element (
+			name <- 'SimulationExperiment',
+			children <- Sequence{aoc,id,name,efb,catl,ptgp,itgp,frame,cla,maxMem,randomSeed,seedValue,
+				vmArgs,absAcc,relAcc,timeAcc,fixedTimeStep,shapes,controls,parameters,presentationProperties,timeProperties}
+			
+		),
+		aoc: XML!Attribute (
+			name <- 'ActiveObjectClassId',
+			value <- i.activeObjectClass.id.toString()
+		),
+		catl: XML!Element (
+			name <- 'ClientAreaTopLeft',
+			children <- Sequence{catlX,catlY}
+		),	
+		catlX: XML!Element (
+			name <- 'X',
+			children <- Sequence{catlXT}
+		),
+		catlXT: XML!Text (
+			value <- i.clientAreaTopLeft.x.toString()
+		),
+		catlY: XML!Element (
+			name <- 'Y',
+			children <- Sequence{catlYT}
+		),
+		catlYT: XML!Text (
+			value <- i.clientAreaTopLeft.y.toString()
+		),
+		
+        ptgp: XML!Element (
+        	name <- 'PresentationTopGroupPersistent',
+			children <- Sequence{ptgpT}
+		),
+        ptgpT: XML!Text (
+			value <- i.presentationTopGroupPersistent.toString()
+		),
+		
+		itgp: XML!Element (
+        	name <- 'IconTopGroupPersistent',
+			children <- Sequence{itgpT}
+		),
+		itgpT: XML!Text (
+			value <- i.iconTopGroupPersistent.toString()
+		),		
+
+        frame: XML!Element (
+        	name <- 'Frame',
+			children <- Sequence{positionX,positionY,width,height}
+		),		
+		positionX: XML!Element (
+			name <- 'X',
+			children <- Sequence{positionXT}
+		),
+		positionXT: XML!Text (
+			value <- i.frame.x.toString()
+		) ,
+		positionY: XML!Element (
+			name <- 'Y',
+			children <- Sequence{positionYT}
+		),
+		positionYT: XML!Text (
+			value <- i.frame.y.toString()
+		),
+		width: XML!Element (
+			name <- 'Width',
+			children <- Sequence{widthT}
+		),
+		widthT: XML!Text (
+			value <- i.frame.width.toString()
+		) ,
+		height: XML!Element (
+			name <- 'Height',
+			children <- Sequence{heightT}
+		),
+		heightT: XML!Text (
+			value <- i.frame.height.toString()
+		) ,
+
+		cla: XML!Element (
+			name <- 'CommandLineArguments',
+			children <- Sequence{claT}
+		),
+		claT: XML!Text (
+			value <- i.commandLineArguments.toString()
+		),
+		
+		maxMem: XML!Element (
+			name <- 'MaximumMemory',
+			children <- Sequence{maxMemT}
+		) ,
+		maxMemT: XML!Text (
+			value <- i.maximumMemory.toString()
+		),
+		
+		randomSeed: XML!Element (
+			name <- 'RandomSeed',
+			children <- Sequence{randomSeedT}
+		),
+		randomSeedT: XML!Text (
+			value <- i.randomSeed.toString()
+		),
+		
+		seedValue: XML!Element (
+			name <- 'SeedValue',
+			children <- Sequence{seedValueT}
+		),
+		seedValueT: XML!Text (
+			value <- i.seedValue.toString()
+		),
+		
+		vmArgs: XML!Element (
+			name <- 'VmArgs',
+			children <- Sequence{vmArgsT}
+		),
+		vmArgsT: XML!Text (
+			value <- i.vmArgs
+		),
+		
+		absAcc: XML!Element (
+			name <- 'AbsoluteAccuracy',
+			children <- Sequence{absAccT}
+		),
+		absAccT: XML!Text (
+			value <- i.absoluteAccuracy.toString()
+		),
+		
+		relAcc: XML!Element (
+			name <- 'RelativeAccuracy',
+			children <- Sequence{relAccT}
+		),
+		relAccT: XML!Text (
+			value <- i.relativeAccuracy.toString()
+		),
+		
+		timeAcc: XML!Element (
+			name <- 'TimeAccuracy',
+			children <- Sequence{timeAccT}
+		),
+		timeAccT: XML!Text (
+			value <- i.timeAccuracy.toString()
+		),
+
+		fixedTimeStep: XML!Element (
+			name <- 'FixedTimeStep',
+			children <- Sequence{fixedTimeStepT}
+		),
+		fixedTimeStepT: XML!Text (
+			value <- i.fixedTimeStep.toString()
+		),
+		
+		shapes: XML!Element (
+			name <- 'Shapes',
+			children <- i.shapes
+		),
+			
+		controls: XML!Element (
+			name <- 'Controls',
+			children <- i.controls
+		),
+		parameters: XML!Element (
+			name <- 'Parameters',
+			children <- Sequence{}
+		),
+		presentationProperties: XML!Element (
+			name <- 'PresentationProperties',
+			children <- Sequence{enableAdaptiveFrameManagement,enableAntiAliasing,enablePanning,enableZoom,
+				executionMode,cpuRatio,title,framesPerSecond,realTimeScale,uiProperties}
+		),
+		enableAdaptiveFrameManagement: XML!Attribute (
+			name <- 'EnableAdaptiveFrameManagement',
+			value <- i.enableAdaptiveFrameManagement.toString()
+		),
+		enableAntiAliasing: XML!Attribute (
+			name <- 'EnableAntiAliasing',
+			value <- i.enableAntiAliasing.toString()
+		),
+		enablePanning: XML!Attribute (
+			name <- 'EnablePanning',
+			value <- i.enablePanning.toString()
+		),
+		enableZoom: XML!Attribute (
+			name <- 'EnableZoom',
+			value <- i.enableZoom.toString()
+		),
+		executionMode: XML!Element (
+			name <- 'ExecutionMode',
+			children <- Sequence{executionModeT}
+		),
+		executionModeT: XML!Text (
+			value <- i.executionMode.toString()
+		),
+		cpuRatio: XML!Element (
+			name <- 'CpuRatio',
+			children <- Sequence{cpuRatioT}
+		),
+		cpuRatioT: XML!Text (
+			value <- i.cpuRatio.toString()
+		),
+		title: XML!Element (
+			name <- 'Title',
+			children <- Sequence{titleT}
+		),
+		titleT: XML!Text (
+			value <- i.title.toString()
+		),
+		framesPerSecond: XML!Element (
+			name <- 'FramesPerSecond',
+			children <- Sequence{framesPerSecondT}
+		),
+		framesPerSecondT: XML!Text (
+			value <- i.framesPerSecond.toString()
+		),		
+ 		realTimeScale: XML!Element (
+			name <- 'RealTimeScale',
+			children <- Sequence{realTimeScaleT}
+		),
+		realTimeScaleT: XML!Text (
+			value <- i.realTimeScale.toString()
+		),
+		uiProperties: distinct XML!Element foreach (e in i.uiProperties)(
+			name <- 'UIProperty'
+		),
+		uipName: distinct XML!Attribute foreach (e in i.uiProperties) (
+			name <- 'Name',
+			value <- e.name
+		),	
+		uipValue: distinct XML!Attribute foreach (e in i.uiProperties) (
+			name <- 'Value',
+			value <- e.value
+		),		
+
+		timeProperties: XML!Element (
+			name <- 'ModelTimeProperties',
+			children <- Sequence{useCalendar,stopOption,initialTime,finalTime,modelTimeUnit}
+		),
+		useCalendar: XML!Attribute (
+			name <- 'UseCalendar',
+			value <- i.useCalendar.toString()
+		),	
+		stopOption: XML!Element (
+			name <- 'StopOption',
+			children <- Sequence{stopOptionT}
+		),
+		stopOptionT: XML!Text (
+			value <- i.stopOption
+		),
+		initialTime: XML!Element (
+			name <- 'InitialTime',
+			children <- Sequence{initialTimeT}
+		),
+		initialTimeT: XML!Text (
+			value <- i.initialTime
+		),		
+		finalTime: XML!Element (
+			name <- 'FinalTime',
+			children <- Sequence{finalTimeT}
+		),
+		finalTimeT: XML!Text (
+			value <- i.finalTime
+		),				
+		modelTimeUnit: XML!Element (
+			name <- 'ModelTimeUnit',
+			children <- Sequence{modelTimeUnitT}
+		),
+		modelTimeUnitT: XML!Text (
+			value <- i.modelTimeUnit
+		)
+	do {
+		for (e in uiProperties) {
+			e.children <- Sequence{uipName->at(uiProperties.indexOf(e)),uipValue->at(uiProperties.indexOf(e))};
+		}
+	}
+}
+
+rule Text extends VisualModelElement {
+	from 
+		i: AnyLogic!Text
+	to
+		o: XML!Element (
+			name <- 'Text',
+			children <- Sequence{id,name,efb,positionX,positionY,label,publicFlag,presentationFlag,showLabel,
+				asObject,eIcon,rotation,color,text,font,alignment}
+			
+		),
+		asObject: XML!Element (
+			name <- 'AsObject',
+			children <- Sequence{asObjectT}
+		),
+		asObjectT: XML!Text (
+			value <- i.asObject.toString()
+		),
+		eIcon: XML!Element (
+			name <- 'EmbeddedIcon',
+			children <- Sequence{eIconT}
+		),
+		eIconT: XML!Text (
+			value <- i.embeddedIcon.toString()
+		),
+		rotation: XML!Element (
+			name <- 'Rotation',
+			children <- Sequence{rotationT}
+		),
+		rotationT: XML!Text (
+			value <- i.rotation.toString()
+		),
+		color: XML!Element (
+			name <- 'Color',
+			children <- Sequence{colorT}
+		),
+		colorT: XML!Text (
+			value <- i.color.toString()
+		),
+		text: XML!Element (
+			name <- 'Text',
+			children <- Sequence{textT}
+		),
+		textT: XML!Text (
+			value <- i.text
+		),
+		font: XML!Element (
+			name <- 'Font',
+			children <- Sequence{fName,fSize,fStyle}
+		),
+		fName: XML!Element (
+			name <- 'Name',
+			children <- Sequence{fNameT}
+		),
+		fNameT: XML!Text (
+			value <- i.font.name
+		),		
+		fSize: XML!Element (
+			name <- 'Size',
+			children <- Sequence{fSizeT}
+		),
+		fSizeT: XML!Text (
+			value <- i.font.size.toString()
+		),	
+		fStyle: XML!Element (
+			name <- 'Style',
+			children <- Sequence{fStyleT}
+		),
+		fStyleT: XML!Text (
+			value <- i.font.style.toString()
+		),	
+		alignment: XML!Element (
+			name <- 'Alignment',
+			children <- Sequence{alignmentT}
+		),
+		alignmentT: XML!Text (
+			value <- i.alignment
+		)
+}
+
+rule Button extends VisualModelElement {
+	from 
+		i: AnyLogic!Button
+	to
+		o: XML!Element (
+			name <- 'Control',
+			children <- Sequence{button,id,name,efb,positionX,positionY,label,publicFlag,presentationFlag,showLabel,
+				basicProperties,extendedProperties}
+			
+		),
+		button: XML!Attribute (
+			name <- 'Type',
+			value <- 'Button'
+		),			
+		basicProperties: XML!Element (
+			name <- 'BasicProperties',
+			children <- Sequence{width, height, asObject, color, enableExpression, actionCode}
+		),	
+		width: XML!Attribute (
+			name <- 'Width',
+			value <- i.width.toString()
+		),
+		height: XML!Attribute (
+			name <- 'Height',
+			value <- i.height.toString()
+		),
+		asObject: XML!Attribute (
+			name <- 'AsObject',
+			value <- i.asObject.toString()
+		),
+		embeddedIcon: XML!Element (
+			name <- 'EmbeddedIcon',
+			children <- Sequence{embeddedIconT}
+		),
+		embeddedIconT: XML!Text (
+			value <- i.embeddedIcon.toString()
+		),
+		color: XML!Element (
+			name <- 'TextColor',
+			children <- Sequence{colorT}
+		),
+		colorT: XML!Text (
+			value <- i.textColor.toString()
+		),
+		enableExpression: XML!Element (
+			name <- 'EnableExpression',
+			children <- Sequence{enableExpressionT}
+		),
+		enableExpressionT: XML!Text (
+			value <- i.enableExpression.toString()
+		),		
+		actionCode: XML!Element (
+			name <- 'ActionCode',
+			children <- Sequence{actionCodeT}
+		),
+		actionCodeT: XML!Text (
+			value <- i.actionCode.toString()
+		),		
+		
+		extendedProperties: XML!Element (
+			name <- 'ExtendedProperties',
+			children <- Sequence{text, font}
+		),	
+		text: XML!Element (
+			name <- 'LabelText',
+			children <- Sequence{textT}
+		),
+		textT: XML!Text (
+			value <- i.labelText
+		),
+		font: XML!Element (
+			name <- 'Font',
+			children <- Sequence{fName,fSize,fStyle}
+		),
+		fName: XML!Attribute (
+			name <- 'Name',
+			value <- i.font.name
+		),		
+		fSize: XML!Attribute (
+			name <- 'Size',
+			value <- i.font.size.toString()
+		),	
+		fStyle: XML!Attribute (
+			name <- 'Style',
+			value <- i.font.style.toString()
+		)
+}
+

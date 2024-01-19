@@ -1,0 +1,338 @@
+--@atlcompiler atl2006
+
+--------------------------------------------------------------------------------
+-- Transforms a R2ML metamodel into WSDL metamodel.
+-- Created as part of M.Sc. theses at GOOD OLD AI Research Group
+-- Author: Marko Ribaric
+-- Works for R2ML v0.5-beta
+--------------------------------------------------------------------------------
+-- Version: 0.1 - 10.06.2007.
+--
+-- TODO:
+--	1) add binding
+--  2) add additional MEPs
+--  3) add infault
+--
+-- ANNOTATION: With MDR, Enumerations must be located in top-most package
+--------------------------------------------------------------------------------
+
+module R2ML2WSDL; 					-- Module Template
+create OUT : WSDL from IN : R2ML;
+
+-------------------------------------------------------------------------------
+-- HELPERS --------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- HELPER:	setElemName
+-- Returns the name of the element (Interface or Endpoint) from the name of the service
+-- (service name is baseName + "Service", and interface name is baseName + "Interface")
+-- CONTEXT:	thisModule
+-- IN1:	String - the name of the service
+-- IN2:	String - "Interface" or "Endpoint"
+-- OUT:	String	- baseName + IN2
+helper def: setElemName(serviceName : String, elemName : String) : String =
+	if serviceName.endsWith('Service') then
+	    let fromIndex : Integer = 1  in
+		let toIndex : Integer = serviceName.lastIndexOf('Service')  in	
+		serviceName.substring(fromIndex, toIndex).concat(elemName)
+	else OclUndefined
+	endif ;
+
+-- HELPER:	getAllRRWithThisGroupID
+-- Returns all ReactionRules with the same groupID
+-- CONTEXT:	thisModule
+-- IN1:	String - name of the groipID
+-- OUT:	Sequence(R2ML!ReactionRule)
+helper def: getAllRRWithThisGroupID(value : String) : Sequence(R2ML!ReactionRule) =
+	R2ML!ReactionRule.allInstances()->asSequence()->select(c| c.groupID = value);
+	
+-- HELPER:	getClassWithThisName
+-- Returns R2ML!Class with name same as the name attribute of self
+-- CONTEXT:	R2ML!Type
+-- OUT: R2ML!Class
+helper context R2ML!Type def: getClassWithThisName() : R2ML!Class =
+	R2ML!Class.allInstances()->asSequence()->select(c| c.name = self.name)->first();
+
+-- HELPER:	getMessageTypeWithThisName
+-- Returns R2ML!MessageType with name same as the name attribute of self
+-- CONTEXT:	R2ML!Type
+-- OUT: R2ML!MessageType
+helper context R2ML!Type def: getMessageTypeWithThisName() : R2ML!MessageType =
+	R2ML!MessageType.allInstances()->asSequence()->select(c| c.name = self.name)->first();
+
+-- HELPER:	getFaultMessageTypeWithThisName
+-- Returns R2ML!FaultMessageType with name same as the name attribute of self
+-- CONTEXT:	R2ML!Type
+-- OUT: R2ML!FaultMessageType
+helper context R2ML!Type def: getFaultMessageTypeWithThisName() : R2ML!FaultMessageType =
+	R2ML!FaultMessageType.allInstances()->asSequence()->select(c| c.name = self.name)->first();
+
+
+-------------------------------------------------------------------------------
+-- RULES ----------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- Rule 'Description'
+-- Creates WSDL!Description element from an R2ML!RuleBase. These are root elements.
+rule Description {
+	from i : R2ML!RuleBase ( 
+				i.oclIsTypeOf(R2ML!RuleBase)
+			)
+	to o : WSDL!Description (
+				types <- i.vocabularies,
+				service <- i.rules->select(c| c.oclIsTypeOf(R2ML!ReactionRuleSet)), 
+				interface <- i.rules->select(c| c.oclIsTypeOf(R2ML!ReactionRuleSet))->collect( e | thisModule.resolveTemp(e, 'inter'))
+			)
+}
+
+-- Rule 'ElementType'
+-- Creates WSDL!ElementType element from an R2ML!Vocabulary
+rule ElementType {
+	from i : R2ML!Vocabulary (
+				i.oclIsTypeOf(R2ML!Vocabulary)
+			)
+	to o : WSDL!ElementType (
+				schema <- schema
+			),
+	schema : WSDL!XsSchema (
+			    schemaLocation <- 'http://www.w3.org/2006/01/wsdl',
+				targetNamespace <- 'http://www.bookingservice.com/?wsdl',
+				elementDeclarations <- i.entries
+			)
+}
+
+-- Rule 'XsElementDeclarationCL'
+-- Creates WSDL!XsElementDeclaration element from an R2ML!Class.
+rule XsElementDeclarationCL {
+	from i : R2ML!Class (
+				i.oclIsTypeOf(R2ML!Class)
+			)		
+	to ele : WSDL!XsElementDeclaration (
+				name <- i.name,
+				typeDefinition <- complex
+			),
+		complex : WSDL!XsComplexTypeDefinition (                 
+				content <- con
+			),
+		con : WSDL!XsParticle (
+				term <- ter
+			),
+		ter : WSDL!XsModelGroup (
+				compositor <- #sequence,
+				particles <- Sequence { i.attributes,
+										if not i.referencePropertyRef.oclIsUndefined() then
+											i.referencePropertyRef
+										else OclUndefined
+										endif
+									   }
+			)
+}
+
+-- Rule 'XsElementDeclarationMT'
+-- Creates WSDL!XsElementDeclaration element from an R2ML!MessageType.
+rule XsElementDeclarationMT {
+	from i : R2ML!MessageType (
+				i.oclIsTypeOf(R2ML!MessageType)
+			)		
+	to ele : WSDL!XsElementDeclaration (
+				name <- i.name,
+				typeDefinition <- complex
+			),
+		complex : WSDL!XsComplexTypeDefinition (                 
+				content <- con
+			),
+		con : WSDL!XsParticle (
+				term <- ter
+			),
+		ter : WSDL!XsModelGroup (
+				compositor <- #sequence,
+				particles <- Sequence { i.attributes,
+										if not i.referencePropertyRef.oclIsUndefined() then
+											i.referencePropertyRef
+										else OclUndefined
+										endif
+									  }
+			)
+}
+
+-- Rule 'XsElementDeclarationFMT'
+-- Creates WSDL!XsElementDeclaration element from an R2ML!FaultMessageType.
+rule XsElementDeclarationFMT {
+	from i : R2ML!FaultMessageType (
+				i.oclIsTypeOf(R2ML!FaultMessageType)
+			)		
+	to ele : WSDL!XsElementDeclaration (
+				name <- i.name,
+				typeDefinition <- complex
+			),
+		complex : WSDL!XsComplexTypeDefinition (                 
+				content <- con
+			),
+		con : WSDL!XsParticle (
+				term <- ter
+			),
+		ter : WSDL!XsModelGroup (
+				compositor <- #sequence,
+				particles <- Sequence { i.attributes,
+										if not i.referencePropertyRef.oclIsUndefined() then
+											i.referencePropertyRef
+										else OclUndefined
+										endif
+									   }
+			)	
+}
+
+-- Rule 'XsParticleREF'
+-- Creates WSDL!XsParticle element from an R2ML!ReferenceProperty
+rule XsParticleREF {
+	from i : R2ML!ReferenceProperty (
+				i.oclIsTypeOf(R2ML!ReferenceProperty)
+			)		
+	to	part : WSDL!XsParticle (                 
+				content <- ele
+			),
+		ele : WSDL!XsElementDeclaration (
+				name <- i.name,
+				resolvedElementDeclaration <- i.range.getClassWithThisName()	--TODO: helper
+			)
+}
+
+-- Rule 'XsParticleATT'
+-- Creates WSDL!XsParticle element from an R2ML!Attribute.
+rule XsParticleATT {
+	from i : R2ML!Attribute (
+				i.oclIsTypeOf(R2ML!Attribute)
+			)		
+	to	part : WSDL!XsParticle (                 
+				content <- ele
+			),
+		ele : WSDL!XsElementDeclaration (
+				name <- i.name,
+				typeDefinition <- if not i.range.oclIsUndefined() then
+									thisModule.SimpleType(i.range)
+								  else OclUndefined
+								  endif
+			)
+}
+
+-- Rule 'SimpleType'
+-- Creates WSDL!XsSimpleTypeDefinition element from an R2ML!Datatype.
+-- This rule is unique lazy rule, which means that is called from other rules
+unique lazy rule SimpleType {
+	from i : R2ML!Datatype
+	to o : WSDL!XsSimpleTypeDefinition (
+			name <- i.name
+		)		
+}
+
+-- Rule 'Interface'
+-- Creates WSDL!Interface element from an R2ML!ReactionRuleSet.
+-- for each distinct groupID create one Operation
+rule Interface {
+	from i : R2ML!ReactionRuleSet (
+				i.oclIsTypeOf(R2ML!ReactionRuleSet)
+			)		
+	to	serv : WSDL!Service (
+				name <- i.ruleSetID,
+				interface <- inter,				
+				endpoint <- en
+			),
+	inter : WSDL!Interface (
+				name <- thisModule.setElemName(i.ruleSetID, 'Interface'),
+				fault <- i.rules,
+				operation <- let setOfGroupIDs : Set (String) = i.rules->iterate(p; s : Set(String) = Set{} |
+							 									s->including(p.groupID) ) in
+								setOfGroupIDs->collect(e| 
+									thisModule.Operation(i.rules->asSequence()->select(c| c.groupID = e)->first()) 
+													   )
+			),
+		en : WSDL!Endpoint (                 
+				name <- thisModule.setElemName(i.ruleSetID, 'Endpoint'),
+				address <- i.rules->select(c| c.oclIsTypeOf(R2ML!ReactionRule) and not
+					c.producedAction.type.oclIsTypeOf(R2ML!FaultMessageType))->first().producedAction.sender
+		)
+}
+
+-- Rule 'Fault'
+-- Creates WSDL!Fault element from an R2ML!ReactionRule.
+rule Fault {
+	from i : R2ML!ReactionRule (
+				i.oclIsTypeOf(R2ML!ReactionRule) and
+				i.producedAction.type.oclIsTypeOf(R2ML!FaultMessageType)
+			)		
+	to	part : WSDL!Fault (
+				name <- i.producedAction.type.name,
+				element <- i.producedAction.type.getFaultMessageTypeWithThisName()
+			)
+}
+
+-- Rule 'Operation'
+-- Creates WSDL!Operation element from an Sequence (R2ML!ReactionRule) .
+-- This rule is lazy rule, which means that is called from other rules
+lazy rule Operation {
+	from i : R2ML!ReactionRule
+	to	part : WSDL!Operation (
+				name <- i.groupID,
+				pattern <- if thisModule.getAllRRWithThisGroupID(i.groupID).size() = 2 then
+								#inout
+							else #inonly
+							endif,
+				input <- thisModule.Input(i.triggeringEvent),
+				output <- let rr1 : R2ML!ReactionRule =
+						thisModule.getAllRRWithThisGroupID(i.groupID)->
+						select(c| not c.producedAction.type.oclIsTypeOf(R2ML!FaultMessageType))->first()
+						in
+							if not rr1.oclIsUndefined() then
+								thisModule.Output(rr1.producedAction)
+							else OclUndefined
+							endif,
+				outfault <- let rr2 : R2ML!ReactionRule =
+						thisModule.getAllRRWithThisGroupID(i.groupID)->
+						select(c| c.producedAction.type.oclIsTypeOf(R2ML!FaultMessageType))->first()
+						in
+							if not rr2.oclIsUndefined() then
+								thisModule.Outfault(rr2)
+							else OclUndefined
+							endif						
+			)
+}
+
+-- Rule 'Input'
+-- Creates WSDL!Input element from an R2ML!MessageEventExpression.
+-- This rule is lazy rule, which means that is called from other rules
+lazy rule Input {
+	from i : R2ML!MessageEventExpression (
+				i.oclIsTypeOf(R2ML!MessageEventExpression)
+			)		
+	to	part : WSDL!Input (
+				messageLabel <- 'In',
+				element <- i.type.getMessageTypeWithThisName()
+			)
+}
+
+-- Rule 'Output'
+-- Creates WSDL!Output element from an R2ML!MessageEventExpression.
+-- This rule is lazy rule, which means that is called from other rules
+lazy rule Output {
+	from i : R2ML!MessageEventExpression (
+				i.oclIsTypeOf(R2ML!MessageEventExpression)
+			)		
+	to	part : WSDL!Output (
+				messageLabel <- 'Out',
+				element <- i.type.getMessageTypeWithThisName()
+			)
+}
+
+-- Rule 'Outfault'
+-- Creates WSDL!Outfault element from an R2ML!ReactionRule.
+-- This rule is lazy rule, which means that is called from other rules
+lazy rule Outfault {
+	from i : R2ML!ReactionRule (
+				i.oclIsTypeOf(R2ML!ReactionRule)
+			)		
+	to	part : WSDL!Outfault (
+				messageLabel <- 'Out',
+				fault <- i
+			)
+}
+

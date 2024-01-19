@@ -1,0 +1,2189 @@
+% TXL C# Edition 7 Basis Grammar
+% Version 3.1, April 2019
+
+% Copyright 2006-2019 James R. Cordy
+
+% Redistribution and use in source and binary forms, with or without
+% modification, are permitted provided that the following conditions are met:
+%
+%    Redistributions of source code must retain the above copyright notice, 
+%    this list of conditions and the following disclaimer.
+%    Redistributions in binary form must reproduce the above copyright notice,
+%    this list of conditions and the following disclaimer in the documentation
+%    and/or other materials provided with the distribution.
+%
+%    THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+%    INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+%    AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+%    AUTHORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+%    OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+%    SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+%    INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+%    CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+%    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+%    POSSIBILITY OF SUCH DAMAGE.
+
+% Originally based on the ECMA-334 C# Standard, 3rd edition, June 2005, Appendix A
+% Updated to match the ECMA-334 C# Standard, 5th edition, December 2017, Appendix A, with corrections
+% Updated to MS C# Edition 7.0
+
+% Modification Log:
+
+% v3.1, Jim Cordy, April 2019.
+%   Refactored and tuned for parse efficiency.
+%   Validated on a range of open source C# software systems, including CefSharp, 
+%   Core, GVFS, JavaScriptServices, RssBandit, VMukti, acat, choco, cli,
+%   coreclr, corefx, mono, nant, orleans, roslyn.
+
+% v3.0, Jim Cordy, April 2019.
+%   Updated to C# Edition 5, ECMA-334 (2017).
+%   Added MS C# Edition 6 extensions.
+%   Added MS C# Edition 7 extensions.
+%   Added various MS C# proposed Edition 7.x and 8 extensions, as observed.
+
+% v2.2, Jim Cordy, March 2012.
+%   Refactored to add [condition] for if/while conditions, 
+%   [declaration] for data declarations.
+
+% v2.1, Jim Cordy, Feb 2009.
+%   Added "this" type names.
+%   Added query expressions (Linq).
+
+% v2.0, Jim Cordy, July 2008.
+%   Validated on a range of open source C# software including VMukti-Chat,
+%   Linq Rev. 1712, Rss-Bandit 1.5.0.17, Castle 0.85, SMC 5.1.0, and Nant 0.86b1.
+%   Updated to address slight problems.
+
+% v1.0, Jim Cordy, March 2006.
+% Direct adaptation of the C# Edition 3 reference grammar to TXL.
+% Suitable for syntax checking and source analysis tasks but 
+% not an ideal transformation grammar.
+
+% Remaining issues to address:
+%
+%  - comment overrides to parse and preserve comments in source
+%
+%  - preprocessor overrides to parse preprocessor statements
+%    (treated as comments in this grammar)
+%
+%  - a tuned and factored grammar more suitable for transformation tasks
+
+
+% Allow for long lines in C# source output
+#pragma -w 32767
+
+
+% A.1.3 Comments
+
+comments 
+    // 
+    /* */ 
+end comments
+
+% Healing Windows Service markup
+comments
+    <<<<<<< =======
+end comments
+
+tokens
+    comment | ">>>>>>> b7#n*"
+end tokens
+
+
+% A.1.7 Keywords
+
+keys 
+    abstract   as         base       bool       break 
+    byte       case       catch      char       checked 
+    class      const      continue   decimal    default 
+    delegate   do         double     else       enum 
+    event      explicit   extern     false      finally 
+    fixed      float      for        foreach    goto 
+    if         implicit   in         int        interface 
+    internal   is         lock       long       namespace 
+    new        null       object     operator   out 
+    override   params     private    protected  public 
+    readonly   ref        return     sbyte      sealed 
+    short      sizeof     stackalloc static     string 
+    struct     switch     this       throw      true 
+    try        typeof     uint       ulong      unchecked 
+    unsafe     ushort     using      virtual    void 
+    volatile   while 
+end keys 
+
+
+% A.1.8 Literals
+
+tokens 
+    hexadecimal_integer_literal "0[xX][\dABCDEFabcdef_]+[(UL)(Ul)(uL)(ul)(LU)(Lu)(lU)(lu)UuLl]?"
+
+    binary_integer_literal      "0[bB][01_]+[(UL)(Ul)(uL)(ul)(LU)(Lu)(lU)(lu)UuLl]?"    % 7th Ed. - JRC 7.4.19
+
+    real_literal                "\d+.\d+([eE][+-]?\d+)?[fFDdMm]?" 
+                            |   ".\d+([eE][+-]?\d+)?[fFDdMm]?"
+                            |   "\d+([eE][+-]?\d+)[fFDdMm]?"
+                            |   "\d+[fFDdMm]"
+
+    decimal_integer_literal     "\d[\d_]*[(UL)(Ul)(uL)(ul)(LU)(Lu)(lU)(lu)UuLl]?"
+
+    charlit                     "'[(\\\c)#']*'"
+    stringlit                   "\"[(\\\c)#\"]*\""
+                            |   "@\"[(\"\")#\"]*\""
+                            |   "$\"[(\\\c)({[({#}*})#}]*})#\"]*\""                     % 6th Ed. - JRC 4.4.19
+                            |   "$@\"[(\"\")({[({#}*})#}]*})#\"]*\""
+
+    id                          "@?[\a_][\a\d_]*"
+end tokens 
+
+define character_literal
+    [charlit]
+end define
+
+define string_literal
+    [stringlit]
+end define
+
+define literal
+      [boolean_literal]
+    | [integer_literal]
+    | [real_literal]
+    | [character_literal]
+    | [string_literal]
+    | [null_literal]
+end define
+
+define boolean_literal
+    'true | 'false
+end define
+
+define integer_literal
+      [decimal_integer_literal] 
+    | [hexadecimal_integer_literal] 
+    | [binary_integer_literal]        % 7th Ed. - JRC 7.4.19
+end define
+
+define null_literal
+    'null
+end define
+
+
+% A.1.9 Operators and punctuators
+
+compounds 
+    ??  ::  ++  --  &&  || 
+    ->  ==  !=  <=  >=  +=  -=  *=  /=  '%= 
+    &=  |=  ^=  <<  <<=  
+    % >>  >>=         % Conflicts with type_parameter closures
+    =>                % 5th Ed. - JRC 4.4.19
+    ..                % 8th Ed. range - JRC 14.4.19
+end compounds 
+
+
+% A.1.10 Pre-processing directives
+
+% (for now we treat these as comments - JRC)
+
+comments
+    '#
+end comments
+
+
+% A.2.1 Basic concepts
+
+define program 
+    [compilation_unit]
+end define
+
+define compilation_unit
+    [repeat compilation_element]        % Observed unordered - JRC 13.4.19
+end define
+
+define compilation_element
+      [extern_alias_directives] 
+    | [using_directives] 
+    | [global_attributes]
+    | [namespace_member_declarations] 
+end define 
+
+define namespace_name 
+    [namespace_or_type_name] 
+end define 
+
+define type_name 
+    [namespace_or_type_name] 
+end define 
+
+define namespace_or_type_name 
+    [id] [opt colon_colon_id] [opt type_argument_list] [repeat dot_id_opt_type_argument_list]
+end define
+
+define colon_colon_id
+    ':: [id]
+end define
+
+define dot_id_opt_type_argument_list        
+    [dot_id] [opt type_argument_list]
+end define
+
+define dot_id
+    '. [id]
+end define
+
+
+% A.2.2 Types
+
+define type 
+    ['ref ?] [base_type] [repeat type_modifier]
+end define
+
+define type_modifier
+    '? | [rank_specifier] | '*
+end define
+
+define base_type
+      [simple_type]
+    | [tuple_type]        % 7th Ed. - JRC 10.4.19
+    | [class_type]        % Including enum, class, interface, delegate, type_parameter
+    | 'void 
+end define
+
+define tuple_type
+    '( [list tuple_element_type+] ')
+end define
+
+define tuple_element_type
+    [type] [id?]
+end define
+
+define simple_type
+      [numeric_type]
+    | 'bool
+end define
+
+define numeric_type
+      [integral_type]
+    | [floating_point_type]
+    | 'decimal
+end define
+
+define integral_type 
+      'sbyte 
+    | 'byte 
+    | 'short 
+    | 'ushort 
+    | 'int 
+    | 'uint 
+    | 'long 
+    | 'ulong 
+    | 'char 
+end define 
+
+define floating_point_type 
+      'float
+    | 'double
+end define
+
+define class_type
+      [type_name]
+    | 'object
+    | 'string
+    | 'dynamic        % 5th Ed. - JRC 4.4.19
+end define
+
+define array_type
+    [base_type] [array_ranks]
+end define
+
+define array_ranks
+    [repeat array_rank+]
+end define
+
+define array_rank
+    [opt '*] [opt '?] [rank_specifier]
+end define
+
+define rank_specifiers
+    [repeat rank_specifier+]
+end define
+
+define rank_specifier
+    '[ [repeat',] ']
+end define
+
+define rank_specifier_or_star
+      [rank_specifier]
+    | '*
+end define
+
+define delegate_type
+    [type_name]
+end define
+
+
+% A.2.4 Expressions
+
+define argument_list
+    [list argument+] 
+    [', ?]            % Observed ifdef unbalance - JRC 15.4.19
+end define
+
+define argument
+      [argument_name?] [argument_value]            % 5th Ed. - JRC 4.4.19
+end define
+
+define argument_name
+    [id] ':
+end define
+
+define argument_value
+      [ref_or_out?] [var_or_type?] [expression]    % 5th Ed. - JRC 4.4.19
+end define
+
+define ref_or_out
+    'ref | 'out | 'in
+end define
+
+define var_or_type
+    'var | [type]
+end define
+
+define primary_expression
+    ['ref ?] [simple_primary_expression] [repeat primary_expression_modifier]
+end define
+
+define simple_primary_expression
+    % Left-factored for TXL parse efficiency - JRC
+      [literal] 
+    | [simple_name] 
+    | [parenthesized_or_tuple_expression] 
+    | [predefined_type] 
+    | [qualified_alias_member] 
+    | [literal_access_expression]
+    | [this_access]
+    | [base_access] 
+    | [creation_expression]
+    | [typeof_expression] 
+    | [checked_expression] 
+    | [unchecked_expression] 
+    | [default_value_expression]
+    | [anonymous_method_expression] 
+    | [sizeof_expression]
+    | [nameof_expression]            % 6th Ed. - JRC 4.4.19
+end define 
+
+% Switch expressions - 8th Ed. - JRC 6.4.19
+define switch_expression
+    'switch [switch_expression_block]
+end define
+
+define switch_expression_block 
+    '{                                 [IN]
+        [switch_expression_sections]   [EX]
+    '}                                
+end define 
+
+define switch_expression_sections
+    [list switch_expression_section+]
+end define
+
+define switch_expression_section 
+   [NL] [switch_expression_label] 
+            [opt when_conditional_expression] '=> [NL] [IN]
+        [expression] [EX]
+end define 
+
+define switch_expression_label 
+      [constant_expression]
+    | '_
+end define 
+% End switch extensions
+
+define primary_expression_modifier
+      [member_access_operator]
+    | [method_invocation_operator]
+    | [element_access_operator]
+    | [post_increment_operator]
+    | [post_decrement_operator]
+    | [pointer_member_access_operator]
+    | [post_not_operator]            % Observed - JRC 10.4.19
+end define
+
+define simple_name
+    [id] [opt type_argument_list]
+end define
+
+define parenthesized_or_tuple_expression
+    '( [tuple_element] [opt comma_tuple_elements]')        % 7th Ed. - JRC 9.4.19
+end define
+
+define comma_tuple_elements
+    ', [list tuple_element+]
+end define
+
+define tuple_element
+    [opt tuple_label] [opt type] [expression]
+end define
+
+define tuple_label
+    [id] ':
+end define
+
+define literal_access_expression
+    [integer_literal] '. [id_or_key]
+end define
+
+define id_or_key
+    [id] | [key]
+end define
+
+define member_access_operator
+    ['? ?]        % 5th Ed. - JRC 4.4.19
+    '. [id] [opt type_argument_list]
+end define
+
+define predefined_type
+      'bool | 'byte | 'char | 'decimal | 'double | 'float | 'int | 'long 
+    | 'object | 'sbyte | 'short | 'string | 'uint | 'ulong | 'ushort 
+end define
+
+define method_invocation_operator
+    '( [argument_list?] ') 
+end define 
+
+define element_access_operator
+    ['? ?]        % 5th Ed. - JRC 4.4.19
+    '[ [list element_index+] '] 
+end define
+
+define element_index
+      [element_index_expression] 
+          [opt dot_dot_element_index_expression]        % 8th Ed. ranges - JRC 14.4.19
+    | [element_index_expression] '..
+    | '.. [element_index_expression]
+    | '..
+end define
+
+define dot_dot_element_index_expression
+    '.. [element_index_expression]
+end define
+
+define element_index_expression
+    ['^ ?] [expression]
+end define
+
+define this_access
+    'this
+end define
+
+define base_access 
+      'base '. [id] [opt type_argument_list] 
+    | 'base '[ [list expression+] '] 
+end define 
+
+define post_increment_operator
+    '++ 
+end define
+
+define post_decrement_operator
+    '--
+end define
+
+define pointer_member_access_operator
+    '-> [id] [opt type_argument_list]
+end define
+
+define post_not_operator
+    '!
+end define
+
+define creation_expression
+       [new_or_stackalloc] [type?] [object_collection_array_initializer]
+    | [anonymous_object_initializer]
+    | [rank_specifier] [array_initializer]
+end define
+
+define new_or_stackalloc
+    'new | 'stackalloc
+end define
+
+define object_collection_array_initializer
+      [object_creation_expression]
+    | [object_or_collection_initializer]
+    | '[ [expression_list] '] [opt rank_specifiers] [opt array_initializer]
+    | [opt rank_specifiers] [array_initializer]
+end define
+
+define anonymous_object_initializer
+    '{ [member_declarator_list?] '}
+end define
+
+define member_declarator_list
+    [list member_declarator+] [opt ',]
+end define
+
+define member_declarator
+      [primary_expression]
+    | [id] '=' [expression]
+end define
+
+define object_creation_expression
+    '( [opt argument_list] ') [opt object_or_collection_initializer]
+end define
+
+define object_or_collection_initializer
+      [object_initializer]
+    | [collection_initializer]
+end define
+
+define collection_initializer
+    '{ [opt element_initializer_list] '}
+end define
+
+define element_initializer_list
+    [list element_initializer+] [opt ',] 
+end define
+
+define element_initializer
+      [non_assignment_expression]
+    | '{ [expression_list] '}
+end define
+
+define object_initializer
+    '{ [opt member_initializer_list] '}
+end define
+
+define member_initializer_list
+    [list member_initializer+] [opt ',]
+end define
+
+define member_initializer
+      [id_or_bracketed_expression] '= [initializer_value]
+end define
+
+define id_or_bracketed_expression
+      [id]
+    | '[ [expression] '] 
+end define
+
+define initializer_value
+      [expression]
+    | [object_or_collection_initializer]
+end define
+
+define expression_list
+    [list expression+]
+end define
+
+define typeof_expression 
+      'typeof '( [opt type] ') 
+end define 
+
+define dot_id_generic_dimension_specifier
+    '. [id] [opt generic_dimension_specifier]
+end define
+
+define generic_dimension_specifier
+    '< [repeat ',] '>
+end define
+
+define checked_expression 
+    'checked '( [expression] ') 
+end define 
+
+define unchecked_expression 
+    'unchecked '( [expression] ') 
+end define 
+
+define default_value_expression
+      'default '( [type] ') 
+    | 'default                % Observed - JRC 9.4.19
+end define 
+
+define anonymous_method_expression
+    'delegate [opt anonymous_method_signature] [block]
+end define
+
+define anonymous_method_signature
+    '( [opt anonymous_method_parameter_list] ')
+end define
+
+define anonymous_method_parameter_list
+    [list anonymous_method_parameter+]
+end define
+
+define anonymous_method_parameter
+    [opt parameter_modifier] [type] [id]
+end define
+
+define unary_expression
+      [primary_expression]
+          [opt switch_expression]            % 8th Ed. switch expressions - JRC 6.4.19
+    | '+ [unary_expression]
+    | '- [unary_expression]
+    | '! [unary_expression]
+    | '~ [unary_expression]
+    | [pre_increment_expression]
+    | [pre_decrement_expression]
+    | [cast_expression]
+    | [addressof_expression]
+    | [pointer_indirection_expression]
+    | 'await [unary_expression]              % 5th Ed. - JRC 4.4.19
+    | 'throw [unary_expression]              % 7th Ed. - JRC 4.4.19
+end define
+
+define pre_increment_expression
+    '++ [unary_expression]
+end define
+
+define pre_decrement_expression
+    '-- [unary_expression]
+end define
+
+define cast_expression
+    '( [type] ') [unary_expression]
+end define
+
+define addressof_expression
+    '& [unary_expression]
+end define
+
+define pointer_indirection_expression
+    '* [unary_expression]
+end define
+
+define multiplicative_expression 
+    [unary_expression] [repeat multiplicative_op_unary_expression]
+end define 
+
+define multiplicative_op_unary_expression
+    [multiplicative_op] [unary_expression]
+end define
+
+define multiplicative_op
+      '* | '/ | '% 
+end define
+
+define additive_expression 
+    [multiplicative_expression] [repeat additive_op_multiplicative_expression]
+end define
+
+define additive_op_multiplicative_expression
+    [additive_op] [multiplicative_expression]
+end define
+
+define additive_op
+    '+ | '- 
+end define
+
+define shift_expression
+    [additive_expression] [repeat shift_op_additive_expression]
+end define
+
+define  shift_op_additive_expression
+    [shift_op] [additive_expression]
+end define
+
+define shift_op
+    '<< | '>> 
+end define
+
+define relational_expression 
+    [shift_expression] [repeat relational_op_shift_expression_or_is_or_as]
+end define
+
+define relational_op_shift_expression_or_is_or_as
+      [relational_op] [shift_expression]
+    | 'is [type] [repeat rank_specifier_or_star] ['? ?] [type_pattern?]        % 7th Ed. - JRC 5.4.19 
+    | 'is [shift_expression]                                                   % Observed - JRC 5.4.19 
+    | 'as [type] ['? ?]                                                        % 7th Ed. - JRC 8.4.19 
+end define
+
+define type_pattern
+      [id] 
+    | [id?] [sub_patterns]
+end define
+
+define sub_patterns
+    '{ [list sub_pattern] '}
+end define
+
+define sub_pattern
+      [id] ': ['var ?] [type]
+    | [sub_patterns]
+end define
+
+define relational_op
+    '< | '> | '<= | '>= 
+end define
+
+define equality_expression 
+    [relational_expression] [repeat equality_op_relational_expression]
+end define
+
+define equality_op_relational_expression
+    [equality_op] [relational_expression] 
+end define
+
+define equality_op
+    '== | '!= 
+end define
+
+define and_expression 
+    [equality_expression] [repeat bit_and_op_equality_expression]
+end define
+
+define bit_and_op_equality_expression
+    '& [equality_expression] 
+end define
+
+define exclusive_or_expression 
+    [and_expression] [repeat exclusive_or_op_and_expression]
+end define
+
+define exclusive_or_op_and_expression
+    '^ [and_expression] 
+end define
+
+define inclusive_or_expression 
+    [exclusive_or_expression] [repeat bit_or_op_exclusive_or_expression]
+end define
+
+define bit_or_op_exclusive_or_expression
+    '| [exclusive_or_expression] 
+end define
+
+define conditional_and_expression 
+    [inclusive_or_expression] [repeat and_op_inclusive_or_expression]
+end define
+
+define and_op_inclusive_or_expression
+    '&& [inclusive_or_expression] 
+end define
+
+define conditional_or_expression 
+      [conditional_and_expression] [repeat or_op_conditional_and_expression] 
+end define
+
+define or_op_conditional_and_expression
+    '|| [conditional_and_expression] 
+end define
+
+define null_coalescing_expression 
+    [conditional_or_expression] [opt null_coalescing_op_expression] 
+end define
+
+define null_coalescing_op_expression
+    '?? [null_coalescing_expression] 
+end define
+
+define conditional_expression 
+    [null_coalescing_expression] [opt conditional_op_expressions]
+end define
+
+define conditional_op_expressions
+    '? [expression] ': [expression] 
+end define
+
+define assignment 
+    [unary_expression] [assignment_operator] [expression] 
+end define
+
+define assignment_operator 
+    '= | '+= | '-= | '*= | '/= | '%= | '&= | '|= | '^= | '<<= | '>>= | '??=
+end define
+
+define expression
+        [non_assignment_expression] 
+      | [assignment]
+end define
+
+define non_assignment_expression
+      [lambda_expression]        % 5th Ed. - JRC 20.2.09
+    | [query_expression]         % 5th Ed. - JRC 20.2.09
+    | [conditional_expression]
+end define
+
+% 5th Ed. Linq query expressions - JRC 20.2.09
+define query_expression
+    [from_clause] [IN] [query_body] [EX]
+end define
+
+define query_body
+    [repeat query_body_clause] [final_query_clause] [opt query_continuation]
+end define
+
+define query_body_clause
+      [NL] [from_clause]
+    | [NL] [join_clause]
+    | [NL] [let_clause]
+    | [NL] [where_clause]
+    | [NL] [orderby_clause]
+end define
+
+define from_clause
+    'from [item_name] 'in [src_expr]
+end define
+
+define join_clause
+    'join [item_name] 'in [src_expr] 'on [key_expr] 'equals [key_expr] [opt into_item_name]
+end define
+
+define into_item_name
+    'into [item_name]
+end define
+
+define let_clause
+    'let [item_name] '= [sel_expr]
+end define
+
+define where_clause
+    'where [pred_expr]
+end define
+
+define orderby_clause
+    'orderby [list key_expr_ascending_descending]
+end define
+
+define key_expr_ascending_descending
+    [key_expr] [opt ascending_descending]
+end define
+
+define ascending_descending
+    'ascending | 'descending
+end define
+
+define final_query_clause
+      [NL] [select_clause]
+    | [NL] [groupby_clause]
+end define
+
+define select_clause
+    'select [sel_expr]
+end define
+
+define groupby_clause
+    'group [sel_expr] 'by [key_expr]
+end define
+
+define query_continuation
+    'into [item_name] [query_body]
+end define
+
+define item_name
+    [opt type] [simple_name]
+end define
+
+define sel_expr
+    [expression]
+end define
+
+define key_expr
+    [expression]
+end define
+
+define src_expr
+    [expression]
+end define
+
+define pred_expr
+    [expression]
+end define
+% End Linq query expressions
+
+% 5th Ed. Lambda expressions - JRC 20.2.09
+define lambda_expression
+    ['async ?] [input_parameters] '=> [return_expression_or_block]
+end define
+
+define return_expression_or_block
+    [return_expression] | [block]
+end define
+
+define input_parameters
+      [input_parameter]
+    | '( [list input_parameter] ')
+end define
+
+define input_parameter
+    [repeat parameter_modifier]    % Observed - JRC 7.4.19
+    [opt type] [id]
+end define
+% End Lambda expressions
+
+define constant_expression
+    [expression]
+end define
+
+define condition
+    [boolean_expression]
+end define
+
+define boolean_expression
+    [expression]
+end define
+
+
+% A.2.5 Statements
+
+define declaration_or_statement 
+      [label_colon] [declaration_or_statement]
+    | [declaration] 
+    | [statement]
+end define 
+
+define label_colon
+    [id] ':
+end define
+
+define statement
+      [block] 
+    | [empty_statement] 
+    | [expression_statement] 
+    | [selection_statement] 
+    | [iteration_statement] 
+    | [jump_statement] 
+    | [try_statement] 
+    | [checked_statement] 
+    | [unchecked_statement] 
+    | [lock_statement] 
+    | [using_statement] 
+    | [yield_statement]
+    | [unsafe_statement]
+    | [fixed_statement]
+end define 
+
+define block
+    '{                         [NL] [IN]
+        [opt statement_list]   [EX]
+    '} [opt ';]                        
+end define
+
+define unsafe_statement
+    'unsafe [block]
+end define
+
+define statement_list
+    [repeat declaration_or_statement+]
+end define
+
+define empty_statement 
+    ';        
+end define 
+
+define local_variable_declaration 
+    [var_or_type] [variable_declarators]    % 5th Ed. - JRC 4.4.19 
+end define 
+
+define expression_statement 
+    [statement_expression] '; [NL]
+end define 
+
+% Refactored for TXL parse efficiency - JRC 9.4.19
+define statement_expression 
+   [unary_or_assignment]
+end define 
+
+define unary_or_assignment 
+    [unary_expression] [opt assignment_operator_expression]
+end define
+
+define assignment_operator_expression
+    [assignment_operator] [expression] 
+end define
+
+define selection_statement 
+      [if_statement] 
+    | [switch_statement] 
+end define 
+
+define if_statement 
+    'if '( [condition] ')
+        [nested_statement]                                 
+    [repeat else_if_clause]
+    [opt else_clause] [NL]
+end define
+
+define else_if_clause
+    'else 'if '( [condition] ')
+        [nested_statement] 
+end define
+
+define else_clause
+    'else
+        [nested_statement]                         
+end define 
+
+define nested_statement
+      [block]
+    | [IN] [NL] [statement] [EX]
+end define
+
+define switch_statement 
+    'switch '( [expression ]') 
+        [switch_block] 
+end define 
+
+define switch_block 
+    '{                      [NL] [IN]
+        [switch_sections]   [EX]
+    '}                      [NL]
+end define 
+
+define switch_sections
+    [repeat switch_section+]
+end define
+
+define switch_section 
+    [switch_labels]        [NL] [IN]
+        [statement_list]   [EX]
+end define 
+
+define switch_labels
+    [repeat switch_label+]
+end define
+
+define switch_label 
+      'case [constant_expression] [opt when_conditional_expression] ':    % 7th Ed. when - JRC 6.4.19
+    | 'case [type] [id] [opt when_conditional_expression] ':              % 7th Ed. patterns - JRC 5.4.19
+    | 'null ':                                                            % 7th Ed. - JRC 5.4.19
+    | 'default ': 
+end define 
+
+define when_conditional_expression
+    'when [conditional_expression] 
+end define
+
+define iteration_statement 
+      [while_statement] 
+    | [do_statement] 
+    | [for_statement] 
+    | [foreach_statement] 
+end define 
+
+define while_statement 
+    'while '( [condition] ')                
+        [nested_statement] [NL]
+end define 
+
+define do_statement 
+    'do                           [NL] [IN]
+        [statement]               [EX]
+    'while '( [condition] ') ';   [NL]
+end define 
+
+define for_statement 
+    'for '( [opt for_initializer] '; [opt for_condition] '; [opt for_iterator] ')
+        [nested_statement] [NL] 
+end define 
+
+define for_initializer 
+      [local_variable_declaration] 
+    | [statement_expression_list]
+end define 
+
+define for_condition 
+    [boolean_expression] 
+end define 
+
+define for_iterator 
+    [statement_expression_list]
+end define 
+
+define statement_expression_list
+    [list statement_expression+]
+end define
+
+define foreach_statement 
+    'foreach '( [for_vars] 'in [expression ]')                
+        [nested_statement] [NL] 
+end define 
+
+define for_vars
+      [opt type] [for_ids]
+    | [opt type] '( [list for_vars+] ')    % 7th Ed. - JRC 6.4.19
+end define
+
+define for_ids
+      [id]
+    | '( [list id+] ')
+end define
+
+define jump_statement 
+      [break_statement] 
+    | [continue_statement] 
+    | [goto_statement] 
+    | [return_statement] 
+    | [throw_statement] 
+end define 
+
+define break_statement 
+    'break '; [NL] 
+end define 
+
+define continue_statement 
+    'continue '; [NL] 
+end define 
+
+define goto_statement 
+      'goto [id] '; [NL] 
+    | 'goto 'case [constant_expression] '; [NL] 
+    | 'goto 'default '; [NL] 
+end define 
+
+define return_statement 
+    'return [opt return_expression] '; [NL] 
+end define 
+
+define return_expression
+    [opt return_modifiers] [expression]
+end define
+
+define throw_statement 
+    'throw [opt expression] '; [NL] 
+end define 
+
+define try_statement 
+    'try [block] [NL] 
+        [opt catch_clauses] 
+        [opt finally_clause]
+end define
+
+define catch_clauses
+    [opt specific_catch_clauses]
+    [opt general_catch_clause]
+end define
+
+define specific_catch_clauses
+    [repeat specific_catch_clause+]
+end define
+
+define specific_catch_clause 
+    'catch '( [class_type] [opt id] ') [exception_filter?] [block] [NL] 
+end define 
+
+define general_catch_clause 
+    'catch [exception_filter?] [block] [NL] 
+end define 
+
+define exception_filter        % 6th Ed. - JRC 4.4.19
+    'when '( [expression] ')
+end define
+
+define finally_clause
+    'finally [block] [NL] 
+end define 
+
+define checked_statement 
+    'checked [block] [NL] 
+end define 
+
+define unchecked_statement 
+    'unchecked [block] [NL]
+end define 
+
+define lock_statement 
+    'lock '( [expression] ') [NL]
+        [statement] 
+end define 
+
+define using_statement 
+      'using '( [resource_acquisition] ') [NL]
+          [statement] [NL]
+    | 'using [resource_acquisition] [NL]        % 7th Ed. implicitly scoped - JRC 4.4.19
+end define 
+
+define resource_acquisition 
+      [local_variable_declaration] 
+    | [expression] 
+end define
+
+define yield_statement
+      'yield 'return [expression] '; [NL]
+    | 'yield 'break ';               [NL]
+end define
+
+define namespace_declaration 
+    'namespace [qualified_identifier] [NL] 
+        [namespace_body]
+end define 
+
+define qualified_identifier
+    [id] [repeat dot_id]
+end define
+
+define namespace_body 
+    '{                                        [NL] [IN] 
+        [opt extern_alias_directives]                 
+        [opt using_directives]                 
+        [opt namespace_member_declarations]   [EX] 
+    '} [opt ';]                               [NL]
+end define 
+
+define extern_alias_directives
+    [repeat extern_alias_directive+] [NL]
+end define
+
+define extern_alias_directive 
+    'extern [id] [id] '; [NL] 
+end define 
+
+define using_directives
+    [repeat using_directive+] [NL]
+end define
+
+define using_directive 
+      [using_alias_directive] 
+    | [using_namespace_directive] 
+end define 
+
+define using_alias_directive 
+    'using [id] '= [namespace_or_type_name] '; [NL] 
+end define 
+
+define using_namespace_directive 
+    'using ['static ?] [namespace_name] '; [NL]    % 6th Ed. static - JRC 4.4.19
+end define 
+
+define namespace_member_declarations
+    [repeat namespace_member_declaration+]
+end define
+
+define namespace_member_declaration 
+      [namespace_declaration] [NL]
+    | [type_declaration]      [NL]
+    | [namespace_body]        [NL]    % Observed, problem with empty #else - JRC 13.4.19
+end define 
+
+define type_declaration 
+      [class_declaration] 
+    | [struct_declaration] 
+    | [interface_declaration] 
+    | [enum_declaration] 
+    | [delegate_declaration] 
+end define 
+
+define qualified_alias_member
+    % Redundant? - JRC
+    [id] ':: [id] [opt type_argument_list]
+end define
+
+
+% A.2.6 Classes
+
+define class_declaration 
+    [opt attributes] [opt class_modifiers] [opt 'partial] 
+    'class ['static ?]    % 7th Ed. static - JRC 8.4.19
+            [id] [opt type_parameter_list] [opt class_base] 
+            [opt type_parameter_constraints_clauses] [NL] 
+        [class_body] 
+end define 
+
+define class_modifiers
+    [repeat class_modifier+]
+end define
+
+define class_modifier 
+      'new 
+    | 'public 
+    | 'protected 
+    | 'internal 
+    | 'private 
+    | 'abstract 
+    | 'sealed 
+    | 'static 
+    | 'unsafe
+end define 
+
+define class_base 
+    ': [class_and_interface_type_ist] 
+end define 
+
+define class_and_interface_type_ist
+    [list class_or_interface_type+]
+end define
+
+define class_or_interface_type
+      [class_type]
+end define
+
+define class_body 
+    '{                                    [NL] [IN] 
+        [opt class_member_declarations]   [EX] 
+    '} [opt ';]                           [NL]
+end define 
+
+define class_member_declarations
+    [repeat class_member_declaration+]
+end define
+
+define class_member_declaration 
+      [declaration]
+    | [method_declaration] 
+    | [property_declaration] 
+    | [event_declaration] 
+    | [indexer_declaration] 
+    | [operator_declaration] 
+    | [constructor_declaration] 
+    | [finalizer_declaration] 
+    | [type_declaration] 
+end define 
+
+define declaration
+      [constant_declaration] 
+    | [field_declaration] 
+    | [method_declaration]    % 7th Ed. - JRC 4.4.19
+end define
+
+define constant_declaration 
+    [opt attributes] [opt constant_modifiers] 'const [type] [constant_declarators] '; [NL] 
+end define 
+
+define constant_modifiers
+    [repeat constant_modifier+]
+end define
+
+define constant_modifier
+      'new
+    | 'public
+    | 'protected
+    | 'internal
+    | 'private
+end define
+
+define constant_declarators
+    [list constant_declarator+]
+end define
+
+define constant_declarator 
+    [id] '= [constant_expression] 
+end define 
+
+define field_declaration 
+    [opt attributes] [opt field_modifiers] [type] [variable_declarators] '; [NL] 
+end define 
+
+define field_modifiers
+    [repeat field_modifier+]
+end define
+
+define field_modifier
+      'new
+    | 'public
+    | 'protected
+    | 'internal
+    | 'private
+    | 'static
+    | 'readonly
+    | 'volatile
+    | 'unsafe
+    | 'ref
+end define
+
+define variable_declarators
+    [list variable_declarator+]
+end define
+
+define variable_declarator 
+      [id] [opt equals_variable_initializer]
+end define
+
+define equals_variable_initializer
+    '= [variable_initializer] 
+end define 
+
+define variable_initializer 
+      [expression] 
+    | [array_initializer] 
+    | [stackalloc_initializer]
+end define 
+
+define method_declaration 
+    [method_header]                                   [NL] 
+        [method_body_or_right_arrow_expression_semi]  [NL]    % 6th Ed. - JRC 4.4.19
+end define 
+
+define method_header 
+    [opt attributes] [opt method_modifiers] [opt return_modifiers] [return_type] 
+        [member_name] [opt type_parameter_list] '( [opt formal_parameter_list] ') 
+                [opt type_parameter_constraints_clauses] 
+end define 
+
+define method_body_or_right_arrow_expression_semi
+      [method_body]
+    | [right_arrow_expression] '; [NL]
+end define
+
+define method_modifiers
+    [repeat method_modifier+]
+end define
+
+define method_modifier
+      'new 
+    | 'public 
+    | 'protected 
+    | 'internal 
+    | 'private 
+    | 'static 
+    | 'virtual 
+    | 'sealed 
+    | 'override 
+    | 'abstract 
+    | 'extern 
+    | 'partial
+    | 'async        % 5th Ed. - JRC 4.4.19
+    | 'unsafe
+    | 'ref          % Observed - JRC 13.4.19
+    | 'readonly     % Observed - JRC 13.4.19
+end define
+
+define return_modifiers
+    [repeat return_modifier+]
+end define
+
+define return_modifier
+    'ref | 'unsafe
+end define
+
+define return_type
+      [type]
+end define
+
+define member_name
+    [opt interface_type_dot] [id]
+end define
+
+define interface_type_dot
+    [class_type] '.
+end define
+
+define method_body 
+      [block]   [NL]
+    | ';        [NL]
+end define 
+
+define formal_parameter_list 
+    [fixed_parameters] [opt comma_parameter_array]
+end define
+
+define comma_parameter_array
+    ', [parameter_array] 
+end define 
+
+define fixed_parameters
+    [list fixed_parameter+]
+end define
+
+define fixed_parameter 
+      [opt attributes] [opt parameter_modifier] [type] [id] 
+          [parameter_default_value?]    % 5th Ed. - JRC 4.4.19
+    | [parameter_array]                 % Observed - JRC 18.6.08
+end define 
+
+define parameter_modifier 
+      'ref 
+    | 'out | 'in    % 7th Ed. - JRC 6.4.19
+    | 'this         % Observed - JRC 5.4.19
+end define 
+
+define parameter_default_value
+    '= [expression]
+end define
+
+define parameter_array 
+      [opt attributes] 'params [array_type] [id] 
+    | '__arglist
+end define 
+
+define property_declaration 
+    [NL] [property_header] [NL] 
+        [property_body_or_right_arrow_expression_semi] [NL]    % 6th Ed. or - JRC 4.4.19
+end define
+
+define property_header
+    [opt attributes] [opt property_modifiers] [opt return_modifiers] [return_type] [member_name] 
+end define
+
+define property_body_or_right_arrow_expression_semi
+      [property_body]
+    | [right_arrow_expression] '; [NL]
+end define
+
+define property_body
+    '{                            [NL] [IN] 
+        [accessor_declarations]   [EX]
+    '}                            [NL]                            
+    [property_initializer?]       % 6th Ed. - JRC 4.4.19
+end define
+
+define property_modifiers
+    [repeat property_modifier+]
+end define
+
+define property_modifier
+      'new 
+    | 'public 
+    | 'protected 
+    | 'internal 
+    | 'private 
+    | 'static 
+    | 'virtual 
+    | 'sealed 
+    | 'override 
+    | 'abstract 
+    | 'extern 
+    | 'unsafe
+    | 'readonly
+    | 'ref
+end define
+
+define property_initializer
+    '= [variable_initializer] '; [NL]
+end define
+
+define accessor_declarations
+      [repeat accessor_declaration+] 
+end define
+
+define accessor_declaration
+    [opt attributes] [opt accessor_modifiers] [get_or_set] 
+        [accessor_body_or_right_arrow_expression_semi]        % 7th Ed. or - JRC 6.4.19
+end define
+
+define get_or_set
+    'get | 'set
+end define
+
+define accessor_body_or_right_arrow_expression_semi
+      [accessor_body]
+    | [right_arrow_expression] '; [NL]
+end define
+
+define accessor_modifiers
+    [repeat accessor_modifier+]
+end define
+
+define accessor_modifier
+      'protected 
+    | 'internal 
+    | 'private 
+    | 'readonly
+end define
+
+define accessor_body
+      [block]   [NL]
+    | ';        [NL]
+end define
+
+define event_declaration 
+      [opt attributes] [opt event_modifiers] 'event [type] [variable_declarators] '; [NL] 
+    | [opt attributes] [opt event_modifiers] 'event [type] [member_name] [NL] 
+          [event_body]
+end define
+
+define event_body
+      '{                                    [NL] [IN] 
+            [event_accessor_declarations]   [EX]
+      '}                                    [NL]
+end define 
+
+define event_modifiers
+    [repeat event_modifier+]
+end define
+
+define event_modifier
+      'new 
+    | 'public 
+    | 'protected 
+    | 'internal 
+    | 'private 
+    | 'static 
+    | 'virtual 
+    | 'sealed 
+    | 'override 
+    | 'abstract 
+    | 'extern 
+    | 'unsafe
+end define
+
+define event_accessor_declarations 
+      [repeat event_accessor_declaration+] 
+end define 
+
+define event_accessor_declaration 
+    [opt attributes] [add_or_remove]
+        [accessor_body_or_right_arrow_expression_semi]
+end define 
+
+define add_or_remove
+    'add | 'remove
+end define
+
+define indexer_declaration 
+    [opt attributes] [opt indexer_modifiers] [indexer_declarator] 
+        [indexer_body_or_right_arrow_expression_semi]    % 6th Ed. or - JRC 6.4.19
+end define
+
+define indexer_body_or_right_arrow_expression_semi
+      [indexer_body]
+    | [right_arrow_expression] '; [NL]
+end define
+
+define indexer_body
+    '{                            [NL] [IN] 
+        [accessor_declarations]   [EX] 
+    '}                            [NL]
+end define
+
+define indexer_modifiers
+    [repeat indexer_modifier+]
+end define
+
+define indexer_modifier
+      'new 
+    | 'public 
+    | 'protected 
+    | 'internal 
+    | 'private 
+    | 'virtual 
+    | 'sealed 
+    | 'override 
+    | 'abstract 
+    | 'extern 
+    | 'unsafe
+end define
+
+define indexer_declarator 
+    [type] [opt interface_type_dot] 'this '[ [formal_parameter_list] '] 
+end define 
+
+define operator_declaration 
+    [opt attributes] [opt operator_modifiers] [operator_declarator] 
+        [operator_body_or_right_arrow_expression_semi]    % 6th Ed. or - JRC 4.4.19
+end define 
+
+define operator_body_or_right_arrow_expression_semi
+      [operator_body]
+    | [right_arrow_expression] '; [NL]
+end define
+
+define right_arrow_expression
+      [IN] '=> [opt return_modifiers] [expression] [EX]
+end define
+
+define operator_modifiers
+    [repeat operator_modifier+]
+end define
+
+define operator_modifier
+      'public
+    | 'static
+    | 'extern
+    | 'unsafe
+end define
+
+define operator_declarator 
+      [unary_operator_declarator]
+    | [binary_operator_declarator]
+    | [conversion_operator_declarator]
+end define
+
+define unary_operator_declarator
+    [type] ['operator ?] [overloadable_unary_operator]    % Observed optional - JRC 9.4.18
+        '( [opt in_or_out] [type] [id] ')
+end define
+
+define overloadable_unary_operator
+    '+ | '- | '! | '~ | '++ | '-- | 'true | 'false
+end define
+
+define binary_operator_declarator
+    [type] ['operator ?] [overloadable_binary_operator]   % Observed optional - JRC 9.4.18
+        '( [opt in_or_out] [type] [id] ', [opt in_or_out] [type] [id] ')
+end define
+
+define overloadable_binary_operator 
+      '+ | '- | '* | '/ | '% 
+    | '& | '| | '^
+    | '<< | '>>
+    | '== | '!= | '> | '< | '>= | '<= 
+end define
+
+define conversion_operator_declarator
+    [implicit_or_explicit] 'operator [type] '( [opt in_or_out] [type] [id] ')
+end define
+
+define implicit_or_explicit
+    'implicit | 'explicit
+end define
+
+define in_or_out
+    'in | 'out
+end define
+
+define operator_body 
+      [block]   [NL]
+    | ';        [NL]
+end define 
+
+define constructor_declaration 
+    [opt attributes] [opt constructor_modifiers] [constructor_declarator] [NL]
+        [constructor_body_or_right_arrow_expression_semi] [NL]    % 7th Ed. or - JRC 6.4.19
+end define 
+
+define constructor_body_or_right_arrow_expression_semi
+      [constructor_body]
+    | [right_arrow_expression] '; [NL]
+end define
+
+define constructor_modifiers
+    [repeat constructor_modifier+]
+end define
+
+define constructor_modifier
+      'public
+    | 'protected
+    | 'internal
+    | 'private
+    | 'static
+    | 'extern
+    | 'unsafe
+end define
+
+define constructor_declarator 
+    [id] '( [opt formal_parameter_list] ') [opt constructor_initializer] 
+end define 
+
+define constructor_initializer
+      ': 'base '( [opt argument_list] ')
+    | ': 'this '( [opt argument_list] ')
+end define
+
+define constructor_body 
+      [block]   [NL]
+    | ';        [NL]
+end define 
+
+define finalizer_declaration
+    [opt attributes] [opt finalizer_modifiers] '~ [id] '( ') 
+        [finalizer_body_or_right_arrow_expression_semi]
+end define 
+
+define finalizer_modifiers
+    [repeat finalizer_modifier+]
+end define
+
+define finalizer_modifier
+    'extern | 'unsafe
+end define
+
+define finalizer_body_or_right_arrow_expression_semi
+      [finalizer_body]
+    | [right_arrow_expression] '; [NL]
+end define
+
+define finalizer_body 
+      [block]   [NL]
+    | ';        [NL]
+end define 
+
+
+% A.2.7 Structs
+
+define struct_declaration 
+    [opt attributes] [opt struct_modifiers] [opt 'partial] 'struct [id] [opt type_parameter_list] 
+    [opt struct_interfaces] [opt type_parameter_constraints_clauses] [NL]
+        [struct_body] [NL]
+end define 
+
+define struct_modifiers
+    [repeat struct_modifier+]
+end define
+
+define struct_modifier
+      'new
+    | 'public
+    | 'protected
+    | 'internal
+    | 'private
+    | 'readonly    % 6th Ed. - JRC 4.4.19
+    | 'ref         % Observed - JRC 10.4.19
+    | 'unsafe
+end define
+
+define struct_interfaces
+    ': [interface_type_list]
+end define
+
+define interface_type_list
+    [list class_type+]
+end define
+
+define struct_body 
+    '{                                     [NL] [IN]
+        [opt struct_member_declarations]   [EX] 
+    '} [opt ';]                            [NL]
+end define 
+
+define struct_member_declarations
+    [repeat struct_member_declaration+]
+end define
+
+define struct_member_declaration 
+      [constant_declaration] 
+    | [field_declaration] 
+    | [method_declaration] 
+    | [property_declaration] 
+    | [event_declaration] 
+    | [indexer_declaration] 
+    | [operator_declaration] 
+    | [constructor_declaration] 
+    | [type_declaration] 
+    | [fixed_buffer_declaration]
+end define 
+
+define fixed_buffer_declaration
+    [opt attributes] [struct_modifiers?] 'fixed [type] [fixed_size_buffer_declarators] '; [NL]
+end define
+
+define fixed_size_buffer_declarators
+    [repeat fixed_size_buffer_declarator+]
+end define
+
+define fixed_size_buffer_declarator
+    [id] '[ [expression] ']
+end define
+
+
+% A.2.8 Arrays
+
+% array_type, non_array_type, rank_specifiers, variable_initializer already defined above,
+% apparent redundancy in specification - JRC
+
+define array_initializer 
+    '{ [opt variable_initializer_list] [opt ',] '} 
+end define 
+
+define variable_initializer_list
+    [list variable_initializer+]
+end define
+
+define stackalloc_initializer
+    'stackalloc [type] '[ [expression] ']
+end define
+
+
+% A.2.9 Interfaces
+
+define interface_declaration 
+    [opt attributes] [opt interface_modifiers] [opt 'partial] 'interface [id] 
+    [opt type_parameter_list] [opt interface_base] [opt type_parameter_constraints_clauses] [NL]
+        [interface_body] [NL]
+end define 
+
+define interface_modifiers
+    [repeat interface_modifier]
+end define
+
+define interface_modifier
+      'new
+    | 'public
+    | 'protected
+    | 'internal
+    | 'private
+    | 'unsafe
+end define
+
+define interface_base
+    ': [interface_type_list]
+end define
+
+define interface_body 
+    '{                                        [NL] [IN] 
+        [opt interface_member_declarations]   [EX] 
+    '} [opt ';]                               [NL]
+end define 
+
+define interface_member_declarations
+    [repeat interface_member_declaration+]
+end define
+
+define interface_member_declaration 
+      [interface_method_declaration] 
+    | [interface_property_declaration] 
+    | [interface_event_declaration] 
+    | [interface_indexer_declaration] 
+end define 
+
+define interface_method_declaration 
+    [opt attributes] [opt 'new] [opt return_modifiers] [return_type] [id] [opt type_parameter_list] '( [opt formal_parameter_list] ') 
+        [opt type_parameter_constraints_clauses] '; [NL]
+end define 
+
+define interface_property_declaration 
+    [opt attributes] [opt 'new] [type] [id] [NL]
+    '{                          [NL] [IN] 
+        [interface_accessors]   [EX]
+    '}                          [NL]
+end define
+
+define interface_accessors
+    [repeat interface_accessor+]
+end define
+
+define interface_accessor
+    [opt attributes] [get_or_set] '; [NL]
+end define
+
+define interface_event_declaration 
+    [opt attributes] [opt 'new] 
+        [opt 'public]    % Observed - JRC 8.4.19
+        'event [type] [id] ';   [NL]
+end define
+
+define interface_indexer_declaration 
+    [opt attributes] [opt 'new] [type] 'this '[ [formal_parameter_list] '] 
+    '{                          [NL] [IN] 
+        [interface_accessors]   [EX] 
+    '}                          [NL]
+end define 
+
+
+% A.2.10 Enums
+
+define enum_declaration 
+    [opt attributes] [opt enum_modifiers] 'enum [id] [opt type_parameter_list] [opt enum_base] 
+        [enum_body] [NL]
+end define 
+
+define enum_base
+    ': [type]
+end define
+
+define enum_body 
+    '{                                            [NL] [IN]
+        [opt enum_member_declarations] [opt ',]   [EX] [NL]
+    '} [opt ';]                                   [NL]
+end define 
+
+define enum_modifiers
+    [repeat enum_modifier+]
+end define
+
+define enum_modifier
+      'new
+    | 'public
+    | 'protected
+    | 'internal
+    | 'private
+end define
+
+define enum_member_declarations
+    [list enum_member_declaration+]
+end define
+
+define enum_member_declaration 
+     [opt attributes] [id] [opt equals_constant_expression] 
+end define 
+
+define equals_constant_expression
+    '= [constant_expression]
+end define
+
+
+% A.2.11 Delegates
+
+define delegate_declaration 
+    [opt attributes] [opt delegate_modifiers] 'delegate [opt return_modifiers] [return_type] [id] [opt type_parameter_list]
+        '( [opt formal_parameter_list] ') [opt type_parameter_constraints_clauses] '; [NL] 
+end define 
+
+define delegate_modifiers
+    [repeat delegate_modifier+]
+end define
+
+define delegate_modifier
+      'new
+    | 'public
+    | 'protected
+    | 'internal
+    | 'private
+    | 'unsafe
+end define
+
+
+% A.2.12 Attributes
+
+define global_attributes 
+    [global_attribute_sections] 
+end define 
+
+define global_attribute_sections
+    [repeat global_attribute_section+]
+end define
+
+define global_attribute_section
+    '[ [global_attribute_target_specifier] [attribute_list] [opt ',] ']
+end define
+
+define global_attribute_target_specifier
+    [global_attribute_target] ':
+end define
+
+define global_attribute_target
+    [id] | [key]
+end define
+
+define attributes
+    [attribute_sections]
+end define
+
+define attribute_sections
+    [repeat attribute_section+] 
+end define 
+
+define attribute_section 
+    '[ [opt attribute_target_specifier ] [attribute_list] [opt ',] '] [NL]
+end define 
+
+define attribute_target_specifier 
+    [attribute_target] ': 
+end define 
+
+define attribute_target 
+    [id] | [key]
+end define 
+
+define attribute_list
+    [list attribute+]
+end define
+
+define attribute 
+    [attribute_name] [opt attribute_arguments] 
+end define 
+
+define attribute_name 
+    [type_name] 
+end define 
+
+define attribute_arguments 
+    '( [attribute_argument_list] ') 
+end define 
+
+define attribute_argument_list
+    [list attribute_argument]
+end define
+
+define attribute_argument
+      [attribute_label?] [positional_argument]
+    | [named_argument]
+end define 
+
+define attribute_label    % 6th Ed. - JRC 6.4.19
+    [id] ':
+end define
+
+define positional_argument
+    [attribute_argument_expression] 
+end define 
+
+define named_argument 
+    [id] '= [attribute_argument_expression] 
+end define 
+
+define attribute_argument_expression
+    [expression]
+end define
+
+
+% A.2.13 Generics
+
+define type_parameter_list
+        '< [type_parameters] '> 
+end define
+
+define type_parameters
+    [list attributes_type_parameter+]
+end define
+
+define attributes_type_parameter
+    [opt attributes] [type_parameter]
+end define
+
+define type_parameter
+    [variance_annotation ?] [id]
+end define
+
+define variance_annotation
+    'in | 'out
+end define
+
+define type_argument_list
+        '< [list type_argument+] '>
+end define
+
+define type_argument
+    [type?]    % Observed empty - JRC 8.4.19
+end define
+
+define type_parameter_constraints_clauses
+    [repeat type_parameter_constraints_clause+]
+end define
+
+define type_parameter_constraints_clause
+    'where [type_parameter] ': [type_parameter_constraints]
+end define
+
+define type_parameter_constraints
+    [list type_parameter_constraint]
+end define
+
+define type_parameter_constraint
+      [primary_constraint]
+    | [secondary_constraint]
+    | [constructor_constraint]
+end define
+
+define primary_constraint
+      [class_type]
+    | 'class
+    | 'struct
+end define
+
+define secondary_constraint
+      [class_type]
+    | [type_parameter]
+end define
+
+define constructor_constraint
+    'new '( ')
+end define
+
+define sizeof_expression
+    'sizeof '( [type] ')
+end define
+
+define nameof_expression    % 6th Ed. - JRC 4.4.19
+    'nameof '( [repeat id_dot] [id] ')
+end define
+
+define id_dot
+    [id] '.
+end define
+
+define fixed_statement
+    'fixed '( [type] [fixed_pointer_declarators] ') [statement]
+end define
+
+define fixed_pointer_declarators
+    [list fixed_pointer_declarator+]
+end define
+
+define fixed_pointer_declarator
+    [id] '= [fixed_pointer_initializer]
+end define
+
+define fixed_pointer_initializer
+    [expression]
+end define
+
+% End of grammar

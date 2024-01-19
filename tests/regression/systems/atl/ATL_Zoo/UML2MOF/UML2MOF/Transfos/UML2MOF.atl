@@ -1,0 +1,599 @@
+module UML2MOF;
+create OUT : MOF from IN : UML;
+
+
+uses strings;
+
+
+-------------------------------------------------------------------------------
+-- HELPERS --------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- This helper computes a MOF!VisibilityKind from a UML!VisibilityKind.
+-- CONTEXT: thisModule
+-- IN:		UML!VisibilityKind
+-- RETURN:	MOF!VisibilityKind
+helper def: getVisibility(v : UML!VisibilityKind) : MOF!VisibilityKind =
+	if v = #vk_public
+	then
+		#public_vis
+	else
+		if v = #vk_private
+		then
+			#private_vis
+		else
+			if v = #vk_protected
+			then
+				#protected_vis
+			else
+				#public_vis	-- default
+			endif
+		endif
+	endif;
+
+-- This helper computes the MOF!VisibilityKind that corresponds to the
+-- UML!VisibilityKind of the contextual UML!ModelElement. If this visibility
+-- kind is undefined, the helper retuns 'public_vis' as a default value.
+-- CONTEXT: UML!ModelElement
+-- RETURN:	MOF!VisibilityKind
+helper context UML!ModelElement def: getMOFVisibility() : MOF!VisibilityKind =
+	let v : UML!VisibilityKind = self.visibility in
+	if not v.oclIsUndefined()
+	then
+		thisModule.getVisibility(v)
+	else
+		#public_vis
+	endif;
+
+-- This helper computes the MOF!ScopeKind that corresponds to the
+-- UML!ScopeKind of the contextual UML!Feature.
+-- CONTEXT: UML!Feature
+-- RETURN:	MOF!ScopeKind
+helper context UML!Feature def: getMOFScope() : MOF!ScopeKind =
+	if self.ownerScope = #sk_instance
+	then
+		#instance_level
+	else
+		#classifier_level
+	endif;
+
+-- This helper computes the MOF isChangeable boolean attribute that corresponds
+-- to the UML!Changeability of the contextual UML!ModelElement (whose
+-- changeability is not undefined).
+-- CONTEXT: UML!ModelElement
+-- RETURN:	Boolean
+helper context UML!ModelElement def: getIsChangeable() : Boolean =
+	(self.changeability = #ck_changeable);
+
+-- This helper computes the MOF isChangeable boolean attribute that corresponds
+-- to the UML!Changeability of the contextual UML!ModelElement. If this
+-- changeability is undefined, the helper retuns true as a default value.
+-- CONTEXT: UML!ModelElement
+-- RETURN:	Boolean
+helper context UML!ModelElement def: getMOFIsChangeable() : Boolean =
+	if not self.changeability.oclIsUndefined()
+	then
+		self.getIsChangeable()
+	else
+		true
+	endif;
+
+-- This helper computes the tuple encoding the MOF multiplicity that
+-- corresponds to the UML!Multiplicity, UML!OrederingKind, and the isUnique
+-- boolean provided as parameters.
+-- CONTEXT: thisModule
+-- IN:		UML!Multiplicity, UML!OrderingKind,	Boolean
+-- RETURN:	TupleType(Integer, Integer, Boolean, Boolean)
+helper def: getMultiplicity(m : UML!Multiplicity,
+							o : UML!OrderingKind,
+							isUnique : Boolean) :
+							TupleType(lower : Integer,
+									  upper : Integer,
+									  isOrdered : Boolean,
+									  isUnique : Boolean) =
+	Tuple{
+		lower = m.range->asSequence()->first().lower,
+		upper = m.range->asSequence()->first().upper,
+		isOrdered = (o = 'ok_ordered'),
+		isUnique = isUnique
+	};
+
+-- This helper computes the tuple encoding the MOF multiplicity that
+-- corresponds to the UML!Multiplicity of the contextual UML!StructuralFeature.
+-- If the multiplicity of the contextual structural feature is undefined, the
+-- helper returns (1,1,true,true) as a default tuple. Otherwise, it returns the
+-- tuple computed by the getMultiplicity helper. Note that if the ordering of
+-- the contextual structural feature is undefined, it is considered as ordered.
+-- CONTEXT: UML!StructuralFeature
+-- RETURN:	TupleType(Integer, Integer, Boolean, Boolean)
+helper context UML!StructuralFeature def: getMOFMultiplicity() : 
+						TupleType(lower : Integer, upper : Integer,
+								  isOrdered : Boolean, isUnique : Boolean) =
+	if not self.multiplicity.oclIsUndefined()
+	then
+		if not self.ordering.oclIsUndefined()
+		then
+			thisModule.getMultiplicity(self.multiplicity, self.ordering, false)
+		else
+			thisModule.getMultiplicity(self.multiplicity, 'ok_ordered', false)
+		endif
+	else
+		Tuple{lower = 1, upper = 1, isOrdered = true, isUnique = true}
+	endif;
+	
+-- Helper ...
+-- CONTEXT: UML!ModelElement
+-- RETURN:	String
+--helper context UML!ModelElement def: getMOFQualifiedName() : String =
+--	self.name;
+	
+
+-------------------------------------------------------------------------------
+-- RULES ----------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- Rule 'Package'
+-- This rule generates a MOF package from each UML package that has a
+-- stereotype named 'metamodel'.
+-- Supertypes of the generated package correspond to the parent of the
+-- generalization of the input UML package.
+rule Package {
+	from
+		up : UML!Package (
+			up.stereotype->exists(e | e.name = 'metamodel')
+		)
+	to
+		mp : MOF!Package (
+			-- Begin bindings inherited from ModelElement
+			name <- up.name,
+			annotation <- '',
+			container <- up.namespace,
+			constraints <- up.constraint,
+--			requiredElements <-,
+			-- End of bindings inherited from ModelElement
+			
+			-- Begin bindings inherited from Namespace
+			contents <- up.ownedElement,
+			-- End of bindings inherited from Namespace
+			
+			-- Begin bindings inherited from GeneralizableElement
+			isRoot <- up.isRoot,
+			isLeaf <- up.isLeaf,
+			isAbstract <- up.isAbstract,
+			visibility <- up.getMOFVisibility(),
+			supertypes <- up.generalization->collect(e | e.parent)
+			-- End of bindings inherited from GeneralizableElement
+		)
+}
+
+-- Rule 'Constraint'
+-- This rule generates a MOF constraint from a UML one. Properties of the
+-- generated constraint, except evaluationPolicy, are copied from the input UML
+-- constraint.
+-- The MOF evaluationPolicy property, which has no equivalent in UML, is set to
+-- the default 'immediate' value.
+rule Constraint {
+	from
+		uc : UML!Constraint
+	to
+		mc : MOF!Constraint(
+			-- Begin bindings inherited from ModelElement
+			name <- uc.name,
+			annotation <- '',
+			container <- uc.namespace,
+			constraints <- uc.constraint,
+--			requiredElements <-,
+			-- End of bindings inherited from ModelElement
+
+			expression <- uc.body.body,
+			language <- uc.body.language,
+			constrainedElements <- uc.constrainedElement,
+			evaluationPolicy <- #immediate
+		)
+}
+
+-- Rule 'Comment'
+-- This rule generates a MOF constraint from each UML Comment that has a
+-- 'constraint' stereotype.
+-- The content of the generated constraint corresponds to the body of the input
+-- UML comment, its language is associated with the OCL default value.
+rule Comment {
+	from
+		uc : UML!Comment (
+			uc.stereotype->exists(e | e.name = 'constraint')
+		)
+	to
+		mc : MOF!Constraint(
+			-- Begin bindings inherited from ModelElement
+			name <- uc.name,
+			annotation <- '',
+			container <- uc.namespace,
+			constraints <- uc.constraint,
+--			requiredElements <-,
+			-- End of bindings inherited from ModelElement
+
+			expression <- uc.body,
+			language <- 'OCL',
+			constrainedElements <- uc.annotatedElement
+		)
+}
+
+-- Rule 'Class'
+-- This rule generates a MOF class from each UML class whose namespace (which
+-- expected to be a Package) has a 'metamodel' stereotype.
+-- Properties of the generated class are copied from the input UML class
+-- properties.
+rule Class {
+	from
+		uc : UML!Class (
+			uc.namespace.stereotype->exists(e | e.name = 'metamodel')
+		)
+	to
+		mc : MOF!Class (
+			-- Begin bindings inherited from ModelElement
+			name <- uc.name,
+			annotation <- '',
+			container <- uc.namespace,
+			constraints <- uc.constraint,
+--			requiredElements <-,
+			-- End of bindings inherited from ModelElement
+
+			-- Begin bindings inherited from Namespace
+			contents <- uc.ownedElement,
+			-- End of bindings inherited from Namespace
+			
+			-- Begin bindings inherited from GeneralizableElement
+			isRoot <- uc.isRoot,
+			isLeaf <- uc.isLeaf,
+			isAbstract <- uc.isAbstract,
+			visibility <- uc.getMOFVisibility(),
+			supertypes <- uc.generalization->collect(e | e.parent),
+			-- End of bindings inherited from GeneralizableElement
+
+			isSingleton <- false
+		)
+}
+
+-- Rule 'Attribute'
+-- This rule generates a MOF attribute from each UML attribute.
+-- Properties of the generated attribute are copied from the input UML
+-- attribute properties. Note that the 'isDerived' attribute is set to the
+-- false default value.
+rule Attribute {
+	from
+		ua : UML!Attribute
+	to
+		ma : MOF!Attribute (
+			-- Begin bindings inherited from ModelElement
+			name <- ua.name,
+			annotation <- '',
+			container <- ua.owner,
+			constraints <- ua.constraint,
+--			requiredElements <-,
+			-- End of bindings inherited from ModelElement
+			
+			-- Begin bindings inherited from Feature
+			scope <- ua.getMOFScope(),
+			visibility <- ua.getMOFVisibility(),
+			-- End of bindings inherited from Feature
+			
+			-- Begin bindings inherited from StructuralFeature
+			multiplicity <- ua.getMOFMultiplicity(),
+			isChangeable <- ua.getMOFIsChangeable(),
+			-- End of bindings inherited from StructuralFeature
+			
+			-- Begin bindings inherited from TypedElement
+			type <- ua.type,
+			-- End of bindings inherited from TypedElement
+
+			isDerived <- false
+		)
+}
+
+-- Rule 'Parameter'
+-- This rule generates a MOF parameter from each UML parameter.
+-- Properties of the generated parameter are copied from the input UML
+-- parameter properties. Note that the MOF multiplicity attribute is not set
+-- since the corresponding information is not available in the UML metamodel.
+-- The MOF multiplicity attribute, not encoded in UML, is left undefined.
+rule Parameter {
+	from
+		up : UML!Parameter
+	to
+		mp : MOF!Parameter (
+			-- Begin bindings inherited from ModelElement
+			name <- up.name,
+			annotation <- '',
+			container <- up.namespace,
+			constraints <- up.constraint,
+--			requiredElements <-,
+			-- End of bindings inherited from ModelElement
+			
+			-- Begin bindings inherited from TypedElement
+			type <- up.type,
+			-- End of bindings inherited from TypedElement
+
+			direction <-
+				if up.kind = #pdk_in
+				then
+					#in_dir
+				else
+					if up.kind = #pdk_inout
+					then
+						#inout_dir
+					else
+						if up.kind = #pdk_out
+						then
+							#out_dir
+						else
+							#return_dir
+						endif
+					endif
+				endif
+--			multiplicity <-
+		)
+}
+
+-- Rule 'Operation'
+-- This rule generates a MOF operation from each UML operation.
+-- Properties of the generated operation are copied from the input UML
+-- operation properties. Note that the exceptions property of the generated
+-- MOF operation is set to an empty set as a default value.
+rule Operation {
+	from
+		uo : UML!Operation
+	to
+		mo : MOF!Operation (
+			-- Begin bindings inherited from ModelElement
+			name <- uo.name,
+			annotation <- '',
+			container <- uo.owner,
+			constraints <- uo.constraint,
+--			requiredElements <-,
+			-- End of bindings inherited from ModelElement
+
+			-- Begin bindings inherited from Namespace
+			contents <- uo.parameter,
+			-- End of bindings inherited from Namespace
+
+			-- Begin bindings inherited from Feature
+			scope <- uo.getMOFScope(),
+			visibility <- uo.getMOFVisibility(),
+			-- End of bindings inherited from Feature
+
+			isQuery <- uo.isQuery,
+			exceptions <- Set{}
+		)
+}
+
+-- Rule 'Association'
+-- This rule generates a MOF association from each UML association.
+-- Properties of the generated association are copied from the input UML
+-- association properties. contents of the generated association correspond to
+-- the MOF association end generated for the connection of the input UML
+-- association.
+rule Association {
+	from
+		ua : UML!Association
+	to
+		ma : MOF!Association (
+			-- Begin bindings inherited from ModelElement
+			name <- ua.name,
+			annotation <- '',
+			container <- ua.namespace,
+			constraints <- ua.constraint,
+--			requiredElements <-,
+			-- End of bindings inherited from ModelElement
+			
+			-- Begin bindings inherited from Namespace
+			contents <- ua.connection,
+			-- End of bindings inherited from Namespace
+			
+			-- Begin bindings inherited from GeneralizableElement
+			isRoot <- ua.isRoot,
+			isLeaf <- ua.isLeaf,
+			isAbstract <- ua.isAbstract,
+			visibility <- ua.getMOFVisibility(),
+			supertypes <- ua.generalization->collect(e | e.parent)
+			-- End of bindings inherited from GeneralizableElement
+		)
+}
+
+-- Rule 'AssociationEnd'
+-- This rule generates a MOF association end, along with an optional reference,
+-- from each UML association end.
+-- The MOF reference is only generated from navigable UML association ends. For
+-- this purpose, the rule iterates through a Sequence that contains 1 element
+-- if UML association end is navigable, 0 otherwise.
+-- Properties of the generated association end are copied from the input UML
+-- association end properties.
+-- When generated, the reference has the same name than its associated
+-- association end. Its container corresponds to the class that to which is
+-- associated the other association end contained by the association that also
+-- contains the input UML association end.
+-- Its scope and visibilty are respectively set to the 'instance_level' and
+-- 'public_vis' default values. The values of its type, mutliplicity and
+-- isChangeable attributes are copied from the input UML association end.
+-- The constraints of the generated reference are packed within a single
+-- element Sequence for the purpose of compatibility with the reference
+-- sequence of the 'foreach' operator.
+-- Finally, ...
+rule AssociationEnd {
+	from
+		ua : UML!AssociationEnd
+	to
+		ma : MOF!AssociationEnd(
+			-- Begin bindings inherited from ModelElement
+			name <- ua.name,
+			annotation <- '',
+			container <- ua.association,
+			constraints <- ua.constraint,
+--			requiredElements <-,
+			-- End of bindings inherited from ModelElement
+			
+			-- Begin bindings inherited from TypedElement
+			type <- ua.participant,
+			-- End of bindings inherited from TypedElement
+
+			isNavigable <- ua.isNavigable,
+			aggregation <-
+				if ua.aggregation = #ak_aggregate
+				then
+					#shared
+				else
+					if ua.aggregation = #ak_composite
+					then
+						#composite
+					else
+						#none
+					endif
+				endif,
+			multiplicity <-
+				thisModule.getMultiplicity(ua.multiplicity, ua.ordering, true),
+			isChangeable <- ua.getMOFIsChangeable()
+		),
+		
+		mr : distinct MOF!Reference foreach(c in
+									if ua.isNavigable
+									then
+										Sequence{true}
+									else
+										Sequence{}
+									endif) (
+			-- Begin bindings inherited from ModelElement
+			name <- ua.name,
+			annotation <- '',
+			container <- ua.association.connection
+							->select(e | not (e = ua))
+							->first().participant,
+			constraints <- Sequence{ua.constraint},
+--			requiredElements <-,
+			-- End of bindings inherited from ModelElement
+
+			-- Begin bindings inherited from Feature
+			scope <- #instance_level,
+			visibility <- ua.getMOFVisibility(),
+			-- End of bindings inherited from Feature
+
+			-- Begin bindings inherited from StructuralFeature
+			-- If the 2 following bindings are exchnaged with the referencedEnd
+			-- one, an error may be raised due to MDR inconstency checkings.
+			multiplicity <-
+				thisModule.getMultiplicity(ua.multiplicity, ua.ordering, true),
+			isChangeable <- ua.getMOFIsChangeable(),
+			-- End of bindings inherited from StructuralFeature
+	
+			-- Begin bindings inherited from TypedElement
+			type <- ua.participant,
+			-- End of bindings inherited from TypedElement
+
+			-- The Association corresponding to the Reference is derived: the
+			-- exposedEnd reference should not be assigned.
+--			exposedEnd <- ua.association.connection
+--							->select(e | not (e = ua))->first(),
+			referencedEnd <- ma
+		)
+}
+
+-- Rule 'TaggedValue'
+-- This rule generates a MOF tag from each UML tagged value whose type is
+-- neither named 'element.uuid' nor 'isValid'.
+-- Properties of the generated tag are copied from the input UML tagged value
+-- properties.
+rule TaggedValue {
+	from
+		ut : UML!TaggedValue (
+			(ut.type.name <> 'element.uuid') and
+			(ut.type.name <> 'isValid')
+		)
+	using {
+		name : String = ut.type.name;
+	}
+	to
+		ot : MOF!Tag (
+			-- Begin bindings inherited from ModelElement
+			name <- ut.name,
+			annotation <- '',
+			container <- ut.namespace,
+			constraints <- ut.constraint,
+--			requiredElements <-,
+			-- End of bindings inherited from ModelElement
+
+			tagId <- name,
+			values <- ut.dataValue,
+			elements <- Sequence{ut.modelElement}
+		)
+}
+
+-- Rule 'Dependency'
+-- The rule generates a MOF!Import from each input UML!Dependency that has a
+-- stereotype of either 'clustering' or 'import' type. Note that input
+-- dependencies can have a clustering or an import stereotype, but not both.
+-- Properties of the generated import are copied from those of the input
+-- dependency. Note that the isClustered attribute is set to false if the
+-- input dependency has an 'import' stereotype, true otherwise (i.e. if it has
+-- a 'clustering' stereotype).
+rule Dependency {
+	from
+		ud : UML!Dependency (
+			ud.stereotype
+				->exists(e | e.name = 'import' or e.name = 'clustering')
+		)
+	using {
+		importer : UML!ModelElement = ud.client->asSequence()->first();
+		imported : UML!ModelElement = ud.supplier->asSequence()->first();
+	}
+	to
+		mi : MOF!Import (
+			-- Begin bindings inherited from ModelElement
+			name <- imported.name,
+			annotation <- '',
+			container <- importer,
+			constraints <- ud.constraint,
+--			requiredElements <-,
+			-- End of bindings inherited from ModelElement
+
+			visibility <- #public_vis,
+			isClustered <-
+					if ud.stereotype->exists(e | e.name = 'import')
+					then
+						false
+					else
+						true
+					endif,
+			importedNamespace <- imported
+		)
+}
+
+
+-- Rule 'DataType'
+-- This rule generates a MOF datatype from each UML datatype.
+-- Properties of the generated datatype are copied from the input UML datatype
+-- properties. Note that the visibility of the generated MOF datatype is set to
+-- the 'public_vis' default value.
+rule DataType{
+	from
+		ud : UML!DataType
+	to
+		md : MOF!PrimitiveType (
+			-- Begin bindings inherited from ModelElement
+			name <- ud.name,
+			annotation <- '',
+			container <- ud.namespace,
+			constraints <- ud.constraint,
+--			requiredElements <-,
+			-- End of bindings inherited from ModelElement
+
+			-- Begin bindings inherited from Namespace
+			contents <- ud.ownedElement,
+			-- End of bindings inherited from Namespace
+			
+			-- Begin bindings inherited from GeneralizableElement
+			isRoot <- ud.isRoot,
+			isLeaf <- ud.isLeaf,
+			isAbstract <- ud.isAbstract,
+			visibility <- #public_vis,
+			supertypes <- ud.generalization->collect(e | e.parent)
+			-- End of bindings inherited from GeneralizableElement
+		)
+}

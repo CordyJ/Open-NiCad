@@ -1,0 +1,430 @@
+module Maven2XML;
+create  XML1 : XMLMaven  , XML2 : XMLProject 
+			from InMaven : MavenMaven, InProject : MavenProject;
+
+-- In this module, the two files are transformed in XML
+-- but there is no link in the transformation
+
+-- helper getXmlnsAux : returns the name of the Xmlns element having
+-- the same value that given in parameter
+helper def:getXmlnsAux(name: String): String =
+	MavenMaven!Xmlns.allInstances() ->
+		select(e|e.value=name)->first().name;
+
+-- helper getXmlns : returns the prefix corresponding to name
+helper def:getXmlns(name: String): String =
+	let completeValue: String = thisModule.getXmlnsAux(name)in
+	if completeValue.size()>0
+		then completeValue+':'
+		else ''
+		endif;
+
+-- rules for the file representing maven.xml
+
+-- central rule for maven.xml
+rule MavenMavenProject2XMLMavenRoot{
+	from i : MavenMaven!Project
+	to o : XMLMaven!Root(
+		name <- 'project',
+		children <- Sequence {i.xmlns,goalDefault,
+								i.path,i.properties,i.taskdefs,
+								i.prePostGoals,i.goals}
+	),
+	goalDefault : XMLMaven!Attribute (
+		name <- 'default',
+		value <- i.default.name
+	)
+	
+}
+
+
+rule Xmlns{
+	from i : MavenMaven!Xmlns
+	to o:XMLMaven!Attribute(
+		name <- 'xmlns:'+i.name,
+		value <- i.value
+	)
+}
+------------------------------------------------------------------------------------
+-- Antproperty
+
+rule PropertyValue{
+	from i : MavenMaven!AntPropertyValue
+	to o : XMLMaven!Element(
+		name <- thisModule.getXmlns('jelly:ant')+'property',
+		children <- Sequence{propertyName2,propertyValue}
+	),
+	propertyName2 : XMLMaven!Attribute(
+		name <- 'name',
+		value <- i.name
+	),
+	propertyValue : XMLMaven!Attribute(
+		name <- 'value',
+		value <- i.value
+	)
+}
+rule PropertyLocation{
+	from i : MavenMaven!AntPropertyLocation
+	to o : XMLMaven!Element(
+		name <- thisModule.getXmlns('jelly:ant')+'property',
+		children <- Sequence{propertyName2,propertyLocation}
+	),
+	propertyName2 : XMLMaven!Attribute(
+		name <- 'name',
+		value <- i.name
+	),
+	propertyLocation : XMLMaven!Attribute(
+		name <- 'location',
+		value <- i.location
+	)
+}
+
+rule PropertyFile{
+	from i : MavenMaven!AntPropertyFile
+	to o : XMLMaven!Element(
+		name <- thisModule.getXmlns('jelly:ant')+'property',
+		children <- nameFile
+	),
+	nameFile : XMLMaven!Attribute(
+		name <- 'file',
+		value <- i.file
+	)
+}
+
+rule PropertyEnv{
+	from i : MavenMaven!AntPropertyEnv
+	to o : XMLMaven!Element(
+		name <- thisModule.getXmlns('jelly:ant')+'property',
+		children <- environmentName
+	),
+	environmentName : XMLMaven!Attribute(
+		name <- 'environment',
+		value <- i.environment
+	)
+}
+
+------------------------------------------------------------------------------------------------
+-- goal
+rule Goal{
+	from i : MavenMaven!Goal
+	to o : XMLMaven!Element(
+		name <- 'goal',
+		children <- Sequence{nameAttribute,i.contentsGoal}
+	),
+	nameAttribute : XMLMaven!Attribute(
+		name <- 'name',
+		value <- i.name
+	)
+}
+
+rule AttainGoal{
+	from i : MavenMaven!AttainGoal
+	to o : XMLMaven!Element (
+		name <- 'attainGoal',
+		children <- attainGoalAttribute
+	),
+	attainGoalAttribute : XMLMaven!Attribute (
+		name <- 'name',
+		value <- i.attainGoal.name
+	)
+}
+
+
+rule PreGoal{
+	from i : MavenMaven!PreGoal
+	to o : XMLMaven!Element(
+		name <- 'preGoal',
+		children <- Sequence{nameAttribute,i.contentsGoal}
+	),
+	nameAttribute : XMLMaven!Attribute(
+		name <- 'name',
+		value <- i.centralGoal.name
+	)
+}
+
+
+rule PostGoal{
+	from i : MavenMaven!PostGoal
+	to o : XMLMaven!Element(
+		name <- 'postGoal',
+		children <- Sequence{nameAttribute,i.contentsGoal}
+	),
+	nameAttribute : XMLMaven!Attribute(
+		name <- 'name',
+		value <- i.centralGoal.name
+	)
+}
+--------------------------------------------------------------------------------
+-- jelly commands
+
+rule JellySet{
+	from i:MavenMaven!JellySet
+	to o : XMLMaven!Element(
+		name <- thisModule.getXmlns('jelly:core')+'set',
+		children <- Sequence{varAttribute,valueAttribute}
+	),
+	varAttribute : XMLMaven!Attribute(
+		name <- 'var',
+		value <- i.var
+	),
+	valueAttribute : XMLMaven!Attribute(
+		name <- 'value',
+		value <- i.value
+	)
+}
+
+
+------------------------------------------------------------------------
+-- tasks
+
+------------------------------------------------------------------------
+-- task defined by the user
+rule TaskDef{
+	from i : MavenMaven!AntTaskDef
+	to o : XMLMaven!Element(
+		name <- thisModule.getXmlns('jelly:ant')+'taskdef',
+		children <- Sequence{nameName,nameClassName}
+	),
+	nameName : XMLMaven!Attribute(
+		name <- 'name',
+		value <- i.name
+	),
+	nameClassName : XMLMaven!Attribute(
+		name <- 'classname',
+		value <- i.classname
+	)
+}
+
+rule NewTask{
+	from i : MavenMaven!NewTask
+	to o : XMLMaven!Element(
+		name <- i.taskName.name,
+		children <- i.attributes
+	)
+}
+
+rule Attribut{
+	from i : MavenMaven!Attribut
+	to o : XMLMaven!Attribute(
+		name <- i.name,
+		value <- i.value
+	)
+}
+
+----------------------
+-- pre defined tasks
+
+rule Tstamp{
+	from i : MavenMaven!Tstamp
+	to o : XMLMaven!Element(
+		name <- thisModule.getXmlns('jelly:ant')+'tstamp'
+	)
+}
+
+rule Mkdir{
+	from i : MavenMaven!Mkdir
+	to o : XMLMaven!Element(
+		name <- thisModule.getXmlns('jelly:ant')+'mkdir',
+		children <- dirAttribute
+	),
+	dirAttribute : XMLMaven!Attribute(
+		name <- thisModule.getXmlns('jelly:ant')+'dir',
+		value <- i.dir
+	)
+}
+
+rule Javac{
+	from i : MavenMaven!Javac
+	to o : XMLMaven!Element(
+		name <- thisModule.getXmlns('jelly:ant')+'javac',
+		children <- Sequence{sourceDirAttribute,destDirAttribute,i.inExcludes,i.classPath}
+	),
+	sourceDirAttribute : XMLMaven!Attribute(
+		name <- 'srcdir',
+		value <- i.srcdir
+	),
+	destDirAttribute : XMLMaven!Attribute(
+		name <- 'destdir',
+		value <- i.destdir
+	)
+}
+
+rule Copy{
+	from i : MavenMaven!Copy
+	to o : XMLMaven!Element(
+		name <- thisModule.getXmlns('jelly:ant')+'copy',
+		children <- Sequence{toDirAttribute,i.fileset}
+	),
+	toDirAttribute : XMLMaven!Attribute(
+		name <- 'todir',
+		value <- i.todir
+	)
+}
+
+
+
+--------------------------------------------------------------------------------------------
+-- path,pattern and filter (like ANT2XML)
+rule Path{
+	from i : MavenMaven!Path
+	to o : XMLMaven!Element(
+		name <- thisModule.getXmlns('jelly:ant')+'path',
+		children <- Sequence{idAttribute,i.fileset,i.path,i.pathElement}
+	),
+	idAttribute : XMLMaven!Attribute(
+		name <- 'id',
+		value <- i.id
+	)
+}
+
+rule ClassPath{
+	from i : MavenMaven!ClassPath
+	to o : XMLMaven!Element(
+		name <- thisModule.getXmlns('jelly:ant')+'classpath',
+		children <- refidAttribute),
+	refidAttribute : XMLMaven!Attribute(
+		name <- 'refid',
+		value <- i.refid
+	)
+}
+
+rule Fileset{
+	from i : MavenMaven!FileSet
+	to o : XMLMaven!Element(
+		name <- thisModule.getXmlns('jelly:ant')+'fileset',
+		children <- Sequence{dirAttribute,i.patternset,i.include,i.exclude}
+	),
+	dirAttribute : XMLMaven!Attribute(
+		name <- 'dir',
+		value <- i.dir
+	)
+}
+
+rule PathElement{
+	from i : MavenMaven!PathElement
+	to o : XMLMaven!Element(
+		name <- thisModule.getXmlns('jelly:ant')+'pathelement'
+	)
+}
+
+rule PatternSet{
+	from i : MavenMaven!PatternSet
+	to o : XMLMaven!Element(
+		name <- thisModule.getXmlns('jelly:ant')+'patternset',
+		children <- i.inexcludes
+	)
+}
+
+rule Include{
+	from i : MavenMaven!Includes
+	to o : XMLMaven!Element(
+		name <- thisModule.getXmlns('jelly:ant')+'include',
+		children <- nameAttribute
+	),
+	nameAttribute : XMLMaven!Attribute(
+		name <- 'name',
+		value <- i.name
+	)
+}
+
+rule Exclude{
+	from i : MavenMaven!Excludes
+	to o : XMLMaven!Element(
+		name <- thisModule.getXmlns('jelly:ant')+'exclude',
+		children <- nameAttribute
+	),
+	nameAttribute : XMLMaven!Attribute(
+		name <- 'name',
+		value <- i.name
+	)
+}
+
+
+
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+-- rules for the file representing project.xml
+
+-- central rule for project.xml
+rule MavenProjectProject2XMLProjectRoot{
+	from i : MavenProject!Project(
+		if i.description.oclIsUndefined() 
+			then false
+			else not (i.description='')
+			endif
+	)
+	to o : XMLProject!Root(
+		name <- 'project',
+		children <- Sequence{idAttribute,nameAttribute,descriptionElement,i.build}
+	),
+	 idAttribute : XMLProject!Attribute(
+		name <- 'id',
+		value <- i.id
+	),
+	 nameAttribute : XMLProject!Attribute(
+		name <- 'name',
+		value <- i.name
+	),
+	descriptionElement : XMLProject!Element(
+		name <- 'description',
+		children <- descriptionText
+	),
+	descriptionText : XMLProject!Text(
+		value <- i.description
+	)
+}
+
+rule MavenProjectProject2XMLProjectRootWithoutDescription{
+	from i : MavenProject!Project(
+		if i.description.oclIsUndefined() 
+			then true
+			else i.description=''
+			endif
+	)
+	to o : XMLProject!Root(
+		name <- 'project',
+		children <- Sequence{idAttribute,nameAttribute,i.build}
+	),
+	 idAttribute : XMLProject!Attribute(
+		name <- 'id',
+		value <- i.id
+	),
+	 nameAttribute : XMLProject!Attribute(
+		name <- 'name',
+		value <- i.name
+	)
+}
+
+
+rule MavenProjectDescription{
+	from i : MavenProject!Description
+	to o : XMLProject!Element(
+		name <- 'description',
+		children <- textText
+	),
+	textText : XMLProject!Text(
+		value <- i.description
+	)
+}
+
+rule MavenProjectBuild{
+	from i : MavenProject!Build
+	to o : XMLProject!Element(
+		name <- 'build',
+		children <- Sequence{defaultGoalElement,sourceDirectoryElement}
+	),
+	defaultGoalElement : XMLProject!Element(
+		name <- 'defaultGoal',
+		children <- defaultGoalText
+	),
+	defaultGoalText : XMLProject!Text(
+		value <- i.defaultGoal
+	),
+	sourceDirectoryElement : XMLProject!Element(
+		name <- 'sourceDirectory',
+		children <- sourceDirectoryText
+	),
+	sourceDirectoryText : XMLProject!Text(
+		value <- i.sourceDirectory
+	)
+}

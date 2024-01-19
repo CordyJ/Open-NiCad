@@ -1,0 +1,227 @@
+-- DSL to Ecore
+-- second transformation : DSL to KM3
+
+module DSL2KM3;
+create OUT : KM3 from IN : DSL;
+
+-------------------------------------------------------------------------------
+-- HELPERS --------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- This helper checks if a relation needs to be turn on a class
+-- * if self is pointed by an other relationship
+-- * if self has supertypes
+-- * if self has subtypes
+-- * if self has properties
+-- CONTEXT: DSL!Relationship 
+-- RETURN:  Boolean
+helper context DSL!Relationship def: needTurnOnClass() : Boolean =
+	let cond : Boolean =
+	DSL!Role.allInstances()->iterate(e; acc : Boolean = false |
+		acc or (e.type = self or e.source = self))	
+		in (cond or
+			(not self.properties.isEmpty()
+		or (not self.superType.oclIsUndefined()
+		or not self.subTypes.isEmpty())));
+
+-- This helper get the roles pointing on a given class
+-- CONTEXT: DSL!Class 
+-- RETURN:  Sequence(DSL!Role)
+helper def: getRoles(c : DSL!Class) : Sequence(DSL!Role) =
+    DSL!Role.allInstances()->select(e | e.source = c 
+	   	and e.relation.properties.isEmpty() 
+		and e.relation.superType.oclIsUndefined()
+		and	e.relation.subTypes.isEmpty());
+
+-- This helper get the containmentstyle of the roles 
+-- CONTEXT: DSL!Role	
+-- RETURN: Boolean (true for embedding, false for reference) 
+helper context DSL!Role def: isEmbedding() : Boolean =
+    let a : DSL!Role = self.relation.roles.first()
+	in if self = a then a.relation.isEmbedding
+	else false endif;
+
+-------------------------------------------------------------------------------
+-- RULES ----------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- Rule 'Metamodel'.
+-- This rule generates the Metamodel, which will content the following packages :
+-- * the package containing the model
+-- * the PrimitivesTypes package, which contents string, integer and boolean types
+rule Metamodel {
+	from 
+		e : DSL!DomainModel	
+	to
+		a : KM3!Metamodel(
+			contents <- Sequence{b, c}
+		),
+		b : KM3!Package (
+			name <- e.name,
+			contents <-
+				Sequence{
+					e.classifiers
+						->select(a |
+							a.oclIsTypeOf(DSL!Class) or
+							if a.oclIsTypeOf(DSL!Relationship)
+							then
+								a.needTurnOnClass()
+							else
+								false
+							endif
+						),
+					e.types
+						->select(a | a.oclIsTypeOf(DSL!Enumeration))
+				}
+			),
+		c : KM3!Package (
+			name <- 'PrimitiveTypes',
+			contents <- e.types->select(a | a.oclIsTypeOf(DSL!SimpleType))
+		)		
+}
+
+-- Rule 'Class'.
+-- This rule generates a KM3!Class corresponding to a DSL!Class
+-- and mark his name if it is the Root class
+rule Class {
+	from 
+		e : DSL!Class
+	to
+		a : KM3!Class(
+			name<-e.name,
+			isAbstract <- e.isAbstract,
+			structuralFeatures<-Set{
+				e.properties -> select (c | c.oclIsTypeOf(DSL!ValueProperty) ),			
+				thisModule.getRoles(e)
+			},
+			supertypes <- Set{e.superType}		
+		)
+}
+
+-- Rule 'Relation2Class'.
+-- This rule generates a KM3!Class from a Relationship
+-- if it needs
+rule Relation2Class {
+	from 
+	e : DSL!Relationship(
+			e.needTurnOnClass()
+		)
+	to
+	a : KM3!Class(
+		name<-e.name,
+		isAbstract <- e.isAbstract,
+		structuralFeatures<- Set{ 
+			e.properties -> select (c | c.oclIsTypeOf(DSL!ValueProperty)),			
+			e.roles->first()
+		},
+		supertypes <- Set{e.superType}
+	)
+}
+
+-- Rule 'SimpleReference'.
+-- This rule generates a Reference in a KM3!Class by copying the features
+-- of the corresponding DSL!Role
+rule SimpleReference {
+	from
+		r : DSL!Role(
+			not r.relation.needTurnOnClass()
+		)
+	to
+		rf : KM3!Reference (
+			name <- r.name,
+			type <- r.type,
+			lower <- r.min,
+			upper <- if r.max=0 then 0-1 else 1 endif,
+			isOrdered <- r.isOrdered,
+			owner <- r.source,
+			isContainer <- r.isEmbedding(),
+			opposite <- r.relation.roles->select(e | e <> r)->first(),
+			isUnique <- false
+		)
+}
+
+-- Rule 'ComplexReference'.
+-- This rule generates two opposites references which will be the link
+-- between the new Relationship and his adjoining Classes
+rule ComplexReference {
+	from
+		r : DSL!Role (
+			r.relation.needTurnOnClass()
+		)
+	using {
+		oppositeRole : DSL!Role = r.relation.roles->select(e | e <> r)->first();
+	}
+	to		
+		rfInOwner : KM3!Reference (
+			name <- r.name,	
+			owner <- r.source,
+			type <- r.relation,
+			opposite <- rfInRelationship,
+			lower <- r.min,
+			upper <- if r.max=0 
+			then 0-1 else 1 endif,
+			isOrdered <- r.isOrdered,
+			isContainer <- r.isEmbedding(),
+			isUnique <- false
+		),
+		rfInRelationship : KM3!Reference (
+			name <- oppositeRole.name,
+			owner <- r.relation,			
+			type <- r.source,			
+			opposite <- rfInOwner,
+			lower <- oppositeRole.min,
+			upper <- if oppositeRole.max=0 then 0-1 else 1 endif,
+			isOrdered <- oppositeRole.isOrdered,
+			isContainer <- oppositeRole.isEmbedding(),
+			isUnique <- false
+		)
+}
+
+-- Rule 'Attribute'.
+-- This rule generates a KM3!Attribut, corresponding to a DSL!ValueProperty
+rule Attribute {
+	from
+		e : DSL!ValueProperty
+	to
+		a : KM3!Attribute(
+			name <- e.name,
+			upper <- 1,
+			lower <-1,
+			type <- e.type,
+			isUnique <- false,
+			isOrdered <- false
+		)
+}
+
+-- Rule 'Enumeration'.
+-- This rule generates the KM3!Enumeration corresponding to a DSL!Enumeration
+rule Enumeration {
+	from 
+		e : DSL!Enumeration
+	to
+		a : KM3!Enumeration(
+				name <- e.name,
+				literals <- e.literals -> select(a | a.oclIsTypeOf(DSL!EnumerationLiteral))
+		)
+}
+
+-- Rule 'EnumLiteral'.
+-- This rule generates the KM3!EnumLiteral corresponding to a 
+-- DSL!EnumerationLiteral
+rule EnumLiteral {
+	from 
+		e : DSL!EnumerationLiteral
+	to
+		l : KM3!EnumLiteral (
+			name <- e.name
+		)
+}
+
+-- Rule 'Datatype'.
+-- This rule generates the KM3!Datatype corresponding to a DSL!SimpleType
+rule DataType {
+	from 
+	t : DSL!SimpleType
+	to
+	e: KM3!DataType(name<-t.name)
+}

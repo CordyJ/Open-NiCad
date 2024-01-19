@@ -1,0 +1,116 @@
+--@atlcompiler	atl2006
+--@name			Table2TabularHTML
+--@version		2.0
+--@domains		Table, HTML
+--@authors		Eric Vepa (evepa <at> sodius.com) for SODIUS (www.sodius.com)
+--@date			2007/06/04
+--@description	This transformation is used to transform generic tables into a HTML model with tables.
+
+module Table2TabularHTML; -- Module Template
+create OUT : HTML from IN : Table;
+
+uses TableHelpers;
+
+--@begin attribute helper html
+--@comments The unique HTML tag.
+helper def : html : HTML!HTML = OclUndefined;
+--@end attribute helper html
+
+--@begin entrypoint rule HTML
+--@comments Creates the unique HTML, HEAD, TITLE and BODY tags.
+entrypoint rule HTML() {
+	to
+		html : HTML!HTML (
+			head <- head,
+			body <- body
+		),
+		head : HTML!HEAD (
+			headElements <- title
+		),
+		title : HTML!TITLE (
+			value <- ''
+		),
+		body : HTML!BODY
+	do {
+		thisModule.html <- html;
+	}
+}
+--@end entrypoint rule HTML
+
+--@begin rule Table2TABLE
+rule Table2TABLE {
+	from
+		table : Table!Table (
+			table.rows->size() > 0
+		)
+	to
+		tab : HTML!TABLE (
+			border <- '1',
+			trs <- thisModule.Row2TRwithTH(table.rows->first()),
+			trs <- table.rows->subSequence(2,table.rows->size())->
+				collect(row|thisModule.Row2TRwithTD(row))
+		)
+	do {
+		thisModule.html.body.bodyElements <- tab;
+	}
+}
+--@end rule Table2TABLE
+
+--@begin lazy rule Row2TRwithTH
+lazy rule Row2TRwithTH {
+	from
+		row : Table!Row
+	to
+		tr : HTML!TR (
+			tds <- row.cells->
+				collect(cell|thisModule.Cell2TH(cell))
+		)
+}
+--@end lazy rule Row2TRwithTH
+
+--@begin lazy rule Cell2TH
+lazy rule Cell2TH {
+	from
+		cell : Table!Cell
+	to
+		th : HTML!TH (
+			value <- cell.value()
+		)
+}
+--@end lazy rule Cell2TH
+
+--@begin lazy rule Row2TRwithTD
+lazy rule Row2TRwithTD {
+	from
+		row : Table!Row
+	to
+		tr : HTML!TR (
+			tds <- thisModule.Cell2TD(row.cells->first()),
+			tds <- row.cells->subSequence(2,row.cells->size())->
+				collect(cell|thisModule.Cell2TDRightAlign(cell))
+		)
+}
+--@end lazy rule Row2TRwithTD
+
+--@begin lazy rule Cell2TD
+lazy rule Cell2TD {
+	from
+		cell : Table!Cell
+	to
+		td : HTML!TD (
+			value <- cell.value()
+		)
+}
+--@end lazy rule Cell2TD
+
+--@begin lazy rule Cell2TDRightAlign
+lazy rule Cell2TDRightAlign {
+	from
+		cell : Table!Cell
+	to
+		td : HTML!TD (
+			value <- cell.value(),
+			align <- 'right'
+		)
+}
+--@end lazy rule Cell2TDRightAlign

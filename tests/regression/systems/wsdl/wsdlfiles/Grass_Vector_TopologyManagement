@@ -1,0 +1,638 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://Grass_Vector_TopologyManagement.grass.ws.laits.gmu.edu" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://Grass_Vector_TopologyManagement.grass.ws.laits.gmu.edu" xmlns:intf="http://Grass_Vector_TopologyManagement.grass.ws.laits.gmu.edu" xmlns:tns1="http://grass.ws.laits.gmu.edu" xmlns:tns2="http://ws.laits.gmu.edu" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+	 <wsdl:types>
+
+		  <schema elementFormDefault="qualified" targetNamespace="http://Grass_Vector_TopologyManagement.grass.ws.laits.gmu.edu" xmlns="http://www.w3.org/2001/XMLSchema">
+
+			<!-- ELEMENTS -->
+
+			   <element name="Build_polylinesElement">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Name of the element to describe input parameters.
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element minOccurs="1" name="sourceURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of input vector map. Default data format is GML.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+			   <element name="fault" type="tns2:WebServiceExceptionsType"/>
+
+			   <element name="Build_polylinesResponse">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Always return URL and Format of output file.
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element name="returnURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of output vector map.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element name="returnFormat" type="xsd:string">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Format of output vector map.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+			   <element name="Build_topologyElement">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Name of the element to describe input parameters.
+                         </documentation>
+
+				    </annotation>
+
+			      <complexType>
+
+				     <sequence>
+
+					      <element minOccurs="1" name="sourceURL" type="xsd:anyURI">
+
+						       <annotation>
+
+							        <documentation xml:lang="en">
+
+                        URL of input vector map. Default data format is GML.
+                                        </documentation>
+
+						       </annotation>
+
+					      </element>
+
+				     </sequence>
+				
+			      </complexType>
+
+			   </element>
+			  
+			   <element name="Build_topologyResponse">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Always return URL and Format of output file.
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element name="returnURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of output vector map.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element name="returnFormat" type="xsd:string">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Format of output vector map.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+			   <element name="Clean_topologyElement">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Name of the element to describe input parameters.
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element minOccurs="1" name="sourceURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of input vector map. Default data format is GML.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element minOccurs="1" name="tool" type="impl:ToolType">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Cleaning tool. Parameter format: string[,string,...]
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+			   <simpleType name="ToolType">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Cleaning tool.
+                         </documentation>
+
+				    </annotation>
+
+				    <restriction base="string">
+
+					     <enumeration value="break">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    break: break lines at each intersection
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="rmdupl">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    rmdupl: remove duplicate lines (pay attention to categories!)
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="rmdangle">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    rmdangle: remove dangles, threshold ignored if less than 0
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="chdangle">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    chdangle: change the type of boundary dangle to line, threshold ignored if less than 0, input line type is ignored
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="rmbridge">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    rmbridge: remove bridges connecting area and island or 2 islands
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="chbridge">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    chbridge: change the type of bridges connecting area and island or 2 islands from boundary to line
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="snap">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    snap: snap lines to vertex in threshold
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="rmdac">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    rmdac: remove duplicate area centroids ('type' option ignored)
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="bpol">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    bpol: break (topologically clean) polygons (imported from non topological format (like shapefile). Boundaries are broken on each point shared between 2 and more polygons where angles of segments are different
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="prune">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    prune: remove vertices in threshold from lines and boundaries, boundary is pruned only if topology is not damaged (new intersection, changed attachement of centroid), first and last segment of the boundary is never changed
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="rmarea">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    rmarea: remove small areas, the longest boundary with adjacent area is removed
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="rmsa">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    rmsa: remove small angles between lines at nodes
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+				    </restriction>
+
+			   </simpleType>
+
+			   <element name="Clean_topologyResponse">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Always return URL and Format of output file.
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element name="returnURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of output vector map.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element name="returnFormat" type="xsd:string">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Format of output vector map.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+		  </schema>
+
+		  <schema elementFormDefault="qualified" targetNamespace="http://ws.laits.gmu.edu" xmlns="http://www.w3.org/2001/XMLSchema">
+
+			   <complexType name="WebServiceExceptionsType">
+
+				    <sequence>
+
+					     <element name="exception" type="xsd:string"/>
+
+				    </sequence>
+
+			   </complexType>
+
+		  </schema>
+
+	 </wsdl:types>
+
+	 <wsdl:message name="build_polylinesRequest">
+
+		  <wsdl:part element="impl:Build_polylinesElement" name="parameters"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="build_polylinesResponse">
+
+		  <wsdl:part element="impl:Build_polylinesResponse" name="return"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="build_topologyRequest">
+
+		  <wsdl:part element="impl:Build_topologyElement" name="parameters"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="build_topologyResponse">
+
+		  <wsdl:part element="impl:Build_topologyResponse" name="return"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="clean_topologyRequest">
+
+		  <wsdl:part element="impl:Clean_topologyElement" name="parameters"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="clean_topologyResponse">
+
+		  <wsdl:part element="impl:Clean_topologyResponse" name="return"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="WebServiceExceptionsType">
+
+		  <wsdl:part element="impl:fault" name="fault"/>
+
+	 </wsdl:message>
+
+	 <wsdl:portType name="Grass_Vector_TopologyManagementPortType">
+
+		  <wsdl:operation name="build_polylines">
+
+			   <wsdl:input message="impl:build_polylinesRequest" name="build_polylinesRequest"/>
+
+			   <wsdl:output message="impl:build_polylinesResponse" name="build_polylinesResponse"/>
+
+			   <wsdl:fault message="impl:WebServiceExceptionsType" name="WebServiceExceptionsType"/>
+
+		  </wsdl:operation>
+
+		  <wsdl:operation name="build_topology">
+
+			   <wsdl:input message="impl:build_topologyRequest" name="build_topologyRequest"/>
+
+			   <wsdl:output message="impl:build_topologyResponse" name="build_topologyResponse"/>
+
+			   <wsdl:fault message="impl:WebServiceExceptionsType" name="WebServiceExceptionsType"/>
+
+		  </wsdl:operation>
+
+		  <wsdl:operation name="clean_topology">
+
+			   <wsdl:input message="impl:clean_topologyRequest" name="clean_topologyRequest"/>
+
+			   <wsdl:output message="impl:clean_topologyResponse" name="clean_topologyResponse"/>
+
+			   <wsdl:fault message="impl:WebServiceExceptionsType" name="WebServiceExceptionsType"/>
+
+		  </wsdl:operation>
+
+	 </wsdl:portType>
+
+	 <wsdl:binding name="Grass_Vector_TopologyManagementSoapBinding" type="impl:Grass_Vector_TopologyManagementPortType">
+
+		  <wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+		  <wsdl:operation name="build_polylines">
+
+			   <wsdl:documentation>
+Build polylines from the lines or boundaries in a vector map.   </wsdl:documentation>
+
+			   <wsdlsoap:operation soapAction="build_polylines" style="document"/>
+
+			   <wsdl:input>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:input>
+
+			   <wsdl:output>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:output>
+
+			   <wsdl:fault name="WebServiceExceptionsType">
+
+				    <wsdlsoap:fault name="WebServiceExceptionsType" use="literal"/>
+
+			   </wsdl:fault>
+
+		  </wsdl:operation>
+
+		  <wsdl:operation name="build_topology">
+
+			   <wsdl:documentation>
+Create topology for GRASS vector data.   </wsdl:documentation>
+
+			   <wsdlsoap:operation soapAction="build_topology" style="document"/>
+
+			   <wsdl:input>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:input>
+
+			   <wsdl:output>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:output>
+
+			   <wsdl:fault name="WebServiceExceptionsType">
+
+				    <wsdlsoap:fault name="WebServiceExceptionsType" use="literal"/>
+
+			   </wsdl:fault>
+
+		  </wsdl:operation>
+
+		  <wsdl:operation name="clean_topology">
+
+			   <wsdl:documentation>
+Automatically fix topology of vector maps.   </wsdl:documentation>
+
+			   <wsdlsoap:operation soapAction="clean_topology" style="document"/>
+
+			   <wsdl:input>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:input>
+
+			   <wsdl:output>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:output>
+
+			   <wsdl:fault name="WebServiceExceptionsType">
+
+				    <wsdlsoap:fault name="WebServiceExceptionsType" use="literal"/>
+
+			   </wsdl:fault>
+
+		  </wsdl:operation>
+
+	 </wsdl:binding>
+
+	 <wsdl:service name="Grass_Vector_TopologyManagementService">
+
+		  <wsdl:documentation>
+Create, change or repair the topology of vector data.  </wsdl:documentation>
+
+		  <wsdl:port binding="impl:Grass_Vector_TopologyManagementSoapBinding" name="Grass_Vector_TopologyManagement">
+
+			   <wsdlsoap:address location="http://65.123.203.154:8099/axis/services/Grass_Vector_TopologyManagement"/>
+
+		  </wsdl:port>
+
+	 </wsdl:service>
+
+	<!--WSDL created by Apache Axis version: 1.4
+Built on Apr 22, 2006 (06:55:48 PDT)-->
+
+</wsdl:definitions>

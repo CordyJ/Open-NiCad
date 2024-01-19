@@ -1,0 +1,430 @@
+module SSL2SDL;
+create OUT : SDL from IN : SSL, IN2 : ODM;
+
+-- A SSL!OntologyClassURI element has a lexicalForm attribute with
+-- the following structure: <ontologyID>#<ontologyClassID>.
+-- This helper takes this value and returns the <ontologyClassID> part.
+helper def : getOntologyIDName(e : String) : String = 
+	e.substring(e.indexOf('#') + 2, e.size())
+;
+
+-- A SSL!DataTypeURI element has a lexicalForm attribute that 
+-- contains the URI that points to a XMLSchema and to the desired type,
+-- in the form: <baseURI>#<typeName>
+-- This helper takes this value and returns the <typeName> part.
+helper def : getSchemaTypeName(e : String) : String = 
+	e.substring(e.indexOf('#') + 2, e.size())
+;
+
+-- Taking a String value, this helper returns a sequence containing all the
+-- ODM!DatatypeProperty elements that apply to the ODM!Class that has the id attribute
+-- equal with that value. The returned sequence includes the ODM!DatatypeProperty-es 
+-- that apply to any of its superclasses (the inherited ODM!DatatypeProperty-es).
+helper def: getDataTypePropertiesForId(inputId : String) : Sequence(ODM!DatatypeProperty) = 
+	ODM!Class.allInstances() -> select (d | d.id = inputId) -> 
+		collect (d | thisModule.getAllDataTypeProperties(d)) -> flatten()
+;
+
+-- Taking a ODM!Class, returns a sequence containing all the ODM!DatatypeProperty 
+-- elements that have in their theDomain property a reference to that class or to
+-- one of its superclasses (recursion on all the defined super classes)
+helper def: getAllDataTypeProperties(c : ODM!Class) : Sequence(ODM!DatatypeProperty) = 
+	Sequence{}
+	-> append (thisModule.getOwnDataTypeProperties(c))
+	-> append ( c.theSuperClass ->
+				iterate(e; result : Sequence(ODM!DatatypeProperty) = Sequence{} 
+				| result -> append(thisModule.getAllDataTypeProperties(e)) -> flatten())
+	   ) -> flatten()
+;
+
+-- Taking a ODM!Class, returns a sequence containing all the ODM!DatatypeProperty 
+-- elements that have in their theDomain property a reference to that class.
+helper def: getOwnDataTypeProperties(c : ODM!Class) : Sequence(ODM!DatatypeProperty) = 
+	ODM!DatatypeProperty.allInstances() -> select(e | e.theDomain -> includes (c))     
+;
+	
+-- This helper returns a sequence containing all the SSL!ServiceInput 
+-- elements that belong to a SSL!ServiceFunctionality that has 
+-- multiple inputs
+helper def: getMultipleInputs() : Sequence(SSL!ServiceInput) = 
+	SSL!ServiceFunctionality.allInstances() -> select(e | e.Input.size() > 1) 
+	-> collect(e | e.Input) -> flatten()
+;
+
+-- Similar with getMultipleInputs(), but referring to SSL!ServiceOutput.
+helper def: getMultipleOutputs() : Sequence(SSL!ServiceOutput) = 
+	SSL!ServiceFunctionality.allInstances() -> select(e | e.Output.size() > 1) 
+	-> collect(e | e.Output) -> flatten()
+;
+
+-- This helper returns the name of the SSL!ServiceInput that has as 
+-- Type the specified SSL!OntologyClassURI.
+helper def: inputMessageName(searchedType: SSL!OntologyClassURI) : String =
+     SSL!ServiceInput.allInstances() -> select(e | e.Type = searchedType) -> collect(e | e.name) 
+	 -> asSequence() -> first()
+;
+
+-- Similar with inputMessageName(), but referring to SSL!ServiceOutput.
+helper def: outputMessageName(searchedType: SSL!OntologyClassURI) : String =
+     SSL!ServiceOutput.allInstances() -> select(e | e.Type = searchedType) -> collect(e | e.name) 
+	 -> asSequence() -> first()
+;
+
+-- Returns the root element of the input SSL model, as it is the one 
+-- that generates the SDL types.
+helper def: getTypeGenerator() : SSL!ServiceProfile = 
+		SSL!ServiceProfile.allInstances()->asSequence()->first()
+;
+
+-- Returns the name of the target pattern (in rule Definitions) that 
+-- generates the SDL type that corresponds to the specified ODM!DataRange.
+-- For the types that do not have direct mapping to an SDL type, the 
+-- returned target pattern name is the one returned by the helper
+-- getSDLTypeForODM_Default.
+helper def: getSDLTypeForODM(p : ODM!DataRange) : String = 
+	if p.oclIsKindOf(ODM!PrimitiveType) then
+		thisModule.getSDLTypeForSchemaType(
+			thisModule.getSchemaTypeName(p.TypeDefinitionURI.lexicalForm))
+	else thisModule.getSDLTypeForODM_Default()
+	endif
+;	
+
+-- Returns the name of the target pattern (in rule Definitions) that is
+-- assigned by default to elements from the ontology whose type is not mapped
+-- directly to a SDL type (the pattern that generates SDL!SdlString).
+helper def: getSDLTypeForODM_Default() : String = 
+	'type4'
+;
+
+-- Returns the name of the target pattern (in rule Definitions) that 
+-- generates the SDL type that corresponds to the schema type with the 
+-- specified name. (The mapping realized for the schema: 
+-- http://www.w3.org/2001/XMLSchema.)
+-- For the types that do not have direct mapping to an SDL type, the 
+-- retured target pattern name is the one corresponding to SDL!String. 
+helper def: getSDLTypeForSchemaType(name : String) : String = 
+	if  name = 'integer' or name = 'positiveInteger' or name = 'nonPositiveInteger' or
+        name = 'negativeInteger' or name = 'nonNegativeInteger' or name = 'long' or
+        name = 'int' or name = 'short' or name = 'byte' or name = 'unsignedLong' or
+        name = 'unsignedInt' or name = 'unsignedShort' or name = 'unsignedByte'
+	then 'type1'	-- SDL!SdlInteger
+	else if name = 'boolean'
+		 then 'type2'	-- SDL!SdlBoolean
+		 else if name = 'decimal' or name = 'float' or name = 'double'
+		 		then 'type3'	-- SDL!SdlReal
+		 		else if name = 'dateTime' or name = 'date' or name = 'time' or 
+						name = 'gYearMonth' or name = 'gMonthDay' or 
+						name = 'gYear' or name = 'gMonth' or name = 'gDay'
+					 then 'type5'	-- SDL!SdlDateTime
+					 else 	if name = 'string' or name = 'normalizedString' or 
+					 			name = 'token' or name = 'language' or name = 'NMTOKEN' or 
+								name = 'Name' or name = 'NCName' or 
+								name = 'hexBinary' or name = 'base64Binary'
+					 		then 'type4' 	--  SDL!SdlString
+							else 'type4' 	-- default for unsupported types: SDL!SdlString
+							endif						
+					 endif
+		 		endif
+		 endif
+	endif
+;	
+
+-- Returns a sequence with a 'fake' element if the size of the 
+-- provided sequence is 0, otherwise it returns an empty sequence.
+helper def: getFakeDatatypeSequence(m : Sequence(ODM!DatatypeProperty)) : Sequence(String) = 
+	if m.size() = 0
+		then Sequence{''}
+		else Sequence{}
+	endif
+;		
+
+-- Returns a sequence of all the SSL!ServiceInput and SSL!ServiceOutput 
+-- that have the Type attribute equal to the specified SSL!DataTypeURI.
+helper def: getInputOutputHavingURIType(t : SSL!DataTypeURI) : Sequence(SSL!FunctionalityParameter) = 
+	Sequence{SSL!ServiceInput.allInstances() -> asSequence(), SSL!ServiceOutput.allInstances() -> asSequence()} -> flatten() -> select(e | e.Type = t)
+;
+
+-- An SSL!OntologyClassURI element contains the id of an element in the 
+-- associated ontology.
+-- For every SSL!OntologyClassURI element that is the Type attribute of a 
+-- SSL!ServiceInput, this rule creates:
+-- 1) a SDL!ComplexType that has a SDL!Part for each ODM!DatatypeProperty 
+-- in which this class is reffered (by id). If there is no such 
+-- ODM!DatatypeProperty, by default a SDL!Part with the type SDL!String 
+-- is created
+-- 2) if this element is the Type of a SSL!ServiceInput that belongs 
+-- to a SSL!ServiceFunctionality with multiple inputs, then a SDL!Part 
+-- that has a reference to the generated SDL!ComplexType is created
+-- (and it will be included in the element obtained from the transformation 
+-- of that SSL!ServiceFunctionality)
+rule TypeFromOntology_Input {
+	from inp : SSL!OntologyClassURI (
+				SSL!ServiceInput.allInstances() -> select(e | e.Type = inp) -> size() > 0 
+			)
+	using{
+		properties : Sequence(ODM!DatatypeProperty) = 
+			thisModule.getDataTypePropertiesForId(thisModule.getOntologyIDName(inp.lexicalform));
+		service_name : SSL!ServiceInput = thisModule.inputMessageName(inp);
+	}
+	to complex : SDL!ComplexType(
+		ElName <- service_name + 'Parameters',
+		cmpPart <- Sequence{part_a, part_b}
+	),
+	part_a : distinct SDL!Part foreach(a in properties)(
+		ElName <- a.name,
+		refPart <- thisModule.resolveTemp(thisModule.getTypeGenerator(), 
+			thisModule.getSDLTypeForODM(a.theDataRange)
+		)			
+	),
+	part_b : distinct SDL!Part foreach(c in thisModule.getFakeDatatypeSequence(properties) )	(
+		ElName <- thisModule.getOntologyIDName(inp.lexicalform),
+		refPart <- thisModule.resolveTemp(thisModule.getTypeGenerator(), 
+			thisModule.getSDLTypeForODM_Default()
+		)			
+	),
+	
+	part_c : distinct  SDL!Part foreach(b in SSL!ServiceFunctionality.allInstances() ->
+									   select(c | c.Input.size() > 1) -> select(v | v.Input -> select(u | u.Type = inp).size() > 0))(
+		ElName <- service_name,
+		refPart <- complex
+	)
+	
+}
+
+-- The same transformation as TypeFromOntology_Input, but for types 
+-- that belong to a ServiceOutput.
+rule TypeFromOntology_Output {
+	from inp : SSL!OntologyClassURI (
+				SSL!ServiceOutput.allInstances() -> select(e | e.Type = inp) -> size() > 0
+			)
+	using{
+		properties : Sequence(ODM!DatatypeProperty) = 
+			thisModule.getDataTypePropertiesForId(thisModule.getOntologyIDName(inp.lexicalform));
+		service_name : SSL!ServiceOutput = thisModule.outputMessageName(inp);
+	}
+	to complex : SDL!ComplexType(
+		ElName <- service_name + 'Parameters',
+		cmpPart <- Sequence{part_a, part_b}
+	),
+	part_a : distinct SDL!Part foreach(a in properties)(
+		ElName <- a.name,
+		refPart <- thisModule.resolveTemp(thisModule.getTypeGenerator(), 
+			thisModule.getSDLTypeForODM(a.theDataRange)
+			)			
+	),
+	part_b : distinct SDL!Part foreach (c in thisModule.getFakeDatatypeSequence(properties)	)(
+		ElName <- thisModule.getOntologyIDName(inp.lexicalform),
+		refPart <- thisModule.resolveTemp(thisModule.getTypeGenerator(), 
+			thisModule.getSDLTypeForODM_Default()
+		)			
+	),
+	
+	part_c : distinct  SDL!Part foreach(b in SSL!ServiceFunctionality.allInstances() ->
+									   select(c | c.Output.size() > 1) -> select(v | v.Output -> select(u | u.Type = inp).size() > 0))(
+		ElName <- service_name,
+		refPart <- complex
+	)
+}
+
+-- A SSL!DataTypeURI element refers to a type defined in a specified XMLSchema.
+-- For every SSL!DataTypeURI element that is the Type attribute of a 
+-- SSL!ServiceInput or a SSL!ServiceOutput, this rule creates a 
+-- SDL!Part that refers to the corresponding SDL type 
+-- (see the helper getSDLTypeForSchemaType).
+rule TypeFromSchema {
+	from inp : SSL!DataTypeURI (
+		thisModule.getInputOutputHavingURIType(inp) -> size() > 0 
+	)
+	to part_c : SDL!Part (
+		ElName <- thisModule.getInputOutputHavingURIType(inp) -> first().name,
+		refPart <- thisModule.resolveTemp(thisModule.getTypeGenerator(), 	
+			thisModule.getSDLTypeForSchemaType(thisModule.getSchemaTypeName(inp.lexicalform)) )
+	)
+}
+
+-- For every SSL!ServiceInput that is the only input of a 
+-- SSL!ServiceFunctionality and whose type is not SSL!OntologyClassURI, 
+-- this rules construct a SDL!SimpleMessage that describes it (the type 
+-- of the input is transformed according to the rule TypeFromSchema)
+rule SingleInput_NonOntology {
+	from e : SSL!ServiceInput (not thisModule.getMultipleInputs()->includes(e)
+		and not e.Type.oclIsKindOf(SSL!OntologyClassURI ))
+	to inm : SDL!SimpleMessage(
+		  ElName <- e.name,
+		  cmpPart <- e.Type
+    )	
+}
+
+-- The same transformation as SingleInput_NonOntology, but for 
+-- SSL!ServiceOutput.
+rule SingleOutput_NonOntology {
+	from e : SSL!ServiceOutput (not thisModule.getMultipleOutputs()->includes(e)
+		and not e.Type.oclIsKindOf(SSL!OntologyClassURI ))
+	to outm : SDL!SimpleMessage (
+   	  ElName <- e.name,
+      cmpPart <- e.Type
+    )
+}
+
+-- For every SSL!ServiceInput that is the only input of a 
+-- SSL!ServiceFunctionality and whose type is SSL!OntologyClassURI (it 
+-- is described in the ontology), this rules construct a SDL!SimpleMessage 
+-- that describes it (the message contains a single SDL!Part that refers 
+-- to the complex type generated from the input's type - see rule 
+-- TypeFromOntology_Input: part_c)
+rule SingleInput_Ontology {
+	from e : SSL!ServiceInput ( not thisModule.getMultipleInputs()->includes(e) and 
+		e.Type.oclIsKindOf(SSL!OntologyClassURI ))
+	to inm : SDL!SimpleMessage(
+		ElName <- e.name,
+		cmpPart <- part
+	),
+	part : SDL!Part(
+		ElName <- e.name + 'ComplexType',
+		refPart <- e.Type
+	)
+}
+
+-- The same transformation as SingleInput_Ontology, but for 
+-- SSL!ServiceOutput.
+rule SingleOutput_Ontology {
+	from e : SSL!ServiceOutput ( not thisModule.getMultipleOutputs()->includes(e) and 
+		e.Type.oclIsKindOf(SSL!OntologyClassURI ))
+	to outm : SDL!SimpleMessage(
+		ElName <- e.name,
+		cmpPart <- part
+	),
+	part : SDL!Part(
+		ElName <- e.name + 'ComplexType',
+		refPart <- e.Type
+	)
+}
+
+
+
+-- For every SSL!ServiceFunctionality that has a single input and a 
+-- single output, this rule constructs a SDL!Operation that contains 
+-- the results of the input's and output's transformation (see rules
+-- SingleInput_Ontology, SingleInput_NonOntology and their 
+-- correspondents for output messages)
+rule ServiceFunctionality11 {
+	from e : SSL!ServiceFunctionality (e.Input.size() <= 1 and e.Output.size() <= 1 )
+	to outOper : SDL!Operation(
+		ElName <- e.name,
+		refInputMessage <- e.Input,
+		refOutputMessage <- e.Output
+	)
+}
+
+-- For every SSL!ServiceFunctionality that has multiple inputs and a 
+-- single output, this rule constructs a SDL!Operation that contains 
+-- the results of the output's transformation (see rules 
+-- SingleOutput_Ontology, SingleOutput_NonOntology) and that constructs 
+-- a SDL!Message in which it "compacts" the inputs by placing, as parts, 
+-- the results of the transformation of each input's type (see rules 
+-- TypeFromOntology_Input: part_c and TypeFromSchema: part_c)
+rule ServiceFunctionalityN1 {
+	from e : SSL!ServiceFunctionality (e.Input.size() > 1 and e.Output.size() = 1)
+	to inp : SDL!SimpleMessage(
+		ElName <- e.name + 'Request',
+		cmpPart <- Sequence{e.Input -> collect(k | thisModule.resolveTemp(k.Type, 'part_c'))}
+	),
+	outOper : SDL!Operation(
+		ElName <- e.name,
+		refInputMessage <- inp,
+		refOutputMessage <- e.Output
+	)
+}
+
+
+-- For every SSL!ServiceFunctionality that has a single input and
+-- multiple outputs, this rule constructs a SDL!Operation that contains 
+-- the results of the input's transformation (see rules 
+-- SingleInput_Ontology, SingleInput_NonOntology) and that constructs 
+-- a SDL!Message in which it "compacts" the outputs by placing, as parts, 
+-- the results of the transformation of each output's type (see rules 
+-- TypeFromOntology_Output: part_c and TypeFromSchema: part_c)
+rule ServiceFunctionality1N {
+	from e : SSL!ServiceFunctionality (e.Input.size() = 1 and e.Output.size() > 1)
+	to out : SDL!SimpleMessage(
+		ElName <- e.name + 'Response',
+		cmpPart <- Sequence{
+			e.Output -> collect(k | thisModule.resolveTemp(k.Type, 'part_c'))	
+		}
+	),
+	outOper : SDL!Operation(
+		ElName <- e.name,
+		refInputMessage <- e.Input,
+		refOutputMessage <- out		
+	)
+}
+
+-- For every SSL!ServiceFunctionality that has multiple inputs and
+-- multiple outputs, this rule constructs a SDL!Operation that contains: 
+-- - a SDL!Message in which it "compacts" the inputs by placing, as parts, 
+-- the results of the transformation of each input's type (see rules 
+-- TypeFromOntology_Input: part_c and TypeFromSchema: part_c)
+-- - a SDL!Message in which it "compacts" the outputs by placing, as parts, 
+-- the results of the transformation of each output's type (see rules 
+-- TypeFromOntology_Output: part_c and TypeFromSchema: part_c)
+rule ServiceFunctionalityNN {
+	from e : SSL!ServiceFunctionality (e.Input.size() > 1 and e.Output.size() > 1)
+	to inp : SDL!SimpleMessage(
+		ElName <- e.name + 'Request',
+		cmpPart <- Sequence{
+			e.Input -> collect(k | thisModule.resolveTemp(k.Type, 'part_c'))	
+		}		
+	),
+	out : SDL!SimpleMessage(
+		ElName <- e.name + 'Response',
+		cmpPart <- Sequence{
+			e.Output -> collect(k | thisModule.resolveTemp(k.Type, 'part_c'))	
+		}	
+	),
+	outOper : SDL!Operation(
+		ElName <- e.name,
+		refInputMessage <- inp,
+		refOutputMessage <- out		
+	)
+}
+
+-- The main rule of the transformation. It constructs the skeleton of the SDL model, and uses the 
+-- results of the other rules in order to fill it.
+-- It creates the SDL types definitions, generates the definitions of the interfaces (containing the
+-- generated operations) and groups the generated messages.
+rule Definitions {
+	from e : SSL!ServiceProfile 
+	to out : SDL!Definitions ( 
+		ElName <- e.name,
+		cmpType <- Sequence{type1, type2, type3, type4, type5, type6, SSL!OntologyClassURI.allInstances()},
+		cmpInterface <- interfaces,
+		cmpMessage <- Sequence{
+			SSL!ServiceInput.allInstances() -> select(e | not thisModule.getMultipleInputs() -> includes(e)) -> collect (e | thisModule.resolveTemp(e, 'inm') ),
+			SSL!ServiceOutput.allInstances() -> select(e | not thisModule.getMultipleOutputs() -> includes(e)) -> collect (e | thisModule.resolveTemp(e, 'outm') ),
+			SSL!ServiceFunctionality.allInstances() -> select (e | e.Input.size() > 1) -> collect (e | thisModule.resolveTemp(e, 'inp') ),
+			SSL!ServiceFunctionality.allInstances() -> select (e | e.Output.size() > 1) -> collect (e | thisModule.resolveTemp(e, 'out') )
+		}
+	),
+	interfaces : SDL!Interface (
+		ElName <- e.name + 'Service', 
+		cmpOperation <- e.Functionality -> collect(e | thisModule.resolveTemp(e, 'outOper') )
+	),
+	type1 : SDL!SdlInteger(
+	   ElName <- 'Integer'
+	),
+	type2 : SDL!SdlBoolean(
+	   ElName <- 'Boolean'
+	),
+	type3 : SDL!SdlReal(
+	   ElName <- 'Real'
+	),
+	type4 : SDL!SdlString(
+	   ElName <- 'String'
+	),
+	type5 : SDL!SdlDateTime(
+	   ElName <- 'DateTime'
+	),
+	type6 : SDL!SdlUri(
+	   ElName <- 'Uri'
+	)
+}

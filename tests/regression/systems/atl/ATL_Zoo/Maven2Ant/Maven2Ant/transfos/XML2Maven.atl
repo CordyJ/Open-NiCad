@@ -1,0 +1,592 @@
+module XML2Maven;
+create OutMaven : MavenMaven, OutProject : MavenProject
+							from XML1 : XMLMaven, XML2 : XMLProject;
+
+-- concerning the file representing maven.xml
+
+-- helper : returns the value of the attribute 'name' of an element
+--  the value must exist
+helper context XMLMaven!Element def: getAttrVal(name : String) : String =
+    self.children->
+		select(c | c.oclIsKindOf(XMLMaven!Attribute) and c.name = name)
+			->first().value;
+
+-- helper : returns true if the attribute 'name' of an element has a value
+helper context XMLMaven!Element def: testAttribute(name : String) : Boolean =
+	not (self.children -> select(d | d.oclIsKindOf(XMLMaven!Attribute) and d.name = name)->
+		first().oclIsUndefined());
+
+-- helper : returns a value of the attribute 'name' of an element
+--		  returns '' if this attribute do not exist
+helper context XMLMaven!Element def:getAttribute(name : String):String = 
+	if (self.testAttribute(name))
+		then self.getAttrVal(name)
+		else ''
+		endif;
+
+
+------------------------------------------------------------------------
+-- concerning Xmlns
+
+-- helper detXmlns: returns the value of the namespace:
+-- it removes the prefix ‘xmlns:’
+helper context XMLMaven!Attribute def:detXmlns():String = 
+	if self.name.size()>6
+		then self.name.substring(7,self.name.size())
+		else ''
+		endif;
+
+
+helper def:testXmlnsAux(name: String): Boolean =
+	not (XMLMaven!Attribute.allInstances() ->
+		select(e|e.value=name)-> first().oclIsUndefined());
+
+-- helper getXmlnsAux: returns the name of the attribute
+-- whose value is given in parameter
+  helper def:getXmlnsAux(name: String): String =
+	if thisModule.testXmlnsAux(name)then
+		XMLMaven!Attribute.allInstances() ->
+			select(e|e.value=name)->first().name
+		else ''
+		endif;
+--helper def:getXmlnsAux(name: String): String =XMLMaven!Attribute.allInstances() ->
+--			select(e|e.value=name)->first().name;
+
+-- helper getXmlns: returns the value of the prefix corresponding
+-- to the library whose name is given in parameter
+helper def:getXmlns(name: String): String =
+	let completeValue: String = thisModule.getXmlnsAux(name)in
+	if completeValue.size()>6
+		then completeValue.substring(7,completeValue.size())+':'
+		else ''
+		endif;
+----------------------------------------------------------------------------
+
+-- central rule for MavenMaven
+rule XMLMavenRoot2MavenMavenProject{
+	from i : XMLMaven!Root(
+		i.name = 'project'
+	)
+	to o : MavenMaven!Project(
+		xmlns <- i.children ->
+			select(d | if d.oclIsKindOf(XMLMaven!Attribute) then
+							d.name.substring(1,6)='xmlns:'
+						else
+							false
+						endif
+						),
+       default <- XMLMaven!Element.allInstances() ->
+			select(d | d.name = 'goal'
+				and d.getAttribute('name')=i.getAttribute('default'))->
+				first(),
+		path <- i.children ->
+			select(d | d.oclIsKindOf(XMLMaven!Element)
+					and (d.name = thisModule.getXmlns('jelly:ant')+'path'))
+						->first(),
+		properties <- i.children ->
+			select(d | d.oclIsKindOf(XMLMaven!Element)
+					and (d.name = thisModule.getXmlns('jelly:ant')+'property')),
+		taskdefs <- i.children ->
+			select(d | d.oclIsKindOf(XMLMaven!Element)
+					and (d.name = thisModule.getXmlns('jelly:ant')+'taskdef')),
+	    prePostGoals <- i.children ->
+			select(d | d.oclIsKindOf(XMLMaven!Element)
+					and (d.name = 'preGoal' or d.name='postGoal')),
+		goals <- i.children ->
+			select(d | d.oclIsKindOf(XMLMaven!Element)
+					and d.name = 'goal')
+	)
+}
+
+
+rule Xmlns{
+	from i : XMLMaven!Attribute(
+		if i.parent.name='project'
+			and i.parent.oclIsKindOf(XMLMaven!Root)
+			and i.name.size()>5 then
+				i.name.substring(1, 6) = 'xmlns:'
+		else
+				false
+		endif
+	)
+	to o : MavenMaven!Xmlns(
+		name <- i.detXmlns(),
+		value <- i.value
+	)
+}
+-------------------------------------------------------------------
+-- properties
+
+rule PropertyLocation{
+	from i : XMLMaven!Element(
+		i.name = thisModule.getXmlns('jelly:ant')+'property' and
+		i.testAttribute('location')
+	)
+	to o : MavenMaven!AntPropertyLocation(
+		name <- i.getAttribute('name'),
+		location <- i.getAttribute('location')
+	)
+}
+
+rule PropertyValue{
+	from i : XMLMaven!Element(
+		i.name = thisModule.getXmlns('jelly:ant')+'property' and
+		i.testAttribute('value')
+	)
+	to o : MavenMaven!AntPropertyValue(
+		name <- i.getAttribute('name'),
+		value <- i.getAttribute('value')
+	)
+}
+rule PropertyFile{
+	from i : XMLMaven!Element(
+		i.name = thisModule.getXmlns('jelly:ant')+'property' and
+		i.testAttribute('file')
+	)
+	to o : MavenMaven!AntPropertyFile(
+		file <- i.getAttribute('file')
+	)
+}
+
+rule PropertyEnv{
+	from i : XMLMaven!Element(
+		i.name = thisModule.getXmlns('jelly:ant')+'property' and
+		i.testAttribute('environment')
+	)
+	to o : MavenMaven!AntPropertyEnv(
+		environment <- i.getAttribute('environment')
+	)
+}
+
+
+rule JellySet{
+	from i : XMLMaven!Element(
+		i.name = thisModule.getXmlns('jelly:core')+'set'
+	)
+	to o : MavenMaven!JellySet(
+		var <- i.getAttribute('var'),
+		value <- i.getAttribute('value')
+	)
+}
+
+rule Goal{
+	from i : XMLMaven!Element(
+		i.name = 'goal'
+	)
+	to o : MavenMaven!Goal(
+		name <- i.getAttribute('name'),			
+		contentsGoal <- i.children ->
+			select(d | d.oclIsKindOf(XMLMaven!Element))
+	)
+}
+
+
+rule PreGoal{
+		from i : XMLMaven!Element(
+		i.name = 'preGoal'
+	)
+	to o : MavenMaven!PreGoal(
+		centralGoal <- XMLMaven!Element.allInstances() ->
+				select(d|d.name='goal' and d.getAttribute('name')=i.getAttribute('name')) ->
+					first(),
+		contentsGoal <- i.children ->
+			select(d | d.oclIsKindOf(XMLMaven!Element))
+	)
+}
+
+rule PostGoal{
+		from i : XMLMaven!Element(
+		i.name = 'postGoal'
+	)
+	to o : MavenMaven!PostGoal(
+		centralGoal <- XMLMaven!Element.allInstances() ->
+				select(d|d.name='goal' and d.getAttribute('name')=i.getAttribute('name')) ->
+					first(),
+		contentsGoal <- i.children ->
+			select(d | d.oclIsKindOf(XMLMaven!Element))
+	)
+}
+
+rule AttainGoal{
+	from i : XMLMaven!Element(
+		i.name = 'attainGoal'
+	)
+	to o : MavenMaven!AttainGoal(
+		attainGoal <- XMLMaven!Element.allInstances() ->
+				select(d|d.name='goal' and d.getAttribute('name')=i.getAttribute('name')) ->
+					first()
+	)
+}
+
+---------------------------------------------------------------------
+-- copy of tasks (like XML2Ant)
+
+-- task defined by the user
+rule AntTaskDef{
+	from i : XMLMaven!Element(
+		i.name = thisModule.getXmlns('jelly:ant')+'taskdef'
+	)
+	to o : MavenMaven!AntTaskDef(
+		name <- i.getAttribute('name'),
+		classname <- i.getAttribute('classname')
+	)
+}
+rule NewTask{
+	from i : XMLMaven!Element(
+		not(XMLMaven!Element.allInstances() ->
+			select(d |  d.name = thisModule.getXmlns('jelly:ant')+'taskdef'
+				and d.getAttribute('name')=i.name) ->
+					isEmpty())
+	)
+	to o : MavenMaven!NewTask(
+		taskName <- XMLMaven!Element.allInstances() ->
+			select(d |  d.name = thisModule.getXmlns('jelly:ant')+'taskdef'
+				and d.getAttribute('name')=i.name) ->
+					first(),
+		attributes <- i.children ->
+			select(d | d.oclIsKindOf(XMLMaven!Attribute))
+	)
+}
+
+rule Attribut{
+	from i : XMLMaven!Attribute(
+		not(XMLMaven!Element.allInstances() ->
+			select(d | d.name = thisModule.getXmlns('jelly:ant')+'taskdef'
+				and d.getAttribute('name')=i.parent.name) ->
+					isEmpty())
+	)
+	to o : MavenMaven!Attribut(
+		name <- i.name,
+		value<- i.value
+	)
+}
+
+-------------------------------------------------------
+-- pre-defined tasks
+rule Mkdir{
+	from i : XMLMaven!Element(
+		i.name = thisModule.getXmlns('jelly:ant')+'mkdir'
+	)
+	to o : MavenMaven!Mkdir(
+		dir <- i.getAttribute('dir')
+	)
+}
+
+rule Tstamp{
+	from i : XMLMaven!Element(
+		i.name = thisModule.getXmlns('jelly:ant')+'tstamp'
+	)
+	to o : MavenMaven!Tstamp()
+}
+
+
+rule Java{
+	from i : XMLMaven!Element(
+		i.name = thisModule.getXmlns('jelly:ant')+'java'
+	)
+	to o : MavenMaven!Java(
+		classname <- i.getAttribute('classname'),
+		jar <- i.getAttribute('jar'),
+		fork <- i.getAttribute('fork'),
+  		classPath <- i.children ->
+			select(d | d.oclIsKindOf(XMLMaven!Element) 
+					and (d.name = 'classpath' or d.name='ant:classpath'))
+	)
+}
+
+rule Javac{
+	from i : XMLMaven!Element(
+		i.name = thisModule.getXmlns('jelly:ant')+'javac'
+	)
+	to o : MavenMaven!Javac(
+		destdir <- i.getAttribute('destdir'),
+		srcdir <- i.getAttribute('srcdir'),
+  		classPath <- i.children ->
+			select(d | d.oclIsKindOf(XMLMaven!Element)
+					and d.name = thisModule.getXmlns('jelly:ant')+'classpath')->
+						first(),
+		inExcludes <- i.children ->
+			select(d | d.oclIsKindOf(XMLMaven!Element)
+					and (d.name  = thisModule.getXmlns('jelly:ant')+'include' or
+						d.name = thisModule.getXmlns('jelly:ant')+ 'exclude'))
+	)
+}
+
+rule Javadoc{
+	from i : XMLMaven!Element(
+		i.name = thisModule.getXmlns('jelly:ant')+'javadoc'
+	)
+	to o : MavenMaven!Javadoc(
+	 	sourcepath <- i.getAttribute('sourcepath'),
+  		destdir <- i.getAttribute('destdir'),
+  		packagenames <- i.getAttribute('packagenames'),
+  		defaultexcludes <- i.getAttribute('defaultexcludes'),
+  		author <- i.getAttribute('author'),
+  		version <- i.getAttribute('version'),
+  		use <- i.getAttribute('use'),
+  		windowtitle <- i.getAttribute('windowtitle')
+	)
+}
+
+rule Copy{
+	from i : XMLMaven!Element(
+		i.name = thisModule.getXmlns('jelly:ant')+'copy'
+	)
+	to o : MavenMaven!Copy(
+		todir <- i.getAttribute('todir'),
+		fileset <- i.children ->
+			select(d | d.oclIsKindOf(XMLMaven!Element)
+				and d.name = thisModule.getXmlns('jelly:ant')+'fileset') ->
+					first(),
+		filterset <- i.children ->
+			select(d | d.oclIsKindOf(XMLMaven!Element)
+				and d.name = thisModule.getXmlns('jelly:ant')+'filterset') ->
+					first()
+	)
+}
+
+
+rule Delete{
+	from i : XMLMaven!Element(
+		i.name = thisModule.getXmlns('jelly:ant')+'delete'
+	)
+	to o : MavenMaven!Delete(
+		dir <- i.getAttribute('dir')
+	)
+}
+
+rule Jar{
+	from i : XMLMaven!Element(
+		i.name = thisModule.getXmlns('jelly:ant')+'jar'
+	)
+	to o : MavenMaven!Jar(
+		jarfile <- i.getAttribute('jarfile'),
+		basedir <- i.getAttribute('basedir')
+	)
+}
+------------------------------------------------------------------------------
+-- path, file and pattern
+-- like XML2Ant
+
+rule Path{
+	from i : XMLMaven!Element(
+		i.name = thisModule.getXmlns('jelly:ant')+'path'
+	)
+	to o : MavenMaven!Path(
+		id <- i.getAttribute('id'),
+		refid <- i.getAttribute('refid'),
+		fileset <- i.children ->
+			select(d | d.oclIsKindOf(XMLMaven!Element)
+					and d.name = thisModule.getXmlns('jelly:ant')+'fileset')
+	)
+}
+
+rule FileSet{
+	from i : XMLMaven!Element(
+		i.name = thisModule.getXmlns('jelly:ant')+'fileset'
+	)
+	to o : MavenMaven!FileSet(
+		dir <- i.getAttribute('dir'),
+		patternset <- i.children ->
+			select(d | d.oclIsKindOf(XMLMaven!Element)
+					and d.name = thisModule.getXmlns('jelly:ant')+'patternset'),
+		include <- i.children ->
+			select(d | d.oclIsKindOf(XMLMaven!Element)
+					and d.name = thisModule.getXmlns('jelly:ant')+'include'),
+		exclude <- i.children ->
+			select(d | d.oclIsKindOf(XMLMaven!Element)
+					and d.name = thisModule.getXmlns('jelly:ant')+'exclude')
+	)
+}
+
+
+rule PatternSet{
+	from i : XMLMaven!Element(
+		i.name = thisModule.getXmlns('jelly:ant')+'patternset'
+	)
+	to o : MavenMaven!PatternSet(
+		inexcludes <- i.children ->
+			select(d | d.oclIsKindOf(XMLMaven!Element)
+					and (d.name = thisModule.getXmlns('jelly:ant')+'exclude'
+								or d.name= thisModule.getXmlns('jelly:ant')+'include'))
+	)
+}
+rule ClassPath{
+	from i : XMLMaven!Element(
+		i.name = thisModule.getXmlns('jelly:ant')+'classpath'
+	)
+	to o : MavenMaven!ClassPath(
+		refid <- i.getAttribute('refid'),
+		pathElement <- i.children ->
+			select(d | d.oclIsKindOf(XMLMaven!Element)
+					and d.name = thisModule.getXmlns('jelly:ant')+'pathelement'),
+        fileset <- i.children ->
+			select(d | d.oclIsKindOf(XMLMaven!Element)
+					and d.name = thisModule.getXmlns('jelly:ant')+'fileset')
+	)
+ }
+ 
+ 
+ 
+rule PathElement{
+	from i : XMLMaven!Element(
+		i.name = thisModule.getXmlns('jelly:ant')+'pathelement'
+	)
+	to o : MavenMaven!PathElement(
+		path <- i.getAttribute('path'),
+		location <- i.getAttribute('location')
+	)
+}
+
+
+
+rule FilterSet{
+	from i : XMLMaven!Element(
+		i.name = thisModule.getXmlns('jelly:ant')+'filterset'
+	)
+	to o : MavenMaven!FilterSet(
+		starttoken <- i.getAttribute('starttoken'),
+   		endtoken <- i.getAttribute('endtoken'),
+		filter <- i.children ->
+			select(d | d.oclIsKindOf(XMLMaven!Element)
+					and d.name = thisModule.getXmlns('jelly:ant')+'filter'),
+		filtersfile <- i.children ->
+			select(d | d.oclIsKindOf(XMLMaven!Element)
+					and d.name = thisModule.getXmlns('jelly:ant')+'filtersfile')
+	)
+}
+
+rule Filter{
+	from i : XMLMaven!Element(
+		i.name = thisModule.getXmlns('jelly:ant')+'filter'
+	)
+	to o : MavenMaven!Filter(
+		token <- i.getAttribute('token'),
+		value <- i.getAttribute('value')
+	)
+}
+
+rule FiltersFile{
+	from i : XMLMaven!Element(
+		i.name = thisModule.getXmlns('jelly:ant')+'filtersfile'
+	)
+	to o : MavenMaven!FiltersFile(
+		file <- i.getAttribute('file')
+	)
+}
+
+ 
+
+rule Includes{
+	from i : XMLMaven!Element(
+		i.name = thisModule.getXmlns('jelly:ant')+'include'
+	)
+	to o : MavenMaven!Includes(
+		name <- i.getAttribute('name'),
+		ifCondition <- i.getAttribute('if'),
+		unless <- i.getAttribute('unless')
+	)
+}
+
+
+rule Excludes{
+	from i : XMLMaven!Element(
+		i.name = thisModule.getXmlns('jelly:ant')+'exclude'
+	)
+	to o : MavenMaven!Excludes(
+		name <- i.getAttribute('name'),
+		ifCondition <- i.getAttribute('if'),
+		unless <- i.getAttribute('unless')
+	)
+}
+
+
+rule IncludesFile{
+	from i : XMLMaven!Element(
+		i.name = thisModule.getXmlns('jelly:ant')+'includesfile'
+	)
+	to o: MavenMaven!IncludesFile(
+		name <- i.getAttribute('name'),
+		ifCondition <- i.getAttribute('if'),
+		unless <- i.getAttribute('unless')
+	)
+}
+
+rule ExcludesFile{
+	from i : XMLMaven!Element(
+		i.name = thisModule.getXmlns('jelly:ant')+'excludesfile'
+	)
+	to o : MavenMaven!ExcludesFile(
+		name <- i.getAttribute('name'),
+		ifCondition <- i.getAttribute('if'),
+		unless <- i.getAttribute('unless')
+	)
+}
+
+
+----------------------------------------------------------------------------------
+----------------------------------------------------------------------------------
+-- concerning the file representing project.xml
+
+-- helper : returns the value  of a text belonging to an element
+helper context XMLProject!Element def: getTextAux(name : String) : String =
+    self.children->
+		select(c | c.oclIsKindOf(XMLProject!Element)and c.name=name)
+			->first().children
+				-> select(d | d.oclIsKindOf(XMLProject!Text))
+					->first().value;
+
+helper context XMLProject!Element def: testElement(name:String) : Boolean =
+	not (self.children ->
+			select(d | d.oclIsKindOf(XMLProject!Element) and d.name=name)->
+		first().oclIsUndefined());
+
+helper context XMLProject!Element def:getText(name : String):String = 
+	if (self.testElement(name))
+		then self.getTextAux(name)
+		else ''
+		endif;
+
+
+-- helper : returns the value of the attribute 'name' of an element
+--  the value must exist
+helper context XMLProject!Element def: getAttrVal(name : String) : String =
+    self.children->
+		select(c | c.oclIsKindOf(XMLProject!Attribute) and c.name = name)
+			->first().value;
+
+-- helper : returns true if the attribute 'name' of an element has a value
+helper context XMLProject!Element def: testAttribute(name : String) : Boolean =
+	not (self.children ->
+			select(d | d.oclIsKindOf(XMLProject!Attribute) and d.name = name)->
+		first().oclIsUndefined());
+
+-- helper : returns a value of the attribute 'name' of an element
+--		  returns '' if this attribute do not exist
+helper context XMLProject!Element def:getAttribute(name : String):String = 
+	if (self.testAttribute(name))
+		then self.getAttrVal(name)
+		else ''
+		endif;
+
+rule XMLProjectRoot2MavenProjectProject{
+	from i : XMLProject!Root
+	to o : MavenProject!Project(
+		id <- i.getAttribute('id'),
+		name <- i.getAttribute('name'),
+   		description <- i.getText('description'),
+ 		build <- i.children ->
+			select(d | d.oclIsKindOf(XMLProject!Element) and d.name = 'build')
+				-> first()
+	)
+}
+
+rule Build{
+	from i : XMLProject!Element(
+		i.name = 'build'
+	)
+	to o : MavenProject!Build(
+		defaultGoal <-  i.getText('defaultGoal'),
+		sourceDirectory <- i.getText('sourceDirectory')
+	)
+}

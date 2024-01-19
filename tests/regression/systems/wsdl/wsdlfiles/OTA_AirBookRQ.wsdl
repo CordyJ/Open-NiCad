@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2005 sp2 U (http://www.altova.com) by Maciej (Sabre Deutschland Marketing GmbH) -->
+<definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ota="http://www.opentravel.org/OTA/2003/05" xmlns:tns="https://webservices.sabre.com/websvc" xmlns:eb="http://www.ebxml.org/namespaces/messageHeader" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:wsse="http://schemas.xmlsoap.org/ws/2002/12/secext" targetNamespace="https://webservices.sabre.com/websvc">
+	<types>
+		<xs:schema>
+			<xs:import schemaLocation="../ebxml/msg-header-2_0.xsd" namespace="http://www.ebxml.org/namespaces/messageHeader"/>
+			<xs:import schemaLocation="../ebxml/wsse.xsd" namespace="http://schemas.xmlsoap.org/ws/2002/12/secext"/>
+		</xs:schema>
+		<xs:schema targetNamespace="http://www.opentravel.org/OTA/2003/05">
+			<!-- if the tool doesn't accept embedded schema files, then use flat -->
+			<xs:include schemaLocation="../ota2004.1/FS_OTA_AirBookRQRS.xsd"/>
+		</xs:schema>
+	</types>
+	<message name="OTA_AirBookInput">
+		<part name="ebHeader" element="eb:MessageHeader"/>
+		<part name="wsseHeader" element="wsse:Security"/>
+		<part name="bodyRQ" element="ota:OTA_AirBookRQ"/>
+	</message>
+	<message name="OTA_AirBookOutput">
+		<part name="ebHeader" element="eb:MessageHeader"/>
+		<part name="wsseHeader" element="wsse:Security"/>
+		<part name="bodyRS" element="ota:OTA_AirBookRS"/>
+	</message>
+	<portType name="OTA_AirBookPortType">
+		<operation name="OTA_AirBookRQ">
+			<input message="tns:OTA_AirBookInput"/>
+			<output message="tns:OTA_AirBookOutput"/>
+		</operation>
+	</portType>
+	<binding name="OTA_AirBookBinding" type="tns:OTA_AirBookPortType">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="OTA_AirBookRQ">
+			<soap:operation soapAction="OTA_AirBookRQ" style="document"/>
+			<input>
+				<soap:header message="tns:OTA_AirBookInput" part="ebHeader" use="literal"/>
+				<soap:header message="tns:OTA_AirBookInput" part="wsseHeader" use="literal"/>
+				<soap:body parts="bodyRQ" use="literal"/>
+			</input>
+			<output>
+				<soap:header message="tns:OTA_AirBookOutput" part="ebHeader" use="literal"/>
+				<soap:header message="tns:OTA_AirBookOutput" part="wsseHeader" use="literal"/>
+				<soap:body parts="bodyRS" use="literal"/>
+			</output>
+		</operation>
+	</binding>
+	<service name="OTA_AirBookService">
+		<port name="OTA_AirBookPortType" binding="tns:OTA_AirBookBinding">
+			<soap:address location="https://webservices.sabre-merlin.de/XGateConnector/services/urn:XGate2"/>
+		</port>
+	</service>
+</definitions>

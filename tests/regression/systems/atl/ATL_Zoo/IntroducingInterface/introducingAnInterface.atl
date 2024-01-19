@@ -1,0 +1,174 @@
+-- @name	 Introducing an interface
+-- @version		1.0
+-- @domains		Catalogue of Model Transformations
+-- @authors		Baudry Julien (jul.baudry<at>gmail.com)
+-- @date		2006/08/02
+-- @description	The purpose of this transformation is introduce an interface to each reference
+-- @see http://www.dcs.kcl.ac.uk/staff/kcl/tcat.pdf   
+-- @see section 2.6, page 16
+-- @see author of article : K. Lano
+
+module UML2Transformations; -- Module Template
+create OUT : UML2target from IN : UML2, MODEL : XML;
+
+-- helper getOperations
+-- IN :  UML2!Class, UML2!Class
+-- OUT : Sequence(UML2!Operation)
+-- this helper returns in a sequence the operations of the class 'class' use by the class 'sub	class'
+helper context UML2!Property def: getOperations(class : UML2!Class,subClass : UML2!Class) : Sequence(UML2!Operation) =
+	XML!Root.allInstances()->asSequence()->first().children
+											->select(a|a.name = class.name)->first().children
+											->select(a|(a.name = subClass.name)and((a.children->select(a|a.name='model')->first().value)=subClass.package.name))
+											->first().children
+											->select(a|a.oclIsTypeOf(XML!Element));
+																
+
+--@begin rule model
+rule model {
+	from
+		inputModel : UML2!Model 
+	to
+		outputModel : UML2target!Model (
+			name <- inputModel.name,
+			visibility <- inputModel.visibility,
+			packageableElement_visibility <- inputModel.packageableElement_visibility,
+			ownedMember <-inputModel.ownedMember
+		)
+}
+--@end rule model
+
+--@begin rule class
+rule class {
+	from
+		inputClass : UML2!Class 
+	to
+		outputClass : UML2target!Class (
+			name <- inputClass.name,
+			visibility <- inputClass.visibility,
+			packageableElement_visibility <- inputClass.packageableElement_visibility,
+			isAbstract <- inputClass.isAbstract,
+			isLeaf <- inputClass.isLeaf,
+			isActive <- inputClass.isActive,
+			ownedAttribute <- inputClass.ownedAttribute,
+			ownedOperation <- inputClass.ownedOperation
+		)
+}
+--@end rule class
+
+--@begin association
+rule association {
+	from 
+		inputAssoc : UML2!Association 
+	to
+		outputAssoc : UML2target!Association (
+				isAbstract <- inputAssoc.isAbstract,
+				isDerived <- inputAssoc.isDerived,
+				isLeaf <- inputAssoc.isLeaf,
+				ownedEnd <- inputAssoc.ownedEnd,
+				memberEnd <- inputAssoc.memberEnd,
+				name <- inputAssoc.name,
+				packageableElement_visibility <- inputAssoc.packageableElement_visibility,
+				visibility <- inputAssoc.visibility
+		)
+}	
+
+--@end association
+
+--@begin rule property
+rule property {
+	from
+		inputProperty : UML2!Property 
+	to
+		outputProperty : UML2target!Property (
+			isDerived <- inputProperty.isDerived,
+			isDerivedUnion <- inputProperty.isDerivedUnion,
+			isLeaf <- inputProperty.isLeaf,
+			isOrdered <- inputProperty.isOrdered,
+			isReadOnly <- inputProperty.isReadOnly,
+			isStatic <- inputProperty.isStatic,
+			isUnique <- inputProperty.isUnique,
+			name <- inputProperty.name,
+			visibility <- inputProperty.visibility,
+			lowerValue <- inputProperty.lowerValue,
+			upperValue <- inputProperty.upperValue,
+			type <- outputInterface
+		),
+		outputInterface : UML2target!Interface (
+			name <- inputProperty.name+'_interface_'+inputProperty.association.name,
+			ownedOperation <- inputProperty.getOperations(inputProperty.association.endType->excluding(inputProperty.type)->first(),
+																							inputProperty.type)
+																							->iterate (a; acc : Sequence(UML2target!Operation) = Sequence{}|
+																												acc->including(thisModule.operationXML(a)))
+		),
+		outputImplementation : UML2target!Implementation (
+			name <- inputProperty.name+'_implementation_'+inputProperty.association.name,
+			contract <- outputInterface,
+			implementingClassifier <- inputProperty.type
+		)
+}
+--@end rule property
+
+--@begin literal null
+rule literalNull {
+	from 
+		inputLiteral : UML2!LiteralNull
+	to 
+		outputLiteral : UML2target!LiteralNull (
+			name <- inputLiteral.name,
+			value <- inputLiteral.value
+		)
+}
+--@end literal null
+
+--@begin literal integer 
+rule literalInteger {
+	from 
+		inputLiteral : UML2!LiteralInteger
+	to 
+		outputLiteral : UML2target!LiteralInteger (
+			name <- inputLiteral.name,
+			value <- inputLiteral.value
+		)
+}
+--@end literal integer
+
+--@begin literal unlimited natural 
+rule literalUnlimitedNatural {
+	from 
+		inputLiteral : UML2!LiteralUnlimitedNatural
+	to 
+		outputLiteral : UML2target!LiteralUnlimitedNatural (
+			name <- inputLiteral.name,
+			value <- inputLiteral.value
+		)	
+}
+--@end literal unlimited natural
+
+--@begin operation
+rule operation {
+	from
+		inputOperation : UML2!Operation
+	to
+		outputOperation : UML2target!Operation (
+			isAbstract <- inputOperation.isAbstract,
+			isLeaf <- inputOperation.isLeaf,
+			isOrdered <- inputOperation.isOrdered,
+			isQuery <- inputOperation.isQuery,
+			isStatic <- inputOperation.isStatic,
+			isUnique <- inputOperation.isUnique,
+			name <- inputOperation.name,
+			visibility <- inputOperation.visibility
+		)
+}
+--@end operation
+
+--@begin operationXML
+lazy rule operationXML {
+	from
+		inputElement : XML!Element
+	to
+		outputOperation : UML2target!Operation (
+			name <- inputElement.name
+		)
+}
+--@end operationXML

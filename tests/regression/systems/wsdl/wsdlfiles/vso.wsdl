@@ -1,0 +1,306 @@
+<?xml version="1.0"?>
+<!-- VSO Data Types -->
+<!-- 2005/03/21 : updated for java's 'wscompile'; added 'Extra' fields access. -->
+
+
+<definitions name="VSO"
+	xmlns="http://schemas.xmlsoap.org/wsdl/"
+	xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
+	xmlns:vso="http://virtualsolar.org/VSO/VSOi"
+	xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+	targetNamespace="http://virtualsolar.org/VSO/VSOi"
+>
+	<types>
+		<schema xmlns="http://www.w3.org/2001/XMLSchema"
+  	                targetNamespace="http://virtualsolar.org/VSO/VSOi">
+		
+			<complexType name="StringArray">
+				<complexContent>
+					<restriction base="soapenc:Array">
+						<attribute ref="soapenc:arrayType" wsdl:arrayType="string[]" />
+					</restriction>
+				</complexContent>
+			</complexType>
+
+			<complexType name="Time">
+				<all>
+					<element name="start" type="string" />
+					<element name="end"   type="string" />
+				</all>
+			</complexType>
+			<complexType name="Wave">
+				<all>
+					<element name="wavemin" type="float" />
+					<element name="wavemax" type="float" />
+					<element name="waveunit" type="string" />
+					<element name="wavetype" type="string" minOccurs="0" />
+				</all>
+			</complexType>
+			<complexType name="Extent">
+				<all>
+					<element name="x"    type="string" minOccurs="0" />
+					<element name="y"    type="string" minOccurs="0" />
+					<element name="width" type="string" minOccurs="0" />
+					<element name="length" type="string" minOccurs="0" />
+					<element name="type"  type="string" minOccurs="0" />
+				</all>
+			</complexType>
+			<complexType name="Thumbnail">
+				<all>
+					<element name="hires" type="string" minOccurs="0" />
+					<element name="lowres" type="string" minOccurs="0" />
+				</all>
+			</complexType>
+			<complexType name="Extra">
+				<all>
+					<element name="thumbnail" type="vso:Thumbnail" minOccurs="0" />
+				</all>
+			</complexType>
+    
+
+			<!-- for "Query" function -->
+			
+			<complexType name="QueryRequestBlock">
+				<all>
+					<element name="provider" type="string" minOccurs="0" />
+					<element name="source" type="string" minOccurs="0" />
+					<element name="instrument" type="string" minOccurs="0" />
+					<element name="physobs" type="string" minOccurs="0" />
+					<element name="time" type="vso:Time" minOccurs="1" />
+					<element name="wave" type="vso:Wave" minOccurs="0" />
+					<element name="extent" type="vso:Extent" minOccurs="0" />
+					<element name="field" type="vso:StringArray" minOccurs="0" />
+				</all>
+			</complexType>
+			<complexType name="QueryRequest">
+				<all>
+					<element name="version" type="float" minOccurs="0" />
+					<element name="block" type="vso:QueryRequestBlock" />
+				</all>
+			</complexType>
+			<complexType name="QueryResponseBlock">
+				<all>
+					<element name="provider" type="string" />
+					<element name="source" type="string" minOccurs="0" />
+					<element name="instrument" type="string" minOccurs="0" />
+					<element name="physobs" type="string" minOccurs="0" />
+					<element name="time" type="vso:Time" />
+					<element name="wave" type="vso:Wave" minOccurs="0" />
+					<element name="extent" type="vso:Extent" minOccurs="0" />
+					<element name="fileid" type="string" minOccurs="0" />
+					<element name="size" type="float" minOccurs="0" /> 
+					<element name="extra" type="vso:Extra" minOccurs="0"/>
+					<element name="info" type="string" minOccurs="0" />
+				</all>
+			</complexType>
+			
+			<complexType name="QueryResponseBlockArray">
+				<complexContent>
+<!--					<sequence>
+						<element name="record" type="vso:QueryResponseBlock" minOccurs="0" />
+					</sequence> --> 
+					<restriction base="soapenc:Array">
+						<attribute ref="soapenc:arrayType" wsdl:arrayType="vso:QueryResponseBlock[]" />
+					</restriction>
+				</complexContent>
+			</complexType>
+			
+			
+			<!-- provider response block (a bit late to rename it now) -->
+			<complexType name="ProviderQueryResponse">
+				<all>
+					<element name="version" type="float" />
+					<element name="provider" type="string" minOccurs="0" />
+					<element name="no_of_records_found" type="int" minOccurs="0" />
+					<element name="no_of_records_returned" type="int" minOccurs="0" />
+					<element name="record" type="vso:QueryResponseBlockArray" minOccurs="0" />
+					<element name="error" type="string" minOccurs="0" />
+					<element name="debug" type="string" minOccurs="0" />
+					<element name="status" type="string" minOccurs="0" />
+				</all>
+			</complexType>
+                        <complexType name="VSOQueryResponse">
+				<complexContent>
+<!--					<sequence>
+						<element name="vsoqueryresponse" type="vso:ProviderQueryResponse" minOccurs="0" />
+					</sequence> -->
+                                        <restriction base="soapenc:Array">
+                                                <attribute ref="soapenc:arrayType" wsdl:arrayType="vso:ProviderQueryResponse[]"/>
+					</restriction>
+				</complexContent>
+			</complexType>
+
+			
+			<!-- for "GetData" function -->
+			<complexType name="Info">
+			        <all>
+				        <element name="email" type="string" />
+					<element name="host"  type="string" minOccurs="0" />
+   			                <element name="user"  type="string" minOccurs="0" />
+					<element name="directory" type="string" minOccurs="0" />  
+					<element name="password"  type="string" minOcurrs="0" />
+					<element name="address"   type="string" minOccurs="0" />
+					<element name="required" type="string" minOccurs="0" />
+			        </all>
+			</complexType>
+
+			<complexType name="DataRequest">
+				<all>
+					<element name="provider" type="string" />
+					<element name="fileid" type="vso:StringArray" />
+				</all>
+			</complexType>
+
+			<complexType name="DataRequestArray">
+				<complexContent>
+<!--
+					<sequence>
+						<element name="datarequestarray" type="vso:DataRequest" minOccurs='0' />
+					</sequence>
+-->
+					<restriction base="soapenc:Array">
+						<attribute ref="soapenc:arrayType" wsdl:arrayType="vso:DataRequest[]" />
+					</restriction>
+				</complexContent>
+			</complexType>
+			
+			<complexType name="GetDataRequest">
+				<all>
+					<element name="method" type="vso:StringArray" />
+					<element name="info" type="vso:Info" minOccurs="0" />
+					<element name="data" type="vso:DataRequestArray" minOccurs="0"/>
+				</all>
+			</complexType>
+			
+			<complexType name="VSOGetDataRequest">
+				<all>
+					<element name="version" type="float" minOccurs="0" />
+					<element name="request" type="vso:GetDataRequest" />
+				</all>
+			</complexType>
+			
+			
+			<complexType name="Data">
+				<all>
+					<element name="fileid" type="vso:StringArray" minOccurs="0" />
+					<element name="url" type="string" minOccurs="0" />
+					<element name="provider" type="string" minOccurs="0" />
+					<element name="status" type="string" minOccurs="0"  />
+					<element name="details" type="string" minOccurs="0" />
+					<element name="content" type="string" minOccurs="0" />
+				</all>
+			</complexType>
+
+			<complexType name="DataArray">
+				<complexContent>
+<!--
+					<sequence>
+						<element name="dataarray" type="vso:Data" minOccurs='0' />
+					</sequence>
+-->
+					<restriction base="soapenc:Array">
+						<attribute ref="soapenc:arrayType" wsdl:arrayType="vso:Data[]" />
+					</restriction>
+				</complexContent>
+			</complexType>
+
+
+			<complexType name="ProviderGetDataResponse">
+				<all>
+					<element name="version" type="float" />
+					<element name="info" type="vso:StringArray" minOccurs="0" />
+					<element name="provider" type="string" minOccurs="0" />
+					<element name="data" type="vso:DataArray" minOccurs="0" />
+					<element name="status" type="string" minOccurs="0" />
+					<element name="debug" type="string" minOccurs="0" />
+					<element name="method" type="vso:StringArray" minOccurs="0" />
+				</all>
+			</complexType>
+
+			<complexType name="VSOGetDataResponse">
+				<complexContent>
+<!--
+					<sequence>
+						<element name="vsogetdataresponse" type="vso:ProviderGetDataResponse" minOccurs='0' />
+					</sequence>
+-->
+					<restriction base="soapenc:Array">
+						<attribute ref="soapenc:arrayType" wsdl:arrayType="vso:ProviderGetDataResponse[]" />
+					</restriction>
+				</complexContent>
+			</complexType>
+		</schema>
+	</types>
+
+	<message name="QueryInput">
+		<part name="body" type="vso:QueryRequest" />
+	</message>
+	<message name="QueryOutput">
+		<part name="body" type="vso:VSOQueryResponse" />
+	</message>
+	
+	<message name="GetDataInput">
+		<part name="body" type="vso:VSOGetDataRequest" />
+	</message>
+	<message name="GetDataOutput">
+		<part name="body" type="vso:VSOGetDataResponse" />
+	</message>
+	
+	<portType name="VSOiPort">
+		<operation name="Query">
+			<input message="vso:QueryInput" />
+			<output message="vso:QueryOutput" />
+		</operation>
+		<operation name="GetData">
+			<input message="vso:GetDataInput" />
+			<output message="vso:GetDataOutput" />
+		</operation>
+	</portType>
+	
+	<binding name="VSOiBinding" type="vso:VSOiPort">
+		<soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http" />
+		<operation name="Query">
+			<soap:operation soapAction="http://virtualsolar.org/VSO/VSOi#Query" />
+			<input>
+				<soap:body
+					use="encoded"
+					namespace="http://virtualsolar.org/VSO/VSOi"
+					encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+				/>
+			</input>
+			<output>
+				<soap:body
+					use="encoded"
+					namespace="http://virtualsolar.org/VSO/VSOi"
+					encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+				/>
+			</output>
+		</operation>
+		
+		<operation name="GetData">
+			<soap:operation soapAction="http://virtualsolar.org/VSO/VSOi#GetData" />
+			<input>
+				<soap:body
+					use="encoded"
+					namespace="http://virtualsolar.org/VSO/VSOi"
+					encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+				/>
+			</input>
+			<output>
+				<soap:body
+					use="encoded"
+					namespace="http://virtualsolar.org/VSO/VSOi"
+					encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+				/>
+			</output>
+		</operation>
+	</binding>
+	
+	<service name="VSOiService">
+		<port name="sdacVSOi" binding="vso:VSOiBinding">
+			<soap:address location="http://vso.nascom.nasa.gov/cgi/VSOi_strict" />
+		</port>
+	</service>
+</definitions>
+

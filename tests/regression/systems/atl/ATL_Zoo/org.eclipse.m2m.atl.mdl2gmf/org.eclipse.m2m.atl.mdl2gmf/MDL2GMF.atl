@@ -1,0 +1,243 @@
+-- @atlcompiler atl2006
+module MDL2GMF; -- Module Template
+create OUT : GMF from INMDL : MDL, INUML : UML, INPROP : Property;
+uses MDLHelpers;
+
+helper def: quid2Object : Map(String,MDL!Object)=
+	MDL!Object.allInstancesFrom('INMDL')->iterate(e; acc : Map(String, MDL!Object) = Map {} |
+		acc->including(e.getValue('quid'),e)
+	);
+helper def: id2Node : Map(String,MDL!Object)=
+	MDL!Object.allInstancesFrom('INMDL')->iterate(e; acc : Map(String, MDL!Object) = Map {} |
+		let _type : String = e.type in
+		if(_type='ClassView')
+			then
+			acc->including(e.id.toString(),e)
+			else
+			acc->including(OclUndefined,e)
+		endif
+	);
+	
+
+--UML LIB--
+helper def: quid2Element : Map(String,UML!Element)=
+	UML!PackageableElement.allInstancesFrom('INUML')->iterate(e; acc : Map(String, UML!Element) = Map {} |
+		let _eAnnotation : GMF!"ecore::EAnnotation"=e.eAnnotations->any(a|true)in
+		if(not _eAnnotation.oclIsUndefined())
+			then
+			acc->including(_eAnnotation.source,e)
+			else
+			acc->including(OclUndefined,e)
+		endif
+	);
+helper def : getElementById(id : String) : UML!Element =
+	thisModule.quid2Element->get(id);
+helper def: quid2Generalization : Map(String,UML!Element)=
+	UML!Generalization.allInstancesFrom('INUML')->iterate(e; acc : Map(String, UML!Element) = Map {} |
+		let _eAnnotation : GMF!"ecore::EAnnotation"=e.eAnnotations->any(a|true)in
+		if(not _eAnnotation.oclIsUndefined())
+			then
+			acc->including(_eAnnotation.source,e)
+			else
+			acc->including(OclUndefined,e)
+		endif
+	);
+helper def : getGeneralizationById(id : String) : UML!Element =
+	thisModule.quid2Generalization->get(id);
+
+
+rule ClassDiagram {
+	from
+		o : MDL!Object(
+			o.type='ClassDiagram'
+			and o.getValue('quid')=Property!Property.allInstancesFrom('INPROP')->any(e|true).value
+		)
+	to
+		m : GMF!Diagram (
+			element<-thisModule.getElementById(o.getValue('quid')),
+			type<-'UMLClass',
+			measurementUnit<-#Pixel,
+			children<-o.getOwnedNodes('items'),
+			edges<-o.getOwnedEdges('items')
+			
+		)
+		
+}
+
+helper context MDL!Object def: x : Integer =
+	self.getValue('location').x;
+
+helper context MDL!Object def: y : Integer =
+	self.getValue('location').y;
+
+helper context MDL!Object def: width : Integer =
+	self.getValue('width');
+
+helper context MDL!Object def: height : Integer =
+	self.getValue('height');
+
+helper context MDL!Object def: hasSize : Boolean =
+	not (self.width.oclIsUndefined() or self.height.oclIsUndefined());
+
+helper context MDL!Object def: location : TupleType(x : Integer, y : Integer) =
+	if self.hasSize then
+		Tuple {
+			x = (self.x - self.width / 2).round(),
+			y = (self.y - self.height / 2).round()
+		}
+	else
+		Tuple {
+			x = self.x,
+			y = self.y
+		}
+	endif;
+
+abstract rule NodeView {
+	from
+		o : MDL!Object(
+			o.hasOwnerView(Property!Property.allInstancesFrom('INPROP')->any(e|true).value)
+		)
+	to		
+		g : GMF!Node (
+			element<-thisModule.getElementById(o.getValue('quidu')),			
+			layoutConstraint<- bound,
+			eAnnotations<- eAnn,
+			styles<- style
+		),		
+		eAnn : GMF!"ecore::EAnnotation"(
+			source<-'Shortcut',
+			details<-mapEntry			
+		),
+		mapEntry : GMF!"ecore::EStringToStringMapEntry"(
+			key<-'modelID',
+			value<-'UMLClass'
+		),
+		bound : GMF!Bounds(
+			x<-o.location.x,
+			y<- o.location.y
+		),
+		style : GMF!ShapeStyle(
+			lineColor<-o.getValue('line_color'),
+			fillColor<-o.getValue('fill_color')
+		)
+		
+}
+rule ClassView extends NodeView{
+	from
+		o : MDL!Object(
+			o.type='ClassView'
+			and not(o.isStereotypeApplied('Interface')or o.isStereotypeApplied('enumeration'))					
+		)
+	to
+		g : GMF!Node (
+			type<-'2001',
+			children<-Sequence{label,attributes,operations,inners}
+		),
+		label : GMF!Node(
+			type<-'5003'	
+		),
+		attributes : GMF!Node(
+			type<-'7001'	
+		),
+		operations : GMF!Node(
+			type<-'7002'	
+		),
+		inners : GMF!Node(
+			type<-'7003'	
+		)
+		
+}
+rule InterfaceView extends NodeView{
+	from
+		o : MDL!Object(
+			o.type='ClassView'
+			and(o.isStereotypeApplied('Interface'))
+		)
+	to
+		g : GMF!Node (
+			type<-'2010',
+			children<-Sequence{label}
+		),
+		label : GMF!Node(
+			type<-'5012',
+			layoutConstraint<-location
+		),			
+		location : GMF!Location(
+		)
+		
+}
+rule EnumerationView extends NodeView{
+	from
+		o : MDL!Object(
+			o.type='ClassView'
+			and(o.isStereotypeApplied('enumeration'))
+		)
+	to
+		g : GMF!Node (
+			type<-'2003',
+			children<-Sequence{label,attributes,operations,literals}
+		),
+		label : GMF!Node(
+			type<-'5005'
+		),	
+		attributes : GMF!Node(
+			type<-'7013'
+		),
+		operations : GMF!Node(
+			type<-'7014'
+		),
+		literals : GMF!Node(
+			type<-'7015'
+		)
+		
+		
+}
+rule PackageView extends NodeView{
+	from
+		o : MDL!Object(
+			o.type='CategoryView'			
+		)
+	to
+		g : GMF!Node (
+			type<-'2002',
+			children<-Sequence{label,packages,classifiers,others}
+		),
+		label : GMF!Node(
+			type<-'5004'
+		),	
+		packages : GMF!Node(
+			type<-'7010'
+		),
+		classifiers : GMF!Node(
+			type<-'7011'
+		),
+		others : GMF!Node(
+			type<-'7012'
+		)
+			
+}
+rule GeneralizationView {
+	from
+		o : MDL!Object(
+			o.type='InheritView'
+			and
+			o.hasOwnerView(Property!Property.allInstancesFrom('INPROP')->any(e|true).value)
+			
+		)
+	to		
+		g : GMF!Edge (
+			type<-'4001',
+			source<-thisModule.id2Node->get(o.getValue('client')),
+			target<-thisModule.id2Node->get(o.getValue('supplier')),		
+			styles<- Sequence{connectorStyle,fontStyle},
+			element<-thisModule.getGeneralizationById(o.getValue('quidu')),
+			bendpoints<-relativeBendPoints
+			
+		),
+		connectorStyle : GMF!ConnectorStyle(
+		),
+		fontStyle : GMF!FontStyle(
+		),
+		relativeBendPoints : GMF!RelativeBendpoints(
+		)
+}

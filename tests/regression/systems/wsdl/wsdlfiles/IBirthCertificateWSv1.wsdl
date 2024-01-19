@@ -1,0 +1,93 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<definitions
+   name="BirthCertificateWSv1"
+   targetNamespace="http://com/clarkston/cts/webservice/birthcertificate/BirthCertificateWSv1.wsdl"
+   xmlns="http://schemas.xmlsoap.org/wsdl/"
+   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+   xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+   xmlns:tns="http://com/clarkston/cts/webservice/birthcertificate/BirthCertificateWSv1.wsdl"
+   xmlns:ns1="http://com.clarkston.cts.webservice.birthcertificate/IBirthCertificateWSv1.xsd">
+   <types>
+      <schema
+         targetNamespace="http://com.clarkston.cts.webservice.birthcertificate/IBirthCertificateWSv1.xsd"
+         xmlns="http://www.w3.org/2001/XMLSchema"
+         xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/">
+         <complexType name="ArrayOfcom_clarkston_cts_webservice_birthcertificate_BirthCertificateWSTagRange" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+            <complexContent>
+               <restriction base="SOAP-ENC:Array">
+                  <attribute ref="SOAP-ENC:arrayType" wsdl:arrayType="ns1:com_clarkston_cts_webservice_birthcertificate_BirthCertificateWSTagRange[]"/>
+               </restriction>
+            </complexContent>
+         </complexType>
+         <complexType name="com_clarkston_cts_webservice_birthcertificate_BirthCertificateWSTagRange" jdev:packageName="com.clarkston.cts.webservice.birthcertificate" xmlns:jdev="http://xmlns.oracle.com/jdeveloper/webservices">
+            <all>
+               <element name="startTag" type="string"/>
+               <element name="endTag" type="string"/>
+            </all>
+         </complexType>
+         <complexType name="com_clarkston_cts_webservice_birthcertificate_BirthCertificateWSValue" jdev:packageName="com.clarkston.cts.webservice.birthcertificate" xmlns:jdev="http://xmlns.oracle.com/jdeveloper/webservices">
+            <all>
+               <element name="reportType" type="string"/>
+               <element name="certificateId" type="string"/>
+               <element name="certificateName" type="string"/>
+               <element name="createdByUsername" type="string"/>
+               <element name="dateCreated" type="string"/>
+               <element name="createdByAccountBusinessName" type="string"/>
+               <element name="mimeType" type="string"/>
+               <element name="reportDocument" type="string"/>
+            </all>
+         </complexType>
+      </schema>
+   </types>
+   <message name="createBirthCertReport0Request">
+      <part name="tagRange" type="ns1:ArrayOfcom_clarkston_cts_webservice_birthcertificate_BirthCertificateWSTagRange"/>
+   </message>
+   <message name="createBirthCertReport0Response">
+      <part name="return" type="xsd:string"/>
+   </message>
+   <message name="searchBirthCertReport1Request">
+      <part name="certificateId" type="xsd:string"/>
+   </message>
+   <message name="searchBirthCertReport1Response">
+      <part name="return" type="ns1:com_clarkston_cts_webservice_birthcertificate_BirthCertificateWSValue"/>
+   </message>
+   <portType name="BirthCertificateWSv1PortType">
+      <operation name="createBirthCertReport">
+         <input name="createBirthCertReport0Request" message="tns:createBirthCertReport0Request"/>
+         <output name="createBirthCertReport0Response" message="tns:createBirthCertReport0Response"/>
+      </operation>
+      <operation name="searchBirthCertReport">
+         <input name="searchBirthCertReport1Request" message="tns:searchBirthCertReport1Request"/>
+         <output name="searchBirthCertReport1Response" message="tns:searchBirthCertReport1Response"/>
+      </operation>
+   </portType>
+   <binding name="BirthCertificateWSv1Binding" type="tns:BirthCertificateWSv1PortType">
+      <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+      <operation name="createBirthCertReport">
+         <soap:operation soapAction="" style="rpc"/>
+         <input name="createBirthCertReport0Request">
+            <soap:body use="encoded" namespace="BirthCertificateWSv1" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+         </input>
+         <output name="createBirthCertReport0Response">
+            <soap:body use="encoded" namespace="BirthCertificateWSv1" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+         </output>
+      </operation>
+      <operation name="searchBirthCertReport">
+         <soap:operation soapAction="" style="rpc"/>
+         <input name="searchBirthCertReport1Request">
+            <soap:body use="encoded" namespace="BirthCertificateWSv1" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+         </input>
+         <output name="searchBirthCertReport1Response">
+            <soap:body use="encoded" namespace="BirthCertificateWSv1" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+         </output>
+      </operation>
+   </binding>
+   <service name="BirthCertificateWSv1">
+      <documentation>The Service Endpoint for the Birth Certificate Web service.  Handles the support
+for a Web Service client in the creating and searching of a birth certificate report.
+</documentation>
+      <port name="BirthCertificateWSv1Port" binding="tns:BirthCertificateWSv1Binding">
+         <soap:address location="https://www.clia.livestockid.ca/CLTS/BirthCertificateWSv1"/>
+      </port>
+   </service>
+</definitions>

@@ -1,0 +1,481 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://Grass_Vector_FeatureExtraction.grass.ws.laits.gmu.edu" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://Grass_Vector_FeatureExtraction.grass.ws.laits.gmu.edu" xmlns:intf="http://Grass_Vector_FeatureExtraction.grass.ws.laits.gmu.edu" xmlns:tns1="http://grass.ws.laits.gmu.edu" xmlns:tns2="http://ws.laits.gmu.edu" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+	 <wsdl:types>
+
+		  <schema elementFormDefault="qualified" targetNamespace="http://Grass_Vector_FeatureExtraction.grass.ws.laits.gmu.edu" xmlns="http://www.w3.org/2001/XMLSchema">
+
+			<!-- ELEMENTS -->
+
+			   <element name="Extract_featureElement">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Name of the element to describe input parameters.
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element minOccurs="1" name="sourceURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of input vector map. Default data format is GML.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element minOccurs="0" name="flags" nillable="true" type="xsd:string">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Flags. Options: d,t,dt
+                               d : Dissolve common boundaries (default is no)
+                               t : Do not copy table (see also 'new' parameter)
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element default="point,line,boundary,centroid,area,face" minOccurs="0" name="type" nillable="true" type="xsd:string">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Types to be extracted. Default: point,line,boundary,centroid,area,face
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element default="1" minOccurs="0" name="layer" nillable="true" type="xsd:int">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Layer number. If -1, all features in all layers of given type are extracted.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element default="-1" minOccurs="0" name="new" nillable="true" type="xsd:int">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Enter -1 to keep original category or a desired NEW category value. If new &gt;= 0, table is not copied.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element minOccurs="0" name="list" nillable="true" type="xsd:string">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Category ranges: e.g. 1,3-8,13. Parameter format: range[,range,...]
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element minOccurs="0" name="where" nillable="true" type="xsd:string">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        WHERE conditions of SQL statement without 'where' keyword. Parameter format: sql_query
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+			   <element name="Extract_featureResponse">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Always return URL and Format of output file.
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element name="returnURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of output vector map.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element name="returnFormat" type="xsd:string">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Format of output vector map. Default output format is GML.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+			   <element name="fault" type="tns2:WebServiceExceptionsType"/>
+
+			   <element name="Select_featureElement">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Name of the element to describe input parameters.
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element minOccurs="1" name="ainputURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of an input vector map. Default data format is GML.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element minOccurs="1" name="binputURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of another input vector map. Default data format is GML.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element minOccurs="0" name="flags" nillable="true" type="xsd:string">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Flags. Options: d
+                               d : Do not create attribute table                       
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element default="point,line,boundary,centroid,area" minOccurs="0" name="atype" nillable="true" type="xsd:string">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Feature type(s).
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element default="1" maxOccurs="1" minOccurs="0" name="alayer" nillable="true" type="xsd:int">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Layer number. A single vector map can be connected to multiple database tables. This number determines which table to use.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element default="point,line,boundary,centroid,area" minOccurs="0" name="btype" nillable="true" type="xsd:string">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Feature type(s).
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element default="1" minOccurs="0" name="blayer" nillable="true" type="xsd:int">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Layer number. A single vector map can be connected to multiple database tables. This number determines which table to use.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+			   <element name="Select_featureResponse">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Always return URL and Format of output file.
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element name="returnURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of output vector map.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element name="returnFormat" type="xsd:string">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Format of output vector map. Default output format is GML.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+		  </schema>
+
+		  <schema elementFormDefault="qualified" targetNamespace="http://ws.laits.gmu.edu" xmlns="http://www.w3.org/2001/XMLSchema">
+
+			   <complexType name="WebServiceExceptionsType">
+
+				    <sequence>
+
+					     <element name="exception" type="xsd:string"/>
+
+				    </sequence>
+
+			   </complexType>
+
+		  </schema>
+
+	 </wsdl:types>
+
+	 <wsdl:message name="extract_featureRequest">
+
+		  <wsdl:part element="impl:Extract_featureElement" name="parameters"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="extract_featureResponse">
+
+		  <wsdl:part element="impl:Extract_featureResponse" name="return"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="select_featureRequest">
+
+		  <wsdl:part element="impl:Select_featureElement" name="parameters"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="select_featureResponse">
+
+		  <wsdl:part element="impl:Select_featureResponse" name="return"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="WebServiceExceptionsType">
+
+		  <wsdl:part element="impl:fault" name="fault"/>
+
+	 </wsdl:message>
+
+	 <wsdl:portType name="Grass_Vector_FeatureExtractionPortType">
+
+		  <wsdl:operation name="extract_feature">
+
+			   <wsdl:input message="impl:extract_featureRequest" name="extract_featureRequest"/>
+
+			   <wsdl:output message="impl:extract_featureResponse" name="extract_featureResponse"/>
+
+			   <wsdl:fault message="impl:WebServiceExceptionsType" name="WebServiceExceptionsType"/>
+
+		  </wsdl:operation>
+
+		  <wsdl:operation name="select_feature">
+
+			   <wsdl:input message="impl:select_featureRequest" name="select_featureRequest"/>
+
+			   <wsdl:output message="impl:select_featureResponse" name="select_featureResponse"/>
+
+			   <wsdl:fault message="impl:WebServiceExceptionsType" name="WebServiceExceptionsType"/>
+
+		  </wsdl:operation>
+
+	 </wsdl:portType>
+
+	 <wsdl:binding name="Grass_Vector_FeatureExtractionSoapBinding" type="impl:Grass_Vector_FeatureExtractionPortType">
+
+		  <wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+		  <wsdl:operation name="extract_feature">
+
+			   <wsdl:documentation>
+Extract vector objects from an existing vector map and creates a new map containing only the selected objects.   </wsdl:documentation>
+
+			   <wsdlsoap:operation soapAction="extract_feature" style="document"/>
+
+			   <wsdl:input>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:input>
+
+			   <wsdl:output>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:output>
+
+			   <wsdl:fault name="WebServiceExceptionsType">
+
+				    <wsdlsoap:fault name="WebServiceExceptionsType" use="literal"/>
+
+			   </wsdl:fault>
+
+		  </wsdl:operation>
+
+		  <wsdl:operation name="select_feature">
+
+			   <wsdl:documentation>
+Select features from a vector by features from another one.   </wsdl:documentation>
+
+			   <wsdlsoap:operation soapAction="select_feature" style="document"/>
+
+			   <wsdl:input>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:input>
+
+			   <wsdl:output>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:output>
+
+			   <wsdl:fault name="WebServiceExceptionsType">
+
+				    <wsdlsoap:fault name="WebServiceExceptionsType" use="literal"/>
+
+			   </wsdl:fault>
+
+		  </wsdl:operation>
+
+	 </wsdl:binding>
+
+	 <wsdl:service name="Grass_Vector_FeatureExtractionService">
+
+		  <wsdl:documentation>
+Extract vector features from a vector map.  </wsdl:documentation>
+
+		  <wsdl:port binding="impl:Grass_Vector_FeatureExtractionSoapBinding" name="Grass_Vector_FeatureExtraction">
+
+			   <wsdlsoap:address location="http://65.123.203.154:8099/axis/services/Grass_Vector_FeatureExtraction"/>
+
+		  </wsdl:port>
+
+	 </wsdl:service>
+
+	<!--WSDL created by Apache Axis version: 1.4
+Built on Apr 22, 2006 (06:55:48 PDT)-->
+
+</wsdl:definitions>

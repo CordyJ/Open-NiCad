@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions 
+xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd" xmlns:tns="https://home.eease.com" targetNamespace="https://home.eease.com">
+	<wsdl:import namespace="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd" location="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"/>
+	<wsdl:import namespace="eease" location="../xsd/ReturnFromLeaveEmployeeRequest.xsd"/>
+	<wsdl:import namespace="eease" location="../xsd/ReturnFromLeaveEmployeeResponse.xsd"/>
+	<wsdl:message name="Request">
+		<wsdl:part name="security" element="wsse:Security"/>
+		<wsdl:part name="request" element="ReturnFromLeaveEmployeeRequest"/>
+	</wsdl:message>
+	<wsdl:message name="Response">
+		<wsdl:part name="response" element="ReturnFromLeaveEmployeeResponse"/>
+	</wsdl:message>
+	<wsdl:portType name="ReturnFromLeaveEmployeePortType">
+		<wsdl:operation name="ReturnFromLeaveEmployee">
+			<wsdl:input message="tns:Request"/>
+			<wsdl:output message="tns:Response"/>
+		</wsdl:operation>
+	</wsdl:portType>
+	<wsdl:binding name="ReturnFromLeaveEmployeeBinding" type="tns:ReturnFromLeaveEmployeePortType">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<wsdl:operation name="ReturnFromLeaveEmployee">
+			<soap:operation soapAction="ReturnFromLeaveEmployee" style="document"/>
+			<wsdl:input>
+				<soap:header message="tns:Request" part="security" use="literal"/>
+				<soap:body parts="request" use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body parts="response" use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:service name="ReturnFromLeaveEmployeeService">
+		<wsdl:port name="ReturnFromLeaveEmployeePort" binding="tns:ReturnFromLeaveEmployeeBinding">
+			<soap:address location="https://home.eease.com/wsi"/>
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>
+
+

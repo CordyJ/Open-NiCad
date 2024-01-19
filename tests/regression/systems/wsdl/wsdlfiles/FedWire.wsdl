@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2005 U (http://www.xmlspy.com) by Walter (WebserviceX.NET) -->
+<wsdl:definitions xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tns="http://www.webservicex.net/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" targetNamespace="http://www.webservicex.net/">
+	<wsdl:types>
+		<s:schema elementFormDefault="qualified" targetNamespace="http://www.webservicex.net/">
+			<s:element name="GetParticipantsByRoutingNumber">
+				<s:complexType>
+					<s:sequence>
+						<s:element minOccurs="0" maxOccurs="1" name="RoutingNumber" type="s:string"/>
+					</s:sequence>
+				</s:complexType>
+			</s:element>
+			<s:element name="GetParticipantsByRoutingNumberResponse">
+				<s:complexType>
+					<s:sequence>
+						<s:element minOccurs="1" maxOccurs="1" name="GetParticipantsByRoutingNumberResult" type="s:boolean"/>
+						<s:element minOccurs="1" maxOccurs="1" name="FedWireLists" type="tns:FedWireList"/>
+					</s:sequence>
+				</s:complexType>
+			</s:element>
+			<s:complexType name="FedWireList">
+				<s:sequence>
+					<s:element minOccurs="0" maxOccurs="1" name="FedWires" type="tns:ArrayOfFedWireData"/>
+					<s:element minOccurs="1" maxOccurs="1" name="TotalRecords" type="s:int"/>
+				</s:sequence>
+			</s:complexType>
+			<s:complexType name="ArrayOfFedWireData">
+				<s:sequence>
+					<s:element minOccurs="0" maxOccurs="unbounded" name="FedWireData" type="tns:FedWireData"/>
+				</s:sequence>
+			</s:complexType>
+			<s:complexType name="FedWireData">
+				<s:sequence>
+					<s:element minOccurs="0" maxOccurs="1" name="RoutingNumber" type="s:string"/>
+					<s:element minOccurs="0" maxOccurs="1" name="TelegraphicName" type="s:string"/>
+					<s:element minOccurs="0" maxOccurs="1" name="CustomerName" type="s:string"/>
+					<s:element minOccurs="0" maxOccurs="1" name="State" type="s:string"/>
+					<s:element minOccurs="0" maxOccurs="1" name="City" type="s:string"/>
+					<s:element minOccurs="0" maxOccurs="1" name="FundsTransferStatus" type="s:string"/>
+					<s:element minOccurs="0" maxOccurs="1" name="FundsSettlementOnlyStatus" type="s:string"/>
+					<s:element minOccurs="0" maxOccurs="1" name="BookEntrySecuritiesTransferStatus" type="s:string"/>
+					<s:element minOccurs="0" maxOccurs="1" name="DateOfLastRevision" type="s:string"/>
+				</s:sequence>
+			</s:complexType>
+			<s:element name="GetParticipantsByName">
+				<s:complexType>
+					<s:sequence>
+						<s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string"/>
+					</s:sequence>
+				</s:complexType>
+			</s:element>
+			<s:element name="GetParticipantsByNameResponse">
+				<s:complexType>
+					<s:sequence>
+						<s:element minOccurs="1" maxOccurs="1" name="GetParticipantsByNameResult" type="s:boolean"/>
+						<s:element minOccurs="1" maxOccurs="1" name="FedWireLists" type="tns:FedWireList"/>
+					</s:sequence>
+				</s:complexType>
+			</s:element>
+			<s:element name="GetParticipantsByLocation">
+				<s:complexType>
+					<s:sequence>
+						<s:element minOccurs="0" maxOccurs="1" name="City" type="s:string"/>
+						<s:element minOccurs="0" maxOccurs="1" name="StateCode" type="s:string"/>
+					</s:sequence>
+				</s:complexType>
+			</s:element>
+			<s:element name="GetParticipantsByLocationResponse">
+				<s:complexType>
+					<s:sequence>
+						<s:element minOccurs="1" maxOccurs="1" name="GetParticipantsByLocationResult" type="s:boolean"/>
+						<s:element minOccurs="1" maxOccurs="1" name="FedWireLists" type="tns:FedWireList"/>
+					</s:sequence>
+				</s:complexType>
+			</s:element>
+		</s:schema>
+	</wsdl:types>
+	<wsdl:message name="GetParticipantsByRoutingNumberSoapIn">
+		<wsdl:part name="parameters" element="tns:GetParticipantsByRoutingNumber"/>
+	</wsdl:message>
+	<wsdl:message name="GetParticipantsByRoutingNumberSoapOut">
+		<wsdl:part name="parameters" element="tns:GetParticipantsByRoutingNumberResponse"/>
+	</wsdl:message>
+	<wsdl:message name="GetParticipantsByNameSoapIn">
+		<wsdl:part name="parameters" element="tns:GetParticipantsByName"/>
+	</wsdl:message>
+	<wsdl:message name="GetParticipantsByNameSoapOut">
+		<wsdl:part name="parameters" element="tns:GetParticipantsByNameResponse"/>
+	</wsdl:message>
+	<wsdl:message name="GetParticipantsByLocationSoapIn">
+		<wsdl:part name="parameters" element="tns:GetParticipantsByLocation"/>
+	</wsdl:message>
+	<wsdl:message name="GetParticipantsByLocationSoapOut">
+		<wsdl:part name="parameters" element="tns:GetParticipantsByLocationResponse"/>
+	</wsdl:message>
+	<wsdl:portType name="FedWireSoap">
+		<wsdl:operation name="GetParticipantsByRoutingNumber">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Search for Fedwire participants by Routing Number</documentation>
+			<wsdl:input message="tns:GetParticipantsByRoutingNumberSoapIn"/>
+			<wsdl:output message="tns:GetParticipantsByRoutingNumberSoapOut"/>
+		</wsdl:operation>
+		<wsdl:operation name="GetParticipantsByName">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Search for Fedwire participants by their name</documentation>
+			<wsdl:input message="tns:GetParticipantsByNameSoapIn"/>
+			<wsdl:output message="tns:GetParticipantsByNameSoapOut"/>
+		</wsdl:operation>
+		<wsdl:operation name="GetParticipantsByLocation">
+			<documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Search for Fedwire participants by their location</documentation>
+			<wsdl:input message="tns:GetParticipantsByLocationSoapIn"/>
+			<wsdl:output message="tns:GetParticipantsByLocationSoapOut"/>
+		</wsdl:operation>
+	</wsdl:portType>
+	<wsdl:binding name="FedWireSoap" type="tns:FedWireSoap">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<wsdl:operation name="GetParticipantsByRoutingNumber">
+			<soap:operation soapAction="http://www.webservicex.net/GetParticipantsByRoutingNumber" style="document"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetParticipantsByName">
+			<soap:operation soapAction="http://www.webservicex.net/GetParticipantsByName" style="document"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetParticipantsByLocation">
+			<soap:operation soapAction="http://www.webservicex.net/GetParticipantsByLocation" style="document"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:service name="FedWire">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/">The E-Payments Routing Directory provides basic routing information for FedACH transactions and Fedwire Funds and Book-Entry Securities transfers.This Web services search for Fedwire participants by their name, location (state, or state and city), or routing number.</documentation>
+		<wsdl:port name="FedWireSoap" binding="tns:FedWireSoap">
+			<soap:address location="http://www.webservicex.net/FedWire.asmx"/>
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>

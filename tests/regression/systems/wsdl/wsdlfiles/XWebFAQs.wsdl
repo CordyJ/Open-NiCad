@@ -1,0 +1,178 @@
+<definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:tns="urn:ws-xwebservices-com:XWebFAQs:FAQs:v2" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:import0="urn:ws-xwebservices-com:XWebFAQs:FAQs:v2:Messages" targetNamespace="urn:ws-xwebservices-com:XWebFAQs:FAQs:v2" name="XWebFAQs" xmlns="http://schemas.xmlsoap.org/wsdl/">
+  <documentation>XWebFAQs is an XML/SOAP based Web Service which provides integration and management of Frequently Asked Questions (FAQs) to client applications. For complete documentation please visit http://www.xwebservices.com/Web_Services/XWebFAQs/.</documentation>
+  <types>
+    <xsd:schema>
+      <xsd:import schemaLocation="XWebFAQs.xsd" namespace="urn:ws-xwebservices-com:XWebFAQs:FAQs:v2:Messages" />
+    </xsd:schema>
+  </types>
+  <message name="loadFAQIn">
+    <part name="messagePart" element="import0:LoadFAQRequest" />
+  </message>
+  <message name="loadFAQOut">
+    <part name="messagePart" element="import0:LoadFAQResponse" />
+  </message>
+  <message name="loadFAQsIn">
+    <part name="messagePart" element="import0:LoadFAQsRequest" />
+  </message>
+  <message name="loadFAQsOut">
+    <part name="messagePart" element="import0:LoadFAQsResponse" />
+  </message>
+  <message name="loadFAQsPagedIn">
+    <part name="messagePart" element="import0:LoadFAQsPagedRequest" />
+  </message>
+  <message name="loadFAQsPagedOut">
+    <part name="messagePart" element="import0:LoadFAQsPagedResponse" />
+  </message>
+  <message name="getNewFAQIDIn">
+    <part name="messagePart" element="import0:GetNewFAQIDRequest" />
+  </message>
+  <message name="getNewFAQIDOut">
+    <part name="messagePart" element="import0:GetNewFAQIDResponse" />
+  </message>
+  <message name="addFAQIn">
+    <part name="messagePart" element="import0:AddFAQRequest" />
+  </message>
+  <message name="addFAQOut">
+    <part name="messagePart" element="import0:AddFAQResponse" />
+  </message>
+  <message name="updateFAQIn">
+    <part name="messagePart" element="import0:UpdateFAQRequest" />
+  </message>
+  <message name="updateFAQOut">
+    <part name="messagePart" element="import0:UpdateFAQResponse" />
+  </message>
+  <message name="deleteFAQIn">
+    <part name="messagePart" element="import0:DeleteFAQRequest" />
+  </message>
+  <message name="deleteFAQOut">
+    <part name="messagePart" element="import0:DeleteFAQResponse" />
+  </message>
+  <message name="processFAQIn">
+    <part name="messagePart" element="import0:ProcessFAQRequest" />
+  </message>
+  <message name="processFAQOut">
+    <part name="messagePart" element="import0:ProcessFAQResponse" />
+  </message>
+  <portType name="XWebFAQsInterface">
+    <documentation>XWebFAQs is an XML/SOAP based Web Service which provides integration and management of Frequently Asked Questions (FAQs) to client applications. For complete documentation please visit http://www.xwebservices.com/Web_Services/XWebFAQs/.</documentation>
+    <operation name="LoadFAQ">
+      <documentation>Returns a specific Frequently Asked Question.</documentation>
+      <input message="tns:loadFAQIn" />
+      <output message="tns:loadFAQOut" />
+    </operation>
+    <operation name="LoadFAQs">
+      <documentation>Returns all Frequently Asked Questions, in the reverse chronological order the records were entered into the system.</documentation>
+      <input message="tns:loadFAQsIn" />
+      <output message="tns:loadFAQsOut" />
+    </operation>
+    <operation name="LoadFAQsPaged">
+      <documentation>Returns 'paginated' Frequently Asked Question records, in the reverse chronological order the records were entered into the system.</documentation>
+      <input message="tns:loadFAQsPagedIn" />
+      <output message="tns:loadFAQsPagedOut" />
+    </operation>
+    <operation name="GetNewFAQID">
+      <documentation>Returns a new Frequently Asked Question record identifier.</documentation>
+      <input message="tns:getNewFAQIDIn" />
+      <output message="tns:getNewFAQIDOut" />
+    </operation>
+    <operation name="AddFAQ">
+      <documentation>Adds a new Frequently Asked Question.</documentation>
+      <input message="tns:addFAQIn" />
+      <output message="tns:addFAQOut" />
+    </operation>
+    <operation name="UpdateFAQ">
+      <documentation>Updates a Frequently Asked Question.</documentation>
+      <input message="tns:updateFAQIn" />
+      <output message="tns:updateFAQOut" />
+    </operation>
+    <operation name="DeleteFAQ">
+      <documentation>Deletes a Frequently Asked Question.</documentation>
+      <input message="tns:deleteFAQIn" />
+      <output message="tns:deleteFAQOut" />
+    </operation>
+    <operation name="ProcessFAQ">
+      <input message="tns:processFAQIn" />
+      <output message="tns:processFAQOut" />
+    </operation>
+  </portType>
+  <binding name="XWebFAQs" type="tns:XWebFAQsInterface">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document" />
+    <operation name="LoadFAQ">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebFAQs:FAQs:v2:loadFAQIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="LoadFAQs">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebFAQs:FAQs:v2:loadFAQsIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="LoadFAQsPaged">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebFAQs:FAQs:v2:loadFAQsPagedIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="GetNewFAQID">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebFAQs:FAQs:v2:getNewFAQIDIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="AddFAQ">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebFAQs:FAQs:v2:addFAQIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="UpdateFAQ">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebFAQs:FAQs:v2:updateFAQIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="DeleteFAQ">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebFAQs:FAQs:v2:deleteFAQIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="ProcessFAQ">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebFAQs:FAQs:v2:processFAQIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+  </binding>
+  <service name="FAQs">
+    <port name="FAQs" binding="tns:XWebFAQs">
+      <soap:address location="http://ws.xwebservices.com/XWebFAQs/V2/FAQs.asmx" />
+    </port>
+  </service>
+</definitions>

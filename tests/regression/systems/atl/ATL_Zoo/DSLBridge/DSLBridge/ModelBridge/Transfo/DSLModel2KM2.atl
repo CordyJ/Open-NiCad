@@ -1,0 +1,263 @@
+module DSLModel2KM2;
+create OUT : KM2  from IN1 : DSLModel, IN2 : DSL;
+
+-------------------------------------------------------------------------------
+-- HELPERS --------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- This helper returns a boolean which indicates if the relationship corresponding to the role
+-- has a max cardinality > 1
+-- CONTEXT : DSLModel!Role
+-- RETURN : Boolean
+helper context DSLModel!Role def: isMultiple() : Boolean =
+	let a : DSL!Role = DSL!Role.allInstances()
+		->select ( e | e.relation.name = self.owner.type 
+			and e.name = self.name )->first() 
+	in if ( a.max = 1 ) then false else true endif;
+
+-- This helper takes a Sequence in parameter and test if a sequence element with the same name 
+-- as the context is already in the sequence. It is used by the helper getReferences()
+-- CONTEXT : DSLModel!Role
+-- RETURN : Boolean
+helper context DSLModel!Role def: hasSameName(seq : Sequence(DSLModel!Role)) : Boolean =
+	let a : DSLModel!Role =
+		seq->select( e | e.name = self.name)->first()
+	in if a.oclIsUndefined() then false else true endif;
+
+-- This helper returns a sequence of DSLModel!Role without doublons which corresponds to the references
+-- from the context
+-- CONTEXT : DSLModel!ModelElement
+-- RETURN : Sequence(DSLModel!Role)
+helper context DSLModel!ModelElement def : getReferences() : Sequence(DSLModel!Role) =
+	self.getLastRole()->iterate(e;acc : Sequence(DSLModel!Role) = Sequence{} | 
+		if e.hasSameName(acc)
+			then acc
+			else acc->including(e)
+		endif );
+
+-- This helper makes a Sequence of DSLModel!Role which are used to create properties
+-- CONTEXT : ThisModule
+-- RETURN : Sequence(DSLModel!Role)
+helper def: propertyRoles() : Sequence(DSLModel!Role) =
+	let a : Sequence(DSLModel!Role) =
+	DSLModel!ModelElement.allInstances()->iterate(e ;
+	acc:Sequence(DSLModel!Role)=Sequence{} |
+	if ( e.getReferences().size() > 0)
+		then acc -> including(e.getReferences())
+		else acc 
+	endif )in a->flatten();
+
+-- This helper creates a Sequence of DSLModel!Role. It collects all last roles from element links
+-- A last role from an ElementLink corresponds to a reference for the context
+-- CONTEXT : DSLModel!ModelElement
+-- RETURN : Sequence(DSLModel!Role)
+helper context DSLModel!ModelElement def: getLastRole() : Sequence(DSLModel!Role) =
+	self.referencelinks->iterate(e;acc:Sequence(DSLModel!Role) = Sequence{} |
+		acc -> including(e.roles->last()));
+
+-- This helper test if a DSL Relationship is a  ModelElement's ParentLink 
+-- CONTEXT : DSL!Relationship
+-- RETURN : Boolean
+helper context DSL!Role def : isParentLink() : Boolean =
+	let s : Sequence(DSLModel!ModelElement) = DSLModel!ModelElement.allInstances()->
+	select( a | a.oclIsTypeOf(DSLModel!ModelElement))->select(e | e.parentLink.size()>0 )
+	->asSequence()
+	in s -> iterate(e;acc : Boolean = false | 
+		if e.parentLink = self.relation.name
+			then if e.owner.type = self.source.name
+					then if e.type = self.type.name 
+							then acc = acc and true
+							else acc
+						endif 	else acc
+				endif else acc
+		endif );
+
+-- This helper returns the role corresponding to the embedding link
+-- CONTEXT : DSLModel!EmbeddingLink
+-- RETURN : DSL!Role
+helper context DSLModel!EmbeddingLink def:getRole() : DSL!Role =
+	let a : DSL!Relationship =
+		DSL!Relationship.allInstances()
+		->select( e | e.name = self.name )->first()
+	in a.roles->select( e | e.source.name = self.owner.type )->first();
+
+-------------------------------------------------------------------------------
+-- RULES ----------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+rule Model {
+	from
+		dslm : DSLModel!Model
+	to
+		km : KM2!Model (
+			metamodel <- dslm.domainModel,
+			contents <-
+				Sequence{
+					dslm.contents->select(e | e.oclIsTypeOf(DSLModel!ModelElement) ),
+					dslm.contents
+						->select(e | e.oclIsTypeOf(DSLModel!ModelElementLink) and
+							not e.properties.isEmpty()
+						)
+				}
+		)
+}
+
+rule ModelElement {
+	from
+		me : DSLModel!ModelElement (
+			me.oclIsTypeOf(DSLModel!ModelElement)
+		)
+	to
+		kme : KM2!ModelElement (
+			name <- me.type,
+			id <- me.id,
+			properties <- Sequence { 
+				me.properties->asSequence(), -- Attributes
+				me.embeddinglinks->asSequence(), -- Compositions
+				me.getReferences() -- References
+			}
+		)
+}
+
+-- This ModelElement corresponds to the KM3!Class created from a DSL!Relationship
+rule ModelElementLink {
+	from
+		mel : DSLModel!ModelElementLink (
+			not mel.properties.isEmpty()
+		)
+	to
+		kme : KM2!ModelElement (
+			name <- mel.type,
+			id <- mel.id,
+			properties <-
+				Sequence { 
+					mel.properties->asSequence()--,
+--					mel.links.debug('roles')
+				}
+		)
+}
+
+rule PropertySetFromEmbeddingLink {
+	from
+		p : DSLModel!EmbeddingLink (
+			p.getRole().max = 0 or p.getRole().max > 1
+		)
+	to
+		kp : KM2!Property (
+			name <- p.getRole().name,
+			value <- s
+		),
+		s : KM2!SetVal (
+			contents <- e
+		),
+		e : distinct KM2!ModelElementVal foreach( m in p.elements ) (
+				element <- m
+		)
+}
+
+rule PropertyFromEmbeddingLink {
+	from
+		p : DSLModel!EmbeddingLink (
+			p.getRole().max = 1
+		)
+	to
+		kp : KM2!Property (
+			name <- p.getRole().name,
+			value <- e
+		),
+		e : KM2!ModelElementVal (
+				element <- p.elements
+		)
+}
+
+rule PropertySetFromDSLModelRole {
+	from
+		r : DSLModel!Role (
+			if thisModule.propertyRoles().includes(r)
+				then r.isMultiple()
+				else false
+			endif			
+		)
+	using {
+			allroles : Sequence(DSLModel!Role) = r.owner.owner.getLastRole()->select(c | c.name = r.name);
+		}
+	to
+		p : KM2!Property (
+			name <- r.name,
+			value <- s
+		),
+		s : KM2!SetVal (
+			contents <- rol
+		),
+		rol : distinct KM2!ModelElementRefVal foreach ( role in allroles ) (
+				element <- role.element
+		)
+}
+
+rule PropertyFromDSLModelRole {
+	from
+		r : DSLModel!Role (
+			if thisModule.propertyRoles().includes(r)
+				then not r.isMultiple()
+				else false
+			endif			
+		)
+	using {
+			role : DSLModel!Role = r.owner.owner.getLastRole()->select(c | c.name = r.name).first();
+		}
+	to
+		p : KM2!Property (
+			name <- r.name,
+			value <- rol
+		),
+		rol : KM2!ModelElementRefVal (
+			element <- role.element
+		)
+}
+
+-- Rules to create Simple Properties ( Integer, Double, String, Boolean )
+
+rule StringProperty {
+	from
+		v : DSLModel!Property (
+			v.value.oclIsTypeOf(DSLModel!StringValue)
+		)
+	to
+		p : KM2!Property (
+			name <- v.name,
+			value <- s
+		),
+		s : KM2!StringVal (
+			value <- v.value.value
+		)
+}
+
+rule IntegerProperty {
+	from
+		v : DSLModel!Property (
+			v.value.oclIsTypeOf(DSLModel!IntegerValue)
+		)
+	to
+		p : KM2!Property (
+			name <- v.name,
+			value <- s
+		),
+		s : KM2!IntegerVal (
+			value <- v.value.value
+		)
+}
+
+rule BooleanProperty {
+	from
+		v : DSLModel!Property (
+			v.value.oclIsTypeOf(DSLModel!BooleanValue)
+		)
+	to
+		p : KM2!Property (
+			name <- v.name,
+			value <- s
+		),
+		s : KM2!BooleanVal (
+			value <- v.value.value
+		)
+}

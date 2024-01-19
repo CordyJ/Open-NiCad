@@ -1,0 +1,419 @@
+--@atlcompiler	atl2006
+--@name			FLAME4KM3
+--@version		1.1
+--@domains		KM3, FLAME, metrics
+--@authors		Eric Vepa (evepa <at> sodius.com) for SODIUS (www.sodius.com)
+--@date			2007/08/02
+--@description	This library implements a subset of FLAME (Formal Library for Aiding Metrics Extraction) functions applied on KM3 metamodels. These functions navigate through the KM3 metamodel and are used by other metrics libraries.
+--@see			Baroni, A.L.: Formal Definition of Object-Oriented Design Metrics. Master Thesis, Vrije University, Brussel, Belgium, 2002.
+
+library FLAME4KM3; -- Library Template
+
+--@begin attribute helper coupledClasses
+--@comments Set of Classes to which the current Class is coupled (excluding inheritance).
+helper context KM3!Class
+def : coupledClasses : Set(KM3!Classifier) =
+    self.allFeatures->collect(sf|sf.type)->
+        select(c|c.oclIsKindOf(KM3!Class))->asSet();
+--@end attribute helper coupledClasses
+
+--@begin attribute helper newFeatures
+--@comments Sequence of Features declared in the current Class. This definition excludes inherited Features.
+helper context KM3!Class
+def : newFeatures : Sequence(KM3!StructuralFeature) =
+    self.newAttributes()->union(self.newReferences);
+--@end attribute helper newFeatures
+
+--@begin attribute helper directlyInheritedFeatures
+--@comments Sequence of directly inherited Features.
+helper context KM3!Class
+def : directlyInheritedFeatures : Sequence(KM3!StructuralFeature) =
+    self.directlyInheritedAttributes->
+        union(self.directlyInheritedReferences);
+--@end attribute helper directlyInheritedFeatures
+
+--@begin attribute helper allInheritedFeatures
+--@comments Sequence containing all Features of the Class itself and all its inherited Features (both directly and indirectly).
+helper context KM3!Class
+def : allInheritedFeatures : Sequence(KM3!StructuralFeature) =
+    self.allInheritedAttributes->union(self.allInheritedReferences);
+--@end attribute helper allInheritedFeatures
+
+--@begin attribute helper allFeatures
+--@comments Sequence containing all Features of the Class itself and all its inherited Features.
+helper context KM3!Class
+def : allFeatures : Sequence(KM3!StructuralFeature) =
+    self.allAttributes->union(self.allReferences);
+--@end attribute helper allFeatures
+
+--@begin attribute helper newAttributes
+--@comments Sequence of Attributes and containment References declared in the current Class.
+helper context KM3!Class
+def : newAttributes : Sequence(KM3!StructuralFeature) =
+    self.structuralFeatures->select(sf|sf.oclIsTypeOf(KM3!Attribute))->
+        union(self.structuralFeatures->
+            select(sf|sf.oclIsTypeOf(KM3!Reference))->select(r|r.isContainer));
+--@end attribute helper newAttributes
+
+--@begin attribute helper directlyInheritedAttributes
+--@comments Sequence of directly inherited Attributes.
+helper context KM3!Class
+def : directlyInheritedAttributes : Sequence(KM3!StructuralFeature) =
+    self.parents->collect(p|p.newAttributes)->flatten();
+--@end attribute helper directlyInheritedAttributes
+
+--@begin attribute helper allInheritedAttributes
+--@comments Sequence of all inherited Attributes (both directly and indirectly).
+helper context KM3!Class
+def : allInheritedAttributes : Sequence(KM3!StructuralFeature) =
+    self.directlyInheritedAttributes->
+        union(self.parents->
+            collect(p|p.allInheritedAttributes)->flatten());
+--@end attribute helper allInheritedAttributes
+
+--@begin attribute helper allAttributes
+--@comments Sequence containing all Attributes of the Class itself and all its inherited Attributes (both directly and indirectly).
+helper context KM3!Class
+def : allAttributes : Sequence(KM3!StructuralFeature) =
+    self.newAttributes->union(self.allInheritedAttributes);
+
+helper context KM3!Package
+def : allAttributes : Sequence(UML2!StructuralFeature) =
+    self.allClasses->collect(c|c.allAttributes)->flatten();
+--@end attribute helper allAttributes
+
+--@begin attribute helper newReferences
+--@comments Sequence of References (non containment) declared in the current Class.
+helper context KM3!Class
+def : newReferences : Sequence(KM3!Reference) =
+    self.structuralFeatures->select(sf|sf.oclIsTypeOf(KM3!Reference))->
+        select(r|not r.isContainer);
+--@end attribute helper newReferences
+
+--@begin attribute helper directlyInheritedReferences
+--@comments Sequence of directly inherited References.
+helper context KM3!Class
+def : directlyInheritedReferences : Sequence(KM3!Reference) =
+    self.parents->collect(p|p.newReferences)->flatten();
+--@end attribute helper directlyInheritedReferences
+
+--@begin attribute helper allInheritedReferences
+--@comments Sequence containing all References of the Class itself and all its inherited References (both directly and indirectly).
+helper context KM3!Class
+def : allInheritedReferences : Sequence(KM3!Reference) =
+    self.directlyInheritedReferences->
+        union(self.parents->
+            collect(p|p.allInheritedReferences)->flatten());
+--@end attribute helper allInheritedReferences
+
+--@begin attribute helper allReferences
+--@comments Sequence containing all References of the Class itself and all its inherited References.
+helper context KM3!Class
+def : allReferences : Sequence(KM3!Reference) =
+    self.newReferences->union(self.allInheritedReferences);
+--@end attribute helper allReferences
+
+--@begin attribute helper isRoot
+--@comments Indicates whether the Class has ascendants or not. A true value indicates it has no ascendants and a false value indicates it has ascendants.
+helper context KM3!Class
+def : isRoot : Boolean =
+    self.parents->isEmpty();
+--@end attribute helper isRoot
+
+--@begin attribute helper isLeaf
+--@comments Indicates whether the Class has descendants or not. A true value indicates it has no descendants and a false value indicates it has descendants.
+helper context KM3!Class
+def : isLeaf : Boolean =
+    self.children->isEmpty();
+--@end attribute helper isLeaf
+
+--@begin attribute helper children
+--@comments Set of directly derived Classes of the current GeneralizableElement.
+helper context KM3!Class
+def : children : Set(KM3!Classifier) =
+    KM3!Class.allInstances()->
+        select(c|c.supertypes->includes(self))->asSet();
+--@end attribute helper children
+
+--@begin attribute helper descendants
+--@comments Set of all derived Classes (both directly and indirectly).
+helper context KM3!Class
+def : descendants : Set(KM3!Classifier) =
+    self.children->iterate(c; acc : Set(KM3!Classifier) = self.children|
+        acc->union(c.descendants));
+--@end attribute helper descendants
+
+--@begin attribute helper parents
+--@comments Set of Classes from which the current GeneralizableElement derives directly.
+helper context KM3!Class
+def : parents : Set(KM3!Classifier) =
+    self.supertypes->excluding(self)->asSet();
+--@end attribute helper parents
+
+--@begin attribute helper ascendants
+--@comments Set of all classes from which the current Class derives (both directly and indirectly).
+helper context KM3!Class
+def : ascendants : Set(KM3!Classifier) =
+    self.parents->iterate(c; acc: Set(KM3!Classifier) = self.parents|
+        acc->union(c.ascendants));
+--@end attribute helper ascendants
+
+--@begin attribute helper allClasses
+--@comments Sequence of all Classes belonging to the current Package.
+helper context KM3!Package
+def : allClasses : Sequence(KM3!Class) =
+    self.contents->select(c|c.oclIsKindOf(KM3!Class));
+--@end attribute helper allClasses
+
+--@begin attribute helper internalBaseClasses
+--@comments Set of base Classes in the current Package.
+helper context KM3!Package
+def : internalBaseClasses : Set(KM3!Class) =
+    self.allClasses->iterate(c; acc : Set(KM3!Class) = Set{}|
+        acc->union(c.parents));
+--@end attribute helper internalBaseClasses
+
+--@begin attribute helper internalSupplierClasses
+--@comments Set of supplier Classes in the current Package.
+helper context KM3!Package
+def : internalSupplierClasses : Set(KM3!Class) =
+    self.supplierClasses(self);
+--@end attribute helper internalSupplierClasses
+
+--@begin helper FCV
+--@comments Feature to Classifier Visibility
+--@comments Indicates if a Class can access the Feature.
+helper context KM3!Class
+def : FCV(f : KM3!StructuralFeature) : Boolean =
+	self.allFeatures->includes(f) or
+		self.ascendants->exists(c|c.allFeatures->includes(f));
+--@end helper FCV
+
+--@begin helper NAN
+--@comments New Attributes Number
+--@comments Number of new Attributes belonging to the Class.
+helper context KM3!Class
+def : NAN() : Integer =
+	self.newAttributes->size();
+--@end helper NAN
+
+--@begin helper IAN
+--@comments Inherited Attributes Number
+--@comments Number of inherited Attributes in the Class.
+helper context KM3!Class
+def : IAN() : Integer =
+	self.allInheritedAttributes->size();
+--@end helper IAN
+
+--@begin helper AAN
+--@comments Available Attributes Number
+--@comments Number of Attributes in the Class.
+helper context KM3!Class
+def : AAN() : Integer =
+	self.allAttributes->size();
+--@end helper AAN
+
+--@begin helper NRN
+--@comments New References Number
+--@comments Number of new References in the Class.
+helper context KM3!Class
+def : NRN() : Integer =
+	self.newReferences->size();
+--@end helper NRN
+
+--@begin helper IRN
+--@comments Inherited References Number
+--@comments Number of inherited References in the Class.
+helper context KM3!Class
+def : IRN() : Integer =
+	self.allInheritedReferences->size();
+--@end helper IRN
+
+--@begin helper ARN
+--@comments Available References Number
+--@comments Number of References in the Class.
+helper context KM3!Class
+def : ARN() : Integer =
+	self.allReferences->size();
+--@end helper ARN
+
+--@begin helper CHIN
+--@comments CHIldren Number
+--@comments Number of directly derived Classes.
+helper context KM3!Class
+def : CHIN() : Integer =
+	self.children->size();
+--@end helper CHIN
+
+--@begin helper DESN
+--@comments DEScendants Number
+--@comments Number of all derived Classes (both directly and indirectly).
+helper context KM3!Class
+def : DESN() : Integer =
+	self.descendants->size();
+--@end helper DESN
+
+--@begin helper PARN
+--@comments PARents Number
+--@comments Number of Classes from which the current Class derives directly.
+helper context KM3!Class
+def : PARN() : Integer =
+	self.parents->size();
+--@end helper PARN
+
+--@begin helper ASCN
+--@comments ASCendants Number
+--@comments Number of Classes from which the current Class derives (both directly and indirectly).
+helper context KM3!Class
+def : ASCN() : Integer =
+	self.ascendants->size();
+--@end helper ASCN
+
+--@begin helper isInternal
+--@comments Indicates if the Class received as parameter belongs to the considered Package.
+helper context KM3!Package
+def : isInternal(c : KM3!Class) : Boolean =
+	self.contents->includes(c);
+--@end helper isInternal
+
+--@begin helper baseClasses
+--@comments Set of base Classes (from the current Package) that belong to the Package "p".
+helper context KM3!Package
+def : baseClasses(p : KM3!Package) : Set(KM3!Class) =
+	self.internalBaseClasses->select(c|p.isInternal(c))->asSet();
+--@end helper baseClasses
+
+--@begin helper baseClassesInPackages
+--@comments Set of base Classes in both the current Package and the one bound to the parameter.
+helper context KM3!Package
+def : baseClassesInPackages(p : KM3!Package) : Set(KM3!Class) =
+	self.internalBaseClasses->union(p.internalBaseClasses);
+--@end helper baseClassesInPackages
+
+--@begin helper supplierClasses
+--@comments Set of supplier Classes (from the current Package) that belong to the Package "p"(excludes inheritance).
+helper context KM3!Package
+def : supplierClasses(p : KM3!Package) : Set(KM3!Class) =
+	self.allClasses->iterate(c; acc : Set(KM3!Class)= Set{}|
+		acc->union(c.coupledClasses))->select(c|p.isInternal(c))->asSet();
+--@end helper supplierClasses
+
+--@begin helper supplierClassesInPackages
+--@comments Set of supplier Classes in both the current Package and the one bound to the parameter.
+helper context KM3!Package
+def : supplierClassesInPackages(p : KM3!Package) : Set(KM3!Class) =
+	self.internalSupplierClasses->union(p.internalSupplierClasses);
+--@end helper supplierClassesInPackages
+
+--@begin helper relatedClasses
+--@comments Set of Classes from the "p" Package that are either base or supplier Classes.
+helper context KM3!Package
+def : relatedClasses(p : KM3!Package) : Set(KM3!Class) =
+	self.baseClasses(p)->union(self.supplierClasses(p));
+--@end helper relatedClasses
+
+--@begin helper CN
+--@comments Classes Number
+--@comments Number of Classes in the Package.
+helper context KM3!Package
+def : CN() : Integer =
+	self.allClasses->size();
+--@end helper CN
+
+--@begin helper PNAN
+--@comments Package New Attributes Number
+--@comments Number of new Attributes in the Package.
+helper context KM3!Package
+def : PNAN() : Integer =
+	self.allClasses->iterate(c; acc : Integer = 0|acc + c.NAN());
+--@end helper PNAN
+
+--@begin helper PIAN
+--@comments Package Inherited Attributes Number
+--@comments Number of Attributes inherited in the Package.
+helper context KM3!Package
+def : PIAN() : Integer =
+	self.allClasses->iterate(c; acc : Integer = 0|acc + c.IAN());
+--@end helper PIAN
+
+--@begin helper PAAN
+--@comments Package Available Attributes Number
+--@comments Number of available Attributes in the Package.
+helper context KM3!Package
+def : PAAN() : Integer =
+	self.allClasses->iterate(c; acc : Integer = 0|acc + c.AAN());
+--@end helper PAAN
+
+--@begin helper PNRN
+--@comments Package New References Number
+--@comments Number of new References in the Package.
+helper context KM3!Package
+def : PNRN() : Integer =
+	self.allClasses->iterate(c; acc : Integer = 0|acc + c.NRN());
+--@end helper PNRN
+
+--@begin helper PIRN
+--@comments Package Inherited References Number
+--@comments Number of inherited References in the Package.
+helper context KM3!Package
+def : PIRN() : Integer =
+	self.allClasses->iterate(c; acc : Integer = 0|acc + c.IRN());
+--@end helper PIRN
+
+--@begin helper PARN
+--@comments Package Available References Number
+--@comments Number of available References in the Package.
+helper context KM3!Package
+def : PARN() : Integer =
+	self.allClasses->iterate(c; acc : Integer = 0|acc + c.ARN());
+--@end helper PARN
+
+--@begin helper EILN
+--@comments External Inheritance Links Number
+--@comments Number of inheritance relations where the derived Classes belong to the current Package and the base ones belong to the Package "p" given as parameter.
+helper context KM3!Package
+def : EILN(p : KM3!Package) : Integer =
+	self.allClasses->iterate(c; acc : Integer = 0|
+		acc + c.parents->select(g|p.isInternal(g))->size());
+--@end helper EILN
+
+--@begin attribute helper IILN
+--@comments Internal Inheritance Links Number
+--@comments Number of inheritance relations where the base and derived Classes belong to the current Package.
+helper context KM3!Package
+def : IILN : Integer =
+    self.allClasses->iterate(c; acc : Integer = 0|
+        acc + c.parents->select(g|self.isInternal(g))->size());
+--@end attribute helper IILN
+
+--@begin helper PILN
+--@comments Packages Inheritance Links Number
+--@comments Number of inheritance relations between the current package and the one received as parameter.
+helper context KM3!Package
+def : PILN(p : KM3!Package) : Integer =
+	self.IILN + self.EILN(p);
+--@end helper PILN
+
+--@begin helper ECLN
+--@comments External Coupling Links Number
+--@comments Number of coupling relations where the client Class belongs to the current Package and the supplier Class belongs to the Package "p" (excludes inheritance).
+helper context KM3!Package
+def : ECLN(p : KM3!Package) : Integer =
+	self.supplierClassesInPackages(p)->size();
+--@end helper ECLN
+
+--@begin helper ICLN
+--@comments Internal Coupling Links Number
+--@comments Number of distinct coupling relations where both the client and the supplier Classes belong to the current Package (excludes inheritance).
+helper context KM3!Package
+def : ICLN() : Integer =
+	self.internalSupplierClasses->size();
+--@end helper ICLN
+
+--@begin helper PCLN
+--@comments Packages Coupling Links Number
+--@comments Number of coupling relations between the current package and the one received as parameter.
+helper context KM3!Package
+def : PCLN(p : KM3!Package) : Integer =
+	self.ICLN() + self.ECLN(p);
+--@end helper PCLN

@@ -1,0 +1,165 @@
+-- title: UMLSD2STMD
+-- release: 0.1
+-- date: 18 oktober 2006
+
+-- author:      Bas Graaf
+--                      SWERL SoftWare Evolution Research Lab
+--                      Delft University of Technology
+--                      b.s.graaf@tudelft.nl
+
+module mergeflatSTMD;
+create OUT : UML from IN : UML;
+
+helper def: allSimpleStates: Set(UML!SimpleState) =
+	UML!SimpleState->allInstances()
+;
+helper def: allPseudostates: Set(UML!Pseudostate) =
+	UML!Pseudostate->allInstances()
+;
+helper def: allTransitions: Set(UML!Transitions) =
+	UML!Transition->allInstances()
+;
+helper def: allClasses: Set(UML!Class) =
+	UML!Class->allInstances()
+;
+helper def: allAttributes: Set(UML!Attribute) =
+	UML!Attribute->allInstances()
+;
+helper context UML!Constraint def: stateVariableName: String =
+	self.body.body->substring(self.body.body.indexOf('.')+2,self.body.body.indexOf('='))
+;
+helper context UML!Constraint def: stateVariable: UML!Attribute =
+	thisModule.allAttributes->select(a|a.name=self.stateVariableName)->asSequence()->first()
+;
+helper context UML!Object def: stateVariables: Set(UML!Attribute) =
+	self.classifier->asSequence()->first().feature->select(f|f.oclIsTypeOf(UML!Attribute))
+;
+helper context UML!StateVertex def: mergeable(s:UML!StateVertex): Boolean =
+	thisModule.unifiable(self.constraint,s.constraint) and self.name=s.name
+;
+helper def: unifiable(cseq1:Sequence(UML!Constraint),cseq2:Sequence(UML!Constraint)): Boolean =
+	cseq1->includesAll(cseq2->select(c|cseq1->collect(e|e.stateVariable)->includes(c.stateVariable)))
+;
+helper def: mergedStates: Set(UML!StateVertex) =
+	thisModule.allSimpleStates->union(thisModule.allPseudostates)
+	->iterate(s; mss:Set(UML!StateVertex)=Set{} |
+		if mss->exists(e|(e.mergeable(s)) and e.oclType()=s.oclType()) then
+			mss
+		else
+			mss->including(s)
+		endif)
+;
+helper def: transitionTransitions: Set(UML!Transition) =
+	thisModule.allTransitions->iterate(t; ts:Set(UML!Transition)=Set{} |
+		if ts->exists(e|(e.source.mergeable(t.source)) and
+		(e.target.mergeable(t.target))) then
+			ts
+		else
+			ts->including(t)
+		endif)
+;
+rule Class {
+	from c_in:UML!Class
+	to c_out:UML!Class(
+		name <- c_in.name,
+		isActive <- c_in.isActive,
+		feature <- c_in.feature)
+}
+rule Operation {
+	from o_in:UML!Operation
+	to o_out:UML!Operation(
+		name <- o_in.name,
+		constraint <- o_in.constraint)
+}
+rule Method {
+	from m_in:UML!Method
+	to m_out:UML!Method(
+		name <- m_in.name,
+		body <- m_in.body,
+		specification <- m_in.specification)
+}
+rule Attribute {
+	from a_in:UML!Attribute
+	to a_out:UML!Attribute(
+		name <- a_in.name,
+		visibility <- a_in.visibility,
+		type <- a_in.type)
+}
+rule Package {
+	from p_in:UML!Package(
+		not(p_in.oclIsTypeOf(UML!Model)))		
+	to p_out:UML!Package(
+		name <- p_in.name,
+		ownedElement <- p_in.ownedElement)
+}
+rule Stereotype {
+	from s:UML!Stereotype
+	to s_out:UML!Stereotype(
+		name<-s.name,
+		baseClass<-s.baseClass)
+}
+
+rule Model {
+	from m_in:UML!Model
+	to cs:UML!CompositeState(
+		subvertex<-thisModule.mergedStates),
+	sm:UML!StateMachine(
+		transitions<-thisModule.transitionTransitions,
+		top<-cs,
+		"context" <- thisModule.allClasses->select(c|c.isActive)->asSequence()->first()),
+	m_out:UML!Model(
+		ownedElement<-Set{sm}
+		->union(thisModule.transitionTransitions->collect(e|e.trigger)
+		->union(m_in.ownedElement->select(e|e.oclIsTypeOf(UML!Package) or e.oclIsTypeOf(UML!Class)))))
+}
+rule BooleanExpression {
+	from b_in:UML!BooleanExpression
+	to b_out:UML!BooleanExpression(
+		body <- b_in.body)
+}
+rule Constraint {
+	from c_in:UML!Constraint
+	to c_out:UML!Constraint(
+		body <- c_in.body)		
+}
+rule MergedPseudostate {
+	from s_in:UML!Pseudostate (
+		thisModule.mergedStates->includes(s_in))
+	to s_out:UML!Pseudostate(
+		name<-s_in.name,
+		kind <- #pk_initial)
+}
+rule MergedSimpleState {
+	from s_in:UML!SimpleState (
+		thisModule.mergedStates->includes(s_in))
+	to s_out:UML!SimpleState(
+		name<-s_in.name,
+		constraint <- s_in.constraint)
+}
+rule Transition {
+	from t_in:UML!Transition(
+		thisModule.transitionTransitions->includes(t_in))
+	to t_out:UML!Transition(
+		name <- t_in.name,
+		trigger <- t_in.trigger,
+		effect <- t_in.effect,
+		target <- thisModule.mergedStates->select(s|
+			s.mergeable(t_in.target))->asSequence()->first(),		
+		source <- thisModule.mergedStates->select(s|s.mergeable(t_in.source))->asSequence()->first())
+}
+rule Effect {
+	from ca_in:UML!CallAction(
+		thisModule.transitionTransitions->collect(e|
+			e.effect)->includes(ca_in))
+	to ca_out:UML!CallAction(
+		script<-ae),
+	ae:UML!ActionExpression(
+		body<-ca_in.script.body)
+}
+rule Trigger {
+	from ce_in:UML!CallEvent(
+		thisModule.transitionTransitions->collect(e|
+			e.trigger)->includes(ce_in))
+	to ce_out:UML!CallEvent(
+		name <- ce_in.name)
+}

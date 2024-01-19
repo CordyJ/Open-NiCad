@@ -1,0 +1,180 @@
+-- @name		Raise supplier abstraction level
+-- @version		1.0
+-- @domains		Catalogue of Model Transformations
+-- @authors		SIMON Eric(simon.eric3<at>gmail.com)
+-- @date		2006/07/27
+-- @description	This transformation strenghthens or weakens an assertion(respectively postcondition and precondition).
+-- @see http://www.dcs.kcl.ac.uk/staff/kcl/tcat.pdf   
+-- @see section 2.13, page 27
+-- @see author of article : K. Lano
+
+module RaiseSupplier; -- Module Template
+create OUT : KM3 from IN : KM3;
+
+-- @comment this helper returns the root SuperTypes of an element (it is a recursive helper)
+helper context KM3!Class def: getRootSuperTypes : Sequence(KM3!Class) =
+	if self.supertypes->isEmpty()
+		then Sequence{}	
+	else 		self.supertypes->select(c | c.supertypes->notEmpty())
+					->iterate(a; acc : Sequence(KM3!Class)=Sequence{} |acc->including(a.getRootSuperTypes))
+					->union(
+					self.supertypes->select(c | c.supertypes->isEmpty())
+					->iterate(a; acc : Sequence(KM3!Class)=Sequence{} | acc->including(a) )
+			).flatten()
+	endif;
+	
+
+
+
+--@begin rule Metamodel
+rule Metamodel {
+	from
+		inputMm:KM3!Metamodel
+	to
+		outputMm:KM3!Metamodel (
+			location <- inputMm.location,
+			contents <- inputMm.contents
+		)
+}
+--@end rule Metamodel
+
+--@begin rule Package
+rule Package {
+	from
+		inputPkg:KM3!Package
+	to
+		outputPkg:KM3!Package (
+			name <- inputPkg.name,
+			contents <- inputPkg.contents
+		)
+}
+--@end rule Package
+
+--@begin rule DataType
+rule DataType {
+	from
+		inputData:KM3!DataType
+	to
+		outputData:KM3!DataType(
+			name <- inputData.name,
+			location <- inputData.location
+		)
+}
+--@end rule DataType
+
+--@begin rule EnumLiteral
+rule EnumLiteral {
+	from
+		inputL:KM3!EnumLiteral
+	to
+		outputL:KM3!EnumLiteral (
+			name <- inputL.name,
+			location <- inputL.location,
+			enum  <- inputL.enum,
+			package <- inputL.package
+		)
+}
+--@end rule EnumLiteral
+
+--@begin rule Enumeration 
+rule Enumeration {
+	from
+		inputEnum:KM3!Enumeration
+	to
+		outputEnum:KM3!Enumeration (
+			name <- inputEnum.name,
+			location <- inputEnum.location,
+			package <- inputEnum.package,
+			literals <- inputEnum.literals
+		)
+}
+--@end rule Enumeration 
+
+--@begin rule Class
+rule Class {
+	from
+		inputC:KM3!Class
+			to
+		outputC:KM3!Class (
+			isAbstract <- inputC.isAbstract,
+			supertypes <- inputC.supertypes,
+			name <- inputC.name,
+			location <- inputC.location,
+			package <- inputC.package,
+			structuralFeatures <- inputC.structuralFeatures->
+				select(r | r.oclIsTypeOf(KM3!Reference))->select(r | r.opposite.oclIsUndefined())->
+				iterate(a;acc : Sequence(KM3!Reference) = Sequence{} | 
+					if a.type.oclIsTypeOf(KM3!Class)
+						then acc->append(a.type.getRootSuperTypes->iterate(b; acc1:Sequence(KM3!Reference) = Sequence{}|
+							acc1->append(thisModule.InheritAndAssociation(b,a))))->flatten()
+						else acc
+						endif),
+			structuralFeatures <- inputC.structuralFeatures
+				->select(r | r.oclIsTypeOf(KM3!Reference))
+				->select(r | not r.opposite.oclIsUndefined()),
+			structuralFeatures <- inputC.structuralFeatures
+				->select(r | not r.oclIsTypeOf(KM3!Reference))
+		)
+}
+--@end rule Class
+
+
+
+--@begin rule Attribute
+rule Attribute {
+	from
+		inputAttr : KM3!Attribute
+	to
+		outputAttr : KM3!Attribute (
+			package <- inputAttr.package,
+			name <- inputAttr.name,
+			lower <- inputAttr.lower,
+			upper <- inputAttr.upper,
+			isOrdered <- inputAttr.isOrdered,
+			isUnique <- inputAttr.isUnique,
+			owner <- inputAttr.owner,
+			type <- inputAttr.type
+		)
+}
+--@end rule Attribute
+
+--@begin rule Reference
+rule ReferenceWithOpposite {
+	from
+		inputRef : KM3!Reference
+		(not inputRef.opposite.oclIsUndefined())
+	to
+		outputRef : KM3!Reference (
+			package <- inputRef.package,
+			name <- inputRef.name,
+			lower <- inputRef.lower,
+			upper <- inputRef.upper,
+			isOrdered <- inputRef.isOrdered,
+			isUnique <- inputRef.isUnique,
+			owner <- inputRef.owner,
+			type <- inputRef.type,
+			isContainer <- inputRef.isContainer,
+			opposite <- inputRef.opposite
+		)
+}
+--@end rule Reference
+
+-- @comment this lazy rule creates a reference for a given supertypes end another reference
+lazy rule InheritAndAssociation{
+	from
+		supertype:KM3!Class,
+		reference:KM3!Reference
+		
+	to
+		refChildren : KM3!Reference (
+			package <- reference.package,
+			name <- reference.name,
+			lower <- reference.lower,
+			upper <- reference.upper,
+			isOrdered <- reference.isOrdered,
+			isUnique <- reference.isUnique,
+			owner <- reference.owner,
+			type <- supertype,
+			isContainer <- reference.isContainer
+		)
+}

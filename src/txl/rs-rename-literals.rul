@@ -1,0 +1,72 @@
+% NiCad literal renaming for Rust
+% Jim Cordy, October 2020
+
+rule renameLiterals
+    replace $ [LiteralExpression]
+        L [LiteralExpression]
+    by
+        L [renameCharLiterals]
+	  [renameStringLiterals]
+	  [renameRawStringLiterals]
+	  [renameByteLiterals]
+	  [renameByteStringLiterals]
+	  [renameRawByteStringLiterals]
+          [renameIntegerLiterals]
+          [renameFloatLiterals]
+end rule
+
+function renameCharLiterals
+    replace [LiteralExpression]
+        C [CHAR_LITERAL]
+    by
+        ''x'
+end function
+
+function renameStringLiterals
+    replace [LiteralExpression]
+        S [STRING_LITERAL]
+    by
+        '"x"
+end function
+
+function renameRawStringLiterals
+    replace [LiteralExpression]
+        R [RAW_STRING_LITERAL]
+    by
+        'r"x"
+end function
+
+function renameByteLiterals
+    replace [LiteralExpression]
+        B [BYTE_LITERAL]
+    by
+        'b'x'
+end function
+
+function renameByteStringLiterals
+    replace [LiteralExpression]
+        B [BYTE_STRING_LITERAL]
+    by
+        'b"x"
+end function
+
+function renameRawByteStringLiterals
+    replace [LiteralExpression]
+        B [RAW_BYTE_STRING_LITERAL]
+    by
+        'br"x"
+end function
+
+function renameIntegerLiterals
+    replace [LiteralExpression]
+        I [INTEGER_LITERAL]
+    by
+        '1
+end function
+
+function renameFloatLiterals
+    replace [LiteralExpression]
+        F [FLOAT_LITERAL]
+    by
+        '1.0
+end function

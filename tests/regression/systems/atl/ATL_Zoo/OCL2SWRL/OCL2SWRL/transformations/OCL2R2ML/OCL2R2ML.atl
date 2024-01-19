@@ -1,0 +1,1003 @@
+--@atlcompiler atl2006
+
+-- ============================================================
+-- Transforms an OCL metamodel into R2ML metamodel.
+-- Created as part of M.Sc. theses at GOOD OLD AI Laboratory
+-- Author: Milan Milanovic (milan at milanovic.org)
+-- Works for R2ML v0.4 (Integrity  rules)
+-- Licence: GNU General Public License, version 2
+-- ============================================================
+
+module OCL2R2ML; -- Module Template
+create OUT : R2ML from IN : OCL;
+
+uses strings;
+
+-------------------------------------------------------------------------------
+-- HELPERS --------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- HELPER: getDefaultIntegerLiteralExp
+-- Returns always the same IntegerLiteralExp.
+-- OUT:		IntegerLiteralExp
+helper def: getDefaultIntegerLiteralExp() : OCL!IntegerLiteralExp = 
+	 OCL!IntegerLiteralExp.allInstancesFrom('IN')->asSequence()->first();
+
+-- HELPER: getDefaultStringLiteralExp
+-- Returns always the same StringLiteralExp.
+-- OUT:		StringLiteralExp
+helper def: getDefaultStringLiteralExp() : OCL!StringLiteralExp = 
+	 OCL!StringLiteralExp.allInstancesFrom('IN')->asSequence()->first();
+
+-- HELPER: getDefaultBooleanLiteralExp
+-- Returns always the same BooleanLiteralExp.
+-- OUT:		BooleanLiteralExp
+helper def: getDefaultBooleanLiteralExp() : OCL!BooleanLiteralExp = 
+	 OCL!BooleanLiteralExp.allInstancesFrom('IN')->asSequence()->first();
+
+-- HELPER: getInvariantForElement
+-- Returns Ivariant for this element up in hierarchy.
+-- CONTEXT:	OclExpression
+-- OUT:		Invariant
+helper context OCL!OclExpression def: getInvariantForElement() : OCL!Invariant = 
+	if self.refImmediateComposite().oclIsTypeOf(OCL!Invariant) then
+		self.refImmediateComposite()
+	else self.refImmediateComposite().getInvariantForElement()
+	endif;
+
+-- HELPER: haveCollectionExpInSources
+-- Checks if there is CollectionOperation in sources (source.source.etc) of expression.
+-- CONTEXT:	CallExp
+-- OUT:		Boolean
+helper context OCL!CallExp def: haveCollectionExpInSources() : Boolean = 
+	if self.source.oclIsTypeOf(OCL!CollectionOperationCallExp) then
+		true
+	else if not self.source.oclIsUndefined() then
+			if self.source.oclIsKindOf(OCL!CallExp) then
+				self.source.haveCollectionExpInSources()
+			else false
+			endif
+		 else false
+		 endif
+	endif;
+
+-- HELPER: haveCollectionExpInArguments
+-- Checks if there is CollectionOperation in arguments of expression.
+-- CONTEXT:	OperationCallExp
+-- OUT:		Boolean
+helper context OCL!OperationCallExp def: haveCollectionExpInArguments() : Boolean = 
+	if self.argument->asSequence()->first().oclIsTypeOf(OCL!CollectionOperationCallExp) then
+		true
+	else if self.argument->size() > 0 then
+			if self.argument->asSequence()->first().oclIsKindOf(OCL!OperationCallExp) then
+				self.argument->asSequence()->first().haveCollectionExpInArguments()
+			else false
+			endif
+		 else false
+		 endif
+	endif;
+
+-- HELPER: haveIteratorExpInSources
+-- Checks if there is Iterator expression in sources of expression.
+-- CONTEXT:	CallExp
+-- OUT:		Boolean
+helper context OCL!CallExp def: haveIteratorExpInSources() : Boolean = 
+	if self.source.oclIsTypeOf(OCL!IteratorExp) then
+		true
+	else if not self.source.oclIsUndefined() then
+			if self.source.oclIsKindOf(OCL!CallExp) then
+				self.source.haveIteratorExpInSources()
+			else false
+			endif
+		 else false
+		 endif
+	endif;
+
+-- HELPER: hasIteratorExpInParents
+-- Checks if there is Iterator expression in parents of expression.
+-- CONTEXT:	OclExpression
+-- OUT:		Boolean
+helper context OCL!OclExpression def: hasIteratorExpInParents() : Boolean = 
+	if self.refImmediateComposite().oclIsTypeOf(OCL!IteratorExp) then
+		true
+	else if not self.refImmediateComposite().oclIsUndefined() then
+			if self.refImmediateComposite().oclIsKindOf(OCL!OclExpression) then
+				self.refImmediateComposite().hasIteratorExpInParents()
+			else false
+			endif
+		 else false
+		 endif
+	endif;
+
+-- HELPER: getIteratorExpFromSources
+-- Find Iterator expression in sources and returns it.
+-- CONTEXT:	CallExp
+-- OUT:		IteratorExp
+helper context OCL!CallExp def: getIteratorExpFromSources() : OCL!IteratorExp = 
+	if self.source.oclIsTypeOf(OCL!IteratorExp) then
+		self.source
+	else if not self.source.oclIsUndefined() then
+			if self.source.oclIsKindOf(OCL!CallExp) then
+				self.source.getIteratorExpFromSources()
+			else OclUndefined
+			endif
+		 else OclUndefined
+		 endif
+	endif;
+
+-- HELPER: getIteratorExpFromParents
+-- Find Iterator expression in parents and returns it.
+-- CONTEXT:	OclExpression
+-- OUT:		IteratorExp
+helper context OCL!OclExpression def: getIteratorExpFromParents() : OCL!IteratorExp = 
+	if self.refImmediateComposite().oclIsTypeOf(OCL!IteratorExp) then
+		self.refImmediateComposite()
+	else if not self.refImmediateComposite().oclIsUndefined() then
+			if self.refImmediateComposite().oclIsKindOf(OCL!OclExpression) then
+				self.refImmediateComposite().getIteratorExpFromParents()
+			else OclUndefined
+			endif
+		 else OclUndefined
+		 endif
+	endif;
+
+-- HELPER: hasPropertyCallExpInParents
+-- Checks is there any property calls in parents.
+-- CONTEXT:	OclExpression
+-- OUT:		Boolean
+helper context OCL!OclExpression def: hasPropertyCallExpInParents() : Boolean = 
+	if self.refImmediateComposite().oclIsTypeOf(OCL!PropertyCallExp) then
+		true
+	else if not self.refImmediateComposite().oclIsUndefined() then
+			if self.refImmediateComposite().oclIsKindOf(OCL!OclExpression) then
+				self.refImmediateComposite().hasPropertyCallExpInParents()
+			else false
+			endif
+		 else false
+		 endif
+	endif;
+				
+-------------------------------------------------------------------------------
+-- RULES ----------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- Rule 'OclModule2RuleBase'
+-- Create RuleBase and IntegrityRuleSet elements from the OclModule element 
+rule OclModule2RuleBase {
+	from i : OCL!OclModule (
+			i.oclIsTypeOf(OCL!OclModule)
+		)
+	to o : R2ML!RuleBase(
+			ruleBaseID <- 'OCL',
+			rules <- irs
+		),
+		irs : R2ML!IntegrityRuleSet (
+			rules <- i.ownedElements
+		)
+}
+
+-- Rule 'Invariant2AlethicIntegrityRule'
+-- Create AlethicIntegrityRule with UniversallyQuantifiedFormula as it formula,
+-- from the Invariant OCL element 
+rule Invariant2AlethicIntegrityRule {
+	from i : OCL!Invariant(
+			i.oclIsTypeOf(OCL!Invariant)
+		)
+	to o : R2ML!AlethicIntegrityRule (
+			constraint <- uqf,
+			ruleID <- if not i.name.oclIsUndefined() then
+						i.name
+					  else OclUndefined
+					  endif
+		),
+	   uqf : R2ML!UniversallyQuantifiedFormula (
+	   		variables <- if i.specification.oclIsTypeOf(OCL!IteratorExp) then
+							Sequence { thisModule.Class2ObjectVariable(i.contextDefinition.contextElement),
+	   								   i.specification.iterator->collect(c | thisModule.Iterator2ObjectVariable(c))->flatten()	   			
+							   		}
+						 else thisModule.Class2ObjectVariable(i.contextDefinition.contextElement)
+						 endif,
+			formula <- if i.specification.oclIsTypeOf(OCL!OperatorCallExp) and i.specification.name = 'not' then -- jump over not 
+						i.specification.source
+					   else if i.specification.oclIsTypeOf(OCL!IteratorExp) and i.specification.name = 'forAll' then -- in case of expr.allInstances()->forAll(...)
+								if i.specification.source.oclIsTypeOf(OCL!OperationCallExp) then
+									if i.specification.source.name = 'allInstances' then
+										i.specification.body
+									else OclUndefined
+									endif
+								else i.specification
+								endif
+							else if i.specification.oclIsKindOf(OCL!CallExp) then -- check if we have IteratorExp, and
+					   			   		if i.specification.haveIteratorExpInSources() then -- if is go to it
+					  						i.specification.getIteratorExpFromSources()
+					   			   		else i.specification
+								   		endif
+						   	     	 else i.specification
+							         endif
+							endif
+					   endif
+	   	)
+}
+
+-- Lazy Rule 'Class2ObjectVariable'
+-- Create R2ML ObjectVariable from the Class OCL element (in context of Invariant)
+unique lazy rule Class2ObjectVariable {
+	from i : OCL!Class
+	to o : R2ML!ObjectVariable (
+			name <- i.name.toLower(),
+			classRef <- thisModule.Class2Class(i)
+		)
+}
+	
+-- Lazy Rule 'Class2Class'
+-- Create R2ML Class from the Class OCL element 
+unique lazy rule Class2Class {
+	from i : OCL!Class
+	to o : R2ML!Class (
+			name <- i.name
+		)
+}
+
+-- Lazy Rule 'VariableExp2ObjectVariable'
+-- Create R2ML ObjectVariable from the VariableExp OCL element 
+unique lazy rule VariableExp2ObjectVariable {
+	from i : OCL!VariableExp
+	to o : R2ML!ObjectVariable (
+			name <- i.referredVariable.name
+		)
+}
+
+-- Lazy Rule 'Iterator2ObjectVariable'
+-- Create R2ML ObjectVariable from the Iterator OCL element 
+unique lazy rule Iterator2ObjectVariable {
+	from i : OCL!Iterator
+	to o : R2ML!ObjectVariable (
+			name <- i.name
+		)
+}
+
+-- Lazy Rule 'PropertyCallExp2DataVariable'
+-- Create R2ML DataVariable from the PropertyCallExp OCL element 
+unique lazy rule PropertyCallExp2DataVariable {
+	from i : OCL!PropertyCallExp
+	to o : R2ML!DataVariable (
+			name <- i.name,
+			typeCategory <- #bag
+		)
+}
+-- Lazy Rule 'VariableExp2Class'
+-- Create R2ML Class from the VariableExp OCL element (for isKindOf, isTypeOf)
+unique lazy rule VariableExp2Class {
+	from i : OCL!VariableExp
+	to o : R2ML!Class (
+			name <- i.referredVariable.name
+		)
+}
+
+-- Lazy Rule 'Variable2DataVariable'
+-- Create R2ML DataVariable from the Variable OCL element
+unique lazy rule Variable2DataVariable {
+	from i : OCL!Variable
+	to o : R2ML!DataVariable (
+			name <- i.name.toLower(),
+			typeCategory <- #bag
+		)
+}
+
+-- Lazy Rule 'VariableExp2GenericVariable'
+-- Create R2ML GenericVariable from the VariVariableExpable OCL element
+unique lazy rule VariableExp2GenericVariable {
+	from i : OCL!VariableExp
+	to o : R2ML!GenericVariable (
+			name <- if not i.referredVariable.oclIsUndefined() then
+						i.referredVariable.name.concat('_member')
+					else 'member'
+				    endif
+		)
+}
+
+-- Rule 'OperatorCallExp2DatatypePredicateAtom'
+-- Create R2ML atatypePredicateAtom from the OperatorCallExp OCL element,
+-- with relation operators.
+-- E.g. age >= 18
+rule OperatorCallExp2DatatypePredicateAtom {
+	from i : OCL!OperatorCallExp (
+			i.oclIsTypeOf(OCL!OperatorCallExp) and 
+			not i.haveIteratorExpInSources() and -- select(...)->operation (<, >, ...)
+			( i.name = '>=' or i.name = '>' or i.name = '<' or i.name = '<='
+			or ( if i.name = '=' or i.name = '<>' then
+					  i.haveCollectionExpInSources() or
+				      i.haveCollectionExpInArguments() or
+					  -- because of exp.var = val in select(...)
+					  i.refImmediateComposite().oclIsTypeOf(OCL!IteratorExp)
+				 else false
+				 endif
+				)
+			)
+			-- because of expr.var >= 0
+			and if i.source.oclIsTypeOf(OCL!OperationCallExp) or i.source.oclIsTypeOf(OCL!PropertyCallExp) or i.source.oclIsTypeOf(OCL!VariableExp) then
+					true
+				else if not i.haveCollectionExpInSources() and not i.haveCollectionExpInArguments() then
+						not i.argument->asSequence()->first().oclIsKindOf(OCL!LiteralExp)
+					else true
+					endif
+				endif
+			or ( i.name = '<>' and if i.source.oclIsTypeOf(OCL!VariableExp) and 
+									  i.argument->asSequence()->first().oclIsTypeOf(OCL!VariableExp)
+									  then false
+									  else true
+									  endif
+				)
+		)
+	to o : R2ML!DatatypePredicateAtom (
+			predicate <- dtp,
+			dataArguments <- Sequence { if i.source.oclIsTypeOf(OCL!VariableExp) or i.source.oclIsTypeOf(OCL!PropertyCallExp) or i.source.oclIsTypeOf(OCL!OperationCallExp) then
+											i.source
+											 else if not i.source.source.oclIsUndefined() then
+										  	         if i.source.source.oclIsTypeOf(OCL!VariableExp) then
+													    i.source.source
+												     else  i.source
+												     endif 
+											      else i.source
+											      endif
+											 endif, 
+										if i.argument->asSequence()->first().oclIsTypeOf(OCL!CollectionOperationCallExp) then
+											i.argument->asSequence()->first().source
+										else i.argument->asSequence()->first()
+										endif
+										},
+			isNegated <- if i.name = '<>' then
+							true		
+						else OclUndefined
+						endif
+		),
+	   dtp : R2ML!DatatypePredicate (
+	   		name <- if i.name = '=' then
+						if (i.source.oclIsTypeOf(OCL!CollectionOperationCallExp) and i.source.name = 'size') 
+							or i.argument->asSequence()->first().oclIsTypeOf(OCL!CollectionOperationCallExp) then
+					  		'swrlb:length'
+						else if i.source.oclIsTypeOf(OCL!PropertyCallExp) or i.source.oclIsTypeOf(OCL!VariableExp) then 
+								'swrlb:equal'
+							 else OclUndefined
+							 endif	
+						endif
+			  		else if i.name = '>=' then
+							'swrlb:greaterThanOrEqual'
+					  	 else if i.name = '>' then
+								'swrlb:greaterThan'
+						      else if i.name = '<' then
+						 			 'swrlb:lessThan'
+							       else if i.name = '<=' then
+							  			     'swrlb:lessThanOrEqual'
+								   	    else if i.name = '<>' then
+												'swrlb:equal'
+											 else OclUndefined
+											 endif
+								   		endif
+							  	   endif
+						      endif
+					      endif
+					endif
+	   	)
+}
+
+-- Rule 'OperatorCallExp2Disjunction'
+-- Create R2ML Disjunction from the OperatorCallExp OCL element with 'or' as name.
+rule OperatorCallExp2Disjunction {
+	from i : OCL!OperatorCallExp (
+			i.oclIsTypeOf(OCL!OperatorCallExp) and i.name = 'or'
+		)
+	to o : R2ML!Disjunction (
+			formulas <-  Sequence {  if i.source.oclIsTypeOf(OCL!OperatorCallExp) and i.source.name = 'not' then -- jump over not 
+										i.source.source
+					   				else i.source
+					   				endif,
+								  	if i.argument->asSequence()->first().oclIsTypeOf(OCL!OperatorCallExp) and i.argument->asSequence()->first().name = 'not' then -- jump over not 
+										i.argument->asSequence()->first().source
+					   				else i.argument->asSequence()->first()
+					   				endif 
+						}
+		)
+}
+
+-- Rule 'OperatorCallExp2Conjuction'
+-- Create R2ML Conjuction from the OperatorCallExp OCL element with 'and' as name.
+rule OperatorCallExp2Conjuction {
+	from i : OCL!OperatorCallExp (
+			i.oclIsTypeOf(OCL!OperatorCallExp) and i.name = 'and'
+		)
+	to o : R2ML!Conjuction (
+			formulas <- Sequence {  if i.source.oclIsTypeOf(OCL!OperatorCallExp) and i.source.name = 'not' then -- jump over not 
+										i.source.source
+					   				else i.source
+					   				endif,
+								  	if i.argument->asSequence()->first().oclIsTypeOf(OCL!OperatorCallExp) and i.argument->asSequence()->first().name = 'not' then -- jump over not 
+										i.argument->asSequence()->first().source
+					   				else i.argument->asSequence()->first()
+					   				endif 
+						}
+		)
+}
+
+-- Rule 'OperatorCallExp2AttributionAtom'
+-- Create R2ML AttributionAtom from the OperatorCallExp OCL element with '=' 
+-- as name, and have Variable as it source or Property with source Variable (self).
+-- E.g. title = 'Mr.' or self.name = 'Mona'
+rule OperatorCallExp2AttributionAtom {
+	from i : OCL!OperatorCallExp (
+			i.oclIsTypeOf(OCL!OperatorCallExp) and i.name = '='
+			and ( i.source.oclIsTypeOf(OCL!VariableExp) or
+				  ( if i.source.oclIsTypeOf(OCL!PropertyCallExp) then
+						if not i.source.source.oclIsUndefined() then
+							if i.source.source.oclIsTypeOf(OCL!VariableExp) then
+								 i.source.source.referredVariable.name = 'self'
+							else false
+							endif
+						else false
+						endif
+					else false 
+					endif
+				   )
+				)
+			and i.argument->asSequence()->first().oclIsKindOf(OCL!LiteralExp)
+		)
+	to o : R2ML!AttributionAtom (
+			attribute <- atr,
+			subject <- thisModule.Class2ObjectVariable(i.getInvariantForElement().contextDefinition.contextElement),
+			dataValue <- i.argument->asSequence()->first()
+		),
+		atr : R2ML!Attribute (
+				name <- if i.source.oclIsTypeOf(OCL!VariableExp) then
+							i.source.referredVariable.name
+						else i.source.name
+						endif
+			)
+}
+
+-- Rule 'OperatorCallExp2EqualityAtom'
+-- Create R2ML EqualityAtom from the OperatorCallExp OCL element with '<>'.
+-- E.g. iterator variables c1 <> c2 in forAll
+rule OperatorCallExp2EqualityAtom {
+	from i : OCL!OperatorCallExp (
+		i.oclIsTypeOf(OCL!OperatorCallExp) and ( i.name = '<>' or i.name = '=' )and
+		if i.source.oclIsTypeOf(OCL!VariableExp) then
+			if i.source.referredVariable.oclIsTypeOf(OCL!Iterator) then
+			   true
+			else i.argument->asSequence()->first().oclIsTypeOf(OCL!VariableExp)
+			endif
+		else false
+		endif
+	)
+	to o : R2ML!EqualityAtom (
+			terms <- Sequence { thisModule.Iterator2ObjectVariable(i.source.referredVariable), 
+								thisModule.Iterator2ObjectVariable(i.argument->asSequence()->first().referredVariable)
+								},
+			isNegated <- if i.name = '<>' then
+							true
+						 else if i.name = '=' then
+						 	    false
+							  else OclUndefined
+							  endif
+						 endif
+		)
+}
+
+-- Rule 'OperatorCallExp2ReferencePropertyAtom'
+-- Create R2ML ReferencePropertyAtom from the OperatorCallExp OCL element with '=' 
+-- as name, and have Property as it source and Variable as argument.
+-- E.g. card.customer = customer
+rule OperatorCallExp2ReferencePropertyAtom {
+	from i : OCL!OperatorCallExp (
+			i.oclIsTypeOf(OCL!OperatorCallExp) and i.name = '=' 
+			and if i.argument->asSequence()->size() = 1 then
+					i.argument->asSequence()->first().oclIsTypeOf(OCL!VariableExp)
+				else false
+				endif
+			and i.source.oclIsTypeOf(OCL!PropertyCallExp)
+			)
+	to o : R2ML!ReferencePropertyAtom ( 
+			-- Test is variable 'self' or iterator variable or just simple variable.
+			-- Same is for object.
+			subject <- if i.source.source.oclIsTypeOf(OCL!VariableExp) then
+							if i.source.source.referredVariable.name = 'self' then
+						  		thisModule.Class2ObjectVariable(i.getInvariantForElement().contextDefinition.contextElement)				
+					   		else if i.source.source.referredVariable.oclIsTypeOf(OCL!Iterator) then
+					   				thisModule.Iterator2ObjectVariable(i.source.source.referredVariable)
+								 else i.source.source
+						         endif
+					   		endif
+					  else i.source.source
+					  endif,
+			object <- if i.argument->asSequence()->first().referredVariable.name = 'self' then
+						thisModule.Class2ObjectVariable(i.getInvariantForElement().contextDefinition.contextElement)				
+					  else if i.argument->asSequence()->first().referredVariable.oclIsTypeOf(OCL!Iterator) then
+					  			thisModule.Iterator2ObjectVariable(i.argument->asSequence()->first().referredVariable)
+					  	   else i.argument->asSequence()->first()
+						   endif
+					  endif,
+			referenceProperty <- refProp
+		),
+	   refProp : R2ML!ReferenceProperty(
+	   		name <- i.source.name
+	   	)
+}
+
+-- Rule 'OperatorCallExp2Implicaton'
+-- Create R2ML Implication from the OperatorCallExp OCL element with name 'implies'.
+rule OperatorCallExp2Implicaton {
+	from i : OCL!OperatorCallExp (
+			i.oclIsTypeOf(OCL!OperatorCallExp) and i.name = 'implies'
+		)
+	to o : R2ML!Implication (
+			antecedent <- i.source,
+			consequent <- i.argument->asSequence()->first()
+		)
+}
+
+-- Rule 'OperationCallExp2DataOperationTerm'
+-- Create R2ML DataOperationTerm from the OperationCallExp OCL element.
+-- e.g. expr.operation()
+rule OperationCallExp2DataOperationTerm {
+	from i : OCL!OperationCallExp (
+			i.oclIsTypeOf(OCL!OperationCallExp)
+			and i.name <> 'isKindOf' and i.name <> 'isTypeOf'
+			and i.name <> 'allInstances'
+		)
+	to o : R2ML!DataOperationTerm (
+			dataOperationRef <- dor,
+			contextArgument <- if i.source.oclIsTypeOf(OCL!VariableExp) then
+								if not i.source.referredVariable.oclIsUndefined() then
+									if i.source.referredVariable.name = 'self' then
+										thisModule.Class2ObjectVariable(i.getInvariantForElement().contextDefinition.contextElement)
+									else i.source
+									endif
+								else OclUndefined
+								endif
+							   else i.source
+							   endif
+		),
+		dor : R2ML!DataOperation (
+				name <- i.name
+			)
+}
+
+-- Rule 'OperationCallExp2ObjectClassificationAtom'
+-- Create R2ML ObjectClassificationAtom from the OperationCallExp OCL element with
+-- names 'isKindOf' or 'isTypeOf'
+rule OperationCallExp2ObjectClassificationAtom {
+	from i : OCL!OperationCallExp (
+			i.oclIsTypeOf(OCL!OperationCallExp) and
+			( i.name = 'isKindOf' or i.name = 'isTypeOf' ) 
+		)
+	to o : R2ML!ObjectClassificationAtom (
+			term <- if not i.source.oclIsUndefined() then
+						if i.source.oclIsTypeOf(OCL!VariableExp) then
+						  if not i.source.referredVariable.oclIsUndefined() then
+								if i.source.referredVariable.name = 'self' then
+									thisModule.Class2ObjectVariable(i.getInvariantForElement().contextDefinition.contextElement)
+								else thisModule.VariableExp2ObjectVariable(i.source)
+								endif
+						  else OclUndefined
+						  endif
+						else i.source
+						endif
+					else OclUndefined
+				    endif,
+			type <- thisModule.VariableExp2Class(i.argument->asSequence()->first())
+		)
+}
+
+-- Rule 'CollectionOperationCallExp2DatatypePredicateAtom'
+-- Create R2ML DatatypePredicateAtom from the CollectionOperationCallExp OCL element.
+-- E.g. expr->isEmpty()
+rule CollectionOperationCallExp2DatatypePredicateAtom {
+	from i : OCL!CollectionOperationCallExp (
+			i.oclIsTypeOf(OCL!CollectionOperationCallExp) and i.name <> 'includesAll' and
+			OCL!OperatorCallExp.allInstancesFrom('IN')->asSequence()->select(e | e.name <> 'not' and e.name <> 'implies')->collect(e | e.source)->flatten()->excludes(i) and
+			OCL!OperatorCallExp.allInstancesFrom('IN')->asSequence()->select(e | e.name <> 'or' and e.name <> 'and' and e.name <> 'implies')->collect(e | e.argument)->flatten()->excludes(i) and
+			OCL!PropertyCallExp.allInstancesFrom('IN')->asSequence()->collect(e | e.source)->flatten()->excludes(i)
+			and not i.source.oclIsTypeOf(OCL!IteratorExp)
+		)
+	to o : R2ML!DatatypePredicateAtom (
+			predicate <- dtp,
+			dataArguments <- Sequence { i.source },
+			isNegated <- let parent : OclAny = i.refImmediateComposite() in 
+							if not parent.oclIsUndefined() then
+							if parent.oclIsTypeOf(OCL!OperatorCallExp) then
+								if parent.name = 'not' then
+									true
+								else false
+								endif
+							else false
+							endif
+						 else false
+						 endif
+		),
+	   dtp : R2ML!DatatypePredicate (
+	   		name <- if i.name = 'isEmpty' then
+						'swrlb:empty'
+					else OclUndefined
+					endif
+	   	)
+}
+
+-- Rule 'CollectionOperationCallExp2ObjectOperationTerm'
+-- Create R2ML ObjectOperationTerm from the CollectionOperationCallExp OCL element.
+-- E.g. in expr->collectionOperation().attr
+rule CollectionOperationCallExp2ObjectOperationTerm {
+	from i : OCL!CollectionOperationCallExp (
+			i.oclIsTypeOf(OCL!CollectionOperationCallExp) and i.name <> 'includesAll' and
+			OCL!PropertyCallExp.allInstancesFrom('IN')->asSequence()->collect(e | e.source)->flatten()->includes(i)
+			and not i.source.oclIsTypeOf(OCL!IteratorExp)
+		)
+	to o : R2ML!ObjectOperationTerm (
+			operation <- op,
+			contextArgument <- i.source
+		),
+	   op : R2ML!ObjectOperation (
+	   		name <- i.name
+	   	)
+}
+
+-- Rule 'CollectionOperationCallExp2DatatypeFunctionTerm'
+-- Create R2ML DatatypeFunctionTerm from the CollectionOperationCallExp OCL element.
+-- E.g. in collection->operation() 
+rule CollectionOperationCallExp2DatatypeFunctionTerm {
+	from i : OCL!CollectionOperationCallExp (
+			i.oclIsTypeOf(OCL!CollectionOperationCallExp) and i.name <> 'includesAll' and
+			OCL!OperatorCallExp.allInstancesFrom('IN')->asSequence()->select(c | c.name <> '=' and c.name <> 'not')->collect(e | e.source)->flatten()->includes(i)
+			and not i.source.oclIsTypeOf(OCL!IteratorExp)
+		)
+	to o : R2ML!DatatypeFunctionTerm (
+			function <- dtf,
+			dataArguments <- i.source
+		),
+		dtf : R2ML!DatatypeFunction (
+				name <- if i.name = 'size' then
+							'fn:count'
+						else OclUndefined
+						endif
+			)
+
+}
+
+-- Rule 'CollectionOperationCallExp2Implication'
+-- Create R2ML Implication from the CollectionOperationCallExp OCL element,
+-- with name "includesAll"
+rule CollectionOperationCallExp2Implication {
+	from i : OCL!CollectionOperationCallExp (
+			i.oclIsTypeOf(OCL!CollectionOperationCallExp) and i.name = 'includesAll'
+		)
+	to o : R2ML!Implication (
+			consequent <- conAtom,
+			antecedent <- antAtom
+		),
+	   conAtom : R2ML!GenericAtom (
+	   		predicate <- atomPredicate,
+			arguments <- Sequence { thisModule.VariableExp2GenericVariable(i.source), i.argument->asSequence()->first()}
+	   	),
+	   antAtom : R2ML!GenericAtom (
+	   		predicate <- atomPredicate,
+		    arguments <- Sequence { thisModule.VariableExp2GenericVariable(i.source), i.source}
+	   	),
+	   atomPredicate : R2ML!GenericPredicate (
+	   		name <- 'swrlb:member'
+	   	)
+}
+
+-- Rule 'IteratorExpFromForAll2Conjunction'
+-- Create R2ML Conjuction from the IteratorExp OCL element,
+-- with name "forAll".
+rule IteratorExpFromForAll2Conjunction {
+	from i : OCL!IteratorExp (
+			i.oclIsTypeOf(OCL!IteratorExp) and i.name = 'forAll' and
+			if i.source.oclIsTypeOf(OCL!OperationCallExp) then -- it is not created when expr.allInstances()->forAll(...)
+				if i.source.name = 'allInstances' then
+					false
+				else true
+				endif
+			else true
+			endif
+		)
+	to o : R2ML!Conjuction (
+			formulas <- Sequence { i.source, univQuantForm }
+		),
+	  univQuantForm : R2ML!UniversallyQuantifiedFormula (
+	  		formula <- i.body,
+			variables <- i.iterator->asSequence()->collect(c | thisModule.Iterator2ObjectVariable(c))
+	  	)
+}
+
+-- Rule 'IteratorExpFromSelect2Conjunction'
+-- Create R2ML Conjuction from the IteratorExp OCL element,
+-- with name "select".
+-- ANNOTATION: There is no general support in R2ML for OCL iterator expressions.
+rule IteratorExpFromSelect2Conjunction {
+	from i : OCL!IteratorExp (
+			i.oclIsTypeOf(OCL!IteratorExp) and i.name = 'select'
+			and if not i.refImmediateComposite().oclIsUndefined() then
+					if i.refImmediateComposite().oclIsTypeOf(OCL!CollectionOperationCallExp) then
+						if i.refImmediateComposite().name = 'notEmpty' or i.refImmediateComposite().name = 'size' then
+							true
+						else false
+						endif
+					else false
+					endif
+				else false
+				endif
+		)
+	to o : R2ML!Conjuction (
+			formulas <- Sequence { i.source, existQuantForm }
+		),
+	  existQuantForm : R2ML!ExistentiallyQuantifiedFormula (
+	  		formula <- conj,
+			variables <- i.iterator->asSequence()->collect(c | thisModule.Iterator2ObjectVariable(c))
+	  	),
+	  conj : R2ML!Conjuction (
+	  		formulas <- Sequence { antAtom , i.body}
+	  	),
+	 antAtom : R2ML!GenericAtom (
+	   		predicate <- atomPredicate,
+			arguments <- Sequence { i.iterator->asSequence()->collect( c | thisModule.Iterator2ObjectVariable(c)), 
+	   								if i.source.oclIsTypeOf(OCL!PropertyCallExp) then
+										thisModule.PropertyCallExp2DataVariable(i.source)
+									else if i.source.oclIsTypeOf(OCL!VariableExp) then
+											thisModule.Variable2DataVariable(i.source.referredVariable)
+										 else OclUndefined
+										 endif
+									endif
+						   		  }
+	   	),
+	   atomPredicate : R2ML!GenericPredicate (
+	   		name <- 'swrlb:member'
+	   	)
+}
+
+-- Rule 'VariableExp2AttributeFunctionTerm'
+-- Create R2ML AttributeFunctionTerm from the VariableExp which is source of Operation.
+-- E.g. age in " age >= 18 "
+rule VariableExp2AttributeFunctionTerm {
+	from i : OCL!VariableExp (
+			i.oclIsTypeOf(OCL!VariableExp) and i.referredVariable.name <> 'self' and 
+			not i.referredVariable.oclIsTypeOf(OCL!Iterator) and
+			( OCL!OperatorCallExp.allInstancesFrom('IN')->asSequence()->select(c | c.name <> '=')->collect(e | e.source)->flatten()->includes(i) or
+			    ( OCL!CollectionOperationCallExp.allInstancesFrom('IN')->asSequence()->collect(e | e.source)->flatten()->includes(i)
+			    	and 
+				  not i.hasPropertyCallExpInParents()
+			    )	
+			 )
+		-- if variableExp = expr->collectionExp()
+		or if i.refImmediateComposite().oclIsTypeOf(OCL!OperatorCallExp) then
+				if i.refImmediateComposite().name = '=' or i.refImmediateComposite().name = '<>' then
+					if i.refImmediateComposite().argument->asSequence()->first().oclIsTypeOf(OCL!CollectionOperationCallExp) then
+						true
+					else false
+					endif
+				else false
+				endif
+		   else false
+		   endif
+		)
+	to o : R2ML!AttributeFunctionTerm (
+			attribute <- atr,
+			contextArgument <- thisModule.Class2ObjectVariable(i.getInvariantForElement().contextDefinition.contextElement),
+			typeCategory <- if OCL!CollectionOperationCallExp.allInstancesFrom('IN')->asSequence()->collect(e | e.source)->flatten()->includes(i) then
+								#bag
+							else OclUndefined
+							endif
+		),
+		atr : R2ML!Attribute (
+				name <- i.referredVariable.name
+			)
+}
+
+-- Rule 'VariableExp2ReferencePropertyFunctionTerm'
+-- Create R2ML ReferencePropertyFunctionTerm from the VariableExp which is
+-- source of PropertyCallExp or argument of OperatorCallExp.
+-- E.g. owner in " owner.age >= 18 " or customer in " card.customer = customer "
+-- or " members.age() > 21 " (if possible)
+rule VariableExp2ReferencePropertyFunctionTerm {
+	from i : OCL!VariableExp(
+			i.oclIsTypeOf(OCL!VariableExp) and i.referredVariable.name <> 'self' and
+			not i.referredVariable.oclIsTypeOf(OCL!Iterator) and
+			( OCL!PropertyCallExp.allInstancesFrom('IN')->asSequence()->collect(e | e.source)->flatten()->includes(i) or
+			  OCL!OperatorCallExp.allInstancesFrom('IN')->asSequence()->collect(e | e.argument)->flatten()->includes(i) or
+  		  	  OCL!OperationCallExp.allInstancesFrom('IN')->asSequence()->select(c | c.oclIsTypeOf(OCL!OperationCallExp))->select(c | c.name <> 'allInstances')->collect(e | e.source)->flatten()->includes(i)			
+			  or ( OCL!CollectionOperationCallExp.allInstancesFrom('IN')->asSequence()->collect(e | e.source)->flatten()->includes(i)
+			    	and 
+					i.hasPropertyCallExpInParents()
+			    )	
+			)
+		)
+	to o : R2ML!ReferencePropertyFunctionTerm (
+			contextArgument <- thisModule.Class2ObjectVariable(i.getInvariantForElement().contextDefinition.contextElement),
+			referencePropertyRef <- refProp
+		),
+	   refProp : R2ML!ReferenceProperty (
+	   		name <- i.referredVariable.name
+	   	)
+}
+
+-- Rule 'VariableExp2AttributionAtom'
+-- Create R2ML AttributionAtom from the VariableExp which have
+-- parent Iterator expression, like var->select(...).
+rule VariableExp2AttributionAtom {
+	from i : OCL!VariableExp (
+			i.oclIsTypeOf(OCL!VariableExp) and 
+			i.refImmediateComposite().oclIsTypeOf(OCL!IteratorExp)
+		)
+	to o : R2ML!AttributionAtom (
+			attribute <- attr,
+			subject <- thisModule.Class2ObjectVariable(i.getInvariantForElement().contextDefinition.contextElement),
+			dataValue <- thisModule.Variable2DataVariable(i.referredVariable)
+		),
+	   attr : R2ML!Attribute (
+	   		name <- i.referredVariable.name
+	   	)
+}
+
+-- Rule 'PropertyCallExp2AttributionAtom'
+-- Create R2ML AttributionAtom from the PropertyCallExp which have
+-- parent Iterator expression, like self.var->select(...).
+rule PropertyCallExp2AttributionAtom {
+	from i : OCL!PropertyCallExp (
+			i.oclIsTypeOf(OCL!PropertyCallExp) and 
+			i.refImmediateComposite().oclIsTypeOf(OCL!IteratorExp)
+		)
+	to o : R2ML!AttributionAtom (
+			attribute <- attr,
+			subject <- thisModule.Class2ObjectVariable(i.getInvariantForElement().contextDefinition.contextElement),
+			dataValue <- thisModule.PropertyCallExp2DataVariable(i)
+		),
+	   attr : R2ML!Attribute (
+	   		name <- i.name
+	   	)
+}
+
+-- Rule 'PropertyCallExp2AttributeFunctionTerm'
+-- Create R2ML AttributeFunctionTerm from the PropertyCallExp which is
+-- source of Operator without "=" as name.
+-- E.g. age in " owner.age >= 18 "
+rule PropertyCallExp2AttributeFunctionTerm {
+	from i : OCL!PropertyCallExp (
+			i.oclIsTypeOf(OCL!PropertyCallExp) and
+			( OCL!OperatorCallExp.allInstancesFrom('IN')->asSequence()->select(e | e.name <> '=')->collect(e | e.source)->flatten()->includes(i) 
+				or
+			  i.source.oclIsTypeOf(OCL!CollectionOperationCallExp)
+			  or i.refImmediateComposite().oclIsTypeOf(OCL!CollectionOperationCallExp)
+			  or ( if i.refImmediateComposite().oclIsTypeOf(OCL!OperatorCallExp) then
+			  			if i.refImmediateComposite().name = '<>' then
+							true
+						else if i.hasIteratorExpInParents() then -- because of select( ... | t.p = number)
+						         -- ANNOTATION: Here is checking is Iterator expression 
+								 -- 'forAll' called with allInstances, then it is false
+								  let iter : OCL!IteratorExp = i.getIteratorExpFromParents() in
+								  	if not iter.oclIsUndefined() then
+										if iter.source.oclIsTypeOf(OCL!OperationCallExp) then
+											if iter.source.name = 'allInstances' then
+												false
+											else true
+											endif
+										else true
+										endif
+									else true
+									endif
+							 else false
+							 endif
+						endif
+				   else false
+				   endif		  		
+			  	)
+			)
+		)
+	to o :  R2ML!AttributeFunctionTerm (
+			attribute <- atr,
+			contextArgument <- if i.source.oclIsTypeOf(OCL!VariableExp) then
+								 if not i.source.referredVariable.oclIsUndefined() then
+								 	if i.source.referredVariable.name = 'self' then
+										 thisModule.Class2ObjectVariable(i.getInvariantForElement().contextDefinition.contextElement)
+									else if i.source.referredVariable.oclIsTypeOf(OCL!Iterator) then
+											thisModule.Iterator2ObjectVariable(i.source.referredVariable)
+										 else i.source
+										 endif
+									endif
+								 else OclUndefined
+								 endif
+							   else i.source
+							   endif,
+			typeCategory <- if i.refImmediateComposite().oclIsTypeOf(OCL!CollectionOperationCallExp) then
+								#bag
+							else OclUndefined
+							endif
+		),
+	atr : R2ML!Attribute (
+				name <- i.name
+			)
+}
+
+-- Rule 'PropertyCallExp2ReferencePropertyFunctionTerm'
+-- Create R2ML ReferencePropertyFunctionTerm from the PropertyCallExp which is
+-- source of another PropertyCallExp.
+-- E.g. card or members in " members.card.customer = customer "
+rule PropertyCallExp2ReferencePropertyFunctionTerm {
+	from i : OCL!PropertyCallExp (
+		i.oclIsTypeOf(OCL!PropertyCallExp) and
+		OCL!PropertyCallExp.allInstancesFrom('IN')->asSequence()->collect(e | e.source)->flatten()->includes(i)	
+		)
+	to o : R2ML!ReferencePropertyFunctionTerm (
+			contextArgument <- if i.source.oclIsTypeOf(OCL!VariableExp) then
+									if i.source.referredVariable.name = 'self' then
+										thisModule.Class2ObjectVariable(i.getInvariantForElement().contextDefinition.contextElement)
+									else i.source
+									endif
+							   else i.source
+							   endif,
+			referencePropertyRef <- refProp
+		),
+	   refProp : R2ML!ReferenceProperty (
+	   		name <- i.name
+	   	)
+}
+
+-- Rule 'StringLiteralExp2TypedLiteral'
+-- Create R2ML TypedLiteral from the StringLiteralExp.
+rule StringLiteralExp2TypedLiteral {
+	from i : OCL!StringLiteralExp(
+			i.oclIsTypeOf(OCL!StringLiteralExp)
+		)
+	to o : R2ML!TypedLiteral (
+		lexicalValue <- i.stringSymbol,
+		type <- thisModule.StringLiteralExp2Datatype(thisModule.getDefaultStringLiteralExp())
+		)
+}
+
+-- Rule 'IntegerLiteralExp2TypedLiteral'
+-- Create R2ML TypedLiteral from the IntegerLiteralExp.
+rule IntegerLiteralExp2TypedLiteral {
+	from i : OCL!IntegerLiteralExp(
+			i.oclIsTypeOf(OCL!IntegerLiteralExp)
+		)
+	to o : R2ML!TypedLiteral (
+			lexicalValue <- i.integerSymbol.toString(),
+			type <- thisModule.IntegerLiteralExp2Datatype(thisModule.getDefaultIntegerLiteralExp())
+		)
+}
+
+-- Rule 'BooleanLiteralExp2TypedLiteral'
+-- Create R2ML TypedLiteral from the BooleanLiteralExp.
+rule BooleanLiteralExp2TypedLiteral {
+	from i : OCL!BooleanLiteralExp (
+			i.oclIsTypeOf(OCL!BooleanLiteralExp)
+		)
+	to o : R2ML!TypedLiteral (
+			lexicalValue <- i.booleanSymbol.toString(),
+			type <- thisModule.BooleanLiteralExp2Datatype(thisModule.getDefaultBooleanLiteralExp())
+		)
+}
+
+-- Rule 'BooleanLiteralExp2Datatype'
+-- Create R2ML Datatype (xs:positiveInteger) from the BooleanLiteralExp.
+unique lazy rule BooleanLiteralExp2Datatype {
+	from i : OCL!BooleanLiteralExp
+	to o : R2ML!Datatype (
+		name <- 'xs:boolean'
+		)
+}
+
+-- Rule 'IntegerLiteralExp2Datatype'
+-- Create R2ML Datatype (xs:positiveInteger) from the IntegerLiteralExp.
+unique lazy rule IntegerLiteralExp2Datatype {
+	from i : OCL!IntegerLiteralExp
+	to o : R2ML!Datatype (
+		name <- 'xs:positiveInteger'
+		)
+}
+
+-- Rule 'StringLiteralExp2Datatype'
+-- Create R2ML Datatype (xs:string) from the StringLiteralExp.
+unique lazy rule StringLiteralExp2Datatype {
+	from i : OCL!StringLiteralExp
+	to o : R2ML!Datatype (
+		name <- 'xs:string'
+		)
+}

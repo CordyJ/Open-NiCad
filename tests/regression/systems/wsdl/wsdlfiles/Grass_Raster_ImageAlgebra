@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://Grass_Raster_ImageAlgebra.grass.ws.laits.gmu.edu" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://Grass_Raster_ImageAlgebra.grass.ws.laits.gmu.edu" xmlns:intf="http://Grass_Raster_ImageAlgebra.grass.ws.laits.gmu.edu" xmlns:tns1="http://grass.ws.laits.gmu.edu" xmlns:tns2="http://ws.laits.gmu.edu" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+	 <wsdl:types>
+
+		  <schema elementFormDefault="qualified" targetNamespace="http://Grass_Raster_ImageAlgebra.grass.ws.laits.gmu.edu" xmlns="http://www.w3.org/2001/XMLSchema">
+
+			<!-- ELEMENTS -->
+
+			   <element name="Map_calculationElement">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Name of the element to describe input parameters. 
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element maxOccurs="3" minOccurs="1" name="sourceURLArray" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL Array of a group of imagery files to be calculated. Default data format is GeoTIFF. Input images could be up to 3.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element minOccurs="1" name="formula" type="xsd:string">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        The formula entered by the user.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element default="Byte" minOccurs="1" name="outputGeoTiffType" type="tns1:GeoTiffFileType">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Type of output GeoTIFF file. The output Format Type is specified as GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+			   <element name="fault" type="tns2:WebServiceExceptionsType"/>
+
+			   <element name="Map_calculationResponse">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Always return URL and Format of output file.
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element name="returnURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of output file to contain the result of the calculation.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element name="returnFormat" type="xsd:string">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Format of output file.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+		  </schema>
+
+		  <schema elementFormDefault="qualified" targetNamespace="http://grass.ws.laits.gmu.edu" xmlns="http://www.w3.org/2001/XMLSchema">
+
+			   <simpleType name="GeoTiffFileType">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Type of output file if the outputFormatType is specified as GeoTIFF.
+                         </documentation>
+
+				    </annotation>
+
+				    <restriction base="string">
+
+					     <enumeration value="Byte">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be Byte - 8-bit unsigned integer.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="Int16">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be Int16 - 16-bit signed integer.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="UInt16">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be UInt16 - 16-bit unsigned integer.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="UInt32">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be UInt32 - 32-bit unsigned integer.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="Int32">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be Int32 - 32-bit signed integer.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="Float32">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be Float32 - 32-bit floating point.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="Float64">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be Float64 - 64-bit floating point.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="CInt16">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be CInt16 - Complex 16-bit signed integer (ie. two Int16's one representing the real component, and one the imaginary component).
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="CInt32">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be CInt32 - Complex 32-bit signed integer.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="CFloat32">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be CFloat32 - Complex 32-bit floating point.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="CFloat64">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be CFloat64 - Complex 64-bit floating point.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+				    </restriction>
+
+			   </simpleType>
+
+		  </schema>
+
+		  <schema elementFormDefault="qualified" targetNamespace="http://ws.laits.gmu.edu" xmlns="http://www.w3.org/2001/XMLSchema">
+
+			   <complexType name="WebServiceExceptionsType">
+
+				    <sequence>
+
+					     <element name="exception" type="xsd:string"/>
+
+				    </sequence>
+
+			   </complexType>
+
+		  </schema>
+
+	 </wsdl:types>
+
+	 <wsdl:message name="map_calculationRequest">
+
+		  <wsdl:part element="impl:Map_calculationElement" name="parameters"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="map_calculationResponse">
+
+		  <wsdl:part element="impl:Map_calculationResponse" name="return"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="WebServiceExceptionsType">
+
+		  <wsdl:part element="impl:fault" name="fault"/>
+
+	 </wsdl:message>
+
+	 <wsdl:portType name="Grass_Raster_ImageAlgebraPortType">
+
+		  <wsdl:operation name="map_calculation">
+
+			   <wsdl:input message="impl:map_calculationRequest" name="map_calculationRequest"/>
+
+			   <wsdl:output message="impl:map_calculationResponse" name="map_calculationResponse"/>
+
+			   <wsdl:fault message="impl:WebServiceExceptionsType" name="WebServiceExceptionsType"/>
+
+		  </wsdl:operation>
+
+	 </wsdl:portType>
+
+	 <wsdl:binding name="Grass_Raster_ImageAlgebraSoapBinding" type="impl:Grass_Raster_ImageAlgebraPortType">
+
+		  <wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+		  <wsdl:operation name="map_calculation">
+
+			   <wsdl:documentation>
+Allow the user to perform arithmetic on raster map layers. The user can add one, two or three single-band raster datasets to form one output single-band raster. The variable names in the formula expression should be specified singly as a, b, c.   </wsdl:documentation>
+
+			   <wsdlsoap:operation soapAction="map_calculation" style="document"/>
+
+			   <wsdl:input>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:input>
+
+			   <wsdl:output>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:output>
+
+			   <wsdl:fault name="WebServiceExceptionsType">
+
+				    <wsdlsoap:fault name="WebServiceExceptionsType" use="literal"/>
+
+			   </wsdl:fault>
+
+		  </wsdl:operation>
+
+	 </wsdl:binding>
+
+	 <wsdl:service name="Grass_Raster_ImageAlgebraService">
+
+		  <wsdl:documentation>
+Perform arithmetic on raster map layers.  </wsdl:documentation>
+
+		  <wsdl:port binding="impl:Grass_Raster_ImageAlgebraSoapBinding" name="Grass_Raster_ImageAlgebra">
+
+			   <wsdlsoap:address location="http://65.123.203.154:8099/axis/services/Grass_Raster_ImageAlgebra"/>
+
+		  </wsdl:port>
+
+	 </wsdl:service>
+
+	<!--WSDL created by Apache Axis version: 1.4
+Built on Apr 22, 2006 (06:55:48 PDT)-->
+
+</wsdl:definitions>

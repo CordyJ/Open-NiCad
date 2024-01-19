@@ -1,0 +1,15 @@
+query JAVA2String_query = JAVA!JavaClass.allInstances()->
+	select(e | e.oclIsTypeOf(JAVA!JavaClass))->
+	collect(x | x.toString().writeTo('C:/test/' + x.package.name.replaceAll('.', '/') + '/' + x.name + '.java'));
+
+uses JAVA2String;
+
+
+-- Please note that this ATL program serves only for demonstration purposes.
+-- The rules and functions in this program may not be complete.
+
+-- Usage hints:
+-- Please give a folder name that makes sense.
+-- Don't forget to fill in the library link in the Model Configuration.
+-- Pay attention, ATL and it's configuration are case sensitive.
+

@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<definitions name="IMDBService" xmlns:tns="http://www.XYZ.com/IMDBService.wsdl" targetNamespace="http://www.XYZ.com/IMDBService.wsdl" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns="http://schemas.xmlsoap.org/wsdl/">
+	<message name="IMDBRequest">
+		<part name="title" type="xsd:string"/>
+	</message>
+	<message name="IMDBResponse">
+		<part name="return" type="xsd:string"/>
+	</message>
+	<portType name="IMDBPortType">
+		<operation name="getRating">
+			<input message="tns:IMDBRequest"/>
+			<output message="tns:IMDBResponse"/>
+		</operation>
+	</portType>
+	<binding name="IMDBBinding" type="tns:IMDBPortType">
+		<soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="getRating">
+			<soap:operation soapAction="urn:IMDBService#getRating"/>
+			<input>
+				<soap:body use="encoded" namespace="urn:IMDBService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+			</input>
+			<output>
+				<soap:body use="encoded" namespace="urn:IMDBService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+			</output>
+		</operation>
+	</binding>
+	<service name="IMDBService">
+		<documentation>Look up movie ratings.</documentation>
+		<port name="IMDBPort" binding="tns:IMDBBinding">
+			<soap:address location="http://www.XYZ.com/cgi-bin/soap.cgi"/>
+		</port>
+	</service>
+</definitions>

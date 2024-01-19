@@ -1,0 +1,152 @@
+<?xml version="1.0"?>
+
+<definitions name="EasyAmazon"
+             targetNamespace="urn:EasyAmazon"
+             xmlns:typens="urn:EasyAmazon"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
+             xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+             xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+  <types>
+    <xsd:schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:EasyAmazon">
+       
+	   <!-- complex category result array types. -->     
+      <xsd:complexType name="CategoriesResultArray">
+        <xsd:all>
+          <xsd:element name="categoryElements" type="typens:CategoryElementArray"/>
+        </xsd:all>
+      </xsd:complexType>
+
+      <xsd:complexType name="CategoryElementArray">
+        <xsd:complexContent>
+          <xsd:restriction base="soapenc:Array">
+             <xsd:attribute ref="soapenc:arrayType" wsdl:arrayType="typens:CategoryElement[]"/>
+          </xsd:restriction>
+        </xsd:complexContent>
+      </xsd:complexType>
+
+      <xsd:complexType name="CategoryElement">
+        <xsd:all>
+          <xsd:element name="category" 	type="xsd:string"/>
+          <xsd:element name="name" 		type="xsd:string"/>
+          <xsd:element name="browseID" 	type="xsd:int"/>	  
+        </xsd:all>
+      </xsd:complexType>
+	    
+	  <!-- handles amazon link results. -->
+      <xsd:complexType name="AmazonResultArray">
+        <xsd:all>
+			<xsd:element name="amazonElements" type="typens:AmazonElementArray" /> 
+        </xsd:all>
+      </xsd:complexType>
+	  
+      <xsd:complexType name="AmazonElementArray">
+        <xsd:complexContent>
+          <xsd:restriction base="soapenc:Array">
+             <xsd:attribute ref="soapenc:arrayType" wsdl:arrayType="typens:AmazonElement[]"/>
+          </xsd:restriction>
+        </xsd:complexContent>
+      </xsd:complexType>	  
+      
+      <xsd:complexType name="AmazonElement">
+        <xsd:all>
+		  <xsd:element name="title" 		type="xsd:string"/>
+          <xsd:element name="author" 		type="xsd:string"/>
+          <xsd:element name="image" 		type="xsd:string"/>
+          <xsd:element name="small_image" 	type="xsd:string"/>
+          <xsd:element name="our_price" 	type="xsd:float"/>
+          <xsd:element name="list_price" 	type="xsd:float"/>
+          <xsd:element name="release_date" 	type="xsd:string"/>
+          <xsd:element name="binding" 		type="xsd:string"/>
+          <xsd:element name="tagged_url" 	type="xsd:string"/>
+        </xsd:all>
+      </xsd:complexType>
+	  
+    </xsd:schema>
+  </types> 
+  
+  <!-- Get categories -->
+  <message name="getAmazonCategories">
+    <part name="username"       type="xsd:string"/>
+    <part name="password"       type="xsd:string"/>
+  </message>
+
+  <message name="getAmazonCategoriesResponse">
+    <part name="return"         type="typens:CategoriesResultArray"/>           
+  </message>
+
+  <!-- Gets Amazon Links -->
+  <message name="getAmazonLinks">
+    <part name="username"       type="xsd:string"/>
+    <part name="password"       type="xsd:string"/>
+	<part name="query"       	type="xsd:string"/>
+	<part name="category"       type="xsd:string"/>
+	<part name="browseID"  		type="xsd:int"/>
+	<part name="associatesID"  	type="xsd:string"/>		
+  </message>
+  
+  <message name="getAmazonLinksResponse">
+    <part name="return"         type="typens:AmazonResultArray"/> 
+  </message>  
+  
+  
+  <!-- Port for "EasyAmazon" -->
+  <portType name="EasyAmazonPort">
+
+    <operation name="getAmazonCategories">
+      <input message="typens:getAmazonCategories"/>
+      <output message="typens:getAmazonCategoriesResponse"/>
+    </operation>
+
+    <operation name="getAmazonLinks">
+      <input message="typens:getAmazonLinks"/>
+      <output message="typens:getAmazonLinksResponse"/>
+    </operation>
+
+  </portType>
+
+
+  <binding name="EasyAmazonBinding" type="typens:EasyAmazonPort">
+    <soap:binding style="rpc"
+                  transport="http://schemas.xmlsoap.org/soap/http"/>
+
+    <operation name="getAmazonCategories">
+      <soap:operation soapAction="urn:EasyAmazonAction"/>
+      <input>
+        <soap:body use="encoded"
+                   namespace="urn:EasyAmazon"
+                   encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </input>
+      <output>
+        <soap:body use="encoded"
+                   namespace="urn:EasyAmazon"
+                   encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </output>
+    </operation>
+	
+    <operation name="getAmazonLinks">
+      <soap:operation soapAction="urn:EasyAmazonAction"/>
+      <input>
+        <soap:body use="encoded"
+                   namespace="urn:EasyAmazon"
+                   encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </input>
+      <output>
+        <soap:body use="encoded"
+                   namespace="urn:EasyAmazon"
+                   encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </output>
+    </operation>
+  </binding>
+
+  <!-- Endpoint for flash-db Easy Amazon Service -->
+  <service name="EasyAmazonService">
+   <documentation>Returns Amazon categories, browseIDs, all price data and builds an associates link.</documentation>
+    <port name="EasyAmazonPort" binding="typens:EasyAmazonBinding">
+      <soap:address location="http://www.flash-db.com/services/ws/easyAmazon.php"/>
+    </port>
+  </service>
+
+</definitions>

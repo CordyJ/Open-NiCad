@@ -1,0 +1,380 @@
+module XML2SpreadsheetMLSimplified; -- Module Template
+create OUT : SpreadsheetMLSimplified from IN : XML;
+
+-- This helper permits to recover the value of a string attribute thanks to its name.
+-- It returns an empty string if the attribute doesn't exist.
+-- CONTEXT: XML!Element
+-- RETURN: String
+helper context XML!Element def: getStringAttrValue(attrName : String) : String =
+	let eltC : Sequence(XML!Attribute) = 
+		self.children->select(a | a.oclIsTypeOf(XML!Attribute) and a.name = attrName)->asSequence()
+	in
+		if eltC->notEmpty() 
+		then
+			eltC->first().value
+		else
+			''
+		endif;
+
+
+-- This helper permits to recover the element's set of children thanks to their name.
+-- CONTEXT: XML!Element
+-- RETURN: Set(XML!Element)
+helper context XML!Element def: getChildrenByName(name : String) : Set(XML!Element) =
+	self.children->select(e | e.oclIsTypeOf(XML!Element) and e.name = name);
+
+
+-- This helper permits to recover the value of an optional integer attribute
+-- if it exists
+-- CONTEXT: XML!Element
+-- RETURN: Integer
+helper context XML!Element def: getOptIntAttrValue(attrName : String) : Integer =
+	let val : String = self.getStringAttrValue(attrName)
+	in
+		if val <> ''
+		then
+			val.toInteger()
+		else
+			Integer
+		endif;
+
+
+-- This helper permits to recover the value of an optional boolean attribute
+-- if it exists
+-- CONTEXT: XML!Element
+-- RETURN: Boolean
+helper context XML!Element def: getOptBoolAttrValue(attrName : String) : Boolean =
+	let val : String = self.getStringAttrValue(attrName)
+	in
+		if val <> ''
+		then
+			if val = '0'
+			then
+					false
+			else 
+					true
+			endif
+		else
+			Boolean
+		endif;
+
+
+-- This helper permits to recover the value of an optional real attribute
+-- if it exists
+-- CONTEXT: XML!Element
+-- RETURN: Real
+helper context XML!Element def: getOptRealAttrValue(attrName : String) : Real =
+	let val : String = self.getStringAttrValue(attrName)
+	in
+		if val <> ''
+		then
+			val.toReal()
+		else
+			Real
+		endif;
+
+
+-- This helper permits to recover the value of an optional string attribute
+-- if it exists
+-- CONTEXT: XML!Element
+-- RETURN: String
+helper context XML!Element def: getOptStringAttrValue(attrName : String) : String =
+	let val : String = self.getStringAttrValue(attrName)
+	in
+		if val <> ''
+		then
+			val
+		else
+			String
+		endif;
+
+
+-- This helper permits to recover the value of a string data.
+-- The string have to be sometimes reconstructed.
+-- It returns an empty string if the value doesn't exist.
+-- CONTEXT: XML!Element
+-- RETURN: String
+helper context XML!Element def: getStringDataValue() : String =
+	let eltC : Sequence(XML!Text) = 
+		self.children->select(d | d.oclIsTypeOf(XML!Text))->asSequence()
+	in
+		if eltC->notEmpty() 
+		then
+				eltC->iterate(txt; res : String = '' |  
+					res.concat(txt.value)
+				)
+		else
+			''
+		endif;
+
+
+-- This helper permits to recover the value of a simple string data.
+-- It returns an empty string if the value doesn't exist.
+-- CONTEXT: XML!Element
+-- RETURN: String
+helper context XML!Element def: getSimpleStringDataValue() : String =
+	let eltC : Sequence(XML!Text) = 
+		self.children->select(d | d.oclIsTypeOf(XML!Text))->asSequence()
+	in
+		if eltC->notEmpty() 
+		then
+			eltC->first().value
+		else
+			''
+		endif;
+
+
+-- This helper permits to recover the value of a number data.
+-- It returns 0.0 if the value doesn't exist.
+-- CONTEXT: XML!Element
+-- RETURN: Real
+helper context XML!Element def: getNumberDataValue() : Real =
+	let val : String = self.getSimpleStringDataValue()
+	in
+		if val <> ''
+		then
+			val.toReal()
+		else
+			0.0
+		endif;
+
+
+-- This helper permits to recover the value of a boolean data.
+-- It returns false if the value doesn't exist.
+-- CONTEXT: XML!Element
+-- RETURN: Boolean
+helper context XML!Element def: getBooleanDataValue() : Boolean =
+	let val : String = self.getSimpleStringDataValue()
+	in
+		if val <> ''
+		then
+			if val = '0'
+			then
+				false
+			else
+				true
+			endif
+		else
+			false
+		endif;
+
+
+
+-- Rule 'Workbook'
+-- This rule generates the workbook which is the 
+-- root container of a SpreadsheetML document
+rule Workbook {
+	from
+		rw : XML!Root (
+			rw.name = 'Workbook'
+		)
+	
+	to
+		wb : SpreadsheetMLSimplified!Workbook (
+			wb_worksheets <- Sequence{rw.getChildrenByName('Worksheet')->collect(e | thisModule.resolveTemp(e, 'ws'))}
+		)	
+}
+
+
+-- Rule 'Worksheet'
+-- This rule generates the worksheets that are contained
+-- in a workbook.
+rule Worksheet {
+	from
+		ew : XML!Element (
+			ew.name = 'Worksheet'
+		)
+	
+	to
+		ws : SpreadsheetMLSimplified!Worksheet (
+			name <- ew.getStringAttrValue('ss:Name'),
+			ws_table <- Sequence{ew.getChildrenByName('Table')->first()}->collect(e | thisModule.resolveTemp(e, 'tab'))->first()
+		)	
+}
+
+
+-- Rule 'Table'
+-- This rule generates the table for a worksheet.
+-- It's the table which contains the columns and rows.
+rule Table {
+	from
+		et : XML!Element (
+			et.name = 'Table'
+		)
+	
+	to
+		tab : SpreadsheetMLSimplified!Table (
+			t_cols <- Sequence{et.getChildrenByName('Column')->collect(e | thisModule.resolveTemp(e, 'col'))},
+			t_rows <- Sequence{et.getChildrenByName('Row')->collect(e | thisModule.resolveTemp(e, 'row'))}
+		)	
+}
+
+
+-- Rule 'Column'
+-- This rule generates the columns contained in a table.
+-- They don't store the data but they give some specific information about columns format.
+rule Column {
+	from
+		ec : XML!Element (
+			ec.name = 'Column'
+		)
+	
+	to
+		col : SpreadsheetMLSimplified!Column (
+			index <- ec.getOptIntAttrValue('ss:Index'),	
+			hidden <- ec.getOptBoolAttrValue('ss:Hidden'),
+			span <- ec.getOptIntAttrValue('ss:Span'),
+			autoFitWidth <- ec.getOptBoolAttrValue('ss:AutoFitWidth'),
+			width <- ec.getOptRealAttrValue('ss:Width')
+		)	
+}
+
+
+-- Rule 'Row'
+-- This rule generates the rows contained in a table.
+-- They store the data (in the cells) and give some specific information about rows format.
+rule Row {
+	from
+		er : XML!Element (
+			er.name = 'Row'
+		)
+	
+	to
+		row : SpreadsheetMLSimplified!Row (
+			r_cells <- Sequence{er.getChildrenByName('Cell')->collect(e | thisModule.resolveTemp(e, 'cell'))},
+			index <- er.getOptIntAttrValue('ss:Index'),	
+			hidden <- er.getOptBoolAttrValue('ss:Hidden'),
+			span <- er.getOptIntAttrValue('ss:Span'),
+			autoFitHeight <- er.getOptBoolAttrValue('ss:AutoFitHeight'),
+			height <- er.getOptRealAttrValue('ss:Height')
+		)	
+}
+
+
+-- Rule 'Cell'
+-- This rule generates the cells of the table.
+-- They are contained in the rows and they store the data.
+rule Cell {
+	from
+		ece : XML!Element (
+			ece.name = 'Cell'
+		)
+	
+	to
+		cell : SpreadsheetMLSimplified!Cell (
+			index <- ece.getOptIntAttrValue('ss:Index'),
+			arrayRange <- ece.getOptStringAttrValue('ss:ArrayRange'),
+			formula <- ece.getOptStringAttrValue('ss:Formula'),
+			hRef <- ece.getOptStringAttrValue('ss:Href'),
+			mergeAcross <- ece.getOptRealAttrValue('ss:Href'),
+			mergeDown <- ece.getOptRealAttrValue('ss:Href')	
+		)	
+}
+
+
+-- Rule 'StringData'
+-- This rule generates the string data of the table.
+-- They are contained in the cells.
+rule StringData {
+	from
+		esd : XML!Element (
+			esd.name = 'Data' and esd.getStringAttrValue('ss:Type')='String'
+		)
+	
+	to
+		sdata : SpreadsheetMLSimplified!Data (
+			d_cell <- Sequence{esd.parent}->collect(e | thisModule.resolveTemp(e, 'cell'))->first(),
+			value <- sv
+		),		
+		sv : SpreadsheetMLSimplified!StringValue (
+			value <- esd.getStringDataValue()
+		)
+}
+
+-- Rule 'NumberData'
+-- This rule generates the number data of the table.
+-- They are contained in the cells.
+rule NumberData {
+	from
+		end : XML!Element (
+			end.name = 'Data' and end.getStringAttrValue('ss:Type')='Number'
+		)
+	
+	to
+		ndata : SpreadsheetMLSimplified!Data (
+			d_cell <- Sequence{end.parent}->collect(e | thisModule.resolveTemp(e, 'cell'))->first(),
+			value <- nv
+		),		
+		nv : SpreadsheetMLSimplified!NumberValue (
+			value <- end.getNumberDataValue()
+		)
+}
+
+-- Rule 'BooleanData'
+-- This rule generates the boolean data of the table.
+-- They are contained in the cells.
+rule BooleanData {
+	from
+		ebd : XML!Element (
+			ebd.name = 'Data' and ebd.getStringAttrValue('ss:Type')='Boolean'
+		)
+	
+	to
+		bdata : SpreadsheetMLSimplified!Data (
+			d_cell <- Sequence{ebd.parent}->collect(e | thisModule.resolveTemp(e, 'cell'))->first(),
+			value <- bv
+		),		
+		bv : SpreadsheetMLSimplified!BooleanValue (
+			value <- ebd.getBooleanDataValue()
+		)
+}
+
+-- Rule 'DateTimeData'
+-- This rule generates the "DateTime" data of the table.
+-- They are contained in the cells.
+rule DateTimeData {
+	from
+		edtd : XML!Element (
+			edtd.name = 'Data' and edtd.getStringAttrValue('ss:Type')='DateTime'
+		)
+		
+	using {
+		dateTimeString : String = edtd.getSimpleStringDataValue();
+	}
+	
+	to
+		dtdata : SpreadsheetMLSimplified!Data (
+			d_cell <- Sequence{edtd.parent}->collect(e | thisModule.resolveTemp(e, 'cell'))->first(),
+			value <- dttv
+		),		
+		dttv : SpreadsheetMLSimplified!DateTimeTypeValue (
+			value <- dt
+		),
+		-- The format for date/time fields in Excel is : yyyy-mm-ddThh:mm:ssZ
+		dt : SpreadsheetMLSimplified!DateTimeType (
+			year <-	dateTimeString.substring(1,4).toInteger(),
+			month <- dateTimeString.substring(6,7).toInteger(),
+			day <- dateTimeString.substring(9,10).toInteger(),
+			hour <- dateTimeString.substring(12,13).toInteger(),
+			minute <- dateTimeString.substring(15,16).toInteger(),
+			second <- dateTimeString.substring(18,19).toInteger()
+		)
+}
+
+-- Rule 'ErrorData'
+-- This rule generates the "error" data of the table.
+-- They are contained in the cells.
+rule ErrorData {
+	from
+		eed : XML!Element (
+			eed.name = 'Data' and eed.getStringAttrValue('ss:Type')='Error'
+		)
+	
+	to
+		edata : SpreadsheetMLSimplified!Data (
+			d_cell <- Sequence{eed.parent}->collect(e | thisModule.resolveTemp(e, 'cell'))->first(),
+			value <- ev
+		),		
+		ev : SpreadsheetMLSimplified!ErrorValue ()
+}
+

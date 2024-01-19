@@ -1,0 +1,396 @@
+module XML2DSLModel; -- Module Template
+create OUT : DSLModel  from IN1 : XML, IN2 : DSL;
+
+-------------------------------------------------------------------------------
+-- HELPERS --------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- This helper recovers the Domainmodel name
+-- CONTEXT : thisModule
+-- RETURN : String
+helper def : getDomainModelName() : String =
+	DSL!DomainModel.allInstances()->select( e | e.oclIsTypeOf(DSL!DomainModel))->first().name;
+
+-- This helper recover the namespace of the Domainmodel
+-- CONTEXT : thisModule
+-- RETURN : String
+helper def : getNamespace() : String = 	DSL!DomainModel.allInstances()->select( e | e.oclIsTypeOf(DSL!DomainModel))->first().namespace+'.';
+
+-- This helper subtitute the namespace to elements type
+-- CONTEXT : thisModule
+-- RETURN : String
+helper def : subNamespace(type : String) : String =	type.substring(thisModule.getNamespace().size()+1,type.size());
+
+-- This helper gets the Attribute who has value name = name and return it to a Boolean
+-- CONTEXT: XML!Element
+-- RETURN:  Boolean
+helper context XML!Element def: getAttrBool(name : String) : Boolean =
+	let a : String = 
+    self.children->select(c | c.oclIsTypeOf(XML!Attribute) and c.name = name)->first().value
+	in if a ='true' then true else false endif;
+
+-- This helper gets the Attribute who has value name = name
+-- CONTEXT: XML!Element
+-- RETURN:  String
+helper context XML!Element def: getAttrVal(name : String) : String =  
+	self.children->select(c | c.oclIsTypeOf(XML!Attribute) and c.name = name)->first().value;
+
+-- This helper tests if the XML!Element has an attribute with the name in parameter
+-- CONTEXT: XML!Element
+-- RETURN:  Boolean
+helper context XML!Element def: hasAttr(name : String) : Boolean =
+	let a : XML!Attribute =
+	self.children-> select(m | m.oclIsTypeOf(XML!Attribute) and m.name = name )->first()
+	in if (a.oclIsTypeOf(XML!Attribute) )
+		then ( a.name = name) else false 
+	endif;
+
+-- This helper produce a Map of XML!Element corresponding to om:ModelElement 
+-- by identity to help making references
+-- CONTEXT: thisModule
+-- RETURN:  Map(String, XML!Element)
+helper def: ModelElementsById : Map(String, XML!Element) =
+    XML!Element.allInstances()->iterate(e; acc : Map(String,XML!Element) = Map {} |
+        if ((e.name='om:ModelElement') and e.hasAttr('Id')) then
+             acc->including( e.getAttrVal('Id'), e)
+        else
+             acc
+        endif
+    );
+
+-- This helper produce a Map of XML!Element corresponding to om:ElementLink
+-- by identity to help making references
+-- CONTEXT: thisModule
+-- RETURN:  Map(String, XML!Element)
+helper def: ElementLinksById : Map(String, XML!Element) =
+    XML!Element.allInstances()->iterate(e; acc : Map(String,XML!Element) = Map {} |
+        if ((e.name='om:ElementLink') and e.hasAttr('Id')) then
+             acc->including( e.getAttrVal('Id'), e)
+        else
+             acc
+        endif
+    );
+
+-- This helper recognize the XML!Element with a Type Attribute who terminate by Diagram
+-- CONTEXT: XML!Element
+-- RETURN:  Boolean
+helper context XML!Element def: isElementDiagram() : Boolean =
+	let a : String = self.getAttrVal('Type') in 
+	let b : String = a.substring(a.size()- 6,a.size()) in 
+	if ( b = 'Diagram' ) then true else false endif;
+	
+-- This helper return the XML!Element named om:ModelElemnt which is the Element whith a type 
+-- that terminate by Diagram
+-- CONTEXT: thisModule
+-- RETURN:  XML!Element
+helper def : elementToAvoid() : XML!Element = 
+	 XML!Element.allInstances()->select(e | e.oclIsTypeOf(XML!Element) and e.name = 'om:ModelElement' )->
+	 select( d | d.isElementDiagram() )->first();
+
+-- This helper recognize the XML!Element who are children of e
+-- CONTEXT: XML!Element
+-- RETURN:  Boolean
+helper context XML!Element def: isChildrenOf(e : XML!Element) : Boolean =
+	let a : Boolean =
+		if self.parent.oclIsKindOf(XML!Element)
+			then if self.parent = e 
+					then true 
+					else self.parent.isChildrenOf(e) 
+				endif
+			else false
+		endif
+	in a;
+
+-- This Module test if an XML!Element has the same Id has an ElementLink
+-- CONTEXT : XML!Element
+-- RETURN : Boolean
+helper context XML!Element def : isElementLink() : Boolean =
+	let a : Sequence(XML!Element) = 
+	  XML!Element.allInstances()->select(e | e.name = 'om:ElementLink' )
+	  ->select( b | b.getAttrVal('Id')=self.getAttrVal('Id'))->asSequence()
+	in not a.isEmpty();
+
+-- This helper collects in a Sequence all ElementLinks that have the same Id as the parameter
+-- CONTEXT : thisModule
+-- RETURN : Sequence(XML!Element)
+helper  def: getElementLinks(id : String) : Sequence(XML!Element) =
+	XML!Element.allInstances()->select(m | m.oclIsTypeOf(XML!Element) and m.name = 'om:ElementLink')
+	->select( n | n.getAttrVal('Type') <> 'Microsoft.VisualStudio.Modeling.SubjectHasPresentation' ) 
+	->iterate(e ; acc:Sequence(XML!Element) =  Sequence{} | 
+		if e.getAttrVal('Id') = id
+			then acc->including(e)
+			else acc
+		endif
+	);
+
+-- Those rules test the type of a property by matching it with the metamodel
+-- CONTEXT : XML!Element
+-- RETURN : Boolean
+helper context XML!Element def : isString() : Boolean =
+	let a : DSL!ValueProperty =
+		DSL!Classifier.allInstances()->select( e | e.name = thisModule.subNamespace(self.parent.getAttrVal('Type')))
+		->collect( d | d.properties)->flatten()->select( p | p.name = self.getAttrVal('Name'))->first()
+	in if a.oclIsUndefined() then false else a.type.name = 'String' endif;
+
+helper context XML!Element def : isBoolean() : Boolean =
+	let a : DSL!ValueProperty =
+		DSL!Classifier.allInstances()->select( e | e.name = thisModule.subNamespace(self.parent.getAttrVal('Type')))
+		->collect( d | d.properties)->flatten()->select( p | p.name = self.getAttrVal('Name'))->first()
+	in if a.oclIsUndefined() then false else a.type.name = 'Boolean' endif;
+
+helper context XML!Element def : isInteger() : Boolean =
+	let a : DSL!ValueProperty =
+		DSL!Classifier.allInstances()->select( e | e.name = thisModule.subNamespace(self.parent.getAttrVal('Type')))
+		->collect( d | d.properties)->flatten()->select( p | p.name = self.getAttrVal('Name'))->first()
+	in if a.oclIsUndefined() then false else a.type.name = 'Integer' endif;
+
+-- This helper returns a Sequence that containing all the value from attribute ParentLink 
+-- from the context children 
+-- CONTEXT : XML!Element
+-- RETURN : Sequence(String)
+helper context XML!Element def: getParentLinks() : Sequence(String) =
+	self.children->select(m | m.oclIsTypeOf(XML!Element) )->select( n | n.name = 'om:ModelElement')
+	->iterate(e;acc : Sequence(String) = Sequence{} |
+	acc -> including(thisModule.subNamespace(e.getAttrVal('ParentLink'))) );	
+
+-- This helper takes a String in parameter that corresponds to the value of an attribute ParentLink and returns
+-- a Sequence of XML!Element that have this value
+-- CONTEXT : XML!Element
+-- RETURN : Sequence(XML!Element)
+helper context XML!Element def: SequenceFromParentLink(pl : String) : Sequence(XML!Element) =
+	self.children->select( e | e.oclIsTypeOf(XML!Element) and e.name = 'om:ModelElement' )
+	->select( a | thisModule.subNamespace(a.getAttrVal('ParentLink')) = pl)->asSequence();
+
+-- This helper creates a Sequence of Sequence of XML!Element by placing in a Sequence the XML!Element that have 
+-- the same attribute ParentLink
+-- CONTEXT : XML!Element
+-- RETURN : Sequence(Sequence(XML!Element))
+helper context XML!Element def: SequenceOfSequence( allpl : Set(String) ) : Sequence(Sequence(XML!Element)) =
+	allpl->iterate(e;acc : Sequence(Sequence(XML!Element)) = Sequence{} | 
+		acc -> including( self.SequenceFromParentLink(e) ) );
+
+-------------------------------------------------------------------------------
+-- RULES ----------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+rule Model {
+	from 
+		e : XML!Root
+	to
+		mm : DSLModel!Model(
+			domainModel <- thisModule.getDomainModelName(),
+			contents <-
+				e.children
+					->select(a | a.oclIsTypeOf(XML!Element) and
+						(
+						if a.name='om:ModelElement'
+						then if a = thisModule.elementToAvoid()
+							then false
+							else not a.isChildrenOf(thisModule.elementToAvoid())
+							endif
+						else false
+						endif
+						)
+					)->asSequence()
+		)
+}
+
+rule ModelElement {
+	from 
+	e : XML!Element (
+			if e.name='om:ModelElement'
+				then if e = thisModule.elementToAvoid()
+					then false
+						else if e.isChildrenOf(thisModule.elementToAvoid())
+								then false
+								else not e.isElementLink()
+							endif
+					endif
+				else false
+			endif
+		)
+	using {
+			allEmbeddingLinks : Set(String) = 
+					e.getParentLinks()->asSet();
+			allchilds : Sequence (Sequence(XML!Element)) = 
+					e.SequenceOfSequence(allEmbeddingLinks);
+	}
+	to
+	me : DSLModel!ModelElement (
+		type <- thisModule.subNamespace(e.getAttrVal('Type')),
+		id <- e.getAttrVal('Id'),
+		properties <-
+			e.children
+				->select(c | c.oclIsTypeOf(XML!Element) and
+--					c.name='om:Property'
+					(
+					if c.name='om:Property'
+					then if c.parent.name='om:ModelElement'
+						then if c.isChildrenOf(thisModule.elementToAvoid())
+							then false
+							else (c.isString() or c.isBoolean() or c.isInteger())
+							endif
+						else false
+						endif
+					else false
+					endif
+					)
+				),
+		embeddinglinks <- Sequence{p},
+		referencelinks <-
+			e.children
+				->select(l | l.oclIsTypeOf(XML!Element) and 
+--					l.name = 'om:ElementLink'
+					(
+					if l.name='om:ElementLink'
+				  	then if l.isChildrenOf(thisModule.elementToAvoid())
+						then false
+						else l.getAttrVal('Type') <> 'Microsoft.VisualStudio.Modeling.SubjectHasPresentation'
+						endif
+					else false
+					endif
+					)
+				)
+	),
+	p : distinct DSLModel!EmbeddingLink foreach ( pl in allEmbeddingLinks ) (
+		name <- pl,
+		elements <- allchilds
+	)
+}
+
+rule ReferenceLink {
+	from
+		e:XML!Element (
+		  if e.name='om:ElementLink'
+		  	then if e.isChildrenOf(thisModule.elementToAvoid())
+					then false
+					else e.getAttrVal('Type') <> 'Microsoft.VisualStudio.Modeling.SubjectHasPresentation'
+				endif
+				else false
+			endif
+		)
+	to
+		el : DSLModel!ReferenceLink (
+			type <- thisModule.subNamespace(e.getAttrVal('Type')),
+			id <- e.getAttrVal('Id'),
+			roles <- e.children->select(m | m.oclIsTypeOf(XML!Element) and m.name = 'om:Role')->asSequence(),
+			modelElement <- thisModule.ModelElementsById.get(e.getAttrVal('Id'))
+		)
+}
+
+rule ModelElementLink {
+	from
+		e : XML!Element (
+			if e.name='om:ModelElement'
+				then if e = thisModule.elementToAvoid()
+					then false
+						else if e.isChildrenOf(thisModule.elementToAvoid())
+								then false
+								else e.isElementLink()
+							endif
+					endif
+				else false
+			endif
+		)
+	to
+		el : DSLModel!ModelElementLink (
+			type <- thisModule.subNamespace(e.getAttrVal('Type')),
+			id <- e.getAttrVal('Id'),
+			properties <- e.children->select(c | c.oclIsTypeOf(XML!Element) and c.name='om:Property'),
+			links <- thisModule.getElementLinks(e.getAttrVal('Id'))
+		)
+}
+
+rule Role {
+	from
+		e : XML!Element (
+			if e.name = 'om:Role'
+				then if e.parent.getAttrVal('Type') <> 'Microsoft.VisualStudio.Modeling.SubjectHasPresentation'
+						then if e.isChildrenOf(thisModule.elementToAvoid())
+								then false
+								else true
+							endif
+						else false
+					endif
+				else false
+			endif
+		)
+	to
+		r : DSLModel!Role (
+			name <- e.getAttrVal('Name'),
+			owner <- e.parent,
+			element <- thisModule.ModelElementsById.get(e.getAttrVal('Id'))
+		)
+}
+
+rule StringProperty {
+	from 
+		e:XML!Element (
+		if e.name='om:Property'
+			then  if e.parent.name='om:ModelElement'
+					then if e.isChildrenOf(thisModule.elementToAvoid())
+							then false
+							else e.isString()
+						endif
+					else false
+				endif
+			else false
+		endif
+	)
+	to
+	p : DSLModel!Property(
+		name<-e.getAttrVal('Name'),
+		value <- v
+	),
+	v : DSLModel!StringValue (
+		value <- e.getAttrVal('Value')
+	)
+}
+
+rule BooleanProperty {
+	from 
+		e:XML!Element (
+		if e.name='om:Property'
+			then  if e.parent.name='om:ModelElement'
+					then if e.isChildrenOf(thisModule.elementToAvoid())
+							then false
+							else e.isBoolean()
+						endif
+					else false
+				endif
+			else false
+		endif
+	)
+	to
+	p : DSLModel!Property(
+		name<-e.getAttrVal('Name'),
+		value <- v
+	),
+	v : DSLModel!BooleanValue (
+		value <- e.getAttrBool('Value')
+	)
+}
+
+rule IntegerProperty {
+	from 
+		e:XML!Element (
+		if e.name='om:Property'
+			then  if e.parent.name='om:ModelElement'
+					then if e.isChildrenOf(thisModule.elementToAvoid())
+							then false
+							else e.isInteger()
+						endif
+					else false
+				endif
+			else false
+		endif
+	)
+	to
+	p : DSLModel!Property(
+		name<-e.getAttrVal('Name'),
+		value <- v
+	),
+	v : DSLModel!IntegerValue (
+		value <- e.getAttrVal('Value').toInteger()
+	)
+}

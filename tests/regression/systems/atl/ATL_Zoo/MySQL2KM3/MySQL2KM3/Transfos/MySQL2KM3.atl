@@ -1,0 +1,611 @@
+-- @path XML=/MySQL2KM3/Metamodels/XML.ecore
+-- @path MySQL=/MySQL2KM3/Metamodels/MySQL.ecore
+-- @path KM3=/MySQL2KM3/Metamodels/KM3.ecore
+
+module MySQL2KM3;
+create OUT : KM3 from IN : MySQL;
+
+
+-------------------------------------------------------------------------------
+-- HELPERS --------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- HELPER:	databaseElt
+-- Returns the root Database entity of the input MySQM model.
+-- CONTEXT:	thisModule
+-- OUT:		MySQL!DataBase
+helper def: dataBaseElt : MySQL!DataBase =
+	MySQL!DataBase.allInstances()->asSequence()->first();
+
+-- HELPER:	isStringType()
+-- Returns a boolean stating whether the contextual string encodes a KM3 String
+-- type.
+-- CONTEXT:	String
+-- OUT:		Boolean
+helper context String def: isStringType() : Boolean =
+	self = 'varchar';
+
+-- HELPER:	isIntegerType()
+-- Returns a boolean stating whether the contextual string encodes a KM3
+-- Integer type.
+-- CONTEXT:	String
+-- OUT:		Boolean
+helper context String def: isIntegerType() : Boolean =
+	self = 'tinyint' or self = 'int';
+
+-- HELPER:	isDoubleType()
+-- Returns a boolean stating whether the contextual string encodes a KM3 Double
+-- type.
+-- CONTEXT:	String
+-- OUT:		Boolean
+helper context String def: isDoubleType() : Boolean =
+	self = 'float' or self = 'double';
+
+-- HELPER:	isUnsupportedType()
+-- Returns a boolean stating whether the contextual string encodes a KM3
+-- Unsupported type.
+-- CONTEXT:	String
+-- OUT:		Boolean
+helper context String def: isUnsupportedType() : Boolean =
+	self = 'date' or self = 'time' or self = 'blob' or self = 'longblob';
+
+-- HELPER:	km3TypeExistsIn
+-- Returns a boolean stationg whether the KM3 type encoded by the contextual
+-- MySQL!Column is already defined within the set passed as parameter.
+-- CONTEXT:	MySQL!Column
+-- IN:		Set(MySQL!Column)
+-- OUT:		Boolean
+helper context MySQL!Column
+		def: km3TypeExistsIn(s: Set(MySQL!Column)) : Boolean =
+	s->iterate(e; res: Boolean = false |
+		if self.type.isStringType()
+		then
+			if e.type.isStringType() or e.type.isUnsupportedType()
+			then
+				true
+			else
+				res
+			endif
+		else
+			if self.type.isIntegerType()
+			then
+				if e.type.isIntegerType()
+				then
+					true
+				else
+					res
+				endif
+			else
+				if self.type.isDoubleType()
+				then
+					if e.type.isDoubleType()
+					then
+						true
+					else
+						res
+					endif
+				else
+					if self.type.isUnsupportedType()
+					then
+						if e.type.isStringType() or e.type.isUnsupportedType()
+						then
+							true
+						else
+							res
+						endif
+					else
+						res
+					endif
+				endif
+			endif
+		endif
+	);
+
+-- HELPER:	isForeignKey
+-- Returns a boolean stating whether the contextual MySQL!Column is a foreign
+-- key.
+-- CONTEXT:	MySQL!Column
+-- OUT:		Boolean
+helper context MySQL!Column def: isForeignKey : Boolean =
+	self.comment.size() <> 0;
+
+-- HELPER:	isDefinedIn
+-- Returns a boolean stating whether the contextual MySQL!EnumItem is also
+-- defined within the set passed as parameter.
+-- CONTEXT:	MySQL!EnumItem
+-- IN:		Set(MySQL!EnumItem)
+-- OUT:		Boolean
+helper context MySQL!EnumItem
+		def: isDefinedIn(s: Set(MySQL!EnumItem)) : Boolean =
+	s->iterate(i; res: Boolean = false |
+		if self.name = i.name
+		then
+			true
+		else
+			res
+		endif
+	);
+
+-- HELPER:	isEquivalentTo
+-- Returns a boolean stating whether the contextual MySQL!EnumSet is equivalent to
+-- the MySQL!EnumSet passed as parameter.
+-- CONTEXT:	MySQL!EnumSet
+-- IN:		MySQL!EnumSet
+-- OUT:		Boolean
+helper context MySQL!EnumSet def: isEquivalentTo(e: MySQL!EnumSet) : Boolean =
+	if self.enumItems->size() <> e.enumItems->size()
+	then
+		false
+	else
+		self.enumItems->iterate(i; res: Boolean = true |
+			if i.isDefinedIn( e.enumItems )
+			then
+				res
+			else
+				false
+			endif
+		)	
+	endif;
+
+-- HELPER:	enumExistsIn
+-- Returns a boolean stating whether the contextual MySQL!EnumSet appears in
+-- the sequence passed as parameter.
+-- CONTEXT:	MySQL!EnumSet
+-- IN:		Sequence(MySQL!EnumSet)
+-- OUT:		Boolean
+helper context MySQL!EnumSet
+		def: enumExistsIn(s: Sequence(MySQL!EnumSet)) : Boolean =
+	s->iterate(e; res: Boolean = false |
+		if e.isEquivalentTo(self)
+		then
+			true
+		else
+			res
+		endif
+	);
+
+-- HELPER:	enumSet
+-- Returns a sequence of MySQL!EnumSet that contains one exemplary of the
+-- different EnumSet defined in the input MySQL model.
+-- CONTEXT:	thisModule
+-- OUT:		Sequence(MySQL!EnumSet)
+helper def: enumSet : Sequence(MySQL!EnumSet) =
+	MySQL!EnumSet.allInstances()
+		->asSet()
+		->iterate(e; acc: Sequence(MySQL!EnumSet) = Sequence{} |
+			if not e.enumExistsIn(acc)
+			then
+				acc.append(e)
+			else
+				acc
+			endif
+		);
+
+-- HELPER:	dbTypeSet
+-- Returns a set of MySQL!Column that contains one column of the different MySQL
+-- datatypes present in the input MySQL model.
+-- CONTEXT:	thisModule
+-- OUT:		Set(MySQL!Column)
+helper def: dbTypeSet : Set(MySQL!Column) =
+	MySQL!Column.allInstances()
+		->select(c | c.type <> 'enum' and not c.isForeignKey)
+		->asSet();
+
+-- HELPER:	km3TypeSet
+-- Returns a set of MySQL!Column that contains one column of the different KM3
+-- datatypes corresponding to the MySQL datatypes present in the input MySQL
+-- model.
+-- CONTEXT:	thisModule
+-- OUT:		Set(MySQL!Column)
+helper def: km3TypeSet : Set(MySQL!Column) =
+	thisModule.dbTypeSet
+		->iterate(c; acc: Set(MySQL!Column) = Set{} |
+			if not c.km3TypeExistsIn(acc)
+			then
+				acc.including(c)
+			else
+				acc
+			endif
+		);
+
+-- HELPER:	getTableNameRec()
+-- Returns a string containing the name of the Table encoded by the contextual
+-- string (recursive helper).
+-- CONTEXT:	String
+-- OUT:		String
+helper context String def: getTableNameRec() : String =
+	let char : String = self.substring(1 ,1) in
+	if char = ':'
+	then
+		''
+	else
+		char.concat( self.substring(2, self.size()).getTableNameRec() )
+	endif;
+
+-- HELPER:	getTableName()
+-- Returns a string encoding the name of a Table from the contextual string
+-- that contains the Comment property of a MySQL!Column.
+-- CONTEXT:	String
+-- OUT:		String
+helper context String def: getTableName() : String =
+	self.getTableNameRec();
+
+-- HELPER:	getReferredTable
+-- Returns the MySQL!Table that contains the Column that is referred by the
+-- contexual MySQL!Column.
+-- CONTEXT:	MySQL!Column
+-- OUT:		MySQL!Table
+helper context MySQL!Column def: getReferredTable : MySQL!Table =
+	let t_name : String = self.comment.getTableName() in
+	MySQL!Table.allInstances()
+		->select(t | t.name = t_name)
+		->asSequence()->first();
+
+-- HELPER:	getKM3TypeName()
+-- Returns a string encoding the KM3 type corresponding to the type encoded by
+-- the contextual string.
+-- CONTEXT: String
+-- OUT:		String
+helper context String def: getKM3TypeName() : String =
+	if self.isStringType()
+	then
+		'String'
+	else
+		if self.isIntegerType()
+		then
+			'Integer'
+		else
+			if self.isDoubleType()
+			then
+				'Double'
+			else
+				-- Default
+				'String'
+			endif
+		endif
+	endif;
+
+
+-------------------------------------------------------------------------------
+-- RULES ----------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- Rule 'Metamodel'
+-- Creates a Metamodel, a 'PrimitiveTypes' Package, and an empty Package from
+-- the input Database element.
+rule Metamodel {
+	from
+        i : MySQL!DataBase
+	to
+		o : KM3!Metamodel (
+			location <- '',
+			contents <- Sequence{p, pt}
+		),
+		p : KM3!Package (
+			location <- '',
+			name <- i.name,
+			package <- OclUndefined,
+			metamodel <- o,
+			contents <- Sequence{}
+		),
+		pt : KM3!Package (
+			location <- '',
+			name <- 'PrimitiveTypes',
+			package <- OclUndefined,
+			metamodel <- o,
+			contents <- 
+				thisModule.km3TypeSet
+					->collect(e | thisModule.resolveTemp(e, 'd'))
+		)
+}
+
+
+-- Rule 'Class1'
+-- Creates a Class from a Table that contains no foreign key.
+rule Class1 {
+	from
+        i : MySQL!Table (
+        	not i.columns->exists(c | c.isForeignKey)
+        )
+	to
+		o : KM3!Class (
+			location <- '',
+			name <- i.name,
+			package <- thisModule.resolveTemp(thisModule.dataBaseElt, 'p'),
+			isAbstract <- false,
+			supertypes <- Set{},
+			structuralFeatures <-
+				Sequence{
+					i.columns->select(e | not e.isForeignKey),
+					MySQL!Column.allInstances()
+						->select(c |
+							c.isForeignKey and
+							not c.table.columns
+								->exists(e | not e.isForeignKey) and
+							c.table.columns->size() > 2)
+						->select(c | c.getReferredTable = i)
+						->collect(r | thisModule.resolveTemp(r, 'o2')),
+					MySQL!Column.allInstances()
+						->select(c |
+							c.isForeignKey and
+							not c.table.columns->exists(e | not e.isForeignKey) and
+							c.table.columns->size() = 2)
+						->select(c | c.getReferredTable = i)
+				}->flatten(),
+			operations <- Sequence{}
+		)
+}
+
+
+-- Rule 'Class2'
+-- Creates a Class from a Table that contains both foreign key and non foreign
+-- key columns.
+rule Class2 {
+	from
+        i : MySQL!Table (
+        	i.columns->exists(c | c.isForeignKey) and
+        	i.columns->exists(c | not c.isForeignKey)
+        )
+	to
+		o : KM3!Class (
+			location <- '',
+			name <- i.name,
+			package <- thisModule.resolveTemp(thisModule.dataBaseElt, 'p'),
+			isAbstract <- false,
+			supertypes <- Set{},
+			structuralFeatures <-
+				Sequence{
+					i.columns,
+					MySQL!Column.allInstances()
+						->select(c |
+							c.isForeignKey and
+							not c.table.columns
+								->exists(e | not e.isForeignKey) and
+							c.table.columns->size() > 2)
+						->select(c | c.getReferredTable = i)
+						->collect(r | thisModule.resolveTemp(r, 'o2')),
+					MySQL!Column.allInstances()
+						->select(c |
+							c.isForeignKey and
+							not c.table.columns->exists(e | not e.isForeignKey) and
+							c.table.columns->size() = 2)
+						->select(c | c.getReferredTable = i)
+				}->flatten(),
+			operations <- Sequence{}
+		)
+}
+
+
+-- Rule 'Class3'
+-- Creates a Class from a Table that contains only no foreign key columns, and
+-- whose columns number is > 2 .
+rule Class3 {
+	from
+        i : MySQL!Table (
+			not i.columns->exists(c | not c.isForeignKey) and
+			i.columns->size() > 2
+        )
+	to
+		o : KM3!Class (
+			location <- '',
+			name <- i.name,
+			package <- thisModule.resolveTemp(thisModule.dataBaseElt, 'p'),
+			isAbstract <- false,
+			supertypes <- Set{},
+			structuralFeatures <- i.columns,
+			operations <- Sequence{}
+		)
+}
+
+
+-- Rule 'Attribute1'
+-- Creates an Attribute from a Column that is not a foreign key and that does
+-- not belong to thisModule.km3TypeSet.
+rule Attribute1 {
+	from
+        i : MySQL!Column (
+        	not i.isForeignKey and
+			not thisModule.km3TypeSet->exists(c | c = i)
+        )
+	to
+		o : KM3!Attribute (
+			location <- '',
+			name <- i.name,
+			package <- OclUndefined,
+			lower <- 1,
+			upper <- 1,
+			isOrdered <- false,
+			isUnique <- false,
+			type <-
+				if i.type = 'enum'
+				then
+					thisModule.enumSet
+						->select(e | e.isEquivalentTo(i.enumSet))
+						->asSequence()->first()
+				else
+					thisModule.resolveTemp(
+						thisModule.km3TypeSet
+							->select(e |
+								e.type.getKM3TypeName() = i.type.getKM3TypeName())
+							->asSequence()->first(),
+						'd'
+					)
+				endif,
+			owner <- i.table,
+			subsetOf <- Set{},
+			derivedFrom <- Set{}
+		)
+}
+
+
+-- Rule 'Attribute2'
+-- Creates an Attribute and a DataType from a Column that is not a foreign key
+-- but that belongs to thisModule.km3TypeSet.
+rule Attribute2 {
+	from
+        i : MySQL!Column (
+        	not i.isForeignKey and
+			thisModule.km3TypeSet->exists(c | c = i)
+        )
+	to
+		o : KM3!Attribute (
+			location <- '',
+			name <- i.name,
+			package <- OclUndefined,
+			lower <- 1,
+			upper <- 1,
+			isOrdered <- false,
+			isUnique <- false,
+			type <- d,
+			owner <- i.table,
+			subsetOf <- Set{},
+			derivedFrom <- Set{}
+		),
+		d : KM3!DataType (
+			location <- '',
+			name <- i.type.getKM3TypeName(),
+			package <- thisModule.resolveTemp(thisModule.dataBaseElt, 'pt')
+		)
+}
+
+
+-- Rule 'Reference1'
+-- Creates a Reference from a foreign key Column embedded in a Table that also
+-- contains non foreign key columns.
+rule Reference1 {
+	from
+        i : MySQL!Column (
+        	i.isForeignKey and
+			i.table.columns->exists(c | not c.isForeignKey)
+        )
+	to
+		o : KM3!Reference (
+			location <- '',
+			name <- i.name,
+			package <- OclUndefined,
+			lower <- 1,
+			upper <- 1,
+			isOrdered <- false,
+			isUnique <- false,
+			type <- i.getReferredTable,
+			owner <- i.table,
+			subsetOf <- Set{},
+			derivedFrom <- Set{},
+			isContainer <- false,
+			opposite <- OclUndefined
+		)
+}
+
+
+-- Rule 'Reference2'
+-- Creates a Reference from a foreign key Column embedded in a 2 columns Table
+-- that only contains foreign key columns.
+rule Reference2 {
+	from
+        i : MySQL!Column (
+        	i.isForeignKey and
+			not i.table.columns->exists(c | not c.isForeignKey) and
+			i.table.columns->size() = 2
+        )
+	to
+		o : KM3!Reference (
+			location <- '',
+			name <- i.name,
+			package <- OclUndefined,
+			lower <- 0,
+			upper <- 0-1,
+			isOrdered <- false,
+			isUnique <- false,
+			type <- i.getReferredTable,
+			owner <-
+				i.table.columns
+					->select(c | c <> i)
+					->asSequence()->first().getReferredTable,
+			subsetOf <- Set{},
+			derivedFrom <- Set{},
+			isContainer <- false,
+			opposite <-
+				i.table.columns->select(c | c <> i)->asSequence()->first()
+		)
+}
+
+
+-- Rule 'Reference3'
+-- Creates a couple of References from a foreign key Column embedded in a Table
+-- with more than 2 columns, and that only contains foreign key columns (such
+-- tables are created by rule 'Class3').
+rule Reference3 {
+	from
+        i : MySQL!Column (
+        	i.isForeignKey and
+			not i.table.columns->exists(c | not c.isForeignKey) and
+			i.table.columns->size() > 2
+        )
+	to
+		-- Reference owned by the Table only composed of foreign keys
+		o1 : KM3!Reference (
+			location <- '',
+			name <- i.name,
+			package <- OclUndefined,
+			lower <- 0,
+			upper <- 0-1,
+			isOrdered <- false,
+			isUnique <- false,
+			type <- i.getReferredTable,
+			owner <- i.table,
+			subsetOf <- Set{},
+			derivedFrom <- Set{},
+			isContainer <- false,
+			opposite <- o2
+		),
+		-- Reference owned by the referred Table
+		o2 : KM3!Reference (
+			location <- '',
+			name <- i.table.name,
+			package <- OclUndefined,
+			lower <- 0,
+			upper <- 0-1,
+			isOrdered <- false,
+			isUnique <- false,
+			type <- i.table,
+			owner <- i.getReferredTable,
+			subsetOf <- Set{},
+			derivedFrom <- Set{},
+			isContainer <- false,
+			opposite <- o1
+		)
+}
+
+
+-- Rule 'Enumeration'
+-- Creates an Enumeration from an EnumSet that belongs to thisModule.enumSet.
+rule Enumeration {
+	from
+        i : MySQL!EnumSet (
+        	thisModule.enumSet->exists(e | e = i)
+        )
+	to
+		o : KM3!Enumeration (
+			location <- '',
+			name <- 'Enum_'.concat(thisModule.enumSet->indexOf(i).toString()),
+			package <- thisModule.resolveTemp(thisModule.dataBaseElt, 'p'),
+			literals <- i.enumItems
+		)
+}
+
+
+-- Rule 'EnumLiteral'
+-- Creates an EnumLiteral from an EnumItem defined within an EnumSet that
+-- belongs to thisModule.enumSet.
+rule EnumLiteral {
+	from
+        i : MySQL!EnumItem (
+        	thisModule.enumSet->exists(e | e = i.enumSet)
+        )
+	to
+		o : KM3!EnumLiteral (
+			location <- '',
+			name <- i.name,
+			package <- OclUndefined
+		)
+}

@@ -1,0 +1,479 @@
+<?xml version="1.0" encoding="utf-8"?>
+<definitions xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:s0="Domino" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" targetNamespace="Domino" xmlns="http://schemas.xmlsoap.org/wsdl/">
+  <types>
+    <s:schema elementFormDefault="qualified" targetNamespace="Domino">
+      <s:element name="GetQuote">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="quoteIndex" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetQuoteResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetQuoteResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="getperson">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="Lname" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="getpersonResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="getpersonResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="randomperson">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="currentN" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="randompersonResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="randompersonResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetUserSystemInfo">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="UName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetUserSystemInfoResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetUserSystemInfoResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="randomPC">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="UName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="randomPCResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="randomPCResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CalSearch">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="parameters" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CalSearchResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CalSearchResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="string" nillable="true" type="s:string" />
+    </s:schema>
+  </types>
+  <message name="GetQuoteSoapIn">
+    <part name="parameters" element="s0:GetQuote" />
+  </message>
+  <message name="GetQuoteSoapOut">
+    <part name="parameters" element="s0:GetQuoteResponse" />
+  </message>
+  <message name="getpersonSoapIn">
+    <part name="parameters" element="s0:getperson" />
+  </message>
+  <message name="getpersonSoapOut">
+    <part name="parameters" element="s0:getpersonResponse" />
+  </message>
+  <message name="randompersonSoapIn">
+    <part name="parameters" element="s0:randomperson" />
+  </message>
+  <message name="randompersonSoapOut">
+    <part name="parameters" element="s0:randompersonResponse" />
+  </message>
+  <message name="GetUserSystemInfoSoapIn">
+    <part name="parameters" element="s0:GetUserSystemInfo" />
+  </message>
+  <message name="GetUserSystemInfoSoapOut">
+    <part name="parameters" element="s0:GetUserSystemInfoResponse" />
+  </message>
+  <message name="randomPCSoapIn">
+    <part name="parameters" element="s0:randomPC" />
+  </message>
+  <message name="randomPCSoapOut">
+    <part name="parameters" element="s0:randomPCResponse" />
+  </message>
+  <message name="CalSearchSoapIn">
+    <part name="parameters" element="s0:CalSearch" />
+  </message>
+  <message name="CalSearchSoapOut">
+    <part name="parameters" element="s0:CalSearchResponse" />
+  </message>
+  <message name="GetQuoteHttpGetIn">
+    <part name="quoteIndex" type="s:string" />
+  </message>
+  <message name="GetQuoteHttpGetOut">
+    <part name="Body" element="s0:string" />
+  </message>
+  <message name="getpersonHttpGetIn">
+    <part name="Lname" type="s:string" />
+  </message>
+  <message name="getpersonHttpGetOut">
+    <part name="Body" element="s0:string" />
+  </message>
+  <message name="randompersonHttpGetIn">
+    <part name="currentN" type="s:string" />
+  </message>
+  <message name="randompersonHttpGetOut">
+    <part name="Body" element="s0:string" />
+  </message>
+  <message name="GetUserSystemInfoHttpGetIn">
+    <part name="UName" type="s:string" />
+  </message>
+  <message name="GetUserSystemInfoHttpGetOut">
+    <part name="Body" element="s0:string" />
+  </message>
+  <message name="randomPCHttpGetIn">
+    <part name="UName" type="s:string" />
+  </message>
+  <message name="randomPCHttpGetOut">
+    <part name="Body" element="s0:string" />
+  </message>
+  <message name="CalSearchHttpGetIn">
+    <part name="parameters" type="s:string" />
+  </message>
+  <message name="CalSearchHttpGetOut">
+    <part name="Body" element="s0:string" />
+  </message>
+  <message name="GetQuoteHttpPostIn">
+    <part name="quoteIndex" type="s:string" />
+  </message>
+  <message name="GetQuoteHttpPostOut">
+    <part name="Body" element="s0:string" />
+  </message>
+  <message name="getpersonHttpPostIn">
+    <part name="Lname" type="s:string" />
+  </message>
+  <message name="getpersonHttpPostOut">
+    <part name="Body" element="s0:string" />
+  </message>
+  <message name="randompersonHttpPostIn">
+    <part name="currentN" type="s:string" />
+  </message>
+  <message name="randompersonHttpPostOut">
+    <part name="Body" element="s0:string" />
+  </message>
+  <message name="GetUserSystemInfoHttpPostIn">
+    <part name="UName" type="s:string" />
+  </message>
+  <message name="GetUserSystemInfoHttpPostOut">
+    <part name="Body" element="s0:string" />
+  </message>
+  <message name="randomPCHttpPostIn">
+    <part name="UName" type="s:string" />
+  </message>
+  <message name="randomPCHttpPostOut">
+    <part name="Body" element="s0:string" />
+  </message>
+  <message name="CalSearchHttpPostIn">
+    <part name="parameters" type="s:string" />
+  </message>
+  <message name="CalSearchHttpPostOut">
+    <part name="Body" element="s0:string" />
+  </message>
+  <portType name="DomServiceSoap">
+    <operation name="GetQuote">
+      <documentation>this method takes an integer and returns a string quote</documentation>
+      <input message="s0:GetQuoteSoapIn" />
+      <output message="s0:GetQuoteSoapOut" />
+    </operation>
+    <operation name="getperson">
+      <documentation>this method takes last name, searches a Domino directory and returns au108 ?ist of info</documentation>
+      <input message="s0:getpersonSoapIn" />
+      <output message="s0:getpersonSoapOut" />
+    </operation>
+    <operation name="randomperson">
+      <documentation>this method takes a index number, creates a random number not equal to the index, locates a person in the Domino directory and returns a list of info</documentation>
+      <input message="s0:randompersonSoapIn" />
+      <output message="s0:randompersonSoapOut" />
+    </operation>
+    <operation name="GetUserSystemInfo">
+      <documentation>this method takes a user name, first and last, locates tha person in the PC Census database and returns system infomation</documentation>
+      <input message="s0:GetUserSystemInfoSoapIn" />
+      <output message="s0:GetUserSystemInfoSoapOut" />
+    </operation>
+    <operation name="randomPC">
+      <documentation>this method takes a index number, creates a random number not equal to the index, locates by index a random person in the PC Census database and returns system info</documentation>
+      <input message="s0:randomPCSoapIn" />
+      <output message="s0:randomPCSoapOut" />
+    </operation>
+    <operation name="CalSearch">
+      <documentation>this method a ~ delimiated parameter string (FromDate, ToDate, Entry Type,MaxEntries) and searches a Calendar database returning entry(ies) as string</documentation>
+      <input message="s0:CalSearchSoapIn" />
+      <output message="s0:CalSearchSoapOut" />
+    </operation>
+  </portType>
+  <portType name="DomServiceHttpGet">
+    <operation name="GetQuote">
+      <documentation>this method takes an integer and returns a string quote</documentation>
+      <input message="s0:GetQuoteHttpGetIn" />
+      <output message="s0:GetQuoteHttpGetOut" />
+    </operation>
+    <operation name="getperson">
+      <documentation>this method takes last name, searches a Domino directory and returns a list of info</documentation>
+      <input message="s0:getpersonHttpGetIn" />
+      <output message="s0:getpersonHttpGetOut" />
+    </operation>
+    <operation name="randomperson">
+      <documentation>this method takes a index number, creates a random number not equal to the index, locates a person in the Domino directory and returns a list of info</documentation>
+      <input message="s0:randompersonHttpGetIn" />
+      <output message="s0:randompersonHttpGetOut" />
+    </operation>
+    <operation name="GetUserSystemInfo">
+      <documentation>this method takes a user name, first and last, locates tha person in the PC Census database and returns system infomation</documentation>
+      <input message="s0:GetUserSystemInfoHttpGetIn" />
+      <output message="s0:GetUserSystemInfoHttpGetOut" />
+    </operation>
+    <operation name="randomPC">
+      <documentation>this method takes a index number, creates a random number not equal to the index, locates by index a random person in the PC Census database and returns system info</documentation>
+      <input message="s0:randomPCHttpGetIn" />
+      <output message="s0:randomPCHttpGetOut" />
+    </operation>
+    <operation name="CalSearch">
+      <documentation>this method a ~ delimiated parameter string (FromDate, ToDate, Entry Type,MaxEntries) and searches a Calendar database returning entry(ies) as string</documentation>
+      <input message="s0:CalSearchHttpGetIn" />
+      <output message="s0:CalSearchHttpGetOut" />
+    </operation>
+  </portType>
+  <portType name="DomServiceHttpPost">
+    <operation name="GetQuote">
+      <documentation>this method takes an integer and returns a string quote</documentation>
+      <input message="s0:GetQuoteHttpPostIn" />
+      <output message="s0:GetQuoteHttpPostOut" />
+    </operation>
+    <operation name="getperson">
+      <documentation>this method takes last name, searches a Domino directory and returns a list of info</documentation>
+      <input message="s0:getpersonHttpPostIn" />
+      <output message="s0:getpersonHttpPostOut" />
+    </operation>
+    <operation name="randomperson">
+      <documentation>this method takes a index number, creates a random number not equal to the index, locates a person in the Domino directory and returns a list of info</documentation>
+      <input message="s0:randompersonHttpPostIn" />
+      <output message="s0:randompersonHttpPostOut" />
+    </operation>
+    <operation name="GetUserSystemInfo">
+      <documentation>this method takes a user name, first and last, locates tha person in the PC Census database and returns system infomation</documentation>
+      <input message="s0:GetUserSystemInfoHttpPostIn" />
+      <output message="s0:GetUserSystemInfoHttpPostOut" />
+    </operation>
+    <operation name="randomPC">
+      <documentation>this method takes a index number, creates a random number not equal to the index, locates by index a random person in the PC Census database and returns system info</documentation>
+      <input message="s0:randomPCHttpPostIn" />
+      <output message="s0:randomPCHttpPostOut" />
+    </operation>
+    <operation name="CalSearch">
+      <documentation>this method a ~ delimiated parameter string (FromDate, ToDate, Entry Type,MaxEntries) and searches a Calendar database returning entry(ies) as string</documentation>
+      <input message="s0:CalSearchHttpPostIn" />
+      <output message="s0:CalSearchHttpPostOut" />
+    </operation>
+  </portType>
+  <binding name="DomServiceSoap" type="s0:DomServiceSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document" />
+    <operation name="GetQuote">
+      <soap:operation soapAction="Domino/GetQuote" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="getperson">
+      <soap:operation soapAction="Domino/getperson" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="randomperson">
+      <soap:operation soapAction="Domino/randomperson" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="GetUserSystemInfo">
+      <soap:operation soapAction="Domino/GetUserSystemInfo" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="randomPC">
+      <soap:operation soapAction="Domino/randomPC" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="CalSearch">
+      <soap:operation soapAction="Domino/CalSearch" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+  </binding>
+  <binding name="DomServiceHttpGet" type="s0:DomServiceHttpGet">
+    <http:binding verb="GET" />
+    <operation name="GetQuote">
+      <http:operation location="/GetQuote" />
+      <input>
+        <http:urlEncoded />
+      </input>
+      <output>
+        <mime:mimeXml part="Body" />
+      </output>
+    </operation>
+    <operation name="getperson">
+      <http:operation location="/getperson" />
+      <input>
+        <http:urlEncoded />
+      </input>
+      <output>
+        <mime:mimeXml part="Body" />
+      </output>
+    </operation>
+    <operation name="randomperson">
+      <http:operation location="/randomperson" />
+      <input>
+        <http:urlEncoded />
+      </input>
+      <output>
+        <mime:mimeXml part="Body" />
+      </output>
+    </operation>
+    <operation name="GetUserSystemInfo">
+      <http:operation location="/GetUserSystemInfo" />
+      <input>
+        <http:urlEncoded />
+      </input>
+      <output>
+        <mime:mimeXml part="Body" />
+      </output>
+    </operation>
+    <operation name="randomPC">
+      <http:operation location="/randomPC" />
+      <input>
+        <http:urlEncoded />
+      </input>
+      <output>
+        <mime:mimeXml part="Body" />
+      </output>
+    </operation>
+    <operation name="CalSearch">
+      <http:operation location="/CalSearch" />
+      <input>
+        <http:urlEncoded />
+      </input>
+      <output>
+        <mime:mimeXml part="Body" />
+      </output>
+    </operation>
+  </binding>
+  <binding name="DomServiceHttpPost" type="s0:DomServiceHttpPost">
+    <http:binding verb="POST" />
+    <operation name="GetQuote">
+      <http:operation location="/GetQuote" />
+      <input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </input>
+      <output>
+        <mime:mimeXml part="Body" />
+      </output>
+    </operation>
+    <operation name="getperson">
+      <http:operation location="/getperson" />
+      <input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </input>
+      <output>
+        <mime:mimeXml part="Body" />
+      </output>
+    </operation>
+    <operation name="randomperson">
+      <http:operation location="/randomperson" />
+      <input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </input>
+      <output>
+        <mime:mimeXml part="Body" />
+      </output>
+    </operation>
+    <operation name="GetUserSystemInfo">
+      <http:operation location="/GetUserSystemInfo" />
+      <input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </input>
+      <output>
+        <mime:mimeXml part="Body" />
+      </output>
+    </operation>
+    <operation name="randomPC">
+      <http:operation location="/randomPC" />
+      <input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </input>
+      <output>
+        <mime:mimeXml part="Body" />
+      </output>
+    </operation>
+    <operation name="CalSearch">
+      <http:operation location="/CalSearch" />
+      <input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </input>
+      <output>
+        <mime:mimeXml part="Body" />
+      </output>
+    </operation>
+  </binding>
+  <service name="DomService">
+    <documentation>A collections of services hosted on Domino DominoQuote, DirectorySearch, CalendarSearch</documentation>
+    <port name="DomServiceSoap" binding="s0:DomServiceSoap">
+      <soap:address location="http://www.msdomino.net/Web%20Service%20Agent.nsf/DotNetWebService?OpenAgent" />
+    </port>
+    <port name="DomServiceHttpGet" binding="s0:DomServiceHttpGet">
+      <http:address location="http://www.msdomino.net/Web%20Service%20Agent.nsf/DotNetWebService?OpenAgent" />
+    </port>
+    <port name="DomServiceHttpPost" binding="s0:DomServiceHttpPost">
+      <http:address location="http://www.msdomino.net/Web%20Service%20Agent.nsf/DotNetWebService?OpenAgent" />
+    </port>
+  </service>
+</definitions>

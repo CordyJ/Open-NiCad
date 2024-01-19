@@ -1,0 +1,1464 @@
+-- Ecore to DSL
+-- second transformation : DSL to XML
+
+module DSL2XML;
+create OUT : XML from IN : DSL;
+
+-------------------------------------------------------------------------------
+-- HELPERS --------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- This helper converts boolean to string
+-- CONTEXT: Boolean
+-- RETURN: String
+helper context Boolean def: bool2string() : String =
+	if self then 'true' else 'false' endif;
+
+-- This helper get the containmentstyle of a Relationship
+-- CONTEXT: DSL!Relationship
+-- RETURN: String
+helper context DSL!Relationship def : getContainment() : String =
+	if self.isEmbedding then 'embedding' else 'reference' endif;
+
+-- This helper stores an integer value used to assign an ID to each generated
+-- Task.
+-- CONTEXT: thisModule
+-- RETURN:  Integer
+helper def: curId : Integer = 0; 
+
+-- This helper computes the value to be assigned to the ID field of a
+-- generated Task. 
+-- It increments the value stored by the "curId" helper and returns its
+-- new value as a String.
+-- CONTEXT: thisModule
+-- RETURN:  String
+helper def: makeIdentity() : String =
+	let i : Integer = thisModule.refSetValue('curId', thisModule.curId + 1).curId 
+in '00000000-0000-0000-0000-'+
+	if i<=9 then '00000000000'+i.toString()
+	else if i<=99 then '0000000000'+i.toString()
+		else if i<=999 then	'000000000'+i.toString()
+			else '00000000'+i.toString()
+	endif endif endif; 
+
+-- This helper converts identity in id
+-- CONTEXT: DSL!NamedElement
+-- RETURN:  String
+helper context DSL!NamedElement def : makeId() : String = 
+	let id : String = self.identity in
+		'i'+id.substring(1,8)+'z'+id.substring(10,13)
+		+'z'+id.substring(15,18)+'z'+id.substring(20,23)
+		+'z'+id.substring(25,id.size());
+
+-- This helper generates an new id
+-- CONTEXT: thisModule
+-- RETURN:  String
+helper def : makeId2() : String = 
+	let i : Integer = thisModule.refSetValue('curId', thisModule.curId + 1).curId 
+	in 'i00000000z0000z0000z0000z'+
+	if i<9 then '00000000000'+i.toString()
+	else if i<99 then '0000000000'+i.toString()
+		else if i<999 then '000000000'+i.toString()
+			else '00000000'+i.toString()
+	endif endif endif;
+
+-- This helper searchs if a Class is pointed by another
+-- CONTEXT: DSL!Class
+-- RETURN:  Boolean
+helper context DSL!Class def : isType(): Boolean =
+DSL!Relationship.allInstances()->
+iterate(r; acc : Boolean = false |
+		acc or (r.roles.first().type = self));
+
+-- This helper searchs the Class which need to be marked as "root" in CompleteDiagram
+-- CONTEXT: thisModule
+-- RETURN:  Sequence(DSL!Class)
+helper def : getRoots : Sequence(DSL!Class)=
+	let r1 : Sequence(DSL!Class) =
+	DSL!Class.allInstances()->select(e|e.superType.oclIsUndefined() and not e.isType())
+	in
+	if not r1.isEmpty()	then r1
+		else let r2 : Sequence(DSL!Class) =	
+		DSL!Class.allInstances()->select(e|e.superType.oclIsUndefined())
+		in 
+		if not r2.isEmpty() then r2
+			else let r3 : Sequence(DSL!Class) =	
+			DSL!Class.allInstances()->select(e|not e.isType())
+			in 
+			if not r3.isEmpty() then r3
+				else DSL!Class.allInstances()->first()
+			endif
+		endif
+	endif;	
+	
+-- This helper stores a list of treated classes
+-- CONTEXT: thisModule
+-- RETURN: Sequence(KM3!Class)
+helper def: Acc : Sequence(KM3!Class) = thisModule.getRoots;
+
+-- This helper computes the definitionlevel of a treeExpression
+-- if the class has ever been treated, its definitionlevel is "use"
+-- elsewhere we put it into Acc, and the definitionlevel is "definition"
+-- CONTEXT: context DSL!Class
+-- RETURN: String
+helper context DSL!Class def : definitionlevel():String =
+	if thisModule.Acc->includes(self)
+		then 'use'
+		else
+			let c : DSL!Class =	thisModule.refSetValue('Acc',thisModule.Acc.append(self)).Acc.first()
+			in 'definition'
+	endif;
+
+
+-------------------------------------------------------------------------------
+-- RULES ----------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- Rule 'DMD'.
+-- This rule generates the .dsldm file structure :
+-- DMD
+-- 	- Model
+--		-	MdfMetaData
+--		-	Extended
+--		-	Enumerations
+-- 		-	Relationships
+--		-	Concepts
+--		-	Trees
+--				-	treeNavigator Intrinsic
+--				-	treeNavigator CompleteDiagram
+--				-	treeNavigator Serialization
+--				-	treeNavigator Delete
+rule DMD
+{
+	 from 
+	 	d : DSL!DomainModel
+	 to 
+	 --------------
+	 -- Root DMD --
+	 --------------
+	 	r : XML!Root(
+		 	name<-'dmd',--+thisModule.getRoots.toString(),
+			value <- '',
+			children<-Sequence{xsi,xsd,xmlns,model}
+		 ),
+		 
+	    xsi : XML!Attribute (name<-'xmlns:xsi',value<-'http://www.w3.org/2001/XMLSchema-instance'),
+		xsd : XML!Attribute (name<-'xmlns:xsd',value<-'http://www.w3.org/2001/XMLSchema'),
+		xmlns : XML!Attribute (name<-'xmlns',value<-'urn:schemas-microsoft-com:dmd'),
+
+	-----------
+	-- Model --
+	-----------
+		model : XML!Element (
+		 	name<-'model',
+			value <- '',
+			children<-Sequence{
+		 		name,identity,id,namespace,isLoaded,		 	
+		 		mdfmetadata,
+				extended,
+				enumerations,
+				relationships,trees,concepts
+				}
+		 ),
+		name : XML!Attribute (name<-'name',value<-d.name),
+		identity: XML!Attribute (name<-'identity',value<-d.identity),
+		id: XML!Attribute (name<-'id',value<-d.makeId()),
+		namespace: XML!Attribute (name<-'namespace',value<-d.namespace),
+		isLoaded: XML!Attribute (name<-'isLoaded',value<-d.isLoaded.bool2string()),
+
+	-----------------
+	-- MdfMetaData --
+	-----------------
+		mdfmetadata: XML!Element (
+			name<-'mdfmetadata',
+			value <- '',
+			children<-Sequence{
+				xsitype,accessmodifier,category,
+				description,doccomment,localize,
+				majorversion,minorversion,alwaysgeneratecollection,
+				copyright,stringtable,copyclosure,removeclosure
+				}
+		),
+		xsitype:XML!Attribute (name<-'xsi:type',value<-'modelmdfmetadata'),
+		accessmodifier:XML!Attribute (name<-'accessmodifier',value<-'public'),
+		category : XML!Attribute(name <- 'category',value <- ''),
+		description : XML!Attribute(name <- 'description',value <- ''),
+		doccomment : XML!Attribute(name <- 'doccomment',value <- ''),
+		localize:XML!Attribute (name<-'localize',value<-'false'),
+		majorversion:XML!Attribute (name<-'majorversion',value<-'1'),
+		minorversion:XML!Attribute (name<-'minorversion',value<-'0'),
+		alwaysgeneratecollection:XML!Attribute (name<-'alwaysgeneratecollection',value<-'false'),
+		copyright : XML!Element(name <- 'copyright',value <- ''),
+		
+		stringtable : XML!Element(name <- 'stringtable',value <- '',children <- Sequence{resxfile,ressfile,use}),
+			resxfile : XML!Attribute (name <- 'resxfile',value <- d.name+'.Resource.resx'),
+			ressfile : XML!Attribute (name <- 'resourcesfile',value <- d.namespace+'.'+d.name+'.Resource'),
+			use : XML!Attribute (name <- 'usefullyqualifiedname',value <- 'false'),
+		
+		copyclosure : XML!Element(
+			name <- 'copyclosure',value <- '',children <- Sequence{cpname,cpdoc}),
+			cpname : XML!Attribute (name <- 'name',value <- d.name+'CopyClosure'),
+			cpdoc : XML!Attribute (name <- 'doccomment',value <- 'Copy closure visitor filter'),
+		
+		removeclosure : XML!Element(name <- 'removeclosure',value <- '',children <- Sequence{rmname,rmdoc}),
+			rmname : XML!Attribute (name <- 'name',value <- d.name+'RemoveClosure'),
+			rmdoc : XML!Attribute (name <- 'doccomment',value <- 'Remove closure visitor filter'),
+
+	--------------
+	-- Extended --
+	--------------
+		extended: XML!Element (name<-'extended',value <- '',children <- extmod),
+		extmod : XML!Element (name <- 'model',value <- '',children <- extmodText),
+		extmodText : XML!Text (name <- '#text',value <- 'i2b131234z7959z458dz834fz2dc0769ce683'),
+	
+	------------------
+	-- Enumerations --
+	------------------
+		enumerations : XML!Element (
+			name<-'enumerations',
+			value <- '',
+			children<-d.types->select(c|c.oclIsTypeOf(DSL!Enumeration))				
+		),
+		
+	-------------------
+	-- Relationships --
+	-------------------
+		relationships : XML!Element (
+			name<-'relationships',
+			value <- '',
+			children<-d.classifiers->select(c|c.oclIsTypeOf(DSL!Relationship))
+		),
+		
+	--------------	
+	-- Concepts --
+	--------------
+		concepts : XML!Element (
+			name<-'concepts',
+			value <- '',
+			children<-d.classifiers->select(c|c.oclIsTypeOf(DSL!Class))		
+		),
+		
+	-----------
+	-- Trees --
+	-----------
+		trees : XML!Element (
+			name <- 'trees',
+			value <- '',
+			children <- Sequence{
+				treeNavIntr,treeNavDiagram,
+				treeNavSeria,treeNavDel
+			}
+		),
+		
+	-----------------------------
+	-- treeNavigator Intrinsic --
+	-----------------------------
+		treeNavIntr : XML!Element (
+			name <- 'treenavigator',
+			value <- '',
+			children <- Sequence{
+				treeNavIntrna,treeNavIntrIdentity,
+				treeNavIntrId,exp,IntrRoot
+			}
+		),
+		treeNavIntrna : XML!Attribute (name <- 'name',value <- 'intrinsic'),
+		treeNavIntrId : XML!Attribute (name <- 'id',value <- thisModule.makeId2()),
+		treeNavIntrIdentity : XML!Attribute (name <- 'identity',value <- thisModule.makeIdentity()),
+		exp : XML!Element (name <- 'expressions',value <- ''),
+		IntrRoot : XML!Element(name <- 'roots',value <- ''),
+		
+	-----------------------------------
+	-- treeNavigator CompleteDiagram --
+	-----------------------------------
+		treeNavDiagram : XML!Element (
+			name <- 'treenavigator',
+			value <- '',
+			children <- Sequence{
+				treeNavDiagType,treeNavDiagna,
+				treeNavDiagIdentity,treeNavDiagId,
+				Diagexp,DiagRoots,DiagSource
+			}
+		),
+		treeNavDiagType : XML!Attribute (name <- 'xsi:type',value <- 'ShadowTreeNavigator'),
+		treeNavDiagna : XML!Attribute (name <- 'name',value <- 'completeDiagram'),
+		treeNavDiagId : XML!Attribute (name <- 'id',value <- thisModule.makeId2()),
+		treeNavDiagIdentity : XML!Attribute (name <- 'identity',value <- thisModule.makeIdentity()),
+		Diagexp : XML!Element (name <- 'expressions',value <- ''),
+		DiagRoots : XML!Element (name <- 'roots',value <- ''),
+		DiagSource : XML!Element (name <- 'source',value <- '',children <- DiagSourceText),
+		DiagSourceText : XML!Text (
+			name <- '#text',
+			value <- thisModule.resolveTemp(d,'treeNavIntrId').value
+		),
+		
+	---------------------------------
+	-- treeNavigator Serialization --
+	---------------------------------
+		treeNavSeria : XML!Element (
+			name <- 'treenavigator',
+			value <- '',
+			children <- Sequence{
+				treeNavSeriaType,treeNavSeriana,
+				treeNavSeriaIdentity,treeNavSeriaId,
+				Seriaexp,SeriaRoots,SeriaSource
+			}
+		),
+		treeNavSeriaType : XML!Attribute (name <- 'xsi:type',value <- 'ShadowTreeNavigator'),
+		treeNavSeriana : XML!Attribute (name <- 'name',value <- 'serialization'),
+		treeNavSeriaId : XML!Attribute (name <- 'id',value <- thisModule.makeId2()),
+		treeNavSeriaIdentity : XML!Attribute (name <- 'identity',value <- thisModule.makeIdentity()),
+		Seriaexp : XML!Element (name <- 'expressions',value <- ''),
+		SeriaRoots : XML!Element (name <- 'roots',value <- '',children <- SeriaRoot),
+		
+		SeriaRoot : XML!Element(
+			name <- 'root',
+			value <- '',
+			children <- Sequence {
+				SeriaRootname,SeriaRootidentity,SeriaRootid,
+				SeriaRootSource,SeriaRootReferenceType
+			}
+		),
+		SeriaRootname : XML!Attribute (
+			name <- 'name',
+			value <- thisModule.getRoots->first().name
+		),
+		SeriaRootidentity : XML!Attribute (name <- 'identity',value <- thisModule.makeIdentity()),
+		SeriaRootid : XML!Attribute (name <- 'id',value <- thisModule.makeId2()),
+		SeriaRootSource : XML!Element (name <- 'source',value <- ''),
+		SeriaRootReferenceType : XML!Element (name <- 'referencetype',value <- '',children <- SeriaRootReferenceTypeText),
+		SeriaRootReferenceTypeText : XML!Text (
+			name <- '#text',
+			value <- thisModule.getRoots->first().makeId()
+		),
+		SeriaSource : XML!Element (name <- 'source',value <- '',children <- SeriaSourceText),
+		SeriaSourceText : XML!Text (
+			name <- '#text',
+			value <- thisModule.resolveTemp(d,'treeNavIntrId').value
+		),
+
+	--------------------------
+	-- treeNavigator Delete --
+	--------------------------
+		treeNavDel : XML!Element (
+			name <- 'treenavigator',
+			value <- '',
+			children <- Sequence {
+				treeNavDelType,treeNavDelna,
+				treeNavDelIdentity,treeNavDelId,
+				Delexp,DelRoots,DelSource
+			}
+		),
+		treeNavDelType : XML!Attribute (name <- 'xsi:type',value <- 'ShadowTreeNavigator'),
+		treeNavDelna : XML!Attribute (name <- 'name',value <- 'delete'),
+		treeNavDelId : XML!Attribute (name <- 'id',value <- thisModule.makeId2()),
+		treeNavDelIdentity : XML!Attribute (name <- 'identity',value <- thisModule.makeIdentity()),
+		Delexp : XML!Element (name <- 'expressions',value <- ''),
+		DelRoots : XML!Element (name <- 'roots',value <- ''),
+		DelSource : XML!Element (name <- 'source',value <- '',children <- DelSourceText),
+		DelSourceText : XML!Text (
+			name <- '#text',
+			value <- thisModule.resolveTemp(d,'treeNavIntrId').value
+		)
+}
+
+-- Rule 'Concept'.
+-- This rule generates the Concepts which are :
+-- * not subtypes of any class
+-- * not abstract
+rule Concept{
+	from 
+		e:DSL!Class (e.superType.oclIsUndefined() and  not e.isAbstract
+			and not (thisModule.getRoots->includes(e)))
+	to 
+	-------------
+	-- Concept --
+	-------------
+		c:XML!Element(
+			name<-'concept',
+			value <- '',
+			children<-Sequence{
+				name,identity,namespace,id,
+				isLoaded,isAbstract,
+				mdfmetadata,valueProperties
+			}
+		),
+		name:XML!Attribute(name<-'name',value<-e.name),
+		identity: XML!Attribute (name<-'identity',value<-e.identity),
+		id: XML!Attribute (name<-'id',value<-e.makeId()),
+		namespace: XML!Attribute (name<-'namespace',value<-e.namespace),
+	
+		isLoaded: XML!Attribute (name<-'isLoaded',value<-e.isLoaded.bool2string()),
+		isAbstract: XML!Attribute (name<-'isAbstract',value<-'false'),
+			
+	-----------------
+	-- MdfMetaData --
+	-----------------
+		mdfmetadata: XML!Element (
+			name<-'mdfmetadata',
+			value <- '',
+			children<-Sequence{
+				xsitype,accessmodifier,category,description,doccomment,
+				localize
+			}
+		),
+		xsitype:XML!Attribute (name<-'xsi:type',value<-'conceptorshapemdfmetadata'),
+		accessmodifier:XML!Attribute (name<-'accessmodifier',value<-'public'),
+		category : XML!Attribute(name <- 'category',value <- ''),
+		description : XML!Attribute(name <- 'description',value <- ''),
+		doccomment : XML!Attribute(name <- 'doccomment',value <- ''),
+		localize : XML!Attribute (name<-'localize',value<-'false'),
+
+	----------------
+	-- Properties --
+	----------------
+		valueProperties: XML!Element (
+			name<-'valueProperties',
+			value <- '',
+			children<-e.properties->asSet()
+		)
+}
+
+-- Rule 'ConceptRoot'.
+-- This rule generates the Concepts which are:
+-- * included into the roots list 
+-- * not subtypes of any class
+-- * not abstract
+rule ConceptRoot{
+	from 
+		e:DSL!Class (e.superType.oclIsUndefined() and  not e.isAbstract
+					and (thisModule.getRoots->includes(e)))
+	to 
+	-------------
+	-- Concept --
+	-------------
+		c:XML!Element(
+			name<-'concept',
+			value <- '',
+			children<-Sequence{
+				name,identity,namespace,id,
+				isLoaded,isAbstract,
+				mdfmetadata,valueProperties
+			}
+		),
+		name:XML!Attribute(name<-'name',value<-e.name),
+		identity: XML!Attribute (name<-'identity',value<-e.identity),
+		id: XML!Attribute (name<-'id',value<-e.makeId()),
+		namespace: XML!Attribute (name<-'namespace',value<-e.namespace),
+	
+		isLoaded: XML!Attribute (name<-'isLoaded',value<-e.isLoaded.bool2string()),
+		isAbstract: XML!Attribute (name<-'isAbstract',value<-'false'),
+			
+	-----------------
+	-- MdfMetaData --
+	-----------------
+		mdfmetadata: XML!Element (
+			name<-'mdfmetadata',
+			value <- '',
+			children<-Sequence{
+				xsitype,accessmodifier,category,description,doccomment,
+				localize
+			}
+		),
+		xsitype:XML!Attribute (name<-'xsi:type',value<-'conceptorshapemdfmetadata'),
+		accessmodifier:XML!Attribute (name<-'accessmodifier',value<-'public'),
+		category : XML!Attribute(name <- 'category',value <- ''),
+		description : XML!Attribute(name <- 'description',value <- ''),
+		doccomment : XML!Attribute(name <- 'doccomment',value <- ''),
+		localize : XML!Attribute (name<-'localize',value<-'false'),
+
+	----------------
+	-- Properties --
+	----------------
+		valueProperties: XML!Element (
+			name<-'valueProperties',
+			value <- '',
+			children<-e.properties->asSet()
+		),
+		DiagRoot : XML!Element(
+			name <- 'root',
+			value <- '',
+			parent<-thisModule.resolveTemp(e.domainModel,'DiagRoots'),
+			children <- Sequence {
+				DiagRootname,DiagRootidentity,DiagRootid,
+				DiagRootSource,DiagRootReferenceType
+			}
+		),
+		DiagRootname : XML!Attribute (
+			name <- 'name',
+			parent<- DiagRoot,
+			value <- e.name),
+		DiagRootidentity : XML!Attribute (
+			name <- 'identity',
+			parent<- DiagRoot,
+			value <- thisModule.makeIdentity()),
+		DiagRootid : XML!Attribute (
+			name <- 'id',
+			parent<- DiagRoot,
+			value <- thisModule.makeId2()),
+		DiagRootSource : XML!Element (
+			name <- 'source',
+			parent<- DiagRoot,
+			value <- ''),
+		DiagRootReferenceType : XML!Element (
+			name <- 'referencetype',
+			parent<- DiagRoot,value <- '',
+			children <- DiagRootReferenceTypeText),
+		DiagRootReferenceTypeText : XML!Text (
+			name <- '#text',
+			value <- e.makeId()
+		)
+}
+
+-- Rule 'ConceptRootisAbstract'.
+-- This rule generates the Concepts which are :
+-- * included into the roots list 
+-- * not subtypes of any classes
+-- * abstract
+rule ConceptRootisAbstract{
+	from 
+		e:DSL!Class (e.superType.oclIsUndefined() and e.isAbstract
+			and (thisModule.getRoots->includes(e)))
+	to 
+	-------------
+	-- Concept --
+	-------------
+		c:XML!Element(
+			name<-'concept',
+			value <- '',
+			children<-Sequence{
+				name,identity,namespace,id,
+				isLoaded,isAbstract,
+				mdfmetadata,valueProperties
+			}
+		),
+		name:XML!Attribute(name<-'name',value<-e.name),
+		identity: XML!Attribute (name<-'identity',value<-e.identity),
+		id: XML!Attribute (name<-'id',value<-e.makeId()),
+		namespace: XML!Attribute (name<-'namespace',value<-e.namespace),
+		isLoaded: XML!Attribute (name<-'isLoaded',value<-e.isLoaded.bool2string()),
+		isAbstract: XML!Attribute (name<-'isAbstract',value<-'false'
+			),
+			
+	-----------------
+	-- MdfMetaData --
+	-----------------
+		mdfmetadata: XML!Element (
+			name<-'mdfmetadata',
+			value <- '',
+			children<-Sequence{
+				xsitype,accessmodifier,category,description,doccomment,
+				localize,
+				classmodifier
+			}
+		),
+		xsitype:XML!Attribute (name<-'xsi:type',value<-'conceptorshapemdfmetadata'),
+		accessmodifier:XML!Attribute (name<-'accessmodifier',value<-'public'),
+		category : XML!Attribute(name <- 'category',value <- ''),
+		description : XML!Attribute(name <- 'description',value <- ''),
+		doccomment : XML!Attribute(name <- 'doccomment',value <- ''),
+		localize : XML!Attribute (name<-'localize',value<-'false'),
+		classmodifier : XML!Attribute (
+			name<-'classmodifier',
+			value<-if e.isAbstract then 'abstract' else 'none' endif),
+
+	----------------
+	-- Properties --
+	----------------
+		valueProperties: XML!Element (
+			name<-'valueProperties',
+			value <- '',
+			children<-e.properties->asSet()
+		),
+		
+		DiagRoot : XML!Element(
+			name <- 'root',
+			value <- '',
+			parent<-thisModule.resolveTemp(e.domainModel,'DiagRoots'),
+			children <- Sequence {
+				DiagRootname,DiagRootidentity,DiagRootid,
+				DiagRootSource,DiagRootReferenceType
+			}
+		),
+		DiagRootname : XML!Attribute (
+			name <- 'name',
+			parent<- DiagRoot,
+			value <- e.name),
+		DiagRootidentity : XML!Attribute (
+			name <- 'identity',
+			parent<- DiagRoot,
+			value <- thisModule.makeIdentity()),
+		DiagRootid : XML!Attribute (
+			name <- 'id',
+			parent<- DiagRoot,
+			value <- thisModule.makeId2()),
+		DiagRootSource : XML!Element (
+			name <- 'source',
+			parent<- DiagRoot,
+			value <- ''),
+		DiagRootReferenceType : XML!Element (
+			name <- 'referencetype',
+			parent<- DiagRoot,value <- '',
+			children <- DiagRootReferenceTypeText),
+		DiagRootReferenceTypeText : XML!Text (
+			name <- '#text',
+			value <- e.makeId()
+		)
+}
+
+-- Rule 'Concept'.
+-- This rule generates the Concepts which are :
+-- * subtypes of some classes
+-- * not abstract
+rule ConceptHasSuper{
+	from 
+		e:DSL!Class (not e.superType.oclIsUndefined() and  not e.isAbstract
+			and not (thisModule.getRoots->includes(e)))
+	to 
+	-------------
+	-- Concept --
+	-------------
+		c:XML!Element(
+			name<-'concept',
+			value <- '',
+			children<-Sequence{
+				name,identity,namespace,id,
+				isLoaded,isAbstract,mdfmetadata,
+				superType,valueProperties
+				}
+		),
+		
+		name:XML!Attribute(name<-'name',value<-e.name),		
+		identity: XML!Attribute (name<-'identity',value<-e.identity),	
+		namespace: XML!Attribute (name<-'namespace',value<-e.namespace),		
+		id: XML!Attribute (name<-'id',value<-e.makeId()),		
+		isLoaded: XML!Attribute (name<-'isLoaded',value<-e.isLoaded.bool2string()),		
+		isAbstract: XML!Attribute (name<-'isAbstract',value<-'false'),
+		
+	-----------------
+	-- MdfMetaData --
+	-----------------
+		mdfmetadata: XML!Element (
+			name<-'mdfmetadata',
+			value <- '',
+			children<-Sequence{
+				xsitype,accessmodifier,category,description,doccomment,
+				localize
+				}
+		),
+		
+		xsitype:XML!Attribute (name<-'xsi:type',value<-'conceptorshapemdfmetadata'),	
+		accessmodifier:XML!Attribute (name<-'accessmodifier',value<-'public'),		
+		category : XML!Attribute(name <- 'category',value <- ''),		
+		description : XML!Attribute(name <- 'description',value <- ''),		
+		doccomment : XML!Attribute(name <- 'doccomment',value <- ''),		
+		localize:XML!Attribute (name<-'localize',value<-'false'),
+				
+		superType : XML!Element (name <- 'superType',children <- superTypeText),		
+		superTypeText : XML!Text (name <- '#text',value <- e.superType.makeId()),
+	
+	----------------
+	-- Properties --
+	----------------
+		valueProperties: XML!Element (
+			name<-'valueProperties',
+			value <- '',
+			children<-e.properties->asSet()
+		),
+		
+	---------------------------
+	-- inheritanceExpression --
+	--------------------------- 
+		treeHerite : XML!Element (
+			name <- 'treeExpression',
+			value <- '',
+			parent <- thisModule.resolveTemp(e.domainModel,'exp'),
+			children <- Sequence{
+				treeHXsiType,treeHName,treeHIdentity,
+				treeHId,treeHDef,source,super,sub
+			}
+		),
+		treeHXsiType : XML!Attribute (name <- 'xsi:type',value <- 'InheritanceExpression'),
+		treeHName : XML!Attribute(name <- 'name',value <- e.name+'-'+e.superType.name),
+		treeHIdentity : XML!Attribute(name <- 'identity',value <- thisModule.makeIdentity()),
+		treeHId : XML!Attribute(name <- 'id',value <- thisModule.makeId2()),
+		treeHDef : XML!Attribute(name <- 'definitionlevel',value <- 'none'),
+		source : XML!Element (name <- 'source',value <- ''),
+		super : XML!Element (name <- 'superType',value <- '',children <- superText),
+		superText : XML!Text(name<-'#text',value <- e.superType.makeId()),
+		sub : XML!Element (name <- 'subType',value <- '',children <- subText),
+		subText : XML!Text (name<-'#text',value<-e.makeId()),
+		
+	----------------------------------
+	-- Inheritance Complete Diagram --
+	----------------------------------
+		DiagtreeExp : XML!Element (
+			name <- 'treeExpression',
+			value <- '',
+			parent <- thisModule.resolveTemp(e.domainModel,'Diagexp'),
+			children <- Sequence{
+				treeHCDXsiType,treeHCDName,treeHCDIdentity,
+				treeHCDid,treeHCDDef,sourceHCD,superCD,subCD
+			}
+		),
+		treeHCDXsiType : XML!Attribute (name <- 'xsi:type',value <- 'InheritanceExpression'),
+		treeHCDName : XML!Attribute(name <- 'name',value <- e.name+'-'+e.superType.name),
+		treeHCDIdentity : XML!Attribute(name <- 'identity',value <- thisModule.makeIdentity()),
+		treeHCDid : XML!Attribute(name <- 'id',value <- thisModule.makeId2()),
+		---------------------------------------------------------------------------------------------------------------	
+		treeHCDDef : XML!Attribute(name <- 'definitionlevel',value <- e.definitionlevel()),
+		sourceHCD : XML!Element (name <- 'source',value <- '',children <- sourceHCDText),
+		sourceHCDText : XML!Text (name<-'#text',value <-thisModule.resolveTemp(e,'treeHId').value),
+		superCD : XML!Element (name <- 'superType',value <- '',children <- superTextCD),
+		superTextCD : XML!Text(name<-'#text',value <- e.superType.makeId()),
+		subCD : XML!Element (name <- 'subType',value <- '',children <- subTextCD),
+		subTextCD : XML!Text (name<-'#text',value<-e.makeId())
+}
+
+-- Rule 'Concept'.
+-- This rule generates the Concepts which are :
+-- * not subtypes of any classes
+-- * abstract
+rule ConceptisAbstract{
+	from 
+		e:DSL!Class (e.superType.oclIsUndefined() and e.isAbstract
+			and not (thisModule.getRoots->includes(e)))
+	to 
+	-------------
+	-- Concept --
+	-------------
+		c:XML!Element(
+			name<-'concept',
+			value <- '',
+			children<-Sequence{
+				name,identity,namespace,id,
+				isLoaded,isAbstract,
+				mdfmetadata,valueProperties
+			}
+		),
+		name:XML!Attribute(name<-'name',value<-e.name),
+		identity: XML!Attribute (name<-'identity',value<-e.identity),
+		id: XML!Attribute (name<-'id',value<-e.makeId()),
+		namespace: XML!Attribute (name<-'namespace',value<-e.namespace),
+		isLoaded: XML!Attribute (name<-'isLoaded',value<-e.isLoaded.bool2string()),
+		isAbstract: XML!Attribute (name<-'isAbstract',value<-'false'
+			),
+			
+	-----------------
+	-- MdfMetaData --
+	-----------------
+		mdfmetadata: XML!Element (
+			name<-'mdfmetadata',
+			value <- '',
+			children<-Sequence{
+				xsitype,accessmodifier,category,description,doccomment,
+				localize,
+				classmodifier
+			}
+		),
+		xsitype:XML!Attribute (name<-'xsi:type',value<-'conceptorshapemdfmetadata'),
+		accessmodifier:XML!Attribute (name<-'accessmodifier',value<-'public'),
+		category : XML!Attribute(name <- 'category',value <- ''),
+		description : XML!Attribute(name <- 'description',value <- ''),
+		doccomment : XML!Attribute(name <- 'doccomment',value <- ''),
+		localize : XML!Attribute (name<-'localize',value<-'false'),
+		
+		classmodifier : XML!Attribute (
+			name<-'classmodifier',
+			value<-if e.isAbstract then 'abstract' else 'none' endif),
+
+	----------------
+	-- Properties --
+	----------------
+		valueProperties: XML!Element (
+			name<-'valueProperties',
+			value <- '',
+			children<-e.properties->asSet()
+		)
+}
+
+-- Rule 'Concept'.
+-- This rule generates the Concepts which are :
+-- * subtypes of some classes
+-- * abstract
+rule ConceptHasSuperAndisAbstract{
+	from 
+		e:DSL!Class (not e.superType.oclIsUndefined() and e.isAbstract
+			and not (thisModule.getRoots->includes(e))) 
+	to 
+	-------------
+	-- Concept --
+	-------------
+		c:XML!Element(
+			name<-'concept',
+			value <- '',
+			children<-Sequence{
+				name,identity,namespace,id,
+				isLoaded,isAbstract,mdfmetadata,
+				superType,valueProperties
+				}
+		),
+		
+		name:XML!Attribute(name<-'name',value<-e.name),		
+		identity: XML!Attribute (name<-'identity',value<-e.identity),	
+		namespace: XML!Attribute (name<-'namespace',value<-e.namespace),		
+		id: XML!Attribute (name<-'id',value<-e.makeId()),		
+		isLoaded: XML!Attribute (name<-'isLoaded',value<-e.isLoaded.bool2string()),		
+		isAbstract: XML!Attribute (name<-'isAbstract',value<-'false'),
+		
+		-----------------
+		-- MdfMetaData --
+		-----------------
+		mdfmetadata: XML!Element (
+			name<-'mdfmetadata',
+			value <- '',
+			children<-Sequence{
+				xsitype,accessmodifier,category,description,doccomment,
+				localize,
+				classmodifier
+				}
+		),
+		
+		xsitype:XML!Attribute (name<-'xsi:type',value<-'conceptorshapemdfmetadata'),	
+		accessmodifier:XML!Attribute (name<-'accessmodifier',value<-'public'),		
+		category : XML!Attribute(name <- 'category',value <- ''),		
+		description : XML!Attribute(name <- 'description',value <- ''),		
+		doccomment : XML!Attribute(name <- 'doccomment',value <- ''),		
+		localize:XML!Attribute (name<-'localize',value<-'false'),
+		classmodifier : XML!Attribute (
+			name<-'classmodifier',
+			value<-if e.isAbstract then 'abstract' else 'none' endif),
+		
+		
+		superType : XML!Element (name <- 'superType',children <- superTypeText),		
+		superTypeText : XML!Text (name <- '#text',value <- e.superType.makeId()),
+	
+	----------------			
+	-- Properties --
+	----------------
+		valueProperties: XML!Element (
+			name<-'valueProperties',
+			value <- '',
+			children<-e.properties->asSet()
+		),
+		
+	---------------------------
+	-- inheritanceExpression --
+	--------------------------- 
+		treeHerite : XML!Element (
+			name <- 'treeExpression',
+			value <- '',
+			parent <- thisModule.resolveTemp(e.domainModel,'exp'),
+			children <- Sequence{
+				treeHXsiType,treeHName,treeHIdentity,
+				treeHId,treeHDef,source,super,sub
+			}
+		),
+		treeHXsiType : XML!Attribute (name <- 'xsi:type',value <- 'InheritanceExpression'),
+		treeHName : XML!Attribute(name <- 'name',value <- e.name+'-'+e.superType.name),
+		treeHIdentity : XML!Attribute(name <- 'identity',value <- thisModule.makeIdentity()),
+		treeHId : XML!Attribute(name <- 'id',value <- thisModule.makeId2()),
+		treeHDef : XML!Attribute(name <- 'definitionlevel',value <- 'none'),
+		source : XML!Element (name <- 'source',value <- ''),
+		super : XML!Element (name <- 'superType',value <- '',children <- superText),
+		superText : XML!Text(name<-'#text',value <- e.superType.makeId()),
+		sub : XML!Element (name <- 'subType',value <- '',children <- subText),
+		subText : XML!Text (name<-'#text',value<-e.makeId()),
+		
+	----------------------------------
+	-- Inheritance Complete Diagram --
+	----------------------------------
+		DiagtreeExp : XML!Element (
+			name <- 'treeExpression',
+			value <- '',
+			parent <- thisModule.resolveTemp(e.domainModel,'Diagexp'),
+			children <- Sequence{
+				treeHCDXsiType,treeHCDName,treeHCDIdentity,
+				treeHCDid,treeHCDDef,sourceHCD,superCD,subCD
+			}
+		),
+		treeHCDXsiType : XML!Attribute (name <- 'xsi:type',value <- 'InheritanceExpression'),
+		treeHCDName : XML!Attribute(name <- 'name',value <- e.name+'-'+e.superType.name),
+		treeHCDIdentity : XML!Attribute(name <- 'identity',value <- thisModule.makeIdentity()),
+		treeHCDid : XML!Attribute(name <- 'id',value <- thisModule.makeId2()),
+		------------------------------------------------------------------------------------------------------------
+		treeHCDDef : XML!Attribute(name <- 'definitionlevel',value <-e.definitionlevel() ),	
+		sourceHCD : XML!Element (name <- 'source',value <- '',children <- sourceHCDText),
+		sourceHCDText : XML!Text (name<-'#text',value <-thisModule.resolveTemp(e,'treeHId').value),
+		superCD : XML!Element (name <- 'superType',value <- '',children <- superTextCD),
+		superTextCD : XML!Text(name<-'#text',value <- e.superType.makeId()),
+		subCD : XML!Element (name <- 'subType',value <- '',children <- subTextCD),
+		subTextCD : XML!Text (name<-'#text',value<-e.makeId())
+}
+
+-- Rule 'Relationship'.
+-- This rule generates the Relationships which are not subtypes of any classes
+rule Relationship{
+	from 
+		e:DSL!Relationship(
+			e.superType.oclIsUndefined()
+		)
+	to 
+	------------------
+	-- Relationship --
+	------------------
+		r : XML!Element(
+			name<-'relationship',
+			value <- '',
+			children<-Sequence{
+				name,identity,namespace,id,
+				isLoaded,isAbstract,mdfmetadata,
+				roles,valueProperties
+			}	
+		),
+		name:XML!Attribute(name<-'name',value<-e.name),
+		identity: XML!Attribute (name<-'identity',value<-e.identity),
+		id: XML!Attribute (name<-'id',value<-e.makeId()),
+		namespace: XML!Attribute (name<-'namespace',value<-e.namespace),
+		isLoaded: XML!Attribute (name<-'isLoaded',value<-e.isLoaded.bool2string()),
+		isAbstract: XML!Attribute (name<-'isAbstract',value<-'false'),
+		
+		-----------------
+		-- MdfMetaData --
+		-----------------
+		mdfmetadata: XML!Element (
+			name<-'mdfmetadata',
+			value <- '',
+			children<-Sequence{
+				xsitype,accessmodifier,category,
+				description,doccomment,localize				
+			}
+		),
+		xsitype:XML!Attribute (name<-'xsi:type',value<-'mdfclassmetadata'),
+		accessmodifier:XML!Attribute (name<-'accessmodifier',value<-'public'),
+		localize:XML!Attribute (name<-'localize',value<-'false'),
+		category:XML!Attribute (name<-'category',value <- ''),
+		description:XML!Attribute (name<-'description',value <- ''),
+		doccomment:XML!Attribute (name<-'doccomment',value <- ''),
+		
+	-----------
+	-- Roles --
+	-----------
+		roles:XML!Element(
+			name<-'roles',
+			value <- '',
+			children<-e.roles->asSequence()
+		),
+		
+	----------------
+	-- Properties --
+	----------------
+		valueProperties: XML!Element (
+			name<-'valueProperties',
+			value <- '',
+			children<-e.properties->asSequence()
+		),
+		
+	--------------------
+	-- RoleExpression --
+	--------------------
+		treeExp : XML!Element (
+			name <- 'treeExpression',
+			value <- '',
+			parent <- thisModule.resolveTemp(e.domainModel,'exp'),
+			children <- Sequence{
+				reXsiType,reName,reIdentity,
+				reId,reDef,reContainment,source,role
+			}
+		),
+		reXsiType : XML!Attribute(name <- 'xsi:type',value <- 'RoleExpression'),
+		reName : XML!Attribute(name <- 'name',value <- 'RoleExpression'+e.name),
+		reIdentity : XML!Attribute(name <- 'identity',value <- thisModule.makeIdentity()),
+		reId : XML!Attribute(name <- 'id',value <- thisModule.makeId2()),
+		reDef : XML!Attribute(name <- 'definitionlevel',value <- 'none'),
+		reContainment : XML!Attribute(
+			name <- 'containmentstyle',
+			value <- e.getContainment()
+		),
+		source : XML!Element (name <- 'source',value <- ''),
+		role : XML!Element (name <- 'role',value <- '',children <- roleText),
+		roleText : XML!Text(
+			name<-'#text',
+			value <- e.roles->first().makeId()
+		),
+		
+	---------------------------------------
+	-- Role Expression : completeDiagram --
+	---------------------------------------
+		DiagtreeExp : XML!Element (
+			name <- 'treeExpression',
+			value <- '',
+			parent <- thisModule.resolveTemp(e.domainModel,'Diagexp'),
+			children <- Sequence{
+				reCDXsiType,reCDName,DiagreIdentity,
+				DiagreId,DiagreDef,DiagreContainment,Diagsource,Diagrole
+			}
+		),
+		reCDXsiType : XML!Attribute(name <- 'xsi:type',value <- 'RoleExpression'),
+		reCDName : XML!Attribute(name <- 'name',value <- 'RoleExpression'+e.name),
+		DiagreIdentity : XML!Attribute(name <- 'identity',value <- thisModule.makeIdentity()),
+		DiagreId : XML!Attribute(name <- 'id',value <- thisModule.makeId2()),
+		--------------------------------------------------------------------------------------------------------
+		DiagreDef : XML!Attribute(name <- 'definitionlevel',value <- e.roles->first().type.definitionlevel()),
+		DiagreContainment : XML!Attribute(name <- 'containmentstyle',value <- 'fromsource'),
+		Diagsource : XML!Element (name <- 'source',value <- '',children <- sourceText),
+		sourceText : XML!Text(
+			name<-'#text',
+			value <- thisModule.resolveTemp(e,'reId').value
+		),
+		Diagrole : XML!Element (
+			name <- 'role',
+			value <- '',
+			children <- DiagroleText
+		),
+		DiagroleText : XML!Text(
+			name<-'#text',
+			value <- e.roles->first().makeId()
+		)
+}
+
+-- Rule 'Relationship'.
+-- This rule generates the Relationships which are subtypes of some classes
+rule RelationshipHasSuper {
+	from 
+		e:DSL!Relationship(
+			not e.superType.oclIsUndefined()
+		)
+	to 
+	------------------
+	-- Relationship --
+	------------------
+		r : XML!Element(
+			name<-'relationship',
+			value <- '',
+			children<-Sequence{
+				name,identity,namespace,id,
+				isLoaded,isAbstract,mdfmetadata,
+				roles,valueProperties
+			}	
+		),
+		name:XML!Attribute(name<-'name',value<-e.name),
+		identity: XML!Attribute (name<-'identity',value<-e.identity),
+		id: XML!Attribute (name<-'id',value<-e.makeId()),
+		namespace: XML!Attribute (name<-'namespace',value<-e.namespace),
+		isLoaded: XML!Attribute (name<-'isLoaded',value<-e.isLoaded.bool2string()),
+		isAbstract: XML!Attribute (name<-'isAbstract',value<-'false'),
+		
+		-----------------
+		-- MdfMetaData --
+		-----------------
+		mdfmetadata: XML!Element (
+			name<-'mdfmetadata',
+			value <- '',
+			children<-Sequence{
+				xsitype,accessmodifier,category,
+				description,doccomment,localize				
+			}
+		),
+		xsitype:XML!Attribute (name<-'xsi:type',value<-'mdfclassmetadata'),
+		accessmodifier:XML!Attribute (name<-'accessmodifier',value<-'public'),
+		localize:XML!Attribute (name<-'localize',value<-'false'),
+		category:XML!Attribute (name<-'category',value <- ''),
+		description:XML!Attribute (name<-'description',value <- ''),
+		doccomment:XML!Attribute (name<-'doccomment',value <- ''),
+
+	-----------
+	-- Roles --
+	-----------
+		roles:XML!Element(
+			name<-'roles',
+			value <- '',
+			children<-e.roles->asSequence()
+		),
+		
+	----------------
+	-- Properties --
+	----------------
+		valueProperties: XML!Element (
+			name<-'valueProperties',
+			value <- '',
+			children<-e.properties->asSequence()
+		),
+		
+	--------------------
+	-- RoleExpression --
+	--------------------
+		treeExp : XML!Element (
+			name <- 'treeExpression',
+			value <- '',
+			parent <- thisModule.resolveTemp(e.domainModel,'exp'),
+			children <- Sequence{
+				reXsiType,reName,reIdentity,
+				reId,reDef,reContainment,source,role
+			}
+		),
+		reXsiType : XML!Attribute(name <- 'xsi:type',value <- 'RoleExpression'),
+		reName : XML!Attribute(name <- 'name',value <- 'RoleExpression'+e.name),
+		reIdentity : XML!Attribute(name <- 'identity',value <- thisModule.makeIdentity()),
+		reId : XML!Attribute(name <- 'id',value <- thisModule.makeId2()),
+		reDef : XML!Attribute(name <- 'definitionlevel',value <- 'none'),
+		reContainment : XML!Attribute(
+			name <- 'containmentstyle',	
+			value <- e.getContainment()
+		),
+		source : XML!Element (name <- 'source',value <- ''),
+		role : XML!Element (name <- 'role',value <- '',children <- roleText),
+			roleText : XML!Text(name<-'#text',value <- e.roles->first().makeId()),
+
+	---------------------------------------
+	-- Role Expression : completeDiagram --
+	---------------------------------------
+		DiagtreeExp : XML!Element (
+			name <- 'treeExpression',
+			value <- '',
+			parent <- thisModule.resolveTemp(e.domainModel,'Diagexp'),
+			children <- Sequence{
+				reCDXsiType,reCDName,DiagreIdentity,
+				DiagreId,DiagreDef,DiagreContainment,Diagsource,Diagrole
+			}
+		),
+		reCDXsiType : XML!Attribute(name <- 'xsi:type',value <- 'RoleExpression'),
+		reCDName : XML!Attribute(name <- 'name',value <- 'RoleExpression'+e.name),
+		DiagreIdentity : XML!Attribute(name <- 'identity',value <- thisModule.makeIdentity()),
+		DiagreId : XML!Attribute(name <- 'id',value <- thisModule.makeId2()),
+		--------------------------------------------------------------------------------------------------------
+		DiagreDef : XML!Attribute(name <- 'definitionlevel',value <- e.roles.first().type.definitionlevel()),
+		DiagreContainment : XML!Attribute(name <- 'containmentstyle',value <- 'fromsource'),
+		Diagsource : XML!Element (name <- 'source',value <- '',children <- sourceText),
+		sourceText : XML!Text(name<-'#text',value <- thisModule.resolveTemp(e,'reId').value),
+		Diagrole : XML!Element (name <- 'role',value <- '',children <- DiagroleText),
+		DiagroleText : XML!Text(name<-'#text',value <- e.roles->first().makeId()),	
+	
+	---------------------------
+	-- inheritanceExpression --
+	---------------------------
+		treeHerite : XML!Element (
+			name <- 'treeExpression',
+			value <- '',
+			parent <- thisModule.resolveTemp(e.domainModel,'exp'),
+			children <- Sequence{
+				treeHXsiType,treeHName,treeHIdentity,
+				treeHId,treeHDef,treeHsource,super,sub
+			}
+		),
+		treeHXsiType : XML!Attribute (name <- 'xsi:type',value <- 'InheritanceExpression'),
+		treeHName : XML!Attribute(name <- 'name',value <- e.name+'-'+e.superType.name),
+		treeHIdentity : XML!Attribute(name <- 'identity',value <- thisModule.makeIdentity()),
+		treeHId : XML!Attribute(name <- 'id',value <- thisModule.makeId2()),
+		treeHDef : XML!Attribute(name <- 'definitionlevel',value <- 'none'),
+		treeHsource : XML!Element (name <- 'source',value <- ''),
+		super : XML!Element (name <- 'superType',value <- '',children <- superText),
+		superText : XML!Text(name<-'#text',value <- e.superType.makeId()),
+		sub : XML!Element (name <- 'subType',value <- '',children <- subText),
+		subText : XML!Text (name<-'#text',value<-e.makeId()),
+	
+	----------------------------------
+	-- Inheritance Complete Diagram --
+	----------------------------------
+		DiagtreeExp : XML!Element (
+			name <- 'treeExpression',
+			value <- '',
+			parent <- thisModule.resolveTemp(e.domainModel,'Diagexp'),
+			children <- Sequence{
+				treeHXsiType,treeHName,treeHCDIdentity,
+				treeHCDid,treeHCDDef,sourceHCD,superCD,subCD
+			}
+		),
+		treeHCDIdentity : XML!Attribute(name <- 'identity',	value <- thisModule.makeIdentity()),
+		treeHCDid : XML!Attribute(name <- 'id',value <- thisModule.makeId2()),
+	    --------------------------------------------------------------------------------------------------------
+		treeHCDDef : XML!Attribute(name <- 'definitionlevel',value <- e.definitionlevel()),
+		sourceHCD : XML!Element (name <- 'source',value <- '',children <- sourceHCDText),
+			sourceHCDText : XML!Text (name<-'#text',value <- thisModule.resolveTemp(e,'treeHId').value),
+		superCD : XML!Element (name <- 'superType',value <- '',children <- superTextCD),
+			superTextCD : XML!Text(name<-'#text',value <- e.superType.makeId()),
+		subCD : XML!Element (name <- 'subType',value <- '',children <- subTextCD),
+			subTextCD : XML!Text (name<-'#text',value<-e.makeId())
+}
+
+-- Rule 'Role'.
+-- This rule generates the Roles of a Relationship
+rule Role{
+	from 
+		e : DSL!Role
+	to 
+	----------
+	-- Role --
+	----------
+		r : XML!Element(
+			name<-'role',
+			value <- '',
+			children<-Sequence{
+				name,identity,id,min,max,
+				isUnbounded,accepts,mdfmetadata,
+				source,type,genProp
+			}
+		),
+		name:XML!Attribute(name<-'name',value<-e.name),
+		identity: XML!Attribute (name<-'identity',value<-e.identity),
+		id: XML!Attribute (name<-'id',value<-e.makeId()),
+		min: XML!Attribute (name<-'min',value<-e.min.toString()),
+		max: XML!Attribute (name<-'max',value<-e.max.toString()),
+		isUnbounded : XML!Attribute(name <- 'isUnbounded',value <- e.isUnbounded.bool2string()),
+		accepts: XML!Attribute (name<-'accepts',value<-e.accepts),
+		
+		-----------------
+		-- MdfMetaData --
+		-----------------
+		mdfmetadata: XML!Element (
+			name<-'mdfmetadata',
+			value <- '',
+			children<-Sequence{
+				xsitype,accessmodifier,category,
+				description,doccomment,localize,
+				isordered,isnavigable
+			}
+		),
+		xsitype:XML!Attribute (name<-'xsi:type',value<-'rolemdfmetadata'),
+		accessmodifier:XML!Attribute (name<-'accessmodifier',value<-'public'),
+		category:XML!Attribute (name <- 'category',value <- ''),
+		description:XML!Attribute (name <- 'description',value <- ''),
+		doccomment:XML!Attribute (name <- 'doccomment',value <- ''),
+		localize:XML!Attribute (name<-'localize',value<-'false'),
+		isordered:XML!Attribute (name<-'isordered',value<-e.isOrdered.bool2string()),
+		isnavigable : XML!Attribute (name <- 'isnavigablefrom',value <- e.isNavigableFrom.bool2string()),
+		
+	------------
+	-- Source --
+	------------
+		source : XML!Element(name<-'source',value <- '',children<-ts),
+			ts : XML!Text(name<-'#text',value<-e.source.makeId()),
+			
+	----------
+	-- Type --
+	----------
+		type : XML!Element(name<-'type',value <- '',children<-tt),		
+			tt : XML!Text(name<-'#text',value<-e.type.makeId()),
+			
+	-----------------------
+	-- GeneratedProperty --
+	-----------------------
+		genProp : XML!Element (
+			name <- 'generatedProperty',
+			value <- '',
+			children <- Sequence{genName,genIdentity,genRefType}
+		),
+		genName : XML!Attribute(name <- 'name',value <- e.name),
+		genIdentity : XML!Attribute(name <- 'identity',value <- thisModule.makeIdentity()),
+		genRefType : XML!Element(name <- 'referenceType',value <- '',children <- refText),
+		refText : XML!Text (name <- '#text',value <- e.type.makeId())
+}
+
+-- Rule 'SimpleProperty'.
+-- This rule generates the Properties of simples types
+rule SimpleProperty {
+	from 
+		e : DSL!ValueProperty (e.type.oclIsTypeOf(DSL!SimpleType))
+	to
+	--------------
+	-- Property --
+	--------------
+		v : XML!Element(
+			name<-'property',
+			value <- '',
+			children<-Sequence{name,identity,id,mdfmetadata,propertyInfo}
+		),
+		name : XML!Attribute(name<-'name',value<-e.name),
+		identity : XML!Attribute(name<-'identity',value<-e.identity),
+		id : XML!Attribute(name<-'id',value<-e.makeId()),
+		-----------------
+		-- MdfMetaData --
+		-----------------
+		mdfmetadata: XML!Element (
+			name<-'mdfmetadata',
+			value <- '',
+			children<-Sequence{
+				xsitype,accessmodifier,category,
+				description,doccomment,localize,
+				xpathexpression,reversexpathexpression,
+				realattributename,proxyattributename,
+				customstorage,allownulls,readwritestate,tag 
+			}
+		),
+		xsitype:XML!Attribute (name<-'xsi:type',value<-'propertymdfmetadata'
+		),
+		accessmodifier:XML!Attribute (name<-'accessmodifier',value<-'public'),
+		category:XML!Attribute (name<-'category',value <- ''),
+		description:XML!Attribute (name<-'description',value <- ''),
+		doccomment:XML!Attribute (name<-'doccomment',value <- ''),		
+		localize:XML!Attribute (name<-'localize',value<-'false'),
+		xpathexpression:XML!Attribute (name<-'xpathexpression',value <- ''),
+		reversexpathexpression:XML!Attribute (name<-'reversexpathexpression',value <- ''),
+		realattributename:XML!Attribute (name<-'realattributename',value <- ''),
+		proxyattributename:XML!Attribute (name<-'proxyattributename',value <- ''),
+		customstorage:XML!Attribute (name<-'customstorage',value<-'false'),
+		allownulls:XML!Attribute (name<-'allownulls',value<-'false'),
+		readwritestate:XML!Attribute (name<-'readwritestate',value<-'readwrite'),
+		tag:XML!Attribute (name<-'tag',value <- ''),
+		
+	------------------
+	-- PropertyInfo --
+	------------------
+		propertyInfo: XML!Element (
+			name<-'propertyInfo',
+			value <- '',
+			children<-Sequence{xsitypePI,namePI,identityPI,default,max,min}
+		),
+		xsitypePI:XML!Attribute (name<-'xsi:type',value<- e.type.name+'PropertyInfo'),
+		namePI : XML!Attribute(name<-'name',value <- ''),
+		identityPI : XML!Attribute(name<-'identity',value<-thisModule.makeIdentity()),
+		default : XML!Attribute(
+			name<-'default',
+			value <- if e.type.name='String' then ''
+					else '0' endif
+		),
+		max : XML!Attribute(
+			name<-'max',
+			value <- if e.type.name<>'Double'
+					 then '2147483647'
+					 else '1.79769313486232E+307'
+					 endif),
+		min : XML!Attribute(name<-'min',
+			value <- if e.type.name<>'Double'
+					 then '-2147483647'
+					 else '0'
+					 endif),
+		
+	-----------------------------
+	-- ValuePropertyExpression --
+	-----------------------------
+		ValuetreeExp : XML!Element (
+			name <- 'treeExpression',
+			value <- '',
+			children <- Sequence{
+				reXsiType,reName,ValuereIdentity,
+				ValuereId,Valuesource,property
+			},
+			parent <- thisModule.resolveTemp(e.owner.domainModel,'Diagexp')
+		),
+		
+		reXsiType : XML!Attribute(name <- 'xsi:type',value <- 'ValuePropertyExpression'),
+		reName : XML!Attribute(name <- 'name',value <- e.name),
+		ValuereIdentity : XML!Attribute(name <- 'identity',value <- thisModule.makeIdentity()),
+		ValuereId : XML!Attribute(name <- 'id',value <- thisModule.makeId2()),
+		Valuesource : XML!Element (name <- 'source',value <- ''),
+		property : XML!Element (name <- 'property',value <- '',children <- propertyText),
+		propertyText : XML!Text(name<-'#text',value <- e.makeId())
+}
+
+-- Rule 'EnumerationProperty'.
+-- This rule generates the Properties which type is an Enumeration
+rule EnumerationProperty {
+	from 
+		e : DSL!ValueProperty (not e.type.oclIsTypeOf(DSL!SimpleType))
+	to
+	--------------
+	-- Property --
+	--------------
+		v : XML!Element(
+			name<-'property',
+			value <- '',
+			children<-Sequence{name,identity,id,mdfmetadata,propertyInfo}
+		),
+		name : XML!Attribute(name<-'name',value<-e.name),
+		identity : XML!Attribute(name<-'identity',value<-e.identity),
+		id : XML!Attribute(name<-'id',value<-e.makeId()),
+		-----------------
+		-- MdfMetaData --
+		-----------------
+		mdfmetadata: XML!Element (
+			name<-'mdfmetadata',
+			value <- '',
+			children<-Sequence{
+				xsitype,accessmodifier,category,
+				description,doccomment,localize,
+				xpathexpression,reversexpathexpression,
+				realattributename,proxyattributename,
+				customstorage,allownulls,readwritestate,tag 
+			}
+		),
+		xsitype:XML!Attribute (name<-'xsi:type',value<-'propertymdfmetadata'),
+		accessmodifier:XML!Attribute (name<-'accessmodifier',value<-'public'),
+		category:XML!Attribute (name<-'category',value <- ''),
+		description:XML!Attribute (name<-'description',value <- ''),
+		doccomment:XML!Attribute (name<-'doccomment',value <- ''),		
+		localize:XML!Attribute (name<-'localize',value<-'false'),
+		xpathexpression:XML!Attribute (name<-'xpathexpression',value <- ''),
+		reversexpathexpression:XML!Attribute (name<-'reversexpathexpression',value <- ''),
+		realattributename:XML!Attribute (name<-'realattributename',value <- ''),
+		proxyattributename:XML!Attribute (name<-'proxyattributename',value <- ''),
+		customstorage:XML!Attribute (name<-'customstorage',value<-'false'),
+		allownulls:XML!Attribute (name<-'allownulls',value<-'false'),
+		readwritestate:XML!Attribute (name<-'readwritestate',value<-'readwrite'),
+		tag:XML!Attribute (name<-'tag',value <- ''),
+		
+	------------------
+	-- PropertyInfo --
+	------------------
+		propertyInfo: XML!Element (
+			name<-'propertyInfo',
+			value <- '',
+			children<-Sequence{xsitypePI,namePI,identityPI,default,enumeration}
+		),
+		xsitypePI:XML!Attribute (name<-'xsi:type',value<-'EnumerationPropertyInfo'),
+		namePI : XML!Attribute(name<-'name',value <- e.type.name),
+		identityPI : XML!Attribute(name<-'identity',value<-thisModule.makeIdentity()),
+		default : XML!Attribute(name<-'default',value <-e.type.name+'.'),
+		enumeration : XML!Element(name<-'enumeration',children<-enumerationText),
+		enumerationText : XML!Text(name<-'#text',value <- e.type.makeId()),
+		
+	-----------------------------
+	-- ValuePropertyExpression --
+	-----------------------------
+		ValuetreeExp : XML!Element (
+			name <- 'treeExpression',
+			value <- '',
+			children <- Sequence{
+				reXsiType,reName,ValuereIdentity,
+				ValuereId,Valuesource,property
+			},
+			parent <- thisModule.resolveTemp(e.owner.domainModel,'Diagexp')
+		),
+		
+		reXsiType : XML!Attribute(name <- 'xsi:type',value <- 'ValuePropertyExpression'),
+		reName : XML!Attribute(name <- 'name',value <- e.name),
+		ValuereIdentity : XML!Attribute(name <- 'identity',value <- thisModule.makeIdentity()),
+		ValuereId : XML!Attribute(name <- 'id',value <- thisModule.makeId2()),
+		Valuesource : XML!Element (name <- 'source',value <- ''),
+		property : XML!Element (name <- 'property',value <- '',children <- propertyText),
+		propertyText : XML!Text(name<-'#text',value <- e.makeId())
+}
+
+
+-- Rule 'Enumeration'.
+-- This rule generates an Enumeration
+rule Enumeration {
+	from 
+		e : DSL!Enumeration
+	to 
+		v : XML!Element(
+			name<-'enumeration',
+			value <- '',
+			children<-Sequence{name,identity,namespace,id,literals}
+		),
+		name : XML!Attribute(name<-'name',value<-e.name),
+		identity : XML!Attribute(name<-'identity',value<-e.identity),
+		namespace : XML!Attribute(name<-'namespace',value<-e.namespace),
+		id : XML!Attribute(name<-'id',value<-e.makeId()),
+		literals: XML!Element(name<-'literals',value <- '',children<-e.literals)		
+}
+
+-- Rule 'EnumerationLiteral'.
+-- This rule generates an single element of an Enumeration
+rule EnumerationLiteral {
+	from 
+		e : DSL!EnumerationLiteral
+	to
+		 v : XML!Element(
+			name<-'enumerationLiteral',			
+			value <- '',
+			children<-Sequence{name,identity,value}
+		),
+		name : XML!Attribute(name<-'name',value<-e.name),
+		identity : XML!Attribute(name<-'identity',value<-e.identity),
+		value: XML!Attribute (name<-'value',value<-e.value.toString())
+}

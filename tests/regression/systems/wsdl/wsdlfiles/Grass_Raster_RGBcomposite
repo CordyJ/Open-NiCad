@@ -1,0 +1,599 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://Grass_Raster_RGBcomposite.grass.ws.laits.gmu.edu" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://Grass_Raster_RGBcomposite.grass.ws.laits.gmu.edu" xmlns:intf="http://Grass_Raster_RGBcomposite.grass.ws.laits.gmu.edu" xmlns:tns1="http://grass.ws.laits.gmu.edu" xmlns:tns2="http://ws.laits.gmu.edu" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+	 <wsdl:types>
+
+		  <schema elementFormDefault="qualified" targetNamespace="http://Grass_Raster_RGBcomposite.grass.ws.laits.gmu.edu" xmlns="http://www.w3.org/2001/XMLSchema">
+
+			<!-- ELEMENTS -->
+
+			   <element name="Composite_truecolorElement">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Name of the element to describe input parameters.
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element minOccurs="1" name="redImageURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of red raster map layer to be used for. Default data format is GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element minOccurs="1" name="greenImageURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of green raster map layer to be used for. Default data format is GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element minOccurs="1" name="blueImageURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of blue raster map layer to be used for. Default data format is GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element default="false" minOccurs="0" name="dither" nillable="true" type="xsd:boolean">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Dither. Colors not available in the palette are approximated by a diffusion of colored pixels from within the available palette.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element default="false" minOccurs="0" name="closestcolor" nillable="true" type="xsd:boolean">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Use closest color. Original pixel colors are simply translated into the closest available color from the palette, no dithering occurs.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element default="32" minOccurs="0" name="levels" nillable="true" type="xsd:int">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Number of levels to be used for each component. The default number of intensity levels for each component is 32, resulting in a total of 32768 possible colors (equivalent to 15 bits per pixel). If significantly more levels than this are used, this operation will take longer to run.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element minOccurs="0" name="lev_red" nillable="true" type="xsd:int">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Number of levels to be used for red. Options: 1-256
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element minOccurs="0" name="lev_green" nillable="true" type="xsd:int">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Number of levels to be used for green. Options: 1-256
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element minOccurs="0" name="lev_blue" nillable="true" type="xsd:int">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Number of levels to be used for blue. Options: 1-256
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element default="PNG" minOccurs="1" name="outputFormatType" type="impl:FormatType">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Format of output file.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+			   <element name="Composite_truecolorResponse">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Always return URL and Format of output file.
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element name="returnURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of output map.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element name="returnFormat" type="xsd:string">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Format of output map.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+			   <element name="fault" type="tns2:WebServiceExceptionsType"/>
+
+			   <element name="Composite_falsecolorElement">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Name of the element to describe input parameters.
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element minOccurs="1" name="redImageURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of red raster map layer to be used for. Default data format is GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element minOccurs="1" name="greenImageURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of green raster map layer to be used for. Default data format is GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element minOccurs="1" name="blueImageURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of blue raster map layer to be used for. Default data format is GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element default="false" minOccurs="0" name="dither" nillable="true" type="xsd:boolean">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Dither. Colors not available in the palette are approximated by a diffusion of colored pixels from within the available palette.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element default="false" minOccurs="0" name="closestcolor" nillable="true" type="xsd:boolean">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Use closest color. Original pixel colors are simply translated into the closest available color from the palette, no dithering occurs.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element default="32" minOccurs="0" name="levels" nillable="true" type="xsd:int">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Number of levels to be used for each component. The default number of intensity levels for each component is 32, resulting in a total of 32768 possible colors (equivalent to 15 bits per pixel). If significantly more levels than this are used, this operation will take longer to run.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element minOccurs="0" name="lev_red" nillable="true" type="xsd:int">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Number of levels to be used for red. Options: 1-256
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element minOccurs="0" name="lev_green" nillable="true" type="xsd:int">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Number of levels to be used for green. Options: 1-256
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element minOccurs="0" name="lev_blue" nillable="true" type="xsd:int">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Number of levels to be used for blue. Options: 1-256
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element default="PNG" minOccurs="1" name="outputFormatType" type="impl:FormatType">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Format of output file.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+			   <element name="Composite_falsecolorResponse">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Always return URL and Format of output file.
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element name="returnURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of output map.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element name="returnFormat" type="xsd:string">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Format of output map.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+			   <simpleType name="FormatType">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Format of output file.
+                         </documentation>
+
+				    </annotation>
+
+				    <restriction base="string">
+
+					     <enumeration value="PNG">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    PNG (Portable Network Graphics) is an open, extensible image format with Lossless Compression.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+					
+					     <enumeration value="TIFF">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    TIFF (Tagged Image File Format) is a flexible image format that normally saves 8 or 16 bits per color – red, green and blue – for a total of 24 or 48 bits. The TIFF file structure allows both the metadata and the image data to be encoded into the same file.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+				    </restriction>
+
+			   </simpleType>
+
+		  </schema>
+
+		  <schema elementFormDefault="qualified" targetNamespace="http://ws.laits.gmu.edu" xmlns="http://www.w3.org/2001/XMLSchema">
+
+			   <complexType name="WebServiceExceptionsType">
+
+				    <sequence>
+
+					     <element name="exception" type="xsd:string"/>
+
+				    </sequence>
+
+			   </complexType>
+
+		  </schema>
+
+	 </wsdl:types>
+
+	 <wsdl:message name="composite_truecolorRequest">
+
+		  <wsdl:part element="impl:Composite_truecolorElement" name="parameters"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="composite_truecolorResponse">
+
+		  <wsdl:part element="impl:Composite_truecolorResponse" name="return"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="composite_falsecolorRequest">
+
+		  <wsdl:part element="impl:Composite_falsecolorElement" name="parameters"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="composite_falsecolorResponse">
+
+		  <wsdl:part element="impl:Composite_falsecolorResponse" name="return"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="WebServiceExceptionsType">
+
+		  <wsdl:part element="impl:fault" name="fault"/>
+
+	 </wsdl:message>
+
+	 <wsdl:portType name="Grass_Raster_RGBcompositePortType">
+
+		  <wsdl:operation name="composite_truecolor">
+
+			   <wsdl:input message="impl:composite_truecolorRequest" name="composite_truecolorRequest"/>
+
+			   <wsdl:output message="impl:composite_truecolorResponse" name="composite_truecolorResponse"/>
+
+			   <wsdl:fault message="impl:WebServiceExceptionsType" name="WebServiceExceptionsType"/>
+
+		  </wsdl:operation>
+
+		  <wsdl:operation name="composite_falsecolor">
+
+			   <wsdl:input message="impl:composite_falsecolorRequest" name="composite_falsecolorRequest"/>
+
+			   <wsdl:output message="impl:composite_falsecolorResponse" name="composite_falsecolorResponse"/>
+
+			   <wsdl:fault message="impl:WebServiceExceptionsType" name="WebServiceExceptionsType"/>
+
+		  </wsdl:operation>
+
+	 </wsdl:portType>
+
+	 <wsdl:binding name="Grass_Raster_RGBcompositeSoapBinding" type="impl:Grass_Raster_RGBcompositePortType">
+
+		  <wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+		  <wsdl:operation name="composite_truecolor">
+
+			   <wsdl:documentation>
+Combines red, green and blue map layers into a true color image.   </wsdl:documentation>
+
+			   <wsdlsoap:operation soapAction="composite_truecolor" style="document"/>
+
+			   <wsdl:input>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:input>
+
+			   <wsdl:output>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:output>
+
+			   <wsdl:fault name="WebServiceExceptionsType">
+
+				    <wsdlsoap:fault name="WebServiceExceptionsType" use="literal"/>
+
+			   </wsdl:fault>
+
+		  </wsdl:operation>
+
+		  <wsdl:operation name="composite_falsecolor">
+
+			   <wsdl:documentation>
+Combines red, green and blue map layers into a false color image.   </wsdl:documentation>
+
+			   <wsdlsoap:operation soapAction="composite_falsecolor" style="document"/>
+
+			   <wsdl:input>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:input>
+
+			   <wsdl:output>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:output>
+
+			   <wsdl:fault name="WebServiceExceptionsType">
+
+				    <wsdlsoap:fault name="WebServiceExceptionsType" use="literal"/>
+
+			   </wsdl:fault>
+
+		  </wsdl:operation>
+
+	 </wsdl:binding>
+
+	 <wsdl:service name="Grass_Raster_RGBcompositeService">
+
+		  <wsdl:documentation>
+RGB (Red_Green-Blue) image composite.  </wsdl:documentation>
+
+		  <wsdl:port binding="impl:Grass_Raster_RGBcompositeSoapBinding" name="Grass_Raster_RGBcomposite">
+
+			   <wsdlsoap:address location="http://65.123.203.154:8099/axis/services/Grass_Raster_RGBcomposite"/>
+
+		  </wsdl:port>
+
+	 </wsdl:service>
+
+	<!--WSDL created by Apache Axis version: 1.4
+Built on Apr 22, 2006 (06:55:48 PDT)-->
+
+</wsdl:definitions>

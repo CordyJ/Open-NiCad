@@ -1,0 +1,111 @@
+--@name Table2HTML
+--@version 1.0
+--@domains Table, HTML
+--@authors Eric Vepa (eric.vepa <at> gmail.com)
+--@date 2006/08/04
+--@description This transformation is used to transform generic tables into HTML model with tables.
+
+module Table2HTML; -- Module Template
+create OUT : HTML from IN : Table;
+
+--@begin attribute helper allValidTables
+--@comments returns all valid sorted tables, ie tables which are not for bar or pie chart representations
+helper def : allValidTables : Sequence(Table!Table) =
+	Table!Table.allInstances()->
+		select(table|table.rows->first().cells->first().content <> 'Bar Chart')->
+			select(table|table.rows->first().cells->first().content <> 'Pie Chart')->
+				asSet()->sortedBy(table|table.rows->first().cells->first().content);
+--@end attribute helper allValidTables
+
+--@begin helper roundValue
+--@comments for String with a Real content (a dot exists), returns the String with only one decimal after the dot
+helper context Table!Cell def : roundValue() : String =
+	let point : Integer = self.content->indexOf('.') in
+		if point > 0
+			then self.content->substring(1,point+2)
+			else self.content
+		endif;
+--@end helper roundValue
+
+--@begin entrypoint rule HTML
+--@comments only one HTML tag is created with one BODY tag
+entrypoint rule HTML() {
+	using {
+		metamodelTables : Sequence(Table!Table) = thisModule.allValidTables->select(table|table.rows->first().cells->first().content = 'Metamodel');
+	}
+	to
+		h:HTML!HTML (
+			head <- head,
+			body <- body
+		),
+		head:HTML!HEAD (
+			headElements <- title
+		),
+		title:HTML!TITLE (
+			value <-	if metamodelTables->notEmpty()
+								then	if metamodelTables->first().rows->size() = 2
+												then metamodelTables->first().rows->at(2).cells->first().content
+												else 'Zoo'
+											endif
+								else ''
+							endif
+		),
+		body:HTML!BODY (
+			bodyElements <- thisModule.allValidTables->iterate(table; acc:Sequence(HTML!TABLE)=Sequence{}|
+				acc->including(thisModule.Table2TABLE(table)))
+		)
+}
+--@end entrypoint rule HTML
+
+--@begin lazy rule Table2TABLE
+--@comments HTML TABLE are added in the BODY of the only HTML tag
+lazy rule Table2TABLE {
+	from
+		tab:Table!Table
+	to
+		table:HTML!TABLE (
+			border <- '1',
+			trs <- firstRow,
+			trs <- tab.rows->subSequence(2,tab.rows->size())->iterate(row; acc:Sequence(HTML!TR)=Sequence{}|
+				acc->including(thisModule.Row2TR(row)))
+		),
+		firstRow:HTML!TR (
+			tds <- tab.rows->first().cells->iterate(cell; acc:Sequence(HTML!TH)=Sequence{}|
+				acc->including(thisModule.Cell2TH(cell)))
+		)
+}
+--@end lazy rule Table2TABLE
+
+--@begin lazy rule Cell2TH
+lazy rule Cell2TH {
+	from
+		cell:Table!Cell
+	to
+		th:HTML!TH (
+			value <- cell.roundValue()
+		)
+}
+--@end lazy rule Cell2TH
+
+--@begin lazy rule Row2TR
+lazy rule Row2TR {
+	from
+		row:Table!Row
+	to
+		tr:HTML!TR (
+			tds <- row.cells->iterate(cell; acc:Sequence(HTML!TD)=Sequence{}|
+				acc->including(thisModule.Cell2TD(cell)))
+		)
+}
+--@end lazy rule Row2TR
+
+--@begin lazy rule Cell2TD
+lazy rule Cell2TD {
+	from
+		cell:Table!Cell
+	to
+		td:HTML!TD (
+			value <- cell.roundValue()
+		)
+}
+--@end lazy rule Cell2TD

@@ -1,0 +1,88 @@
+module Make2Ant;
+create OUT : Ant from IN : Make;
+
+-- rule Makefile2Project:  its the 'main' rule.
+-- This rule generates the Project element.
+-- Its attributes are the name and the description of the makefile.
+-- It contains properties, targets of the makefile.
+-- It defines also the target called by default.
+rule Makefile2Project{
+	from
+		m : Make!Makefile
+	to
+		a : Ant!Project(
+			name       <- m.name,
+			description <- m.comment.text,
+			properties <- m.elements ->
+				select(c | c.oclIsKindOf(Make!Macro)),
+			targets    <- m.elements ->
+				select(c | c.oclIsKindOf(Make!Rule)),
+			default    <- m.elements ->
+				select(c | c.oclIsKindOf(Make!Rule)) -> first()
+		)
+}
+
+-- rule Macro2Property:
+-- This rule generates a Property.
+-- Its attributes are the name and the value of the Macro.
+rule Macro2Property{
+	from
+		m : Make!Macro
+	to
+		a : Ant!PropertyValue(
+			name  <- m.name,
+			value <- m.value
+		)
+}
+
+-- rule Rule2Target:
+-- This rule generates a Target.
+-- Its attribute is the name of the rule.
+-- It contains tasks.
+-- It can be dependent of others targets.
+rule Rule2Target{
+	from
+		m : Make!Rule
+	to
+		a:Ant!Target(
+			name    <- m.name,
+			tasks <- m.shellLines,
+			depends <- m.dependencies ->
+							select(e | e.oclIsKindOf(Make!RuleDep)) ->
+								collect(e | e.ruledep)
+		)
+}
+
+-- rule ShellLine2Task_Display
+-- This rule is started when the attribute display is true.
+-- This rule generate a Task Echo and a Task Exec.
+rule ShellLine2Task_Display{
+	from
+		m : Make!ShellLine(
+				m.display
+			)
+	to
+		e:Ant!Echo(
+			message <- m.command,
+			target <- m.ruleShellLine
+		),
+		x:Ant!Exec(
+			executable <- m.command,
+			target <- m.ruleShellLine
+		)
+}
+
+-- rule ShellLine2Task_Display
+-- This rule is started when the attribute display is false.
+-- This rule generate only a Task Exec.
+rule ShellLine2Task_NoDisplay{
+	from
+		m : Make!ShellLine(
+				not m.display
+			)
+	to
+		x:Ant!Exec(
+			executable <- m.command,
+			target <- m.ruleShellLine
+		)
+}

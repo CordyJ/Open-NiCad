@@ -1,0 +1,32 @@
+% NiCad literal renaming for PHP
+% Jim Cordy, May 2020
+
+rule renameLiterals
+    replace $ [ScalarConstant]
+        L [ScalarConstant]
+    by
+        L [renameNumericLiterals]
+          [renameCharLiterals]
+          [renameStringLiterals]
+end rule
+
+function renameNumericLiterals
+    replace [ScalarConstant]
+        _ [opt PlusMinus] N [NumericConstant]
+    by
+        1
+end function
+
+function renameCharLiterals
+    replace [ScalarConstant]
+        C [charlit]
+    by
+        ''x'
+end function
+
+function renameStringLiterals
+    replace [ScalarConstant]
+        S [stringlit]
+    by
+        '"x"
+end function

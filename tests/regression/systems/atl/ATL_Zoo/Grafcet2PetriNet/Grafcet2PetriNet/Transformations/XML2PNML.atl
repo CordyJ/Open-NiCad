@@ -1,0 +1,174 @@
+module XML2PNML;
+create OUT : PNML from IN : XML;
+
+-- The getAttrVal helper, returns the value of an attribute (identified by its name, passed as a parameter) of the contextual XML Element.
+-- For this purpose, its collects, among the children of this contextual Element, the Attribute whose name matches the name passed in parameter.
+-- The helper returns the value of the first matched attribute.
+-- CONTEXT: XML!Element
+-- RETURN: String
+helper context XML!Element def: getAttrVal(name : String) : String =
+	let a : Sequence(XML!Attribute) = self.children->select(c | c.oclIsTypeOf(XML!Attribute) and c.name = name) in
+	if a.isEmpty() then 
+		''
+	else
+		a.first().value
+	endif;
+
+-- The getName() helper returns the name of a “net” or a “place” XML Element.
+-- To this end, it first gets, among its Element children, the one named “name”.
+-- It then gets the “text” XML Element child of this new node, and finally returns the value associated with it.
+-- CONTEXT: XML!Element
+-- RETURN: String
+helper context XML!Element def : getName() : String =
+	self.children->select(c | c.oclIsTypeOf(XML!Element) and c.name = 'name')->first().children
+		->select(d | d.oclIsTypeOf(XML!Element) and d.name = 'text')->first().children
+		->select(e | e.oclIsKindOf(XML!Text))->first().value;
+
+-- The getLink helper, collects all instances of xml element and search the one whose id matches the id passed in parameter.
+-- The helper returns the first xml element of the collection.
+-- CONTEXT: n/a
+-- RETURN: XML!Element
+helper def: getLink(id : String) : XML!Element =
+	XML!Element.allInstances()->select(z | z.getAttrVal('id') = id)->first();
+
+
+-- The PNMLDocument rule generates a PNMLDocument from the input XML Root Element.
+rule PNMLDocument {
+	from
+		x : XML!Root
+	to
+		document : PNML!PNMLDocument
+		(
+			xmlns <- uri
+		),
+		uri : PNML!URI
+		(
+			value <- x.getAttrVal('xmlns')
+		)
+}
+
+-- The Net rule generates a NetElement from each “net” XML Element input element. 
+-- Name of the generated NetElement is computed by calling the getName helper. 
+-- Its set of Places, Transitions and Arcs are initialized by the other rules.
+-- The link to its parent, the PNMLDocument, is also created.
+rule Net {
+	from
+		x : XML!Element
+		(
+			x.name = 'net'
+		)
+	to
+		net_element : PNML!NetElement
+		(
+			name <- named_element,
+			type <- type_uri,
+			-- pointer on the root element
+			document <- x.parent
+		),
+		type_uri : PNML!URI
+		(
+			value <- x.getAttrVal('type')
+		),
+		named_element : PNML!Name
+		(
+			labels <- label
+		),
+		label : PNML!Label
+		(
+			text <- x.getName()
+		)
+}
+
+-- The Place rule generates a PNML Place for each “place” XML Element. 
+-- Name of the generated Place is computed by a call to the getName helper. 
+-- Its id is copied from the one of the input XML Element.
+-- The link to its parent, the NetElement, is also created.
+rule Place {
+	from
+		x : XML!Element
+		(
+			x.name = 'place'
+		)
+	to
+		n : PNML!Place
+		(
+			name <- named_element,
+			-- pointer on the net element
+			net <- x.parent,
+			id <- x.getAttrVal('id'),
+			location <- ''
+		),
+		named_element : PNML!Name
+		(
+			labels <- label
+		),
+		label : PNML!Label
+		(
+			text <- x.getName()
+		)
+}
+
+-- The Transition rule generates a PNML Transition for each “transition” XML Element. 
+-- Name of the generated Transition is computed by a call to the getName helper. 
+-- Its id is copied from the one of the input XML Element.
+-- The link to its parent, the NetElement, is also created.
+rule Transition {
+	from
+		x : XML!Element
+		(
+			x.name = 'transition'
+		)
+	to
+		n : PNML!Transition
+		(
+			name <- named_element,
+			-- pointer on the net element
+			net <- x.parent,
+			id <- x.getAttrVal('id')		
+		),
+		named_element : PNML!Name
+		(
+			labels <- label
+		),
+		label : PNML!Label
+		(
+			text <- x.getName()
+		)
+}
+
+-- The Arc rule generates a PNML Arc for each “arc” XML Element. 
+-- Name of the generated Arc is computed by a call to the getName helper. 
+-- Its id is copied from the one of the input XML Element.
+-- Its source (obtained by means of the getLink helper) corresponds to the XML Element which id is contained in the child attribute named “source”. Idem for the target.
+-- The link to its parent, the NetElement, is also created.
+rule Arc {
+	from
+		x : XML!Element
+		(
+			x.name = 'arc'
+		)
+	to
+		n : PNML!Arc
+		(
+			name <- named_element,
+			id <- x.getAttrVal('id'),
+			net <- x.parent,
+			-- seek of the element pointed by the source id contained in the xml file
+			source <- thisModule.getLink(
+				(x.children->select(c | c.oclIsKindOf(XML!Attribute) and c.name = 'source')->first().value)	
+			),
+			-- seek of the element pointed by the target id contained in the xml file
+			target <- thisModule.getLink(
+				(x.children->select(c | c.oclIsKindOf(XML!Attribute) and c.name = 'target')->first().value)	
+			)
+			
+		),
+		named_element : PNML!Name
+		(
+			labels <- label
+		),
+		label : PNML!Label
+		(
+			text <- x.getName()
+		)
+}

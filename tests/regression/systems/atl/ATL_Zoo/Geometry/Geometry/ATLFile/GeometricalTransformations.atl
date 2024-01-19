@@ -1,0 +1,128 @@
+--
+-- Written in January and in February 2005 by Peter Rosenthal
+--
+
+module GeometricalTransformations;
+
+create OUT : DXF2 from IN1 : DXF1, IN2 : GeoTrans;
+
+uses GeometryLib;
+
+
+
+helper  def : getRealParam( command : GeoTrans!GeoTransfo , paramName : String ) : Real =
+	if (command.params->select(c | c.name = paramName)->size()=0) then
+		0.0
+	else
+		(command.params->select(c | c.name = paramName)->first()).param
+	endif;
+
+-- calculates the gravity center (=average) of all points of a mesh
+helper  def: getNewGC(s : DXF1!Mesh) : TupleType(x : Real, y : Real, z : Real) =
+	let nbPoints : Integer = s.points->size() in
+	Tuple {
+		x = s.points->iterate(e; acc : Real = 0.0 | acc + e.x) / nbPoints,
+		y = s.points->iterate(e; acc : Real = 0.0 | acc + e.y) / nbPoints,
+		z = s.points->iterate(e; acc : Real = 0.0 | acc + e.z) / nbPoints
+	};
+
+helper def : execute( point : DXF1!Point, -- calculatedSoFar
+					  a : TupleType(x : Real, y : Real, z : Real), 
+					  command : GeoTrans!GeoTransfo) : 
+					TupleType(x : Real, y : Real, z : Real) =
+
+	if (command.name='explode') then -- false: explode has to be run as rotate
+		let p : Real = thisModule.getRealParam(command, 'factor') in 
+			thisModule.explode( p , a )
+	else
+		if (command.name='rotate') then
+			let rotationAngle : TupleType(x : Real, y : Real, z : Real) = 
+				Tuple { x = thisModule.getRealParam(command, 'rotationX'),
+						y = thisModule.getRealParam(command, 'rotationY'),
+						z = thisModule.getRealParam(command, 'rotationZ')} in 
+				thisModule.rotate( rotationAngle , thisModule.getNewGC(point.mesh) , a )
+		else
+			if (command.name='moveForward') then
+				let vector : TupleType(x : Real, y : Real, z : Real) = 
+				Tuple { x = thisModule.getRealParam(command, 'x'),
+						y = thisModule.getRealParam(command, 'y'),
+						z = thisModule.getRealParam(command, 'z')} in 
+					thisModule.moveForward( a, vector )
+			else
+					if (command.name='moveBackward') then
+						let vector : TupleType(x : Real, y : Real, z : Real) = 
+							Tuple { x = thisModule.getRealParam(command, 'x'),
+									y = thisModule.getRealParam(command, 'y'),
+									z = thisModule.getRealParam(command, 'z')} in 
+							thisModule.moveBackward( a, vector )
+					else
+						a
+					endif
+			endif
+		endif	
+	endif;
+
+helper def : doCommands( a : DXF1!Point,
+						 calculated : TupleType(x : Real, y : Real, z : Real), 
+						 command : GeoTrans!GeoTransfo) 
+						: TupleType(x : Real, y : Real, z : Real) =	
+						
+	if command.superGeoTransfo.oclIsUndefined() then
+		thisModule.execute(a, calculated, command)
+	else
+		let newlyCalculated :  DXF1!Point	 = 
+			thisModule.doCommands(a, calculated, command.superGeoTransfo) in
+		thisModule.execute(a,newlyCalculated, command)
+	endif;
+
+helper context DXF1!Point def  : getPoint() : 
+	TupleType(x : Real, y : Real, z : Real)  =
+	
+	Tuple { x = self.x,
+			y = self.y,
+			z = self.z
+	};
+	
+rule DXF2DXF {
+	from
+		f : DXF1!DXF
+	to
+		out : DXF2!DXF (
+			meshes <- f.meshes
+		)
+}
+	
+rule Mesh {
+	from
+		mesh : DXF1!Mesh
+	to 
+		out : DXF2!Mesh (
+		 	name <- mesh.name,
+			points <- mesh.points
+		)
+}
+				
+rule Point {
+	from
+		point :	DXF1!Point
+	using {
+		c : TupleType(x : Real, y : Real, z : Real) = 
+				-- getting the root command g of the geometric transformation commands
+				let g : GeoTrans!GeoTransfo = 
+					GeoTrans!GeoTransfo->
+						allInstances()->
+							select(t| t.subGeoTransfos->size() = 0 )->first()
+				in 
+				-- executing the sequence of geometric transformation commands on this particular point
+				-- starting with the root command
+					thisModule.doCommands( point, point.getPoint(), g );
+	}
+	to
+		out : DXF2!Point (
+		 	name <- point.name,
+			x <- c.x,
+			y <- c.y,
+			z <- c.z				
+	)
+}
+

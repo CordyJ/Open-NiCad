@@ -1,0 +1,331 @@
+module UML2Amble;
+create OUT : Amble from IN : UMLDI;
+
+
+-------------------------------------------------------------------------------
+-- HELPERS --------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-- This helper computes the sequence of Class model element ordered according
+-- to their name.
+-- CONTEXT: thisModule
+-- RETURN:	Sequence(UMLDI!Class)
+helper def : sortedClasses : Sequence(UMLDI!Class) =
+	UMLDI!Class.allInstances()
+		->select(a | a.oclIsTypeOf(UMLDI!Class))
+		->asSequence()
+		->sortedBy(b | b.name);
+
+
+-- This helper calculates the number of declared instances of a given process.
+-- This data is encoded as a taggedValue, of type 'instances' associated with
+-- each Class model element.
+-- CONTEXT: UMLDI!Class
+-- RETURN:	Integer
+helper context UMLDI!Class def : getInstancesNb() : Integer =
+	self.taggedValue
+		->select(x | x.type.name = 'instances')
+		->first().dataValue
+		->asSequence()->first().toInteger();
+
+	
+-- This helper calculates the minId of the process associated with the
+-- contextual Class. Consecutive Ids are assigned to processes according to
+-- their rank in the sortedClasses Sequence, and their instances number.
+-- The minId associated with a Class C corresponds to the sum of instances
+-- number of the classes that appear before C within sortedClasses.
+-- CONTEXT: UMLDI!Class
+-- RETURN:	Integer
+helper context UMLDI!Class def : getMinId() : Integer =
+	thisModule.sortedClasses
+		->iterate(e; acc : Integer = 0 |
+			if thisModule.sortedClasses->indexOf(e)
+				< thisModule.sortedClasses->indexOf(self) then
+				acc + e.getInstancesNb()
+			else
+				acc
+			endif
+		);
+
+
+-- This helper calculates the maxId of the process associated with the
+-- contextual Class. This value corresponds to the minId of the Class
+-- plus the instances number of the Class.
+-- CONTEXT: UMLDI!Class
+-- RETURN:	Integer
+helper context UMLDI!Class def : getMaxId() : Integer =
+	self.getMinId() + self.getInstancesNb() - 1;
+
+
+-- This helper computes the set of attributes that are owned by the UML class
+-- that has the same name that the contextual state machine.
+-- CONTEXT: UMLDI!StateMachine
+-- RETURN:	Set(UMLDI!Attribute)
+helper context UMLDI!StateMachine def : getVariables() : Set(UMLDI!Attribute) =
+	UMLDI!Attribute.allInstances()
+		->select(a | a.owner.oclIsTypeOf(UMLDI!Class) and
+					 a.owner.name = self.name
+				);
+
+
+-- This helper computes the message receipt operation (owned by an association
+-- class) associated with the contextual transition.
+-- CONTEXT: UMLDI!Transition
+-- RETURN:	UMLDI!Operation
+helper context UMLDI!Transition	def : getMessage() : UMLDI!Operation =
+	let statemachine_name : String = 
+		UMLDI!StateMachine.allInstances()
+			->select(a | a.transitions->includes(self))
+			->first().name in
+	let guard_name : String = self.guard.name in
+	UMLDI!Operation.allInstances()
+		->select(a | a.owner.oclIsTypeOf(UMLDI!AssociationClass))
+		->select(b | 'received_' + b.name = guard_name)
+		->select(c | c.owner.connection
+					->collect(d | d.participant)
+					->collect(e | e.name)
+					->includes(statemachine_name)
+				)
+		->first();
+
+
+-- This helper computes the state machine that has the same name that the
+-- source class of the contextual association class.
+-- CONTEXT: UMLDI!AssociationClass
+-- RETURN:	UMLDI!StateMachine
+helper context UMLDI!AssociationClass
+	def : getSourceProcess() : UMLDI!StateMachine =
+	let source_name : String =
+		self.connection
+			->select(a | not a.isNavigable)
+			->first().participant.name in
+	UMLDI!StateMachine.allInstances()
+		->select(a | a.name = source_name)->first();
+	
+
+-- This helper computes the state machine that has the same name that the
+-- target class of the contextual association class.
+-- CONTEXT: UMLDI!AssociationClass
+-- RETURN:	UMLDI!StateMachine
+helper context UMLDI!AssociationClass
+	def : getTargetProcess() : UMLDI!StateMachine =
+	let target_name : String =
+		self.connection
+			->select(a | a.isNavigable)
+			->first().participant.name in
+	UMLDI!StateMachine.allInstances()
+		->select(a | a.name = target_name)->first();
+
+
+
+-------------------------------------------------------------------------------
+-- RULES ----------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-- Rule 'Model2Program'.
+-- This rule generates the structure of the root Program element from the UML
+-- model.
+rule Model2Program {
+	from
+		model: UMLDI!Model
+	to
+		prg: Amble!Program (
+			name <- model.name,
+			processes <- UMLDI!StateMachine.allInstances(),
+			networks <- UMLDI!AssociationClass.allInstances()
+		)
+}
+
+
+-- Rule 'StateMachine2Process'.
+-- This rule generates an Amble process, with its states, its transitions and
+-- its initial action from an UML state machine.
+-- It also generates the 'id' variable associated with the created Amble
+-- process.
+rule StateMachine2Process {
+	from
+		statemachine: UMLDI!StateMachine
+	using {
+		crt_class : UMLDI!Class =
+			UMLDI!Class.allInstances()
+				->select(a | a.name = statemachine.name)
+				->first();
+	}
+	to
+		process: Amble!Process (
+			name <- statemachine.name,
+			instancesNb <- crt_class.getInstancesNb(),
+			minId <- crt_class.getMinId(),
+			maxId <- crt_class.getMaxId(),
+			states <- statemachine.top.subvertex
+						->select(d | d.oclIsKindOf(UMLDI!SimpleState)),
+			transitions <- statemachine.transitions,
+			initial <- statemachine.top.subvertex
+						->select(d | d.oclIsKindOf(UMLDI!Pseudostate)) 
+						->collect(o | o.outgoing
+								->collect(e | e.effect)).flatten()->first(),
+			variables <- statemachine.getVariables(),
+			connectedTo <- UMLDI!AssociationClass.allInstances()
+							->select(e | e.connection
+								->collect(d | d.participant.name)
+								->includes(statemachine.name))
+		)
+}
+
+
+-- Rule 'Attribute2Variable'.
+-- This rule generates an Amble process Variable from each UML attribute
+-- that is defined within the context of an UML Class.
+rule Attribute2Variable {
+	from
+		attribute: UMLDI!Attribute (
+			attribute.owner.oclIsTypeOf(UMLDI!Class)
+		)
+	to
+		variable: Amble!Variable (
+			name <- attribute.name,
+			type <- attribute.type.name,
+			initValue <- attribute.initialValue.body
+		)
+}
+
+
+-- Rule 'State2State'.
+-- This rule generates an Amble state with its name and its incoming and
+-- outgoing transitions from an UML simple state.
+-- The 'isInitial' property is computed by checking if one of the incoming
+-- transitions is initialted by an UML pseudostate.
+rule State2State {
+	from
+		uml_state: UMLDI!SimpleState
+	to
+		amble_state: Amble!State (
+			name <- uml_state.name,
+			isInitial <- not uml_state.incoming
+							->collect(e | e.source)
+							->select(d | d.oclIsKindOf(UMLDI!Pseudostate))
+							->isEmpty(),
+			incoming <- uml_state.incoming,
+			outgoing <- uml_state.outgoing
+		)
+}
+
+
+-- Rule 'Transition2Trans'.
+-- This rule generates the structure of the root Program element when the
+-- input element contains no monitors.
+rule Transition2Trans {
+	from
+		uml_trans: UMLDI!Transition(
+			uml_trans.name = 'RECEIPT'
+		)
+	to
+		trans: Amble!Trans (
+			source <- uml_trans.source,
+			target <- uml_trans.target,
+			guard <- uml_trans.guard,
+			action <- uml_trans.effect,
+			waitFor <- uml_trans.getMessage()
+		)
+}
+
+
+-- Rule 'Transition2TransAll'.
+-- This rule generates the structure of the root Program element when the
+-- input element contains no monitors.
+rule Transition2TransAll {
+	from
+		uml_trans: UMLDI!Transition(
+			uml_trans.name = 'RECEIPT_ANY'
+		)
+	to
+		trans: Amble!Transall (
+			source <- uml_trans.source,
+			target <- uml_trans.target,
+			guard <- uml_trans.guard,
+			action <- uml_trans.effect,
+			waitFor <- uml_trans.getMessage()
+		)
+}
+
+
+-- Rule 'Transition2Strans'.
+-- This rule generates the structure of the root Program element when the
+-- input element contains no monitors.
+rule Transition2Strans {
+	from
+		uml_trans: UMLDI!Transition(
+			(
+				uml_trans.name.oclIsUndefined()
+				or uml_trans.name = 'CONDITION'
+			)
+			and
+			uml_trans.source->oclIsKindOf(UMLDI!SimpleState)
+		)
+	to
+		trans: Amble!Strans (
+			source <- uml_trans.source,
+			target <- uml_trans.target,
+			guard <- uml_trans.guard,
+			action <- uml_trans.effect 
+		)
+}
+
+
+-- Rule 'Guard2Guard'.
+-- This rule generates an Amble guard from an UML guard.
+rule Guard2Guard {
+	from
+		uml_guard: UMLDI!Guard
+	to
+		amble_guard: Amble!Guard (
+			name <- uml_guard.name
+		)
+}
+
+
+-- Rule 'Effect2Action'.
+-- This rule generates an Amble action from an UML effect.
+rule Effect2Action {
+	from
+		effect: UMLDI!CallAction
+	to
+		action: Amble!Action (
+			name <- effect.name
+		)
+}
+
+
+-- Rule 'Class2Network'.
+-- This rule generates ...
+rule Class2Network {
+	from
+		class: UMLDI!AssociationClass
+	to
+		net: Amble!Network (
+			name <- class.name,
+			channels <- new_channel
+		),
+		new_channel: Amble!Channel (
+			name <- class.name,
+			messages <- class.feature,
+			source <- class.getSourceProcess(),
+			target <- class.getTargetProcess()
+		)
+}
+
+
+-- Rule 'Operation2Message'.
+-- This rule generates ...
+rule Operation2Message {
+	from
+		operation: UMLDI!Operation (
+			operation.owner.oclIsTypeOf(UMLDI!AssociationClass)
+		)
+	to
+		message: Amble!Message (
+			name <- operation.name
+		)
+}

@@ -1,0 +1,772 @@
+-- @atlcompiler atl2006
+module UML2AnyLogic; -- Module Template
+
+create OUT : AnyLogic from IN : UML, IN_DI : DI;
+
+--- !!! HELPER !!! ---
+
+--default values for missing annotations
+helper def : defaultCPUTime  : Real = 60;
+helper def : defaultDBAccess : Integer = 0;
+helper def : defaultDBRows   : Integer = 0;
+
+helper def : defaultProbability : Real = 0.5;
+
+helper def : defaultRate      : Real = 120;
+
+--to scale the presentation
+helper def : scaleFactor : Real = 1.2;
+
+--counter to generate unique IDs use by AnyLogic
+helper def : idCounter   : Integer = 1000;
+
+--helper to clean a string to a valid Java identifier which is required for names in AnyLogic
+helper context String def : clean() : String = 
+	self.regexReplaceAll('[^a-zA-Z_0-9]','');
+
+--helper to access an applied stereotype from the PerformanceProfile
+helper context UML!Element def : getPerformanceAnnotation(stereotype : String) :  OclAny = 
+	if self.getAppliedStereotype('SPT::' + stereotype).oclIsUndefined()
+		then OclUndefined
+		else 
+			self.getStereotypeApplication(self.getAppliedStereotype('SPT::' + stereotype))
+	endif;
+
+--helpers to retrieve diagram information from the DI input model
+helper context UML!Element def : getVisual() : DI!GraphNode = 
+	if (DI!GraphNode.allInstances()->select( e | e.semanticModel.element = self )->size() = 0)
+		then OclUndefined
+		else DI!GraphNode.allInstances()->select( e | e.semanticModel.element = self )->first()
+	endif;
+
+helper context UML!Activity def : getAllVisuals() : Sequence(DI!GraphNode) = 
+	DI!GraphNode.allInstances()->select( e | 
+		self.node->exists(e2 | e2 = e.semanticModel.element) or
+		self.edge->exists(e2 | e2 = e.semanticModel.element)
+	);
+
+helper context UML!ActivityEdge def: getAllWaypoints() : Sequence(String) = 
+	if (DI!GraphEdge.allInstances()->select( e | e.semanticModel.element = self )->size() = 0)
+		then Sequence{}
+		else 
+			DI!GraphEdge.allInstances()->select( e | e.semanticModel.element = self )->first().waypoints
+	endif;
+
+helper context UML!Element def : getX() : Integer =
+	if (DI!GraphNode.allInstances()->select( e | e.semanticModel.element = self )->size() = 0)
+		then -200
+		else DI!GraphNode.allInstances()->select( e | e.semanticModel.element = self )->first().getX()
+	endif;
+
+helper context UML!Element def : getY() : Integer =
+	if (DI!GraphNode.allInstances()->select( e | e.semanticModel.element = self )->size() = 0)
+		then 100
+		else DI!GraphNode.allInstances()->select( e | e.semanticModel.element = self )->first().getY()
+	endif;
+	
+helper context DI!GraphNode def : getX() : Integer = 
+	((self.position.substring(self.position.indexOf('(') + 2,self.position.indexOf(',')).toInteger()) * thisModule.scaleFactor).round();
+
+helper context DI!GraphNode def : getY() : Integer = 
+	((self.position.substring(self.position.indexOf(',') + 3,self.position.indexOf(')')).toInteger()) * thisModule.scaleFactor).round();
+
+helper context DI!GraphNode def: getName() :String =
+	if(UML!Element.allInstances()->select(e  | e = self.semanticModel.element)->size() = 0)
+		then ''
+		else UML!Element.allInstances()->select(e | e = self.semanticModel.element)->first().name
+	endif;
+
+helper context String def : getWaypointX() : Integer = 
+	((self.substring(self.indexOf('sourceX: ') + 10, self.indexOf('sourceY') - 2).toInteger()) * thisModule.scaleFactor).round();
+
+helper context String def : getWaypointY() : Integer = 
+	((self.substring(self.indexOf('sourceY: ') + 10, self.indexOf('targetX') - 2).toInteger()) * thisModule.scaleFactor).round();
+
+
+-- !!! RULES !!! --- 
+
+abstract rule ModelElement {
+	from
+	    i : UML!Element
+	to
+		o : AnyLogic!ModelElement (
+			excludeFromBuild <- false,
+			name <- i.name.clean()
+		)	
+}
+
+rule EmbeddedObjectPresentation {
+	from
+		i : DI!GraphNode (
+			i.semanticModel.element.oclIsKindOf(UML!ActivityNode)
+		)
+	to
+		o : AnyLogic!EmbeddedObjectPresentation (
+			excludeFromBuild <- false,
+			name <-i.getName().clean(),
+			position <- position,
+        	label <- label,
+        	publicFlag <- true,
+	    	presentationFlag <- true,
+			showLabel <- false,
+			
+			asObject <- false,
+			embeddedIcon <- false,
+			rotation <- 0.0		
+		),
+		label : AnyLogic!Point (
+			x <- 10,
+			y <- 0
+		),
+		position: AnyLogic!Point (
+			x <- i.getX(),
+			y <- i.getY()
+		)
+	do {
+		thisModule.idCounter <- thisModule.idCounter + 1;
+		o.id <- thisModule.idCounter;
+		if (o.name.size() = 0) o.name <- 'presetation' + thisModule.idCounter.toString();
+		else  o.name <- o.name + '_presentation' + thisModule.idCounter.toString();
+	}
+}
+
+--the "main" model rule
+rule Model extends ModelElement {
+	from
+	    i : UML!Model 
+	to
+		o : AnyLogic!Model (
+			engineVersion <- 6,
+		    javaPackageName <- i.name.clean().toLower(),
+			activeObjectClasses <- UML!Activity.allInstances(),
+			experiments <- Sequence{simulationExperiment}
+		),
+
+		-- One simulation experiment is created
+		simulationExperiment: AnyLogic!SimulationExperiment (
+			activeObjectClass <- UML!Activity.allInstances()->asSequence()->first(), --TODO ok, as long as there is only one activity
+			
+			excludeFromBuild <- false,
+			name <- i.name.clean() + 'Simulation',
+			
+			clientAreaTopLeft <- expPos,
+			presentationTopGroupPersistent <- true,
+			iconTopGroupPersistent <- true,
+			frame <- expFrame ,
+			commandLineArguments <- '',
+			maximumMemory <- 64,
+			randomSeed <- false,
+			seedValue <- 1,
+			vmArgs <- '',
+			absoluteAccuracy <- 0.00001,
+			relativeAccuracy <- 0.00001,
+			timeAccuracy <- 0.00001,
+			fixedTimeStep <- 0.0010,
+			shapes <- Sequence{expText1, expText2},
+			controls <- Sequence{expButton},
+			parameters <- Sequence{},
+
+			enableAdaptiveFrameManagement <- true,
+			enableAntiAliasing <- true,
+			enablePanning <- true,
+			enableZoom <- true,
+			executionMode <- 'realTime',
+			cpuRatio <- 'ratio_1_2',
+			title <- i.name + ' : Derived Simulation',
+			framesPerSecond <- '20.0',
+			realTimeScale <- 'SCALE_1',
+			uiProperties <- Sequence{uiP1,uiP2,uiP3,uiP4,uiP5,uiP6,uiP7,uiP8,uiP9,uiP11,uiP12,uiP13,uiP14,uiP15,uiP16},
+		
+		 	useCalendar <- false,
+			stopOption <- 'Stop at specified time',
+			initialTime <- '0.0',
+			finalTime <- '100000.0',	
+			modelTimeUnit <- 'Millisecond'
+		),
+		expPos: AnyLogic!Point (
+			x <- 0,
+			y <- 0
+		),
+		expFrame: AnyLogic!Frame (
+			x <-0,
+			y <-0,
+			width <- 800,
+			height <- 600
+		),
+		expText1: AnyLogic!Text (
+			id <- 0,
+			name <- 'generatedText1',
+			excludeFromBuild <- false,
+			position <- expText1Position,
+        	label <- expText1Label,
+			publicFlag <- true,
+			presentationFlag <- true,
+			showLabel <- false,
+			asObject <- true,
+			embeddedIcon <- false,
+			rotation <- 0.0,
+			color <- -16777216,
+			text <- i.name + ' Simulation',
+			font <- expText1Font,
+			alignment <- 'LEFT'		
+		),
+		expText1Position : AnyLogic!Point (
+			x <- 40,
+			y <- 30
+		),
+		expText1Label: AnyLogic!Point (
+			x <- 0,
+			y <- 0
+		),
+		expText1Font: AnyLogic!Font (
+			name <- 'Times New Roman',
+			size <- 28,
+			style <- 1		
+		),
+		expText2: AnyLogic!Text (
+			id <- 0,
+			name <- 'generatedText2',
+			excludeFromBuild <- false,
+			position <- expText2Position,
+        	label <- expText2Label,
+			publicFlag <- true,
+			presentationFlag <- true,
+			showLabel <- false,
+			asObject <- true,
+			embeddedIcon <- false,
+			rotation <- 0.0,
+			color <- -16777216,
+			text <- 'Simulation generated from the UML model ' + i.name + '\nby the transformation developed in Task 4.2 of the MODELPLEX IP.',
+			font <- expText2Font,
+			alignment <- 'LEFT'		
+		),
+		expText2Position : AnyLogic!Point (
+			x <- 40,
+			y <- 63
+		),
+		expText2Label: AnyLogic!Point (
+			x <- 0,
+			y <- 0
+		),
+		expText2Font: AnyLogic!Font (
+			name <- 'Times New Roman',
+			size <- 16,
+			style <- 2		
+		),
+		expButton: AnyLogic!Button (
+			embeddedIcon <- false,				
+			id <- 0,
+			name <- 'generatedButton',
+			excludeFromBuild <- false,
+			position <- expButtonPosition,
+        	label <- expButtonLabel,
+			publicFlag <- true,
+			presentationFlag <- true,
+			showLabel <- false,
+			width <- 220,
+			height <- 30, 
+			asObject <- true,
+            embeddedIcon <- false,			
+			textColor <- -16777216,
+			enableExpression <- 'getState() == IDLE',
+			actionCode <- 'run(); getEngine().getPresentation().setPresentable( getEngine().getRoot() );',
+			labelText <- 'Run the simulation model and switch to Main view',
+			font <- expButtonFont	
+		),
+		expButtonPosition : AnyLogic!Point (
+			x <- 40,
+			y <- 120
+		),
+		expButtonLabel: AnyLogic!Point (
+			x <- 0,
+			y <- 0
+		),
+		expButtonFont: AnyLogic!Font (
+			name <- 'Tahoma',
+			size <- 11,
+			style <- 0		
+		),
+		uiP1: AnyLogic!Parameter (
+			name <- 'Statusbar Memory',
+			value <- 'true'
+		),
+		uiP2: AnyLogic!Parameter (
+			name <- 'Statusbar Model Step',
+			value <- 'false'
+		),
+		uiP3: AnyLogic!Parameter (
+			name <- 'Experiment Progress',
+			value <- 'false'
+		),
+		uiP4: AnyLogic!Parameter (
+			name <- 'Toolbar Animation setup',
+			value <- 'false'
+		),
+		uiP5: AnyLogic!Parameter (
+			name <- 'Statusbar Status',
+			value <- 'true'
+		),
+		uiP6: AnyLogic!Parameter (
+			name <- 'Toolbar File',
+			value <- 'false'
+		),
+		uiP7: AnyLogic!Parameter (
+			name <- 'Toolbar Time scale setup',
+			value <- 'true'
+		),
+		uiP8: AnyLogic!Parameter (
+			name <- 'Toolbar Model navigation',
+			value <- 'true'
+		),
+		uiP9: AnyLogic!Parameter (
+			name <- 'Statusbar Real Time Of Simulation',
+			value <- 'true'
+		),
+		uiP10: AnyLogic!Parameter (
+			name <- 'Toolbar Execution control',
+			value <- 'true'
+		),
+		uiP11: AnyLogic!Parameter (
+			name <- 'Statusbar Model Time',
+			value <- 'false'
+		),
+		uiP12: AnyLogic!Parameter (
+			name <- 'Statusbar Events Per Second',
+			value <- 'false'
+		),
+		uiP13: AnyLogic!Parameter (
+			name <- 'Toolbar View',
+			value <- 'false'
+		),
+		uiP14: AnyLogic!Parameter (
+			name <- 'Simulation Progress',
+			value <- 'true'
+		),
+		uiP15: AnyLogic!Parameter (
+			name <- 'Statusbar Frames Per Second',
+			value <- 'false'
+		),
+		uiP16: AnyLogic!Parameter (
+			name <- 'Statusbar Model Date',
+			value <- 'false'
+		)
+	do {
+		thisModule.idCounter <- thisModule.idCounter + 1;
+		o.id <- thisModule.idCounter;
+		if (o.name.size() = 0) o.name <- 'DerivedSimulationModel';
+	
+		thisModule.idCounter <- thisModule.idCounter + 1;
+		simulationExperiment.id <- thisModule.idCounter;
+	}
+}
+
+rule ActiveObjectClass extends ModelElement {
+	from 
+	    i : UML!Activity
+	using {
+		actionNodes : Sequence(UML!Action) = i.node->select(e | e.oclIsKindOf(UML!Action));
+	}
+	to
+		o : AnyLogic!ActiveObjectClass (
+			clientAreaTopLeft <- catl,
+		    presentationTopGroupPersistent <- true,
+		    iconTopGroupPersistent <- true,
+		    generic <- false,
+		    genericParameters <- 'T',
+            agent <- false,
+			connectors <- i.edge->union(cpuConnectors),
+			embeddedObjects <- i.node->union(cpus),
+			shapes <- i.getAllVisuals()->union(cpuVisuals)
+		),
+		catl: AnyLogic!Point (
+			x <- 0,
+			y <- 0
+		),
+		
+		-- TODO: for now we simpley attach one cpu to each action
+		cpuVisuals : distinct AnyLogic!EmbeddedObjectPresentation foreach(e in actionNodes)(
+			excludeFromBuild <- false,
+			name <-'cpu_presentation',
+			position <- positionList1->at(actionNodes->indexOf(e)),
+			label <- labelList1->at(actionNodes->indexOf(e)),
+        	publicFlag <- true,
+	    	presentationFlag <- true,
+			showLabel <- false,
+			
+			asObject <- false,
+			embeddedIcon <- false,
+			rotation <- 0.0
+		),
+		positionList1: distinct AnyLogic!Point foreach(e in actionNodes) (
+			x <- e.getX() + 220,
+			y <- e.getY() + 10
+		),
+		labelList1: distinct AnyLogic!Point foreach (e in actionNodes) (
+			x <- 10,
+			y <- 0
+		),
+
+		cpus : distinct AnyLogic!EmbeddedObject foreach(e in actionNodes)(
+			excludeFromBuild <- false,
+			name <- 'cpu',
+			position <- positionList2->at(actionNodes->indexOf(e)),
+			label <- labelList2->at(actionNodes->indexOf(e)),
+        	publicFlag <- false,
+	    	presentationFlag <- true,
+			showLabel <- false,
+			presentation <- cpuVisuals->at(actionNodes->indexOf(e)),
+			
+		    activeObjectClass <- aoRefList->at(actionNodes->indexOf(e)),	
+			genericParametersSubstitute <- ''
+		),
+		aoRefList: distinct AnyLogic!ActiveObjectClassRef foreach(e in actionNodes) (
+			packageName <- 'de.tudresden.anylogic.activity',
+			className <- 'CPU'
+		),
+		positionList2: distinct AnyLogic!Point foreach(e in actionNodes) (
+			x <- e.getX() + 220,
+			y <- e.getY() + 10
+		),
+		labelList2: distinct AnyLogic!Point foreach (e in actionNodes) (
+			x <- 10,
+			y <- 0
+		),
+		cpuConnectors : distinct AnyLogic!Connector foreach(e in actionNodes)(
+			excludeFromBuild <- false,
+			name <-'cpu_connector',
+			position <- positionList3->at(actionNodes->indexOf(e)),
+			label <- labelList3->at(actionNodes->indexOf(e)),
+        	publicFlag <- false,
+	    	presentationFlag <- true,
+			showLabel <- false,
+			sourceEmbeddedObject <- e,
+			sourceConnectableName <- 'cpu',
+			targetEmbeddedObject <- cpus->at(actionNodes->indexOf(e)),
+			targetConnectableName <- 'cpu'
+		),
+		positionList3: distinct AnyLogic!Point foreach(e in actionNodes) (
+			x <- 0,
+			y <- 0
+		),
+		labelList3: distinct AnyLogic!Point foreach (e in actionNodes) (
+			x <- 10,
+			y <- 0
+		),
+		pointSourceList: distinct AnyLogic!Point foreach (e in actionNodes) (
+			x <- 0,
+			y <- 0
+		),
+		pointTargetList: distinct AnyLogic!Point foreach (e in actionNodes) (
+			x <- 0,
+			y <- 0
+		)
+	do {
+		thisModule.idCounter <- thisModule.idCounter + 1;
+		o.id <- thisModule.idCounter;
+		if (o.name.size() = 0) o.name <- 'Activity' + thisModule.idCounter.toString();
+		
+		for (e in cpus) {
+			thisModule.idCounter <- thisModule.idCounter + 1;
+			e.id <- thisModule.idCounter;
+			e.name <- e.name + thisModule.idCounter.toString();
+		}
+		for (e in cpuVisuals) {
+			thisModule.idCounter <- thisModule.idCounter + 1;
+			e.id <- thisModule.idCounter;
+			e.name <- e.name + thisModule.idCounter.toString();
+		}
+		for (e in cpuConnectors) {
+			thisModule.idCounter <- thisModule.idCounter + 1;
+			e.id <- thisModule.idCounter;
+			e.name <- e.name + thisModule.idCounter.toString();
+			e.points <- Sequence{pointSourceList->at(cpuConnectors->indexOf(e)),pointTargetList->at(cpuConnectors->indexOf(e))};
+		}
+		
+	}
+}
+
+rule Connector extends ModelElement {
+	from
+		i : UML!ActivityEdge
+	to
+		o : AnyLogic!Connector (
+			position <- position,
+        	label <- label,
+        	publicFlag <- false,
+	    	presentationFlag <- true,
+			showLabel <- false,
+			sourceEmbeddedObject <- i.source,
+			-- TODO at the moment ony Yes/No is support in decission nodes
+			sourceConnectableName <- 
+				if (i.source.oclIsTypeOf(UML!DecisionNode))
+					then if (i.name = 'Yes')
+						then 'outYes'
+						else 'outNo'
+					endif
+					else 'out'
+				endif,
+			-- sourceConnectableName <- 'out',
+			targetEmbeddedObject <- i.target,
+			targetConnectableName <- 'in',
+			points <- Sequence{pointSource}->union(waypoints)->union(Sequence{pointTarget})
+		),
+		position: AnyLogic!Point (
+			x <- 0,
+			y <- 0
+		),
+		label : AnyLogic!Point (
+			x <- 10,
+			y <- 0
+		),
+		pointSource : AnyLogic!Point (
+			x <- i.source.getX(),
+			y <- i.source.getY()
+		),
+		pointTarget : AnyLogic!Point (
+			x <- i.target.getX(),
+			y <- i.target.getY()
+		),
+		waypoints : distinct AnyLogic!Point foreach(e in i.getAllWaypoints())(
+			x <- e.getWaypointX() + i.source.getX(),
+			y <- e.getWaypointY() + i.source.getY()
+		)
+	do {
+		thisModule.idCounter <- thisModule.idCounter + 1;
+		o.id <- thisModule.idCounter;
+		if (o.name.size() = 0) o.name <- 'connector' + thisModule.idCounter.toString();
+		else o.name <- o.name + thisModule.idCounter.toString(); 
+	}
+}
+
+abstract rule EmbeddedObject extends ModelElement {
+	from 
+	    i : UML!ActivityNode 
+	to
+		o : AnyLogic!EmbeddedObject (
+			position <- position,
+        	label <- label,
+        	publicFlag <- false,
+	    	presentationFlag <- true,
+			presentation <- i.getVisual(),
+			showLabel <- true,
+			
+		    activeObjectClass <- aoRef,	
+			genericParametersSubstitute <- ''
+		),
+		position: AnyLogic!Point (
+			x <- i.getX(),
+			y <- i.getY()
+		),
+		label : AnyLogic!Point (
+			x <- 10,
+			y <- 0
+		),
+		aoRef: AnyLogic!ActiveObjectClassRef (
+			packageName <- 'de.tudresden.anylogic.activity'
+		)
+
+}
+
+rule EmbeddedObjectInitialNode extends EmbeddedObject {
+	from 
+	    i : UML!InitialNode 
+	to
+		o : AnyLogic!EmbeddedObject (
+			parameters <- Sequence{arrivalRate},
+			showLabel <- false
+		),
+		aoRef: AnyLogic!ActiveObjectClassRef (
+			className <- 'InitialNode'
+		),
+		arrivalRate : AnyLogic!Parameter (
+			name <- 'rate',
+			value <- 
+				if 	(i.outgoing->first().target.getPerformanceAnnotation('PStep').oclIsUndefined())
+					then thisModule.defaultRate.toString()
+					else i.outgoing->first().target.getPerformanceAnnotation('PStep').repetition.substring(12,14)
+				endif
+		)
+	do {
+		thisModule.idCounter <- thisModule.idCounter + 1;
+		o.id <- thisModule.idCounter;
+		if (o.name.size() = 0) o.name <- 'initialNode' + thisModule.idCounter.toString();
+		else o.name <- o.name   + thisModule.idCounter.toString();
+	}
+}
+
+rule EmbeddedObjectFinalNode extends EmbeddedObject {
+	from 
+	    i : UML!FinalNode 
+	to
+		o : AnyLogic!EmbeddedObject (
+		),
+		aoRef: AnyLogic!ActiveObjectClassRef (
+			className <- 'FinalNode'
+		)
+	do {
+		thisModule.idCounter <- thisModule.idCounter + 1;
+		o.id <- thisModule.idCounter;
+		if (o.name.size() = 0) o.name <- 'finalNode' + thisModule.idCounter.toString();
+		else o.name <- o.name   + thisModule.idCounter.toString();
+	}
+}
+
+rule EmbeddedObjectJoinNode extends EmbeddedObject {
+	from 
+	    i : UML!JoinNode 
+	to
+		o : AnyLogic!EmbeddedObject (
+			showLabel <- false
+		),
+		aoRef: AnyLogic!ActiveObjectClassRef (
+			className <- 'JoinNode'
+		)
+	do {
+		thisModule.idCounter <- thisModule.idCounter + 1;
+		o.id <- thisModule.idCounter;
+		if (o.name.size() = 0) o.name <- 'joinNode' + thisModule.idCounter.toString();
+		else o.name <- o.name   + thisModule.idCounter.toString();
+	}
+}
+
+rule EmbeddedObjectMergeNode extends EmbeddedObject {
+	from 
+	    i : UML!MergeNode 
+	to
+		o : AnyLogic!EmbeddedObject (
+			showLabel <- false
+		),
+		aoRef: AnyLogic!ActiveObjectClassRef (
+			className <- 'MergeNode'
+		)
+	do {
+		thisModule.idCounter <- thisModule.idCounter + 1;
+		o.id <- thisModule.idCounter;
+		if (o.name.size() = 0) o.name <- 'mergeNode' + thisModule.idCounter.toString();
+		else o.name <- o.name   + thisModule.idCounter.toString();
+	}
+}
+
+rule EmbeddedObjectForkNode extends EmbeddedObject {
+	from 
+	    i : UML!ForkNode 
+	to
+		o : AnyLogic!EmbeddedObject (
+			showLabel <- false
+		),
+		aoRef: AnyLogic!ActiveObjectClassRef (
+			className <- 'ForkNode'
+		)
+	do {
+		thisModule.idCounter <- thisModule.idCounter + 1;
+		o.id <- thisModule.idCounter;
+		if (o.name.size() = 0) o.name <- 'forkNode' + thisModule.idCounter.toString();
+		else o.name <- o.name   + thisModule.idCounter.toString();
+	}
+}
+
+rule EmbeddedObjectDecisionNode extends EmbeddedObject {
+	from 
+	    i : UML!DecisionNode 
+	to
+		o : AnyLogic!EmbeddedObject (
+			parameters <- Sequence{probability},
+			showLabel <- false
+		),
+		aoRef: AnyLogic!ActiveObjectClassRef (
+			className <- 'DecisionNode'
+		),
+		probability : AnyLogic!Parameter (
+			name <- 'probabilityYes',
+			value <- 
+				if (i.outgoing->select(e | e.name = 'Yes')->size() = 0)
+					then thisModule.defaultProbability.toString()
+					else if (i.outgoing->select(e | e.name = 'Yes')->first().getPerformanceAnnotation('PStep').oclIsUndefined())
+						then thisModule.defaultProbability.toString()
+						else (i.outgoing->select(e | e.name = 'Yes')->first().getPerformanceAnnotation('PStep').probability / 100 ).toString()
+					endif
+				endif
+		)
+	do {
+		thisModule.idCounter <- thisModule.idCounter + 1;
+		o.id <- thisModule.idCounter;
+		if (o.name.size() = 0) o.name <- 'decisionNode' + thisModule.idCounter.toString();
+		else o.name <- o.name   + thisModule.idCounter.toString();
+	}
+}
+
+rule EmbeddedObjectAction extends EmbeddedObject {
+	from 
+	    i : UML!Action 
+	to
+		o : AnyLogic!EmbeddedObject (
+			parameters <- Sequence{cpuTime,dbAccess,dbRows}
+		),
+		aoRef: AnyLogic!ActiveObjectClassRef (
+			className <- 'Action'
+		),
+		cpuTime : AnyLogic!Parameter (
+			name <- 'cpuTime',
+			value <- 
+				if 	(i.getPerformanceAnnotation('PStep').oclIsUndefined())
+					then thisModule.defaultCPUTime.toString()
+					else i.getPerformanceAnnotation('PStep').hostExecutionDemand.substring(12,14)
+				endif		
+		),
+		dbAccess : AnyLogic!Parameter (
+			name <- 'dbAccess',
+			value <- '0'
+		),
+		dbRows : AnyLogic!Parameter (
+			name <- 'dbRows',
+			value <- '0'
+		)
+	do {
+		thisModule.idCounter <- thisModule.idCounter + 1;
+		o.id <- thisModule.idCounter;
+		if (o.name.size() = 0) o.name <- 'action' + thisModule.idCounter.toString();
+		else o.name <- o.name   + thisModule.idCounter.toString();
+	}
+}
+
+rule EmbeddedObjectSendSignalAction extends EmbeddedObjectAction {
+	from 
+	    i : UML!SendSignalAction 
+	to
+		o : AnyLogic!EmbeddedObject (
+		),
+		aoRef: AnyLogic!ActiveObjectClassRef (
+			className <- 'SendSignalAction'
+		)
+	do {
+		thisModule.idCounter <- thisModule.idCounter + 1;
+		o.id <- thisModule.idCounter;
+		if (o.name.size() = 0) o.name <- 'sendSignalAction' + thisModule.idCounter.toString();
+		else o.name <- o.name   + thisModule.idCounter.toString();
+	}
+}
+
+rule EmbeddedObjectAcceptEventAction extends EmbeddedObjectAction {
+	from 
+	    i : UML!AcceptEventAction 
+	to
+		o : AnyLogic!EmbeddedObject (
+		),
+		aoRef: AnyLogic!ActiveObjectClassRef (
+			className <- 'AcceptEventAction'
+		)
+	do {
+		thisModule.idCounter <- thisModule.idCounter + 1;
+		o.id <- thisModule.idCounter;
+		if (o.name.size() = 0) o.name <- 'acceptEventAction' + thisModule.idCounter.toString();
+		else o.name <- o.name   + thisModule.idCounter.toString();
+	}
+}
+
+
+
+
+
+
+
+

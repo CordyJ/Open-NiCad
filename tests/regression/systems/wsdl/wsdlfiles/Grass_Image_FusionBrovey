@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://Grass_Image_FusionBrovey.grass.ws.laits.gmu.edu" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://Grass_Image_FusionBrovey.grass.ws.laits.gmu.edu" xmlns:intf="http://Grass_Image_FusionBrovey.grass.ws.laits.gmu.edu" xmlns:tns1="http://grass.ws.laits.gmu.edu" xmlns:tns2="http://ws.laits.gmu.edu" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+	 <wsdl:types>
+
+		  <schema elementFormDefault="qualified" targetNamespace="http://Grass_Image_FusionBrovey.grass.ws.laits.gmu.edu" xmlns="http://www.w3.org/2001/XMLSchema">
+
+			<!-- ELEMENTS -->
+
+			   <element name="Fusion_broveyElement">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Name of the element to describe input parameters. 
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element default="LANDSAT" minOccurs="1" name="sensor" type="impl:SensorType">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Specify a sensor.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element minOccurs="1" name="ms1ImageURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of multispectral satellite image scene channel (green: tm2 | qbird_green | spot1). Default data format is GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element minOccurs="1" name="ms2ImageURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of multispectral satellite image scene channel (NIR: tm4 | qbird_nir | spot2). Default data format is GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element minOccurs="1" name="ms3ImageURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of multispectral satellite image scene channel (MIR: tm5 | qbird_red | spot3). Default data format is GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element minOccurs="1" name="panImageURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of the panchromatic satellite image scene channel (etmpan | qbird_pan | spotpan). Default data format is GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element default="PNG" minOccurs="1" name="outputFormatType" type="impl:FormatType">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Format of output file.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+			   <simpleType name="SensorType">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Sensor.
+                         </documentation>
+
+				    </annotation>
+
+				    <restriction base="string">
+
+					     <enumeration value="LANDSAT">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Sensor: LANDSAT
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="QuickBird">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Sensor: QuickBird
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="SPOT">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Sensor: SPOT
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+				    </restriction>
+
+			   </simpleType>
+
+			   <simpleType name="FormatType">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Format of output file.
+                         </documentation>
+
+				    </annotation>
+
+				    <restriction base="string">
+
+					     <enumeration value="PNG">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    PNG (Portable Network Graphics) is an open, extensible image format with Lossless Compression.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="TIFF">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    TIFF (Tagged Image File Format) is a flexible image format that normally saves 8 or 16 bits per color – red, green and blue – for a total of 24 or 48 bits. The TIFF file structure allows both the metadata and the image data to be encoded into the same file.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+				    </restriction>
+
+			   </simpleType>
+
+			   <element name="fault" type="tns2:WebServiceExceptionsType"/>
+
+			   <element name="Fusion_broveyResponse">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Always return URL and Format of output file.
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element name="returnURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of output map.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element name="returnFormat" type="xsd:string">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Format of output map.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+		  </schema>
+
+		  <schema elementFormDefault="qualified" targetNamespace="http://ws.laits.gmu.edu" xmlns="http://www.w3.org/2001/XMLSchema">
+
+			   <complexType name="WebServiceExceptionsType">
+
+				    <sequence>
+
+					     <element name="exception" type="xsd:string"/>
+
+				    </sequence>
+
+			   </complexType>
+
+		  </schema>
+
+	 </wsdl:types>
+
+	 <wsdl:message name="fusion_broveyRequest">
+
+		  <wsdl:part element="impl:Fusion_broveyElement" name="parameters"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="fusion_broveyResponse">
+
+		  <wsdl:part element="impl:Fusion_broveyResponse" name="return"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="WebServiceExceptionsType">
+
+		  <wsdl:part element="impl:fault" name="fault"/>
+
+	 </wsdl:message>
+
+	 <wsdl:portType name="Grass_Image_FusionBroveyPortType">
+
+		  <wsdl:operation name="fusion_brovey">
+
+			   <wsdl:input message="impl:fusion_broveyRequest" name="fusion_broveyRequest"/>
+
+			   <wsdl:output message="impl:fusion_broveyResponse" name="fusion_broveyResponse"/>
+
+			   <wsdl:fault message="impl:WebServiceExceptionsType" name="WebServiceExceptionsType"/>
+
+		  </wsdl:operation>
+
+	 </wsdl:portType>
+
+	 <wsdl:binding name="Grass_Image_FusionBroveySoapBinding" type="impl:Grass_Image_FusionBroveyPortType">
+
+		  <wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+		  <wsdl:operation name="fusion_brovey">
+
+			   <wsdl:documentation>
+Perform a Brovey Transformation using three multispectral and the panchromatic satellite image scene channels; then combines the three Red-Green-Blue output maps to a single one.   </wsdl:documentation>
+
+			   <wsdlsoap:operation soapAction="fusion_brovey" style="document"/>
+
+			   <wsdl:input>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:input>
+
+			   <wsdl:output>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:output>
+
+			   <wsdl:fault name="WebServiceExceptionsType">
+
+				    <wsdlsoap:fault name="WebServiceExceptionsType" use="literal"/>
+
+			   </wsdl:fault>
+
+		  </wsdl:operation>
+
+	 </wsdl:binding>
+
+	 <wsdl:service name="Grass_Image_FusionBroveyService">
+
+		  <wsdl:documentation>
+Perform a Brovey Transformation on three multispectral and a panchromatic satellite image channels to merge multispectral and high-resolution panchromatic channels.  </wsdl:documentation>
+
+		  <wsdl:port binding="impl:Grass_Image_FusionBroveySoapBinding" name="Grass_Image_FusionBrovey">
+
+			   <wsdlsoap:address location="http://65.123.203.154:8099/axis/services/Grass_Image_FusionBrovey"/>
+
+		  </wsdl:port>
+
+	 </wsdl:service>
+
+	<!--WSDL created by Apache Axis version: 1.4
+Built on Apr 22, 2006 (06:55:48 PDT)-->
+
+</wsdl:definitions>

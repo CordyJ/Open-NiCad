@@ -1,0 +1,1190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ EurotaxGlass's Vehicle specification schema. 
+ $Author: akh $
+ $Date: 2006/05/31 13:30:13 $
+ 
+
+
+$Id: specification.wsdl,v 1.5 2007/01/23 09:51:15 akh Exp $
+$Author: akh $
+$Date: 2007/01/23 09:51:15 $
+$Revision: 1.5 $
+$Log: specification.wsdl,v $
+Revision 1.5  2007/01/23 09:51:15  akh
+Version V1.0.4 RC1
+
+
+Revision 1.4  2007/01/11 14:23:23  akh
+Version enum 1.0.4 added and ETGequipmentFlageType extended
+
+Revision 1.3  2006/09/01 08:22:52  akh
+A patch added to display GetListImage
+
+Revision 1.2  2006/07/10 15:07:08  akh
+GetPackageContent returns vehicle element as in the incoming msg
+
+Revision 1.1  2006/05/31 14:43:21  akh
+
+
+     Copyright 2003 - 2008, EurotaxGlass's International AG
+     All Rights Reserved
+     
+     The Author grants permission to retrieve the WSDL or a copy of the WSDL for building software that
+     will consume or consumes the facilities available in this WSDL.
+     
+     The original of this WSDL file can be located at:
+        http://webservices.eurotaxglass.com/wsdl/specification.wsdl
+        http://webservices2.eurotaxglass.com/wsdl/specification.wsdl
+        
+     THIS SCHEMA/WSDL FILE IS PROVIDED "AS IS", WITHOUT ANY WARRANITIES AS TO ITS
+     SUITABILITY OR FITNESS FOR ANY PARTICULAR USE. THE AUTHOR DOES NOT TAKE 
+     RESPONSIBILITY FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL
+     DAMAGES THAT MAY UNINTENTIONALLY BE CAUSED THROUGH ITS USE OR DISTRIBUTION.
+     
+     No other rights are granted by implication, estoppel or otherwise.
+
+
+-->
+<definitions 
+  targetNamespace="urn:com:eurotaxglass:spec"
+  xmlns="http://schemas.xmlsoap.org/wsdl/"  
+  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+  xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"  
+  xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+  xmlns:tns="urn:com:eurotaxglass:spec" >
+  <types>
+     <xs:schema targetNamespace="urn:com:eurotaxglass:spec"
+      xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+      <xs:simpleType name="ISOcurrencyType">
+            <xs:restriction base="xs:NMTOKEN">
+               <xs:enumeration value="AUD"/>
+               <xs:enumeration value="CAD"/>
+               <xs:enumeration value="CHF"/>
+               <xs:enumeration value="CZK"/>
+               <xs:enumeration value="DKK"/>
+               <xs:enumeration value="EUR"/>
+               <xs:enumeration value="GBP"/>
+               <xs:enumeration value="HUF"/>
+               <xs:enumeration value="JPY"/>
+               <xs:enumeration value="NOK"/>
+               <xs:enumeration value="NZD"/>
+               <xs:enumeration value="PLN"/>
+               <xs:enumeration value="SEK"/>
+               <xs:enumeration value="SKK"/>
+	       <xs:enumeration value="USD"/>
+	       <!-- Date: 06/03/2008 15:10:00 CET
+	       RON (New Leu) , CNY (Yuan Renminbi),
+	       TRY (Turkey Lira), INR (Indian Rupee )
+	       -->
+	       <xs:enumeration value="RON" />
+	       <xs:enumeration value="TRY" />
+               <xs:enumeration value="CNY" />
+               <xs:enumeration value="INR" />
+            </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType name="ISOcountryType">
+            <xs:restriction base="xs:NMTOKEN">
+               <xs:enumeration value="AT"/>
+               <xs:enumeration value="BE"/>
+               <xs:enumeration value="CZ"/>
+               <xs:enumeration value="CH"/>
+               <xs:enumeration value="DE"/>
+               <xs:enumeration value="ES"/>
+               <xs:enumeration value="FR"/>
+               <xs:enumeration value="GR"/>
+               <xs:enumeration value="HR"/>
+               <xs:enumeration value="HU"/>
+               <xs:enumeration value="IT"/>
+               <xs:enumeration value="LU"/>
+               <xs:enumeration value="NL"/>
+               <xs:enumeration value="PL"/>
+               <xs:enumeration value="PT"/>
+               <xs:enumeration value="RU"/>
+               <xs:enumeration value="SK"/>
+               <xs:enumeration value="SI"/>
+               <!-- Deprecated and will be replaced by ISO 3166 code for Great Britain.
+                    Use enumeration value "GB" instead of "UK"
+               -->	 
+	       <xs:enumeration value="UK">
+		       <xs:annotation><xs:documentation>This enumeration with value "UK" is deprecated, and will be removed in future releases. Use enumeration with value "GB" instead.</xs:documentation></xs:annotation>
+	       </xs:enumeration>
+	       <xs:enumeration value="GB"/>
+	       <!-- Norway  NOR 578 -->
+	       <xs:enumeration value="NO"/>
+	       <!-- Romania ROU 642 -->
+	       <xs:enumeration value="RO" /> 
+	       <!-- TURKEY TOR 792-->
+	       <xs:enumeration value="TR"/>
+	       <!-- Future extension  China CHN 156-->
+	       <xs:enumeration value="CN"/>
+            </xs:restriction>
+      </xs:simpleType>
+
+
+      <xs:simpleType name="ISOlanguageType">
+        <xs:restriction base="xs:NMTOKEN">
+          <xs:enumeration value="BG"/>
+          <xs:enumeration value="CS"/>
+          <xs:enumeration value="DA"/>
+          <xs:enumeration value="DE"/>
+          <xs:enumeration value="EL"/>
+          <xs:enumeration value="EN"/>
+          <xs:enumeration value="ES"/>
+          <xs:enumeration value="ET"/>
+          <xs:enumeration value="FI"/>
+          <xs:enumeration value="FR"/>
+          <xs:enumeration value="HR"/>
+          <xs:enumeration value="HU"/>
+          <xs:enumeration value="IT"/>
+          <xs:enumeration value="LT"/>
+          <xs:enumeration value="LV"/>
+          <xs:enumeration value="NL"/>
+          <xs:enumeration value="NO"/>
+          <xs:enumeration value="PL"/>
+          <xs:enumeration value="PT"/>
+          <xs:enumeration value="RO"/>
+          <xs:enumeration value="RU"/>
+          <xs:enumeration value="SK"/>
+          <xs:enumeration value="SL"/>
+          <xs:enumeration value="SR"/>
+          <xs:enumeration value="SV"/>
+          <xs:enumeration value="TR"/>
+        </xs:restriction>
+       </xs:simpleType>
+     <xs:simpleType name="VersionType">
+           <xs:restriction base="xs:NMTOKEN">
+           <xs:enumeration value="1.0.0"/>
+           <xs:enumeration value="1.0.1"/>
+	   <xs:enumeration value="1.0.2"/>
+	   <xs:enumeration value="1.0.3"/>
+	   <xs:enumeration value="1.0.4"/>
+	   <xs:enumeration value="1.0.5"/>
+	   <xs:enumeration value="1.0.6"/>
+	   <!--
+	   $Date: 2008/04/25 10:53:00 CET $ 
+	   $Author: akh $
+	   version: 1.0.7 added 
+	   --> 
+	   <xs:enumeration value="1.0.7"/>
+           </xs:restriction>
+      </xs:simpleType>
+
+     <xs:simpleType name="ETGpackageFlagType">
+        <xs:restriction base="xs:NMTOKEN">
+             <xs:enumeration value="PACKAGE" />
+             <xs:enumeration value="PACKAGE_ITEM" />
+        </xs:restriction> 
+     </xs:simpleType>
+
+
+      <xs:simpleType name="ETGequipmentFlagType">
+         <xs:restriction base="xs:NMTOKEN">
+            <xs:enumeration value="SERIAL"><xs:annotation><xs:documentation>Standard/Serial</xs:documentation></xs:annotation></xs:enumeration>
+            <xs:enumeration value="OPTIONAL_FREE_OF_CHARGE"><xs:annotation><xs:documentation>Standard option free of charge</xs:documentation></xs:annotation></xs:enumeration>
+	    <xs:enumeration value="OPTIONAL_AT_EXTRA_CHARGE"><xs:annotation><xs:documentation>Option at extra charge</xs:documentation></xs:annotation></xs:enumeration>
+	    <!-- Author $AKH$ 
+	         $Revision: 1.5 $
+		 Implemented in vspecsrv-1.0.4
+            -->
+	    <xs:enumeration value="OPTIONAL_INCLUDED_IN_QUOTATION"><xs:annotation><xs:documentation>Option at extra charge, but included in basic quotation of the vehicle. Client application should automatically select such equipment and "GetValuation" discards them while calculating the residual value of optional equipment</xs:documentation></xs:annotation></xs:enumeration>
+
+         </xs:restriction>
+      </xs:simpleType>
+      <!-- $Author: akh $ This enum indicates whether data in price history is from official
+            sources or provisional (not official yet )-->
+      <xs:simpleType name="ETGdataSourceType">
+	  <xs:restriction base="xs:NMTOKEN">
+	    <xs:enumeration value="OFFICIAL"/>
+	    <xs:enumeration value="PROVISIONAL"/>
+          </xs:restriction>		  
+      </xs:simpleType>
+      <xs:simpleType name="ETGimageFormatType">
+          <xs:restriction base="xs:NMTOKEN">
+	      <xs:enumeration value="PORTRAIT"/>
+	      <xs:enumeration value="LANDSCAPE"/>
+          </xs:restriction>
+      </xs:simpleType>
+      <!-- $Author: akh $
+         Guided by RFC 3164: syslog protocol and Windows event log -->
+    <xs:simpleType name="ETGmessageSeverityLevelType">
+       <xs:restriction base="xs:NMTOKEN">
+           <xs:enumeration value="INFORMATION"/>
+           <xs:enumeration value="NOTICE"/>
+           <xs:enumeration value="WARNING"/>
+	   <xs:enumeration  value="CRITICAL"/>   
+       </xs:restriction>	       
+    </xs:simpleType>
+
+    <!-- $Author: akh $
+     The following Complex type is used in message handling, for example SOAP Fault.
+     
+     Note: Initially the complex type was named as "ErrorType". The name is 
+     misleading as it contained messages with severity INFORMATION. The name "MessageType"
+     is more accurate than the errorType.
+     -->
+    <xs:complexType name="MessageType">
+	 <xs:sequence>
+             <xs:element name="Code" type="xs:int" minOccurs="1" maxOccurs="1"/>
+             <xs:element name="Severity" type="tns:ETGmessageSeverityLevelType" 
+			     minOccurs="1" maxOccurs="1"/>
+             <xs:element name="Description" type="xs:string" minOccurs="0" maxOccurs="1"/>
+             <xs:element name="Detail"  type="xs:string" minOccurs="0" maxOccurs="1"/>
+	 </xs:sequence>
+    </xs:complexType>
+
+
+     <xs:complexType name="ETGpriceType">
+         <xs:sequence>
+            <xs:element name="Amount" type="xs:double" default="0.00"/>
+            <xs:element name="ISOcurrencyCode" type="tns:ISOcurrencyType"/>
+            <xs:element name="AmountDate" type="tns:ETGdateType" minOccurs="0"/>
+            <xs:element name="Indicator" type="xs:string" minOccurs="0"/>
+         </xs:sequence>
+      </xs:complexType>
+
+      <xs:complexType name="ETGdateType">
+        <xs:annotation>
+          <xs:documentation>Common data type for date representation</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element name="Day" type="xs:gDay" minOccurs="0">
+            <xs:annotation>
+              <xs:documentation>day of the month</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="Month" type="xs:gMonth">
+            <xs:annotation>
+              <xs:documentation>month</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="Year" type="xs:gYear">
+            <xs:annotation>
+              <xs:documentation>year</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:complexType>
+               
+   <xs:complexType name="ETGsettingType">
+        <xs:annotation>
+          <xs:documentation>Settings for country, language, response format etc.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element name="ISOcountryCode" type="tns:ISOcountryType" minOccurs="1" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation>ISO country code</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="ISOlanguageCode" type="tns:ISOlanguageType" minOccurs="1" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation>ISO language code</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="ISOcurrencyCode" type="tns:ISOcurrencyType" minOccurs="0"  maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation>ISO currency code</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:complexType>
+     
+     <xs:complexType name="CodeListType">
+       <xs:sequence>
+        <xs:element name="Code" type="xs:int" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+     </xs:complexType>
+
+      <xs:complexType name="EquipmentItemType">
+         <xs:sequence>
+            <xs:element name="Code" type="xs:int">
+             <xs:annotation>
+                <xs:documentation>Unique equipment code assigned by EurotaxGlass's during acquisition of data from primary  sources. This code is used for evaluating residual value, forecasting residual value, etc.</xs:documentation>
+             </xs:annotation>
+            </xs:element>
+            <xs:element name="LongName" type="xs:string" />
+	    <xs:element name="ShortName" type="xs:string" />
+	    <!-- $Author: akh$
+	    $Date: 2008/04/16 14:58:00 CET
+	    SortCode is xs:int type 
+	    <xs:element name="SortCode"  type="xs:short"/>
+	    -->
+	    <xs:element name="SortCode"  type="xs:int">
+	    <xs:annotation><xs:documentation>SortCode is deprecated and will be removed in future. It is highly recommended not to use this code for any purposes including sorting. If there is a list of equipment, the list is already sorted by the provider (for example, vspecsrv sorts the list internally by SortCode).</xs:documentation></xs:annotation>
+	    </xs:element>
+            <xs:element name="AdoptationDate" type="tns:ETGdateType">
+               <xs:annotation><xs:documentation>Date when this item was adopted to this vehicle</xs:documentation></xs:annotation>
+            </xs:element>
+            <xs:element name="NewPrice" type="tns:ETGpriceType" minOccurs="0" maxOccurs="1" />
+            <xs:element name="GroupCode" type="xs:short" />
+            <xs:element name="EquipmentType" type="tns:ETGequipmentFlagType">
+               <xs:annotation><xs:documentation>Factory fitted equipment, Optional equipment, etc</xs:documentation></xs:annotation>
+            </xs:element>
+            <xs:element name="EquipmentPackageType" type="tns:ETGpackageFlagType" minOccurs="0" maxOccurs="1" />
+            <xs:element name="MerchantCode" type="xs:int" minOccurs="0" maxOccurs="1" default="0">
+                <xs:annotation><xs:documentation>This element is known as market code or devaluation code</xs:documentation></xs:annotation>
+            </xs:element>
+            <!-- $Author: akh $ $Date: 2007/08/08 14:52:00 $ 
+          The element "Manufacturer" code is should have been after the element "Code". It is placed here to be compatible with by pass the XML seq. validatity constraint of client apps. based on previous version of the WSDL
+      -->
+           <xs:element name="ManufacturerCode" type="xs:string" minOccurs="0" maxOccurs="1">
+ <xs:annotation><xs:documentation>Manufacturer code is used for reference only. It is not the primary identifier of an equipment.</xs:documentation></xs:annotation>
+           </xs:element>
+         </xs:sequence>
+ </xs:complexType>
+
+  <xs:complexType name="ESACOdataType">
+    <xs:sequence>
+      <xs:element name="Code" type="xs:int" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="Description" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="MainGroupCode" type="xs:int" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="MainGroupDescription" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="SubGroupCode" type="xs:int" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="SubGroupDescription" type="xs:string" minOccurs="0" maxOccurs="1"/>
+   </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ExtendedEquipmentType">
+         <xs:sequence>
+            <xs:element name="Code" type="xs:int">
+             <xs:annotation>
+                <xs:documentation>Unique equipment code assigned by EurotaxGlass's during acquisition of data from primary  sources. This code is used for evaluating residual value, forecasting residual value, etc.</xs:documentation>
+             </xs:annotation>
+            </xs:element>
+            <xs:element name="ManufacturerCode" type="xs:string" minOccurs="0" maxOccurs="1">
+              <xs:annotation><xs:documentation>Manufacturer code is used for reference only. It is not the primary identifier of an equipment.</xs:documentation></xs:annotation>
+            </xs:element>  
+	    <xs:element name="LongName" type="xs:string" />
+	    <xs:element name="ShortName" type="xs:string" />
+	    <!--
+	    $Date: 2008/04/25 10:47:00 CET 
+	    $Author: akh $
+	    SortCode is removed as the sorting is done at server site.
+	    <xs:element name="SortCode"  type="xs:short" />
+	    -->
+            <xs:element name="AdoptationDate" type="tns:ETGdateType">
+              <xs:annotation><xs:documentation>Date when this item was adopted to this vehicle</xs:documentation></xs:annotation>
+            </xs:element>
+            <xs:element name="NewPrice" type="tns:ETGpriceType" minOccurs="0" maxOccurs="1" />
+            <xs:element name="GroupCode" type="xs:short" />
+            <xs:element name="EquipmentType" type="tns:ETGequipmentFlagType">
+               <xs:annotation><xs:documentation>Factory fitted equipment, Optional equipment, etc</xs:documentation></xs:annotation>
+            </xs:element>
+            <xs:element name="EquipmentPackageType" type="tns:ETGpackageFlagType" minOccurs="0" maxOccurs="1" />
+            <xs:element name="MerchantCode" type="xs:int" minOccurs="0" maxOccurs="1" default="0">
+                <xs:annotation><xs:documentation>This element is known as market code or devaluation code</xs:documentation></xs:annotation>
+            </xs:element>
+            <xs:element name="ESACOdata" type="tns:ESACOdataType" minOccurs="0" maxOccurs="unbounded">
+              <xs:annotation><xs:documentation>ESACOdata provides information about EurotaxGlass's equipment grouping information.</xs:documentation></xs:annotation>
+            </xs:element>
+         </xs:sequence>
+      </xs:complexType>
+
+      <xs:complexType name="ETGhistoricalPriceType">
+	 <xs:sequence>
+	    <xs:element name="ListPrice"         type="xs:double" minOccurs="1" maxOccurs="1" />
+            <xs:element name="ISOcurrencyCode"   type="tns:ISOcurrencyType" minOccurs="1" maxOccurs="1" />
+            <xs:element name="ValidFrom"         type="tns:ETGdateType" minOccurs="1" maxOccurs="1" />
+	    <xs:element name="ValidTo"           type="tns:ETGdateType" minOccurs="0" maxOccurs="1" />
+	    <xs:element name="DeliveryFee"       type="xs:double" minOccurs="0" maxOccurs="1" />
+            <xs:element name="RegistrationFee"   type="xs:double" minOccurs="0" maxOccurs="1" />
+            <xs:element name="RecyclingFee"      type="xs:double" minOccurs="0" maxOccurs="1" />
+	    <xs:element name="ValueAddedTaxRate" type="xs:double" minOccurs="0" maxOccurs="1" />
+	    <xs:element name="LuxaryTaxRate"     type="xs:double" minOccurs="0" maxOccurs="1">
+		    <xs:annotation><xs:documentation>Deprecated as of 1.0.4. and replaced by LuxuryTaxRate</xs:documentation></xs:annotation>
+	    </xs:element>
+	    <xs:element name="RoadTaxRate"       type="xs:double" minOccurs="0" maxOccurs="1" />
+	    <xs:element name="DataSource"        type="tns:ETGdataSourceType" minOccurs="0" maxOccurs="1" />
+	    <!-- $Author: akh $ $Date: 2007/01/23 09:51:15 $
+	     Implemented in vspecsrv-1.0.4 -->
+	     <xs:element name="ListPriceIndicator" type="xs:string" minOccurs="0" maxOccurs="1">
+	     <xs:annotation><xs:documentation>If the element exists in an instance document, it must be either "0" (Listprice is without discount.) or "1" (ListPrice is including the discount.)</xs:documentation></xs:annotation>	     
+            </xs:element> 
+	    <xs:element name="LuxuryTaxRate"     type="xs:double" minOccurs="0" maxOccurs="1"/>
+	    <xs:element name="GuidePrice"        type="xs:double" minOccurs="0" maxOccurs="1">
+	     <xs:annotation><xs:documentation>GuidePrice is the gross amount that is normally published in EurotaxGlass's guides.</xs:documentation></xs:annotation>	     
+	    </xs:element>
+	    <!-- We can add other elements if we need them. -->
+
+         </xs:sequence>
+      </xs:complexType>
+ 
+      <xs:complexType name="EquipmentListType">
+         <xs:sequence>
+             <xs:element name="Equipment" type="tns:EquipmentItemType" minOccurs="0" maxOccurs="unbounded" />
+         </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="HistoricalPriceListType">
+	<xs:sequence>
+            <xs:element name="NationalVehicleCode" type="xs:long"  minOccurs="1" maxOccurs="1"/>
+	    <xs:element name="RegistrationDate"    type="tns:ETGdateType"  minOccurs="0" maxOccurs="1"/>
+	    <xs:element name="HistoricalPrice" type="tns:ETGhistoricalPriceType" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ETGimageType">
+        <xs:sequence>
+            <xs:element name="ID" type="xs:unsignedInt" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="URL" type="xs:anyURI"    minOccurs="1" maxOccurs="1" />
+            <xs:element name="Title" type="xs:string"  minOccurs="0" maxOccurs="1" /> 
+            <xs:element name="Height" type="xs:unsignedInt" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="Width" type="xs:unsignedInt" minOccurs="1" maxOccurs="1"/>
+            <xs:element  name="SizeInKB" type="xs:unsignedInt" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="Orientation" type="tns:ETGimageFormatType" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="ViewCode" type="xs:unsignedInt" minOccurs="0" maxOccurs="1" />
+            <xs:element name="ViewDescription" type="xs:string" minOccurs="0" maxOccurs="1" />
+            <xs:element name="ColorCode" type="xs:unsignedInt" minOccurs="0" maxOccurs="1" />
+            <xs:element name="ColorDescription" type="xs:string" minOccurs="0" maxOccurs="1" />
+            <xs:element name="BodyCode" type="xs:unsignedInt" minOccurs="0" maxOccurs="1" />
+            <xs:element name="BodyDescription" type="xs:string" minOccurs="0" maxOccurs="1" />
+         </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ImageListType">
+          <xs:sequence>
+             <xs:element name="NationalVehicleCode" type="xs:long"  minOccurs="1" maxOccurs="1"/>
+             <xs:element name="Image" type="tns:ETGimageType" minOccurs="0" maxOccurs="unbounded" />
+          </xs:sequence> 
+      </xs:complexType>
+
+      <xs:complexType name="SpecificationType">
+         <xs:sequence>
+            <xs:element name="NationalVehicleCode" type="xs:long"  minOccurs="1" maxOccurs="1"/>
+            <xs:element name="RegistrationDate"    type="tns:ETGdateType"  minOccurs="1" maxOccurs="1"/>
+            <xs:element name="EquipmentList"       type="tns:EquipmentListType"  minOccurs="1" maxOccurs="1"/> 
+         </xs:sequence> 
+      </xs:complexType>
+     <!-- SOAP Header part -->
+     
+    <xs:complexType name="LicenseType">
+        <xs:sequence>
+           <xs:element name="Type" type="xs:string" minOccurs="0">
+           <xs:annotation>
+                <xs:documentation>License type (base, annual, transaction-based, etc.)</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="ID" type="xs:string" minOccurs="0">
+          <xs:annotation>
+              <xs:documentation>ETG-wide unique License ID</xs:documentation>
+          </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+   <xs:complexType name="ClientAppType">
+      <xs:sequence>
+         <xs:element name="Product" type="xs:string" minOccurs="0">
+         <xs:annotation>
+         <xs:documentation>ETG-wide unique Product signature</xs:documentation>
+        </xs:annotation>
+        </xs:element>
+        <xs:element name="Module" type="xs:string" minOccurs="0">
+        <xs:annotation>
+            <xs:documentation>Product-wide unique Module signature</xs:documentation>
+       </xs:annotation>
+       </xs:element>
+       <xs:element name="Version" type="tns:VersionType" minOccurs="0">
+       <xs:annotation>
+           <xs:documentation>Product version</xs:documentation>
+       </xs:annotation>
+       </xs:element>
+    </xs:sequence>
+   </xs:complexType>
+ 
+   <xs:complexType name="LoginDataType">
+        <xs:sequence>
+            <xs:element name="Name" type="xs:string">
+            <xs:annotation>
+            <xs:documentation>ETG-wide unique user name</xs:documentation>
+            </xs:annotation>
+            </xs:element>
+            <xs:element name="Password" type="xs:string">
+            <xs:annotation>
+            <xs:documentation>User password</xs:documentation>
+            </xs:annotation>
+            </xs:element>
+            <xs:element name="ReturnSecurityToken" type="xs:boolean" minOccurs="0">
+            <xs:annotation>
+             <xs:documentation>If set to true, SecurityToken and corresponding TimeToLive will be returned</xs:documentation>
+            </xs:annotation>
+            </xs:element>
+          </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name="OriginatorType">
+    <xs:sequence>
+     <xs:element name="Signature" type="xs:string">
+      <xs:annotation>
+       <xs:documentation>ETG-wide unique user ID / user signature</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+     <xs:choice>
+      <xs:element name="LoginData" type="tns:LoginDataType">
+       <xs:annotation>
+        <xs:documentation>User authentication data</xs:documentation>
+       </xs:annotation>
+      </xs:element>
+      <xs:element name="SecurityToken" type="xs:string">
+       <xs:annotation>
+        <xs:documentation>Security token to be used instead of username/password pair</xs:documentation>
+       </xs:annotation>
+      </xs:element>
+     </xs:choice>
+    </xs:sequence>
+   </xs:complexType>
+
+   <xs:complexType name="RequestType">
+    <xs:sequence>
+     <xs:element name="Signature" type="xs:string">
+      <xs:annotation>
+       <xs:documentation>ETG-wide unique signature defining a service to be invoked</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="ClientOrderID" type="xs:string" minOccurs="0">
+      <xs:annotation>
+       <xs:documentation>An ID provided by the client. Has to be unique for each request within the same client activity. The request can be referenced by this ID in case of claim.</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="ServiceAccessCode" type="xs:string" minOccurs="0">
+      <xs:annotation>
+       <xs:documentation>Optional internal service specific access code. Can be set on preprocessing to pass specific access information to the ultimate service. Should NOT be filled by a client, otherwise ignored and overwritten. To be basically removed from the final response before sending it back to a client.</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+    </xs:sequence>
+   </xs:complexType>
+         <xs:complexType name="FailureType">
+    <xs:sequence>
+     <xs:element name="ETGError" type="tns:ETGStatus"/>
+     <xs:element name="ETGWarning" type="tns:ETGStatus" minOccurs="0"/>
+    </xs:sequence>
+         </xs:complexType>
+
+   <xs:complexType name="SuccessType">
+    <xs:sequence minOccurs="0">
+     <xs:element name="ETGWarning" type="tns:ETGStatus" minOccurs="0"/>
+    </xs:sequence>
+   </xs:complexType>
+
+   <xs:complexType name="ResponseType">
+    <xs:sequence>
+     <xs:element name="OrderID" type="xs:string">
+      <xs:annotation>
+       <xs:documentation>A unique ID that the ETG service has assigned to the order originated by the client request. In case of asynchronous request processing can be used by the client for related request identification.</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="VersionResponse" type="xs:string" minOccurs="0">
+      <xs:annotation>
+       <xs:documentation>Version of global ETG services specification used to construct the response</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="Statistics" type="tns:StatisticsType"/>
+     <xs:element name="SecurityToken" type="xs:string" minOccurs="0">
+      <xs:annotation>
+       <xs:documentation>Reurned security token to be used instead of username/password pair for further calls</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="TimeToLive" type="xs:dateTime" minOccurs="0">
+      <xs:annotation>
+       <xs:documentation>Validity period of the reurned security token</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+
+     <xs:choice>
+      <xs:element name="Failure" type="tns:FailureType">
+       <xs:annotation>
+        <xs:documentation>Indicates that the processing of this request has failed, and provides error and optional warning messages that arose during the processing.</xs:documentation>
+       </xs:annotation>
+      </xs:element>
+      <xs:element name="Success" type="tns:SuccessType">
+       <xs:annotation>
+        <xs:documentation>Indicates that the processing of this request has succeeded; may provide non-fatal warning messages that arose during the processing.</xs:documentation>
+       </xs:annotation>
+      </xs:element>
+     </xs:choice>
+
+
+    </xs:sequence>
+   </xs:complexType>
+
+
+   <xs:complexType name="StatisticsType">
+    <xs:sequence>
+     <xs:element name="StartDateTime" type="xs:dateTime">
+      <xs:annotation>
+       <xs:documentation>Processing start timestamp</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="EndDateTime" type="xs:dateTime">
+      <xs:annotation>
+       <xs:documentation>Processing finish timestamp</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name="ETGStatus">
+    <xs:annotation>
+     <xs:documentation>Placeholder for general status report. To be filled out before sending a response back to the originator.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+     <xs:element name="Code" type="xs:int">
+      <xs:annotation>
+       <xs:documentation>Top level error or warning code</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="Description" type="xs:string">
+      <xs:annotation>
+       <xs:documentation>Top level error or warning description</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="ExtCode" type="xs:int" minOccurs="0">
+      <xs:annotation>
+       <xs:documentation>Extended error or warning code. Can be service specific</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="ExtDescription" type="xs:string" minOccurs="0">
+      <xs:annotation>
+       <xs:documentation>Extended error or warning description.</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+    </xs:sequence>
+   </xs:complexType>
+    
+     <xs:complexType name="ETGHeaderType">
+        <xs:sequence>
+        <xs:element name="VersionRequest" type="tns:VersionType"/>
+        <xs:element name="Originator" type="tns:OriginatorType"/>
+        <xs:element name="Response" type="tns:ResponseType" minOccurs="0"/>
+        </xs:sequence>
+      </xs:complexType>
+     <xs:complexType name="VehicleType">
+        <xs:sequence>
+            <xs:element name="NationalVehicleCode" type="xs:long" minOccurs="1" maxOccurs="1" />
+            <xs:element name="RegistrationDate"    type="tns:ETGdateType" minOccurs="1" maxOccurs="1"/>
+        </xs:sequence>
+     </xs:complexType>
+    
+     <xs:complexType name="ETGversionInformationType">
+      <xs:sequence>
+         <xs:element name="ServiceVersion" type="xs:string" minOccurs="1" maxOccurs="1" />
+         <xs:element name="IntelligenceVersion" type="xs:string" minOccurs="1" maxOccurs="1"/>
+         <!-- We do not use version number in data release -->
+         <xs:element name="DataReleaseDate" type="tns:ETGdateType" minOccurs="1" maxOccurs="1"/>
+       </xs:sequence>
+     </xs:complexType>
+
+     <xs:complexType name="ExtendedEquipmentListType">
+       <xs:annotation><xs:documentation>ExtendedEquipmentListType is introduced to include the ETG ESCO equipment groupping concepts. This XML schema complex data type may be replaced in future.</xs:documentation></xs:annotation>
+     <xs:sequence>
+         <xs:element name="NationalVehicleCode" type="xs:long" minOccurs="1" maxOccurs="1" />
+         <xs:element name="RegistrationDate"    type="tns:ETGdateType" minOccurs="1" maxOccurs="1"/>
+         <xs:element name="Equipment"           type="tns:ExtendedEquipmentType" minOccurs="0"  maxOccurs="unbounded"/> 
+     </xs:sequence>
+     </xs:complexType>
+
+     <xs:complexType name="MutuallyExclusiveEquipmentGroupType">
+      <xs:annotation><xs:documentation>Mutually exclusive optional equipment hadling XML schema data type</xs:documentation></xs:annotation>   
+          <xs:sequence>
+              <xs:element name="MutuallyExcludableEquipmentList" type="tns:EquipmentListType" minOccurs="0" maxOccurs="unbounded">
+                 <xs:annotation><xs:documentation>This is a list of optional equipment which are mutually exclusive, i.e. a valid configuration is possible if and only if the configuration contains only one of the optional equipment. As a rule, client application displays these equipment in a group where only one of the check-box/radio button is selectable.</xs:documentation></xs:annotation>
+              </xs:element>
+          </xs:sequence>
+     </xs:complexType>
+     
+     <xs:complexType name="PropositionalLogicExpressionType">
+         <xs:sequence>
+             <xs:element name="Expression" type="xs:string" maxOccurs="1" minOccurs="1">
+                 <xs:annotation><xs:documentation>This is a propositional logic expression that contains operators:AND, XOR (exclusive or), one or  more Equipment Code as operand</xs:documentation></xs:annotation>
+             </xs:element>
+             <xs:element name="AllowedValue"  type="xs:boolean" default="true" />
+         </xs:sequence>
+     </xs:complexType>
+
+     <!-- Elements go here -->
+     <xs:element name="Message" type="tns:MessageType">
+         <xs:annotation><xs:documentation>This element contains information information for facility "GetListIncludableExcludableEquipment" and "GetListIncludableExcludableEquipmentEx". If an optional equipment do not require other equipment to be included or excluded, these facilities response with a fault and the client information should check the message code and severity to verify that there was no error from service</xs:documentation></xs:annotation>
+     </xs:element>
+     <xs:element name="ETGHeader"           type="tns:ETGHeaderType"/>
+     <xs:element name="Specification"       type="tns:SpecificationType" />
+     <xs:element name="Settings"            type="tns:ETGsettingType" />
+     <xs:element name="Vehicle"             type="tns:VehicleType" />
+     <xs:element name="HistoricalPriceList" type="tns:HistoricalPriceListType" />
+     <xs:element name="PackageInformation"  type="tns:EquipmentItemType" />
+     <xs:element name="PackageContent"      type="tns:EquipmentListType" />
+     <xs:element name="ImageList"           type="tns:ImageListType"   />
+     <xs:element name="VersionInformation"  type="tns:ETGversionInformationType"/>
+     <xs:element name="DesiredEquipment"    type="tns:EquipmentItemType" />
+     <xs:element name="EquipmentList"       type="tns:EquipmentListType" />
+     <xs:element name="IncludableEquipmentList"    type="tns:EquipmentListType" />
+     <xs:element name="ExcludableEquipmentList"    type="tns:EquipmentListType" />
+     <xs:element name="ExtendedEquipmentList"      type="tns:ExtendedEquipmentListType"/>
+     <xs:element name="MutuallyExclusiveEquipmentGroup" type="tns:MutuallyExclusiveEquipmentGroupType">
+         <xs:annotation><xs:documentation>This is a list of optional equipment which are mutually exclusive, i.e. a valid configuration is possible if and only if the configuration contains only one of the optional equipment. As a rule, client application displays these equipment in a group where only one of the check-box/radio button is selectable.</xs:documentation></xs:annotation>
+     </xs:element>
+     <xs:element name="PropositionalLogicExpression" type="tns:PropositionalLogicExpressionType">
+        <xs:annotation><xs:documentation>This element conatins a formula that must be evaluated to true if applied to the configuration of optional equipment valid for a vehicle</xs:documentation></xs:annotation> 
+     </xs:element>
+     
+
+     
+    </xs:schema>
+  </types>
+    
+       <!-- Message definition, we have to be careful about the iteropt. issues with tools in the market -->
+       <message name="ServiceHeader">
+           <part name="etg_header" element="tns:ETGHeader"/>
+       </message>
+       <message name="GetListEquipmentRequest">
+            <part name="Settings"  element="tns:Settings"/> 
+            <part name="Vehicle" element="tns:Vehicle"/>
+       </message>
+     
+     <message name="GetListEquipmentResponse">
+            <part name="Settings" element="tns:Settings"/>
+            <part name="Specification" element="tns:Specification"/>
+       </message>
+
+       <!-- Following message are for SOAP document bindings -->
+    <message name="GetListEquipmentReq">
+            <part name="parameters" element="tns:Settings"/>
+            <part name="vehicle"  element="tns:Vehicle"/>
+       </message>
+       <message name="GetListEquipmentRep">
+            <part name="profile" element="tns:Settings"/>
+            <part name="Spec"   element="tns:Specification"/>
+    </message>
+    
+    <message name="GetListEquipmentExResp">
+       <part name="Settings"  element="tns:Settings"/>
+       <part name="ExtendedEquipmentList" element="tns:ExtendedEquipmentList"/>
+     </message>
+
+
+    <!-- $Author: akh $ 04/05/2006 
+        The following messages are added for GetListHistoricalPrice Method
+    -->
+	
+    <message name="GetListHistoricalPriceRequest">
+       <part name="Settings" element="tns:Settings"/>
+       <part name="Vehicle"    element="tns:Vehicle" />
+    </message>
+    <message name="GetListHistoricalPriceResponse">
+       <part name="Settings" element="tns:Settings"/>
+       <part name="HistoricalPriceList"    element="tns:HistoricalPriceList" />
+    </message>
+    
+    <message name="GetListHistoricalPriceReq">
+       <part name="param1" element="tns:Settings"/>
+       <part name="Param2"    element="tns:Vehicle" />
+    </message>
+    <message name="GetListHistoricalPriceResp">
+       <part name="param1" element="tns:Settings"/>
+       <part name="Param2"    element="tns:HistoricalPriceList" />
+    </message>
+    
+   <!-- $Author: akh $ GetPackageContent RPC message -->
+   
+    <message name="GetPackageContentRequest">
+       <part name="Settings" element="tns:Settings"/>
+       <part name="Vehicle"  element="tns:Vehicle"/>
+       <part name="PackageInformation" element="tns:PackageInformation"/>
+    </message>
+    <message name="GetPackageContentResponse">
+       <part name="Settings" element="tns:Settings"/>
+       <part name="Vehicle"  element="tns:Vehicle"/>
+       <part name="PackageInformation" element="tns:PackageInformation"/>
+       <part name="PackageContent" element="tns:PackageContent"/>
+    </message>
+
+
+    <!-- $Author: akh $ GetPackageContent DOC message -->
+    <message name="GetPackageContentReq">
+       <part name="param1" element="tns:Settings"/>
+       <part name="param2"  element="tns:Vehicle"/>
+       <part name="param3" element="tns:PackageInformation"/>
+    </message>
+    <message name="GetPackageContentResp">
+       <part name="param1" element="tns:Settings"/>
+       <part name="param2"  element="tns:Vehicle"/>
+       <part name="param3" element="tns:PackageInformation"/>
+       <part name="param4" element="tns:PackageContent"/>
+    </message>
+    <!-- GetListImage RPC message -->
+    <message name="GetListImageRequest">
+       <part name="Settings" element="tns:Settings"/>
+       <part name="Vehicle"  element="tns:Vehicle"/>
+    </message>
+    <message name="GetListImageResponse">
+       <part name="Settings"  element="tns:Settings"/>
+       <part name="ImageList" element="tns:ImageList"/>
+    </message>
+    <!-- GetListImage  DOC message -->
+    <message name="GetListImageReq">
+       <part name="param1" element="tns:Settings"/>
+       <part name="Param2"    element="tns:Vehicle" />
+    </message>
+    <message name="GetListImageResp">
+       <part name="param1" element="tns:Settings"/>
+       <part name="Param2" element="tns:ImageList" />
+    </message>
+
+    <!-- $Author: akh $ Added on 21/06/2007 10:34 CET -->
+   <message name="GetVersionRequest">
+     <part name="settings" element="tns:Settings"/>
+   </message>
+
+   <message name="GetVersionResponse">
+     <part name="settings" element="tns:Settings"/>
+     <part name="versionInformation" element="tns:VersionInformation"/>
+   </message>
+      
+   <!-- $Author: akh $ Added on 25/07/2007 15:07 CET -->
+   <message name="GetListIncludableExcludableEquipmentRequest">
+	   <documentation>This is the structure of input message for the GetListIcludableExcludableEquipment method. A well-formed input message should have elements: Settings,Vehicle,DesiredEquipment and EquipmentList.</documentation>
+      <part name="settings" element="tns:Settings">
+	      <documentation>Settings provides ISOcountryCode, ISOlanguageCode and ISOcurrencyCode in order to configure  the internal set of intelligence, data, and locality settings to perform the task</documentation>
+      </part>
+      <part name="vehicle" element="tns:Vehicle">
+       <documentation>The target vehicle where the desired equipment is expected to be installed. The NationalVehicleCode and the RegistrationDate of the vehicle must be provided.</documentation>
+      </part> 
+       <part name="desiredEquipment" element="tns:DesiredEquipment">
+       <documentation>The equipment that is expected to be installed in target vehicle.</documentation>
+      </part>
+       <part name="selectedEquipemtList" element="tns:EquipmentList">
+       <documentation>The list of valid equipment selected for the vehicle</documentation>
+      </part> 
+   </message>
+
+   
+   <message name="GetListIncludableExcludableEquipmentResponse">
+      <documentation>This is the structure of output message for the GetListIcludableExcludableEquipment method. A well-formed input message should have elements: Settings,Vehicle,DesiredEquipment, EquipmentList and a list of excludable and includable equipment.</documentation>
+      <part name="settings" element="tns:Settings">
+       <documentation>Settings provides ISOcountryCode, ISOlanguageCode and ISOcurrencyCode in order to configure  the internal set of intelligence, data, and locality settings to perform the task</documentation>
+      </part>
+      <part name="vehicle" element="tns:Vehicle">
+       <documentation>The target vehicle where the desired equipment is expected to be installed. The NationalVehicleCode and the RegistrationDate of the vehicle must be provided</documentation>
+      </part> 
+       <part name="desiredEquipment" element="tns:DesiredEquipment">
+	       <documentation>The equipment that user likes to fit to the vehicle</documentation>
+      </part>
+       <part name="includableEquipemtList" element="tns:IncludableEquipmentList">
+	       <documentation>The list equipment the desired equipment required to be included</documentation>
+      </part>
+       <part name="excludableEquipemtList" element="tns:ExcludableEquipmentList">
+       <documentation>The list equipment the desired equipment required to be excluded from the pre-selected equipment list</documentation>
+      </part>
+      <part name="mutuallyExclusiveEquipmentGroup" element="tns:MutuallyExclusiveEquipmentGroup">
+        <documentation>This message encapsulates one or more list of mutually excludable equipment.</documentation>          
+      </part>
+   </message>
+   <!-- $Author: akh $ Added on 10/10/2007 15:40 CET -->
+   <message name="GetListIncludableExcludableEquipmentExRequest">
+	   <documentation>This is the structure of input message for the GetListIcludableExcludableEquipmentEx method. A well-formed input message should have elements: Settings,Vehicle and DesiredEquipment</documentation>
+      <part name="settings" element="tns:Settings">
+	      <documentation>Settings provides ISOcountryCode, ISOlanguageCode and ISOcurrencyCode in order to configure  the internal set of intelligence, data, and locality settings to perform the task</documentation>
+      </part>
+      <part name="vehicle" element="tns:Vehicle">
+       <documentation>The target vehicle where the desired equipment is expected to be installed. The NationalVehicleCode and the RegistrationDate of the vehicle must be provided.</documentation>
+      </part> 
+       <part name="desiredEquipment" element="tns:DesiredEquipment">
+       <documentation>The equipment that is expected to be installed in target vehicle.</documentation>
+      </part>      
+   </message>
+
+   
+   <message name="GetListIncludableExcludableEquipmentExResponse">
+      <documentation>This is the structure of output message for the GetListIcludableExcludableEquipment method. A well-formed input message should have elements: Settings,Vehicle and DesiredEquipment and EquipmentList.</documentation>
+      <part name="settings" element="tns:Settings">
+       <documentation>Settings provides ISOcountryCode, ISOlanguageCode and ISOcurrencyCode in order to configure  the internal set of intelligence, data, and locality settings to perform the task</documentation>
+      </part>
+      <part name="vehicle" element="tns:Vehicle">
+       <documentation>The target vehicle where the desired equipment is expected to be installed. The NationalVehicleCode and the RegistrationDate of the vehicle must be provided</documentation>
+      </part> 
+       <part name="desiredEquipment" element="tns:DesiredEquipment">
+	       <documentation>The equipment that user likes to fit to the vehicle</documentation>
+      </part>
+       <part name="includableEquipemtList" element="tns:IncludableEquipmentList">
+	       <documentation>The list equipment the desired equipment required to be included</documentation>
+      </part>
+       <part name="excludableEquipemtList" element="tns:ExcludableEquipmentList">
+       <documentation>The list equipment the desired equipment required to be excluded from the pre-selected equipment list</documentation>
+      </part>
+      <part name="propositionallogicexpression" element="tns:PropositionalLogicExpression">
+        <documentation>This is propositional logic expression (aka sentence/formula) that must be evaluated to either true or false with respect to configuration.</documentation>          
+      </part>
+   </message>
+   <message name="FaultResponse">
+     <part name="faultMessage" element="tns:Message"/>
+   </message>
+    <!-- The follow of input, output is important.
+      in our case the input message should go first.
+     -->
+  <portType name="SpecPortRPC">
+    <operation name="GetListEquipment" >
+      <input message="tns:GetListEquipmentRequest"/>
+      <output message="tns:GetListEquipmentResponse"/>
+    </operation>
+    <operation name="GetListHistoricalPrice">
+	     <input   message="tns:GetListHistoricalPriceRequest"/>
+	     <output  message="tns:GetListHistoricalPriceResponse" />  
+     </operation>
+     <operation name="GetPackageContent">
+	     <input   message="tns:GetPackageContentRequest"/>
+	     <output  message="tns:GetPackageContentResponse" />  
+     </operation>
+     
+     <operation name="GetListImage">
+	     <input   message="tns:GetListImageRequest"/>
+	     <output  message="tns:GetListImageResponse" />  
+     </operation>
+     <operation name="GetVersion">
+          <input message="tns:GetVersionRequest"/>
+          <output message="tns:GetVersionResponse"/>
+     </operation>
+     <operation name="GetListIncludableExcludableEquipment">
+	    <documentation>GetListIncludableExcludableEquipment returns a list of Includable or/and Excludable Equipment for an optional equipment or package configurable to a target vehicle based on a list of pre-selected optional equipment.  If there is no such list, GetListIncludableExcludableEquipment responses with an error message.</documentation>
+	<input message="tns:GetListIncludableExcludableEquipmentRequest"/>
+	<output message="tns:GetListIncludableExcludableEquipmentResponse"/>
+     </operation>
+     <operation name="GetListIncludableExcludableEquipmentEx">
+	    <documentation>This is an alternative to the facility "GetListIncludableExcludableEquipment" that returns a list of Includable or/and Excludable Equipment together with propositional logic expression for an optional equipment or package configurable to a target vehicle based on a list of pre-selected optional equipment.  If there is no such list, GetListIncludableExcludableEquipment responses with an error message.</documentation>
+	<input message="tns:GetListIncludableExcludableEquipmentExRequest"/>
+	<output message="tns:GetListIncludableExcludableEquipmentExResponse"/>
+     </operation>
+     
+ 
+  </portType>
+
+  
+  <portType name="SpecPortDocument"> 
+      <operation name="GetListEquipment">
+           <input message="tns:GetListEquipmentReq"/>
+           <output message="tns:GetListEquipmentRep"/>
+      </operation>
+      <operation name="GetListEquipmentEx">
+           <input message="tns:GetListEquipmentReq"/>
+           <output message="tns:GetListEquipmentExResp"/>
+      </operation>
+ 
+      <operation name="GetListHistoricalPrice">
+	     <input   message="tns:GetListHistoricalPriceReq"/>
+	     <output  message="tns:GetListHistoricalPriceResp" />  
+     </operation>
+     <operation name="GetPackageContent">
+	     <input   message="tns:GetPackageContentReq"/>
+	     <output  message="tns:GetPackageContentResp" />  
+     </operation>
+
+     <operation name="GetListImage">
+	     <input   message="tns:GetListImageReq"/>
+	     <output  message="tns:GetListImageResp" />  
+     </operation>
+     <operation name="GetVersion">
+         <input message="tns:GetVersionRequest"/>
+         <output message="tns:GetVersionResponse"/>
+     </operation>
+     <operation name="GetListIncludableExcludableEquipment">
+        <documentation>GetListIncludableExcludableEquipment returns a list of Includable or/and Excludable Equipment for an optional equipment or package configurable to a target vehicle based on a list of pre-selected optional equipment. If no such list exists, GetListIncludableExcludableEquipment responses with an error in the form of a SOAP Fault.</documentation>
+	<input message="tns:GetListIncludableExcludableEquipmentRequest"/>
+	<output message="tns:GetListIncludableExcludableEquipmentResponse"/>
+     <fault  name="Message" message="tns:FaultResponse" />
+     </operation>
+     <operation name="GetListIncludableExcludableEquipmentEx">
+	    <documentation>This is an alternative to the facility "GetListIncludableExcludableEquipment" that returns a list of Includable or/and Excludable Equipment together with propositional logic expression for an optional equipment or package configurable to a target vehicle based on a list of pre-selected optional equipment.  If there is no such list, GetListIncludableExcludableEquipment responses with an error message.</documentation>
+	<input message="tns:GetListIncludableExcludableEquipmentExRequest"/>
+	<output message="tns:GetListIncludableExcludableEquipmentExResponse"/>
+        <fault name="Message" message="tns:FaultResponse" />
+     </operation>
+     
+     
+   </portType>
+
+    <binding name="SpecBindingRPC" type="tns:SpecPortRPC">
+            <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http" />
+            <operation name="GetListEquipment">
+              <soap:operation style="rpc" soapAction="urn:com:eurotaxglass:spec/GetListEquipment"/>
+              <input>
+                   <soap:body use="literal" namespace="urn:com:eurotaxglass:spec" />
+              </input>
+              <output>
+                   <soap:body use="literal" namespace="urn:com:eurotaxglass:spec" />
+	      </output>
+             </operation>
+             <!-- $Author: akh $ Added on 04/05/2006 -->
+             <operation name="GetListHistoricalPrice">
+              <soap:operation style="rpc" soapAction="urn:com:eurotaxglass:spec/GetListHistoricalPrice"/>
+              <input>
+                   <soap:body use="literal" namespace="urn:com:eurotaxglass:spec" />
+              </input>
+              <output>
+                   <soap:body use="literal" namespace="urn:com:eurotaxglass:spec" />
+              </output>
+            </operation>
+
+             <operation name="GetPackageContent">
+              <soap:operation style="rpc" soapAction="urn:com:eurotaxglass:spec/GetPackageContent"/>
+              <input>
+                   <soap:body use="literal" namespace="urn:com:eurotaxglass:spec" />
+              </input>
+              <output>
+                   <soap:body use="literal" namespace="urn:com:eurotaxglass:spec" />
+              </output>
+            </operation>
+
+             <operation name="GetListImage">
+              <soap:operation style="rpc" soapAction="urn:com:eurotaxglass:spec/GetListImage"/>
+              <input>
+                   <soap:body use="literal" namespace="urn:com:eurotaxglass:spec" />
+              </input>
+              <output>
+                   <soap:body use="literal" namespace="urn:com:eurotaxglass:spec" />
+              </output>
+            </operation>
+            <operation name="GetVersion">
+              <soap:operation style="rpc" soapAction="urn:com:eurotaxglass:spec/GetVersion"/>
+              <input>
+                   <soap:body use="literal" namespace="urn:com:eurotaxglass:spec" />
+              </input>
+              <output>
+                   <soap:body use="literal" namespace="urn:com:eurotaxglass:spec" />
+              </output>
+            </operation>
+            <operation name="GetListIncludableExcludableEquipment">
+              <soap:operation style="rpc" soapAction="urn:com:eurotaxglass:spec/GetListIncludableExcludableEquipment"/>
+              <input>
+                   <soap:body use="literal" namespace="urn:com:eurotaxglass:spec" />
+              </input>
+              <output>
+                   <soap:body use="literal" namespace="urn:com:eurotaxglass:spec" />
+              </output>
+            </operation>
+	    <operation name="GetListIncludableExcludableEquipmentEx">
+              <soap:operation style="rpc" soapAction="urn:com:eurotaxglass:spec/GetListIncludableExcludableEquipmentEx"/>
+              <input>
+                   <soap:body use="literal" namespace="urn:com:eurotaxglass:spec" />
+              </input>
+              <output>
+                   <soap:body use="literal" namespace="urn:com:eurotaxglass:spec" />
+              </output>
+            </operation>
+     </binding>
+
+    
+     <binding name="SpecBindingDoc" type="tns:SpecPortDocument">
+           <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+           <operation name="GetListEquipment">
+           <soap:operation style="document" soapAction="urn:com:eurotaxglass:spec/GetListEquipment" />
+           <input>
+              <soap:header message="tns:ServiceHeader" part="etg_header" use="literal" />
+              <soap:body use="literal"  namespace="urn:com:eurotaxglass:spec" />
+           </input>
+           <output>
+              <soap:header message="tns:ServiceHeader" part="etg_header" use="literal" />
+              <soap:body use="literal" namespace = "urn:com:eurotaxglass:spec" />
+           </output>
+           </operation>
+	   <!-- $Author: akh $ added 16/08/2007 
+	     This operation "GetListEquipmentEx" returns equipment list with ESACO groupping 
+	     information. 
+	     -->
+           <operation name="GetListEquipmentEx">
+           <soap:operation style="document" soapAction="urn:com:eurotaxglass:spec/GetListEquipmentEx" />
+           <input>
+              <soap:header message="tns:ServiceHeader" part="etg_header" use="literal" />
+              <soap:body use="literal"  namespace="urn:com:eurotaxglass:spec" />
+           </input>
+           <output>
+              <soap:header message="tns:ServiceHeader" part="etg_header" use="literal" />
+              <soap:body use="literal" namespace = "urn:com:eurotaxglass:spec" />
+           </output>
+           </operation>
+	  
+          <!-- $Author: akh $ added 04/05/2006 -->
+          <operation name="GetListHistoricalPrice">
+           <soap:operation style="document" soapAction="urn:com:eurotaxglass:spec/GetListHistoricalPrice" />
+           <input>
+              <soap:header message="tns:ServiceHeader" part="etg_header" use="literal" />
+              <soap:body use="literal"  namespace="urn:com:eurotaxglass:spec" />
+           </input>
+           <output>
+              <soap:header message="tns:ServiceHeader" part="etg_header" use="literal" />
+              <soap:body use="literal" namespace = "urn:com:eurotaxglass:spec" />
+           </output>
+           </operation>
+           <!-- GetPackageContent Operation -->
+          
+          <operation name="GetPackageContent">
+           <soap:operation style="document" soapAction="urn:com:eurotaxglass:spec/GetPackageContent" />
+           <input>
+              <soap:header message="tns:ServiceHeader" part="etg_header" use="literal" />
+              <soap:body use="literal"  namespace="urn:com:eurotaxglass:spec" />
+           </input>
+           <output>
+              <soap:header message="tns:ServiceHeader" part="etg_header" use="literal" />
+              <soap:body use="literal" namespace = "urn:com:eurotaxglass:spec" />
+           </output>
+           </operation>
+
+          <operation name="GetListImage">
+           <soap:operation style="document" soapAction="urn:com:eurotaxglass:spec/GetListImage" />
+           <input>
+              <soap:header message="tns:ServiceHeader" part="etg_header" use="literal" />
+              <soap:body use="literal"  namespace="urn:com:eurotaxglass:spec" />
+           </input>
+           <output>
+              <soap:header message="tns:ServiceHeader" part="etg_header" use="literal" />
+              <soap:body use="literal" namespace = "urn:com:eurotaxglass:spec" />
+           </output>
+          </operation>
+          <operation name="GetVersion">
+           <soap:operation style="document" soapAction="urn:com:eurotaxglass:spec/GetVersion" />
+           <input>
+              <soap:header message="tns:ServiceHeader" part="etg_header" use="literal" />
+              <soap:body use="literal"  namespace="urn:com:eurotaxglass:spec" />
+           </input>
+           <output>
+              <soap:header message="tns:ServiceHeader" part="etg_header" use="literal" />
+              <soap:body use="literal" namespace = "urn:com:eurotaxglass:spec" />
+           </output>
+         </operation>
+         <operation name="GetListIncludableExcludableEquipment">
+             <documentation>This methods retrievs the list of includable and excludable equipment for a target vehicle based on the one or more pre-selected optional equipment.</documentation>
+             <soap:operation style="document" soapAction="urn:com:eurotaxglass:spec/GetListIncludableExcludableEquipment" />
+           <input>
+              <soap:header message="tns:ServiceHeader" part="etg_header" use="literal" />
+              <soap:body use="literal"  namespace="urn:com:eurotaxglass:spec" />
+           </input>
+           <output>
+              <soap:header message="tns:ServiceHeader" part="etg_header" use="literal" />
+              <soap:body use="literal" namespace = "urn:com:eurotaxglass:spec" />
+           </output>
+           <fault name="Message">
+              <soap:fault name="Message" use="literal" namespace = "urn:com:eurotaxglass:spec" />
+           </fault>
+         </operation>
+         
+         <operation name="GetListIncludableExcludableEquipmentEx">
+             <documentation>This is an alternative method to "GetListIncludableExcludableEquipment". </documentation>
+             <soap:operation style="document" soapAction="urn:com:eurotaxglass:spec/GetListIncludableExcludableEquipmentEx" />
+           <input>
+              <soap:header message="tns:ServiceHeader" part="etg_header" use="literal" />
+              <soap:body use="literal"  namespace="urn:com:eurotaxglass:spec" />
+           </input>
+           <output>
+              <soap:header message="tns:ServiceHeader" part="etg_header" use="literal" />
+              <soap:body use="literal" namespace = "urn:com:eurotaxglass:spec" />
+           </output>
+           <fault name="Message">
+              <soap:fault name="Message" use="literal" namespace = "urn:com:eurotaxglass:spec" />
+           </fault>
+         </operation>
+         
+      </binding>
+
+      <service name="SpecService">
+                <documentation> EurotaxGlass's Vehicle specification service</documentation>
+                <port name="SpecPortRPC" binding="tns:SpecBindingRPC">
+                  <soap:address location="http://webservices.eurotaxglass.com/webservices/Specification.wsa"/>
+                </port>
+                <port name="SpecPortDoc" binding="tns:SpecBindingDoc">
+                   <soap:address location="http://webservices.eurotaxglass.com/webservices/Specification.wsa"/>
+                </port>
+       </service>
+</definitions>

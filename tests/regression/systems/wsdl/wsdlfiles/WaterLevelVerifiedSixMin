@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://opendap.co-ops.nos.noaa.gov/axis/webservices/waterlevelverifiedsixmin/wsdl" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://opendap.co-ops.nos.noaa.gov/axis/webservices/waterlevelverifiedsixmin/wsdl" xmlns:intf="http://opendap.co-ops.nos.noaa.gov/axis/webservices/waterlevelverifiedsixmin/wsdl" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<!--WSDL created by Apache Axis version: 1.4
+Built on Apr 22, 2006 (06:55:48 PDT)-->
+ <wsdl:types>
+  <schema elementFormDefault="qualified" targetNamespace="http://opendap.co-ops.nos.noaa.gov/axis/webservices/waterlevelverifiedsixmin/wsdl" xmlns="http://www.w3.org/2001/XMLSchema">
+   <element name="Parameters">
+    <complexType>
+     <sequence>
+      <element name="stationId" type="xsd:string"/>
+      <element name="beginDate" type="xsd:string"/>
+      <element name="endDate" type="xsd:string"/>
+      <element name="datum" type="xsd:string"/>
+      <element name="unit" type="xsd:int"/>
+      <element name="timeZone" type="xsd:int"/>
+     </sequence>
+    </complexType>
+   </element>
+   <complexType name="Data">
+    <sequence>
+     <element name="timeStamp" type="xsd:string"/>
+     <element name="WL" type="xsd:double"/>
+     <element name="sigma" type="xsd:double"/>
+     <element name="I" type="xsd:int"/>
+     <element name="F" type="xsd:int"/>
+     <element name="R" type="xsd:int"/>
+     <element name="T" type="xsd:int"/>
+    </sequence>
+   </complexType>
+   <complexType name="item">
+    <sequence>
+     <element maxOccurs="unbounded" name="item" type="impl:Data"/>
+    </sequence>
+   </complexType>
+   <element name="WaterLevelVerifiedSixMinMeasurements">
+    <complexType>
+     <sequence>
+      <element name="data" type="impl:item"/>
+     </sequence>
+    </complexType>
+   </element>
+  </schema>
+ </wsdl:types>
+
+   <wsdl:message name="getWaterLevelVerifiedSixMinResponse">
+
+      <wsdl:part element="impl:WaterLevelVerifiedSixMinMeasurements" name="WaterLevelVerifiedSixMinMeasurements"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getWaterLevelVerifiedSixMinRequest">
+
+      <wsdl:part element="impl:Parameters" name="Parameters"/>
+
+   </wsdl:message>
+
+   <wsdl:portType name="WaterLevelVerifiedSixMinPortType">
+
+      <wsdl:operation name="getWaterLevelVerifiedSixMin" parameterOrder="Parameters">
+
+         <wsdl:input message="impl:getWaterLevelVerifiedSixMinRequest" name="getWaterLevelVerifiedSixMinRequest"/>
+
+         <wsdl:output message="impl:getWaterLevelVerifiedSixMinResponse" name="getWaterLevelVerifiedSixMinResponse"/>
+
+      </wsdl:operation>
+
+   </wsdl:portType>
+
+   <wsdl:binding name="WaterLevelVerifiedSixMinSoapBinding" type="impl:WaterLevelVerifiedSixMinPortType">
+
+      <wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+      <wsdl:operation name="getWaterLevelVerifiedSixMin">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getWaterLevelVerifiedSixMinRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getWaterLevelVerifiedSixMinResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+   </wsdl:binding>
+
+   <wsdl:service name="WaterLevelVerifiedSixMinService">
+
+      <wsdl:port binding="impl:WaterLevelVerifiedSixMinSoapBinding" name="WaterLevelVerifiedSixMin">
+
+         <wsdlsoap:address location="http://opendap.co-ops.nos.noaa.gov/axis/services/WaterLevelVerifiedSixMin"/>
+
+      </wsdl:port>
+
+   </wsdl:service>
+
+</wsdl:definitions>

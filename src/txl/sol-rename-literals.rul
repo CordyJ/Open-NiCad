@@ -1,0 +1,32 @@
+% NiCad literal renaming for Solidity
+% Jim Cordy, October 2020
+
+rule renameLiterals
+    replace $ [Literal]
+        L [Literal]
+    by
+        L [renameNumericLiterals]
+          [renameHexLiterals]
+          [renameStringLiterals]
+end rule
+
+function renameNumericLiterals
+    replace [Literal]
+        N [NumberLiteral]
+    by
+        '1
+end function
+
+function renameHexLiterals
+    replace [Literal]
+        H [HexLiteral]
+    by
+        '1
+end function
+
+function renameStringLiterals
+    replace [Literal]
+        S [StringLiteral]
+    by
+        '"x"
+end function

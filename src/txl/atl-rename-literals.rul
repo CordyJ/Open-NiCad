@@ -1,0 +1,24 @@
+% NiCad literal renaming for ATL
+% Jim Cordy, May 2020
+
+rule renameLiterals
+    replace $ [primitiveExp]
+        E [primitiveExp]
+    by
+        E [renameNumericExp]
+          [renameStringExp]
+end rule
+
+function renameNumericExp
+    replace [primitiveExp]
+        N [number]
+    by
+        1
+end function
+
+function renameStringExp
+    replace [primitiveExp]
+        S [stringExp]
+    by
+        ''x'
+end function

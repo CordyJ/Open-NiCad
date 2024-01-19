@@ -1,0 +1,52 @@
+library XMLHelpers;
+
+helper context XML!Element def: getChildren(n : String) : Sequence(XML!Node) =
+	self.children->select(e | e.name = n);
+
+helper context XML!Element def: getAttr(n : String) : Sequence(XML!Attribute) =
+	self.getChildren(n)->select(e | e.oclIsKindOf(XML!Attribute))->first();
+
+helper context XML!Element def: hasAttr(n : String) : Boolean =
+	self.getAttr(n)->size() <> 0;
+
+helper context XML!Element def: getAttrVal(n : String) : String =
+	let d : XML!Attribute = self.getAttr(n) in
+	if d.oclIsUndefined() then
+		OclUndefined
+	else
+		d.value
+	endif;
+
+helper context XML!Element def: getBooleanAttrVal(n : String) : Boolean =
+	let v : String = self.getAttrVal(n) in
+	if v.oclIsUndefined() then
+		OclUndefined
+	else
+		v = 'true'
+	endif;
+
+helper context XML!Element def: getIntegerAttrVal(n : String) : Integer =
+	let v : String = self.getAttrVal(n) in
+	if v.oclIsUndefined() then
+		OclUndefined
+	else
+		v.toInteger()
+	endif;
+
+helper context XML!Element def: getElemsByName(n : String) : Sequence(XML!Element) =
+	self.getChildren(n)->select(e | e.oclIsKindOf(XML!Element));
+
+helper context XML!Element def: getElemsByNames(n : Sequence(String)) : Sequence(XML!Element) =
+	self.children->select(e | e.oclIsKindOf(XML!Element))->select(e | n->includes(e.name));
+
+helper context XML!Node def: getLocation() : String =
+	if self.startLine.oclIsUndefined() then
+		''
+	else
+		if self.endLine.oclIsUndefined() then
+			'starting at line ' + self.startLine.toString()
+		else
+			'from line ' + self.startLine.toString() + ' to line ' + self.endLine.toString()
+		endif
+	endif;
+

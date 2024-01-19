@@ -1,0 +1,731 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="BookingService"
+ xmlns="http://schemas.xmlsoap.org/wsdl/"
+ xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/"
+ xmlns:WSDL="http://schemas.xmlsoap.org/wsdl/"
+ targetNamespace="http://websvc.worldres.com/BookingService"
+ xmlns:tns="http://websvc.worldres.com/BookingService"
+ xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+ xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+ xmlns:ns1="http://websvc.worldres.com/BookingService">
+
+<types>
+ <schema targetNamespace="http://websvc.worldres.com/BookingService"
+  xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+  xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:ns1="http://websvc.worldres.com/BookingService"
+  xmlns="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="unqualified"
+  attributeFormDefault="unqualified">
+
+  <complexType name="ArrayOfint">
+   <complexContent>
+    <restriction base="SOAP-ENC:Array">
+     <sequence>
+      <element name="item" type="xsd:int" minOccurs="0" maxOccurs="unbounded"/>
+     </sequence>
+     <attribute ref="SOAP-ENC:arrayType" WSDL:arrayType="xsd:int[]"/>
+    </restriction>
+   </complexContent>
+  </complexType>
+
+  <complexType name="occupancy">
+   <all>
+    <element name="numAdult" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="numChild" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+   </all>
+  </complexType>
+
+  <complexType name="ArrayOfoccupancy">
+   <complexContent>
+    <restriction base="SOAP-ENC:Array">
+     <sequence>
+      <element name="item" type="ns1:occupancy" minOccurs="0" maxOccurs="unbounded"/>
+     </sequence>
+     <attribute ref="SOAP-ENC:arrayType" WSDL:arrayType="ns1:occupancy[]"/>
+    </restriction>
+   </complexContent>
+  </complexType>
+
+  <complexType name="search-hotels-req">
+   <all>
+    <element name="token" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="langId" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="currency" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="checkInDay" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="checkInMonth" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="checkInYear" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="numNights" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="rateCode" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="numRoom" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="hotels" type="ns1:ArrayOfint" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="occupancyList" type="ns1:ArrayOfoccupancy" minOccurs="1" maxOccurs="1" nillable="true"/>
+   </all>
+  </complexType>
+
+  <complexType name="prodsearch-req">
+   <all>
+    <element name="token" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="langId" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="currency" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="checkInDay" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="checkInMonth" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="checkInYear" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="numNights" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="hotelId" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="rateCode" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="numAdult" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="numChild" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="numRoom" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+   </all>
+  </complexType>
+
+  <complexType name="product-config">
+   <all>
+    <element name="checkInDay" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="checkInMonth" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="checkInYear" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="numNights" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="hotelId" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="checksum" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="rateCode" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="productCode" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="numAdult" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="numChild" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="numRoom" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="expectedTotalRate" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+    <element name="expectedTotalTax" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+   </all>
+  </complexType>
+
+  <complexType name="ArrayOfproduct-config">
+   <complexContent>
+    <restriction base="SOAP-ENC:Array">
+     <sequence>
+      <element name="item" type="ns1:product-config" minOccurs="0" maxOccurs="unbounded"/>
+     </sequence>
+     <attribute ref="SOAP-ENC:arrayType" WSDL:arrayType="ns1:product-config[]"/>
+    </restriction>
+   </complexContent>
+  </complexType>
+
+  <complexType name="presell-req">
+   <all>
+    <element name="token" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="langId" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="currency" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="products" type="ns1:ArrayOfproduct-config" minOccurs="1" maxOccurs="1" nillable="true"/>
+   </all>
+  </complexType>
+
+  <complexType name="nightly-rate">
+   <all>
+    <element name="baseRate" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+    <element name="tax" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+    <element name="extraAdult" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+    <element name="extraChild" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+   </all>
+  </complexType>
+
+  <complexType name="ArrayOfnightly-rate">
+   <complexContent>
+    <restriction base="SOAP-ENC:Array">
+     <sequence>
+      <element name="item" type="ns1:nightly-rate" minOccurs="0" maxOccurs="unbounded"/>
+     </sequence>
+     <attribute ref="SOAP-ENC:arrayType" WSDL:arrayType="ns1:nightly-rate[]"/>
+    </restriction>
+   </complexContent>
+  </complexType>
+
+  <complexType name="lite-product-desc">
+   <all>
+    <element name="rateCode" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="productCode" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="checksum" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="bedDescription" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="rateName" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="rateDescription" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="roomName" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="roomDesc" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="currencyCode" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="rateChanges" type="xsd:boolean" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="isEstimate" type="xsd:boolean" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="numNight" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="modifyRelative" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="cancelRelative" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="cancellationPolicyType" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="cancellationPolicyValue" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="cancellationPolicyDesc" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="commissionPolicyType" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="commissionPolicyDesc" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="guaranteePolicyType" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="guaranteePolicyValue" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="guaranteePolicyDesc" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="taxPolicyType" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="taxPolicyDesc" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="taxInd" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="productType" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="nightlyRates" type="ns1:ArrayOfnightly-rate" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="occupancyMatch" type="ns1:ArrayOfint" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="totalRate" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+    <element name="totalTax" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+    <element name="roomDeposit" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+    <element name="roomDue" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+    <element name="quoteCurrency" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="quoteTotalRate" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+    <element name="quoteTotalTax" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+    <element name="quoteRoomDeposit" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+    <element name="quoteRoomDue" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+   </all>
+  </complexType>
+
+  <complexType name="product-desc">
+   <all>
+    <element name="rateCode" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="productCode" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="checksum" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="numAvail" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="numBed" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="maxSleep" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="bedDescription" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="rateName" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="rateDescription" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="roomName" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="roomDesc" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="currencyCode" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="rateChanges" type="xsd:boolean" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="isEstimate" type="xsd:boolean" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="numNight" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="modifyRelative" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="cancelRelative" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="cancellationPolicyType" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="cancellationPolicyValue" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="cancellationPolicyDesc" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="commissionPolicyType" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="commissionPolicyDesc" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="guaranteePolicyType" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="guaranteePolicyValue" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="guaranteePolicyDesc" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="taxPolicyType" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="taxPolicyDesc" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="taxInd" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="productType" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="nightlyRates" type="ns1:ArrayOfnightly-rate" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="totalRate" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+    <element name="totalTax" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+    <element name="roomDeposit" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+    <element name="roomDue" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+    <element name="quoteCurrency" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="quoteTotalRate" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+    <element name="quoteTotalTax" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+    <element name="quoteRoomDeposit" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+    <element name="quoteRoomDue" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+   </all>
+  </complexType>
+
+  <complexType name="ArrayOflite-product-desc">
+   <complexContent>
+    <restriction base="SOAP-ENC:Array">
+     <sequence>
+      <element name="item" type="ns1:lite-product-desc" minOccurs="0" maxOccurs="unbounded"/>
+     </sequence>
+     <attribute ref="SOAP-ENC:arrayType" WSDL:arrayType="ns1:lite-product-desc[]"/>
+    </restriction>
+   </complexContent>
+  </complexType>
+
+  <complexType name="ArrayOfproduct-desc">
+   <complexContent>
+    <restriction base="SOAP-ENC:Array">
+     <sequence>
+      <element name="item" type="ns1:product-desc" minOccurs="0" maxOccurs="unbounded"/>
+     </sequence>
+     <attribute ref="SOAP-ENC:arrayType" WSDL:arrayType="ns1:product-desc[]"/>
+    </restriction>
+   </complexContent>
+  </complexType>
+
+  <complexType name="prodsearch-response">
+   <all>
+    <element name="marketingMsg" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="product-desc" type="ns1:ArrayOflite-product-desc" minOccurs="1" maxOccurs="1" nillable="true"/>
+   </all>
+  </complexType>
+
+  <complexType name="hotel-product">
+   <all>
+    <element name="hotelId" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="errorCode" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="errorMsg" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="marketingMsg" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="product-desc" type="ns1:ArrayOflite-product-desc" minOccurs="1" maxOccurs="1" nillable="true"/>
+   </all>
+  </complexType>
+
+  <complexType name="ArrayOfhotel-product">
+   <complexContent>
+    <restriction base="SOAP-ENC:Array">
+     <sequence>
+      <element name="item" type="ns1:hotel-product" minOccurs="0" maxOccurs="unbounded"/>
+     </sequence>
+     <attribute ref="SOAP-ENC:arrayType" WSDL:arrayType="ns1:hotel-product[]"/>
+    </restriction>
+   </complexContent>
+  </complexType>
+
+  <complexType name="presell-response">
+   <all>
+    <element name="depositCurrency" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="bookingFeeDeposit" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+    <element name="totalRoomDeposit" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+    <element name="totalResvDepositCharge" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+    <element name="marketingMsg" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="product-desc" type="ns1:ArrayOflite-product-desc" minOccurs="1" maxOccurs="1" nillable="true"/>
+   </all>
+  </complexType>
+
+  <complexType name="prodsearch-ack">
+   <all>
+    <element name="errorCode" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="errorMsg" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="resp" type="ns1:prodsearch-response" minOccurs="1" maxOccurs="1" nillable="true"/>
+   </all>
+  </complexType>
+
+  <complexType name="search-hotels-ack">
+   <all>
+    <element name="errorCode" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="errorMsg" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="resp" type="ns1:ArrayOfhotel-product" minOccurs="1" maxOccurs="1" nillable="true"/>
+   </all>
+  </complexType>
+
+  <complexType name="presell-ack">
+   <all>
+    <element name="errorCode" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="errorMsg" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="resp" type="ns1:presell-response" minOccurs="1" maxOccurs="1" nillable="true"/>
+   </all>
+  </complexType>
+
+  <complexType name="sell-req">
+   <all>
+    <element name="token" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="langId" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="currency" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="miscId" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="bookingAgentId" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="secondaryBookingSrc" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="prefix" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="firstName" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="middleName" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="lastName" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="suffix" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="address" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="city" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="state" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="country" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="postalCode" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="email" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="dayPhone" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="nightPhone" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="ccNum" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="cvv" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="ccType" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="ccExpMonth" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="ccExpYear" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="ccHolderName" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="messageToHotel" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="products" type="ns1:ArrayOfproduct-config" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="twoPhase" type="xsd:boolean" minOccurs="0" maxOccurs="1" nillable="true"/>
+   </all>
+  </complexType>
+
+  <complexType name="modify-req">
+   <all>
+    <element name="token" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="langId" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="currency" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="resvId" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="miscId" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="bookingAgentId" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="secondaryBookingSrc" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="prefix" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="firstName" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="middleName" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="lastName" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="suffix" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="address" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="city" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="state" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="country" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="postalCode" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="email" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="dayPhone" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="nightPhone" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="ccNum" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="cvv" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="ccType" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="ccExpMonth" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="ccExpYear" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="ccHolderName" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="messageToHotel" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="products" type="ns1:ArrayOfproduct-config" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="twoPhase" type="xsd:boolean" minOccurs="0" maxOccurs="1" nillable="true"/>
+   </all>
+  </complexType>
+
+  <complexType name="cancel-req">
+   <all>
+    <element name="token" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="langId" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="resvId" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="twoPhase" type="xsd:boolean" minOccurs="0" maxOccurs="1" nillable="true"/>
+   </all>
+  </complexType>
+
+  <complexType name="cancel-response">
+   <all>
+    <element name="timeCanceled" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="fee" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+    <element name="currency" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="bookingFee" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+   </all>
+  </complexType>
+
+  <complexType name="cancel-ack">
+   <all>
+    <element name="errorCode" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="errorMsg" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="resp" type="ns1:cancel-response" minOccurs="1" maxOccurs="1" nillable="true"/>
+   </all>
+  </complexType>
+
+  <complexType name="commit-req">
+   <all>
+    <element name="token" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="resvId" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+   </all>
+  </complexType>
+
+  <complexType name="commit-ack">
+   <all>
+    <element name="errorCode" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="errorMsg" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+   </all>
+  </complexType>
+
+  <complexType name="rollback-req">
+   <all>
+    <element name="token" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="resvId" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+   </all>
+  </complexType>
+
+  <complexType name="rollback-ack">
+   <all>
+    <element name="errorCode" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="errorMsg" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+   </all>
+  </complexType>
+
+  <complexType name="stay">
+   <all>
+    <element name="crsConfNum" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="crsCancelNum" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="product" type="ns1:product-config" minOccurs="1" maxOccurs="1"/>
+    <element name="proddesc" type="ns1:product-desc" minOccurs="1" maxOccurs="1"/>
+    <element name="penaltyApplies" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+   </all>
+  </complexType>
+
+  <complexType name="ArrayOfstay">
+   <complexContent>
+    <restriction base="SOAP-ENC:Array">
+     <sequence>
+      <element name="item" type="ns1:stay" minOccurs="0" maxOccurs="unbounded"/>
+     </sequence>
+     <attribute ref="SOAP-ENC:arrayType" WSDL:arrayType="ns1:stay[]"/>
+    </restriction>
+   </complexContent>
+  </complexType>
+
+  <complexType name="sell-response">
+   <all>
+    <element name="resvId" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="guestConfCode" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="timeCreated" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="timeModified" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="timeCanceled" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="depositCurrency" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="bookingFeeDeposit" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+    <element name="totalRoomDeposit" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+    <element name="totalResvDepositCharge" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+    <element name="stays" type="ns1:ArrayOfstay" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="charge-status" type="xsd:byte" minOccurs="1" maxOccurs="1"/>
+   </all>
+  </complexType>
+
+  <complexType name="sell-ack">
+   <all>
+    <element name="errorCode" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="errorMsg" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="resp" type="ns1:sell-response" minOccurs="1" maxOccurs="1" nillable="true"/>
+   </all>
+  </complexType>
+
+  <complexType name="modify-ack">
+   <all>
+    <element name="errorCode" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    <element name="errorMsg" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="true"/>
+    <element name="resp" type="ns1:sell-response" minOccurs="1" maxOccurs="1" nillable="true"/>
+   </all>
+  </complexType>
+
+  <complexType name="ArrayOfstring">
+   <complexContent>
+    <restriction base="SOAP-ENC:Array">
+     <sequence>
+      <element name="item" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+     </sequence>
+     <attribute ref="SOAP-ENC:arrayType" WSDL:arrayType="xsd:string[]"/>
+    </restriction>
+   </complexContent>
+  </complexType>
+
+ </schema>
+</types>
+
+<message name="noopRequest">
+</message>
+
+<message name="noopResponse">
+ <part name="return" type="xsd:string"/>
+</message>
+
+<message name="prodSearchRequest">
+ <part name="reqp" type="ns1:prodsearch-req"/>
+ <part name="rateFilter" type="ns1:ArrayOfstring"/>
+</message>
+
+<message name="prodsearch-ack">
+ <part name="errorCode" type="xsd:int"/>
+ <part name="errorMsg" type="xsd:string"/>
+ <part name="resp" type="ns1:prodsearch-response"/>
+</message>
+
+<message name="hotelListProdSearchRequest">
+ <part name="reqp" type="ns1:search-hotels-req"/>
+ <part name="rateFilter" type="ns1:ArrayOfstring"/>
+</message>
+
+<message name="search-hotels-ack">
+ <part name="errorCode" type="xsd:int"/>
+ <part name="errorMsg" type="xsd:string"/>
+ <part name="resp" type="ns1:ArrayOfhotel-product"/>
+</message>
+
+<message name="presellRequest">
+ <part name="reqp" type="ns1:presell-req"/>
+</message>
+
+<message name="presell-ack">
+ <part name="errorCode" type="xsd:int"/>
+ <part name="errorMsg" type="xsd:string"/>
+ <part name="resp" type="ns1:presell-response"/>
+</message>
+
+<message name="sellRequest">
+ <part name="reqp" type="ns1:sell-req"/>
+</message>
+
+<message name="sell-ack">
+ <part name="errorCode" type="xsd:int"/>
+ <part name="errorMsg" type="xsd:string"/>
+ <part name="resp" type="ns1:sell-response"/>
+</message>
+
+<message name="cancelRequest">
+ <part name="reqp" type="ns1:cancel-req"/>
+</message>
+
+<message name="cancel-ack">
+ <part name="errorCode" type="xsd:int"/>
+ <part name="errorMsg" type="xsd:string"/>
+ <part name="resp" type="ns1:cancel-response"/>
+</message>
+
+<message name="modifyRequest">
+ <part name="reqp" type="ns1:modify-req"/>
+</message>
+
+<message name="modify-ack">
+ <part name="errorCode" type="xsd:int"/>
+ <part name="errorMsg" type="xsd:string"/>
+ <part name="resp" type="ns1:sell-response"/>
+</message>
+
+<message name="commitRequest">
+ <part name="reqp" type="ns1:commit-req"/>
+</message>
+
+<message name="commit-ack">
+ <part name="errorCode" type="xsd:int"/>
+ <part name="errorMsg" type="xsd:string"/>
+</message>
+
+<message name="rollbackRequest">
+ <part name="reqp" type="ns1:rollback-req"/>
+</message>
+
+<message name="rollback-ack">
+ <part name="errorCode" type="xsd:int"/>
+ <part name="errorMsg" type="xsd:string"/>
+</message>
+
+<portType name="BookingServicePortType">
+ <operation name="noop">
+  <documentation>Service definition of function ns1__noop</documentation>
+  <input message="tns:noopRequest"/>
+  <output message="tns:noopResponse"/>
+ </operation>
+ <operation name="prodSearch">
+  <documentation>Service definition of function ns1__prodSearch</documentation>
+  <input message="tns:prodSearchRequest"/>
+  <output message="tns:prodsearch-ack"/>
+ </operation>
+ <operation name="hotelListProdSearch">
+  <documentation>Service definition of function ns1__hotelListProdSearch</documentation>
+  <input message="tns:hotelListProdSearchRequest"/>
+  <output message="tns:search-hotels-ack"/>
+ </operation>
+ <operation name="presell">
+  <documentation>Service definition of function ns1__presell</documentation>
+  <input message="tns:presellRequest"/>
+  <output message="tns:presell-ack"/>
+ </operation>
+ <operation name="sell">
+  <documentation>Service definition of function ns1__sell</documentation>
+  <input message="tns:sellRequest"/>
+  <output message="tns:sell-ack"/>
+ </operation>
+ <operation name="cancel">
+  <documentation>Service definition of function ns1__cancel</documentation>
+  <input message="tns:cancelRequest"/>
+  <output message="tns:cancel-ack"/>
+ </operation>
+ <operation name="modify">
+  <documentation>Service definition of function ns1__modify</documentation>
+  <input message="tns:modifyRequest"/>
+  <output message="tns:modify-ack"/>
+ </operation>
+ <operation name="commit">
+  <documentation>Service definition of function ns1__commit</documentation>
+  <input message="tns:commitRequest"/>
+  <output message="tns:commit-ack"/>
+ </operation>
+ <operation name="rollback">
+  <documentation>Service definition of function ns1__rollback</documentation>
+  <input message="tns:rollbackRequest"/>
+  <output message="tns:rollback-ack"/>
+ </operation>
+</portType>
+
+<binding name="BookingServiceBinding" type="tns:BookingServicePortType">
+ <SOAP:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+ <operation name="noop">
+  <SOAP:operation soapAction=""/>
+  <input>
+   <SOAP:body use="encoded" namespace="http://websvc.worldres.com/BookingService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+   <SOAP:body use="encoded" namespace="http://websvc.worldres.com/BookingService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="prodSearch">
+  <SOAP:operation soapAction=""/>
+  <input>
+   <SOAP:body use="encoded" namespace="http://websvc.worldres.com/BookingService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+   <SOAP:body use="encoded" namespace="http://websvc.worldres.com/BookingService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="hotelListProdSearch">
+  <SOAP:operation soapAction=""/>
+  <input>
+   <SOAP:body use="encoded" namespace="http://websvc.worldres.com/BookingService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+   <SOAP:body use="encoded" namespace="http://websvc.worldres.com/BookingService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="presell">
+  <SOAP:operation soapAction=""/>
+  <input>
+   <SOAP:body use="encoded" namespace="http://websvc.worldres.com/BookingService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+   <SOAP:body use="encoded" namespace="http://websvc.worldres.com/BookingService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="sell">
+  <SOAP:operation soapAction=""/>
+  <input>
+   <SOAP:body use="encoded" namespace="http://websvc.worldres.com/BookingService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+   <SOAP:body use="encoded" namespace="http://websvc.worldres.com/BookingService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="cancel">
+  <SOAP:operation soapAction=""/>
+  <input>
+   <SOAP:body use="encoded" namespace="http://websvc.worldres.com/BookingService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+   <SOAP:body use="encoded" namespace="http://websvc.worldres.com/BookingService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="modify">
+  <SOAP:operation soapAction=""/>
+  <input>
+   <SOAP:body use="encoded" namespace="http://websvc.worldres.com/BookingService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+   <SOAP:body use="encoded" namespace="http://websvc.worldres.com/BookingService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="commit">
+  <SOAP:operation soapAction=""/>
+  <input>
+   <SOAP:body use="encoded" namespace="http://websvc.worldres.com/BookingService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+   <SOAP:body use="encoded" namespace="http://websvc.worldres.com/BookingService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="rollback">
+  <SOAP:operation soapAction=""/>
+  <input>
+   <SOAP:body use="encoded" namespace="http://websvc.worldres.com/BookingService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+   <SOAP:body use="encoded" namespace="http://websvc.worldres.com/BookingService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+</binding>
+
+<service name="BookingService">
+ <documentation>gSOAP 2.2.3b generated service definition</documentation>
+ <port name="BookingService" binding="tns:BookingServiceBinding">
+  <SOAP:address location="https://wsqa.worldres.com/secure-cgi-bin/WebServices_ver_4/BookingService"/>
+ </port>
+</service>
+
+</definitions>

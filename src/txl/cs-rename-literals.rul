@@ -1,0 +1,40 @@
+% NiCad literal renaming for C#
+% Jim Cordy, May 2020
+
+rule renameLiterals
+    replace $ [literal]
+        L [literal]
+    by
+        L [renameIntegerLiterals]
+          [renameFloatLiterals]
+          [renameCharLiterals]
+          [renameStringLiterals]
+end rule
+
+function renameIntegerLiterals
+    replace [literal]
+        I [integer_literal]
+    by
+        '1
+end function
+
+function renameFloatLiterals
+    replace [literal]
+        F [real_literal]
+    by
+        '1.0
+end function
+
+function renameCharLiterals
+    replace [literal]
+        C [character_literal]
+    by
+        ''x'
+end function
+
+function renameStringLiterals
+    replace [literal]
+        S [string_literal]
+    by
+        '"x"
+end function

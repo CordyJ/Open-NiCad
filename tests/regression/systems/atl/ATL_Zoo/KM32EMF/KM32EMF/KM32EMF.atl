@@ -1,0 +1,138 @@
+module KM32EMF;
+create OUT : MOF from IN : KM3;
+
+uses strings;
+
+helper context KM3!Package def: getMetadata(name : String) : String =
+	let comment : String = self.commentsBefore->select(e | e.startsWith('-- @' + name + ' '))->first() in
+	if comment.oclIsUndefined() then
+		OclUndefined
+	else
+		comment.substring(6 + name.size(), comment.size())
+	endif;
+
+rule Package {
+	from
+		e : KM3!Package
+	to
+		c : MOF!EPackage (
+			name <- e.name,
+			eClassifiers <- e.contents->select(e | e.oclIsKindOf(KM3!Classifier)),
+			eSubpackages <- e.contents->select(e | e.oclIsKindOf(KM3!Package)),
+			nsURI <- e.getMetadata('nsURI'),
+			nsPrefix <- e.getMetadata('nsPrefix')
+		)
+}
+
+rule PrimitiveType {
+	from
+		e : KM3!DataType
+	to
+		c : MOF!EDataType (
+			name <- e.name
+		)
+}
+
+rule Reference {
+	from
+		e : KM3!Reference
+	to
+		c : MOF!EReference (
+			name <- e.name,
+			eType <- e.type,
+			lowerBound <- e.lower,
+			upperBound <- e.upper,
+			ordered <- e.isOrdered,
+			eOpposite <- e.opposite,
+			containment <- e.isContainer
+		)
+}
+
+rule Class {
+	from
+		e : KM3!Class
+	to
+		c : MOF!EClass (
+			name <- e.name,
+			eStructuralFeatures <- e.structuralFeatures,
+			eOperations <- e.operations,
+			eSuperTypes <- e.supertypes,
+			"abstract" <- e.isAbstract
+		)
+}
+
+rule PrimitiveAttribute {
+	from
+		e : KM3!Attribute (
+			e.type.oclIsKindOf(KM3!DataType) or
+			e.type.oclIsKindOf(KM3!Enumeration)
+		)
+	to
+		c : MOF!EAttribute (
+			name <- e.name,
+			eType <- e.type,
+			lowerBound <- e.lower,
+			upperBound <- e.upper,
+			ordered <- e.isOrdered,
+			"unique" <- e.isUnique
+		)
+}
+
+rule NonPrimitiveAttribute {
+	from
+		e : KM3!Attribute (
+			not (e.type.oclIsKindOf(KM3!DataType) or
+			e.type.oclIsKindOf(KM3!Enumeration))
+		)
+	to
+		c : MOF!EReference (
+			name <- e.name,
+			eType <- e.type,
+			lowerBound <- e.lower,
+			upperBound <- e.upper,
+			ordered <- e.isOrdered,
+			containment <- true
+		)
+}
+
+rule Enumeration {
+	from
+		e : KM3!Enumeration
+	to
+		c : MOF!EEnum (
+			name <- e.name,
+			eLiterals <- e.literals
+		)
+}
+
+rule EnumLiteral {
+	from
+		e : KM3!EnumLiteral
+	to
+		c : MOF!EEnumLiteral (
+			name <- e.name,
+			value <- e.enum.literals->indexOf(e)
+		)
+}
+
+rule Operation {
+	from
+		io : KM3!Operation
+	to
+		oo : MOF!EOperation (
+			name <- io.name,
+			eParameters <- io.parameters,
+			eType <- io.type
+		)
+}
+
+rule Parameter {
+	from
+		ip : KM3!Parameter
+	to
+		op : MOF!EParameter (
+			name <- ip.name,
+			eType <- ip.type
+		)
+}
+

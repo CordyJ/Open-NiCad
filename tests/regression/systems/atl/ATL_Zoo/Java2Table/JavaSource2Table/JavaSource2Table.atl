@@ -1,0 +1,115 @@
+-- @path JavaSource=/JavaSource2Table/JavaSource.ecore
+-- @path Table=/JavaSource2Table/Table.ecore
+
+module JavaSource2Table;
+create OUT : Table from IN : JavaSource;
+
+-------------------------------------------------------------------------------
+-- HELPERS --------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- This helper builds the sequence of all method definitions in all existing 
+-- classes.
+-- Built sequence is ordered according to the couple (class_name, method_name).
+-- RETURN:	Sequence(JavaSource!MethodDefinition)
+helper def: allMethodDefs : Sequence(JavaSource!MethodDefinition) =
+	JavaSource!MethodDefinition.allInstances()
+		->sortedBy(e | e.class.name + '_' + e.name);
+
+-- This helper builds the content of the table cell associated with the context
+-- MethodDefinition (row) and the input MethodDefinition (column).
+-- The computed value corresponds to the number of calls of the second method
+-- within the first method definition.
+-- CONTEXT:	JavaSource!MethodDefinition
+-- IN:		JavaSource!MethodDefinition
+-- RETURN:	String
+helper context JavaSource!MethodDefinition
+	def : computeContent(col : JavaSource!MethodDefinition) : String =
+	self.invocations
+		->select(i | i.method.name = col.name
+					and i.method.class.name = col.class.name)
+		->size();
+
+-------------------------------------------------------------------------------
+-- RULES ----------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- Rule 'Main'
+-- This rule generates the Table as well as its first row.
+-- First row cells contain the different defined method, in the format
+-- 'class_name.method_name', ordered by the value of the build string.
+rule Main {
+	from
+		s : JavaSource!JavaSource
+		
+	to
+		-- Table is composed of the first row + data rows
+		t : Table!Table (
+			rows <-
+				Sequence{first_row,
+						 thisModule.allMethodDefs
+						 	->collect(e | thisModule.resolveTemp(e, 'row'))
+						 }
+		),
+		-- First row is composed of the first column + title columns
+		first_row : Table!Row (
+--			cells <- Sequence{first_col, title_cols}
+			cells <- Sequence{first_col, thisModule.allMethodDefs -> 
+				collect(md | thisModule.TitleCols(md))} -> flatten()
+		),
+		-- First column empty
+		first_col : Table!Cell (
+			content <- ''
+		)
+		
+		-- Former version, with distinct ... foreach
+		-- 
+		--Title cols = 'class_name.method_name'
+		--title_cols : distinct Table!Cell
+		--				foreach(mDef in thisModule.allMethodDefs)(
+		--	content <- mDef.class.name + '.' + mDef.name
+		--)
+}
+
+unique lazy rule TitleCols {
+	from
+		md: JavaSource!MethodDefinition
+	to
+		tFilled: Table!Cell (
+			content <- md.class.name + '.' + md.name
+		)
+}
+
+-- Rule 'MethodDefinition'
+-- This rule generates the content of the table, including the first cell of
+-- each row, which identifies a method (format 'class_name.method_name').
+rule MethodDefinition {
+	from
+		m : JavaSource!MethodDefinition
+
+	to
+		-- Rows are composed of the first (title) cell + data cells
+		row : Table!Row (
+			cells <- Sequence{title_cel, thisModule.allMethodDefs ->
+				collect(md | thisModule.DataCells(md, m))} -> flatten()
+		),
+		-- Title cell = 'class_name.method_name'
+		title_cel : Table!Cell (
+			content <- m.class.name + '.' + m.name
+		)
+		-- Data cells = nb of calls of each method within a method definition
+--		cels : distinct Table!Cell foreach(mDef in thisModule.allMethodDefs)(
+--			content <- m.computeContent(mDef).toString()
+--		)
+}
+
+lazy rule DataCells {
+	from
+		md: JavaSource!MethodDefinition,
+		m: JavaSource!MethodDefinition
+	to
+		cell: Table!Cell (
+			content <- m.computeContent(md).toString()
+		)
+}
+

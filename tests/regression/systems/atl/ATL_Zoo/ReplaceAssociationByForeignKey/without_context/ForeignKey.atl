@@ -1,0 +1,100 @@
+-- @name		Replacing association by foreign key
+-- @version		1.0
+-- @domains		Catalogue of Model Transformations
+-- @authors		Baudry Julien (jul.baudry<at>gmail.com)
+-- @date		2006/08/02
+-- @description	The purpose of this transformation is to replace an association by a foreign key
+-- @see http://www.dcs.kcl.ac.uk/staff/kcl/tcat.pdf   
+-- @see section 1.6, page 7
+-- @see author of article : K. Lano
+
+module ForeignKey; -- Module Template
+create OUT : KM3target from IN : KM3;
+
+--@begin rule Metamodel
+rule Metamodel {
+	from
+		inputMm:KM3!Metamodel
+	to
+		outputMm:KM3target!Metamodel (
+			location <- inputMm.location,
+			contents <- inputMm.contents
+		)
+}
+--@end rule Metamodel
+
+--@begin rule Package
+rule Package {
+	from
+		inputPkg:KM3!Package
+	to
+		outputPkg:KM3target!Package (
+			name <- inputPkg.name,
+			contents <- inputPkg.contents
+		)
+}
+--@end rule Package
+
+--@begin rule Class
+rule Class {
+	from
+		inputA:KM3!Class
+	to
+		outputA:KM3target!Class (
+			name <- inputA.name,
+			isAbstract <- inputA.isAbstract,
+			structuralFeatures <- inputA.structuralFeatures
+		)
+}
+--@end rule Class
+
+--@begin rule datatype
+rule DataType {
+from
+		inputData:KM3!DataType
+	to
+		outputData:KM3target!DataType(
+			name <- inputData.name,
+			location <- inputData.location
+		)
+}
+--@end rule datatype
+
+--@begin foreignkey
+rule reference2Key {
+	from 
+		r:KM3!Reference (
+			r.upper = 1	
+		)
+	to
+		key:KM3target!Attribute (
+			name <- r.type.name.toLower()+'ForeignKey',
+			isOrdered <- false,
+			isUnique <- false,
+			location <- '',
+			lower <- 1,
+			upper <- 1,
+			type <- KM3!DataType.allInstances()->select(a|a.name = 'Integer')->first(),
+			owner <- r.owner
+		)
+}
+--@end foreignkey
+
+--@begin rule attribute 
+rule attribute {
+	from
+		inputAtt:KM3!Attribute 
+	to
+		outputAtt:KM3target!Attribute(
+			name <- inputAtt.name,
+			isOrdered <- inputAtt.isOrdered,
+			isUnique <- inputAtt.isUnique,
+			location <- inputAtt.location,
+			lower <- inputAtt.lower,
+			upper <- inputAtt.upper,
+			type <- inputAtt.type,
+			owner <- inputAtt.owner
+			
+		)
+}
+--@end rule attribute

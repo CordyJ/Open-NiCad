@@ -1,0 +1,42 @@
+-- @name Tree structure to List structure (using ATL Resolve Algorithm)
+-- @version 1.0
+-- @domains 
+-- @authors Cyril Faure, Freddy Allilaire
+-- @date 01/07/2007
+-- @description "toy example" of model transformation usually made with a DFS (Depth First Search) imperative algorithms
+-- @see http://en.wikipedia.org/wiki/Depth-first_search
+-- @path MMTree=/Tree2List/metamodels/MMTree.ecore
+-- @path MMElementList=/Tree2List/metamodels/MMElementList.ecore
+
+module Tree2List;
+create elmList : MMElementList from aTree : MMTree;
+
+uses Lib4MMTree;
+
+-- we want to process the tree via DFS and create an ordered list containing :
+-- all big leafs, then all medium leafs, then all small leafs. We add the
+-- constraint we want all three "sublists" to be ordered on the DFS traversal order
+-- Note : the nodes (other than the tree root) are not kept in the destination model
+
+-- Rule to transform "Tree Node Root" in "Element List Root"
+rule TreeNodeRoot2RootElement { 
+	from 	-- should be unique
+		rt : MMTree!Node (rt.isTreeNodeRoot()) 
+	to
+		lstRt : MMElementList!RootElement (
+			name <- rt.name,
+			elements <- rt.getLeavesInOrder() -- reference copy,
+			-- Correspondance "Leaf to CommonElement" will be made thanks to a traceability link.
+			-- Traceability links record correspondences between source and target elements established during transformation execution.
+		)
+}
+
+-- Rule to transform Leaf to CommonElement
+rule Leaf2CommonElement {
+	from
+		s : MMTree!Leaf
+	to
+		t : MMElementList!CommonElement(
+			name <- s.name
+		)
+}

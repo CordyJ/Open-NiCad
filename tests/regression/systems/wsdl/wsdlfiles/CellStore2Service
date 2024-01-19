@@ -1,0 +1,1038 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://cellstore.wasp.freeband.nl" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://cellstore.wasp.freeband.nl" xmlns:intf="http://cellstore.wasp.freeband.nl" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tns1="http://common.wasp.freeband.nl" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<!--WSDL created by Apache Axis version: 1.4
+Built on Apr 22, 2006 (06:55:48 PDT)-->
+ <wsdl:types>
+  <schema targetNamespace="http://common.wasp.freeband.nl" xmlns="http://www.w3.org/2001/XMLSchema">
+   <import namespace="http://cellstore.wasp.freeband.nl"/>
+   <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+   <complexType name="LatLong">
+    <sequence>
+     <element name="latitude" type="xsd:double"/>
+     <element name="longitude" type="xsd:double"/>
+    </sequence>
+   </complexType>
+  </schema>
+  <schema targetNamespace="http://cellstore.wasp.freeband.nl" xmlns="http://www.w3.org/2001/XMLSchema">
+   <import namespace="http://common.wasp.freeband.nl"/>
+   <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+   <complexType name="LocationInfo">
+    <sequence>
+     <element name="level" type="xsd:int"/>
+     <element name="location" nillable="true" type="tns1:LatLong"/>
+     <element name="range" type="xsd:int"/>
+    </sequence>
+   </complexType>
+   <complexType name="NetworkData">
+    <sequence>
+     <element name="countryID" type="xsd:int"/>
+     <element name="name" nillable="true" type="soapenc:string"/>
+     <element name="networkID" type="xsd:int"/>
+    </sequence>
+   </complexType>
+   <complexType name="ArrayOfNetworkData">
+    <complexContent>
+     <restriction base="soapenc:Array">
+      <attribute ref="soapenc:arrayType" wsdl:arrayType="impl:NetworkData[]"/>
+     </restriction>
+    </complexContent>
+   </complexType>
+   <complexType name="Measurement">
+    <sequence>
+     <element name="date" type="xsd:long"/>
+     <element name="latitude" type="xsd:double"/>
+     <element name="localAreaCode" type="xsd:int"/>
+     <element name="longitude" type="xsd:double"/>
+     <element name="signalStrength" type="xsd:int"/>
+     <element name="userID" type="xsd:long"/>
+    </sequence>
+   </complexType>
+   <complexType name="ArrayOfMeasurement">
+    <complexContent>
+     <restriction base="soapenc:Array">
+      <attribute ref="soapenc:arrayType" wsdl:arrayType="impl:Measurement[]"/>
+     </restriction>
+    </complexContent>
+   </complexType>
+   <complexType name="CellData">
+    <sequence>
+     <element name="averageSignalStrength" type="xsd:double"/>
+     <element name="cellID" type="xsd:int"/>
+     <element name="countryID" type="xsd:int"/>
+     <element name="lastModified" type="xsd:long"/>
+     <element name="localAreaCode" type="xsd:int"/>
+     <element name="location" nillable="true" type="tns1:LatLong"/>
+     <element name="measurements" nillable="true" type="impl:ArrayOfMeasurement"/>
+     <element name="networkID" type="xsd:int"/>
+     <element name="numberOfMeasurements" type="xsd:int"/>
+     <element name="range" type="xsd:int"/>
+     <element name="userID" type="xsd:long"/>
+    </sequence>
+   </complexType>
+   <complexType name="ArrayOfCellData">
+    <complexContent>
+     <restriction base="soapenc:Array">
+      <attribute ref="soapenc:arrayType" wsdl:arrayType="impl:CellData[]"/>
+     </restriction>
+    </complexContent>
+   </complexType>
+   <complexType name="ArrayOf_xsd_int">
+    <complexContent>
+     <restriction base="soapenc:Array">
+      <attribute ref="soapenc:arrayType" wsdl:arrayType="xsd:int[]"/>
+     </restriction>
+    </complexContent>
+   </complexType>
+   <complexType name="UserData">
+    <sequence>
+     <element name="accessRights" nillable="true" type="soapenc:string"/>
+     <element name="password" nillable="true" type="soapenc:string"/>
+     <element name="userID" nillable="true" type="soapenc:string"/>
+    </sequence>
+   </complexType>
+   <complexType name="ArrayOfUserData">
+    <complexContent>
+     <restriction base="soapenc:Array">
+      <attribute ref="soapenc:arrayType" wsdl:arrayType="impl:UserData[]"/>
+     </restriction>
+    </complexContent>
+   </complexType>
+   <complexType name="LacData">
+    <sequence>
+     <element name="countryID" type="xsd:int"/>
+     <element name="lac" type="xsd:int"/>
+     <element name="maxLatitude" type="xsd:double"/>
+     <element name="maxLongitude" type="xsd:double"/>
+     <element name="minLatitude" type="xsd:double"/>
+     <element name="minLongitude" type="xsd:double"/>
+     <element name="networkID" type="xsd:int"/>
+     <element name="numCells" type="xsd:int"/>
+    </sequence>
+   </complexType>
+   <complexType name="ArrayOfLacData">
+    <complexContent>
+     <restriction base="soapenc:Array">
+      <attribute ref="soapenc:arrayType" wsdl:arrayType="impl:LacData[]"/>
+     </restriction>
+    </complexContent>
+   </complexType>
+  </schema>
+ </wsdl:types>
+
+   <wsdl:message name="listCellsRequest1">
+
+      <wsdl:part name="countryID" type="xsd:int"/>
+
+      <wsdl:part name="networkID" type="xsd:int"/>
+
+      <wsdl:part name="x1" type="xsd:double"/>
+
+      <wsdl:part name="y1" type="xsd:double"/>
+
+      <wsdl:part name="x2" type="xsd:double"/>
+
+      <wsdl:part name="y2" type="xsd:double"/>
+
+      <wsdl:part name="includeMeasurements" type="xsd:boolean"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="cellExistsRequest">
+
+      <wsdl:part name="countryID" type="xsd:int"/>
+
+      <wsdl:part name="networkID" type="xsd:int"/>
+
+      <wsdl:part name="cellID" type="xsd:int"/>
+
+      <wsdl:part name="localAreaCode" type="xsd:int"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="listCellsRequest3">
+
+      <wsdl:part name="countryID" type="xsd:int"/>
+
+      <wsdl:part name="networkID" type="xsd:int"/>
+
+      <wsdl:part name="includeMeasurements" type="xsd:boolean"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="authenticateResponse">
+
+      <wsdl:part name="authenticateReturn" type="xsd:boolean"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="listCellsRequest2">
+
+      <wsdl:part name="countryID" type="xsd:int"/>
+
+      <wsdl:part name="networkID" type="xsd:int"/>
+
+      <wsdl:part name="localAreaCode" type="xsd:int"/>
+
+      <wsdl:part name="includeMeasurements" type="xsd:boolean"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="listLACsRequest1">
+
+      <wsdl:part name="x1" type="xsd:double"/>
+
+      <wsdl:part name="y1" type="xsd:double"/>
+
+      <wsdl:part name="x2" type="xsd:double"/>
+
+      <wsdl:part name="y2" type="xsd:double"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="listLACsRequest2">
+
+      <wsdl:part name="countryID" type="xsd:int"/>
+
+      <wsdl:part name="networkID" type="xsd:int"/>
+
+      <wsdl:part name="x1" type="xsd:double"/>
+
+      <wsdl:part name="y1" type="xsd:double"/>
+
+      <wsdl:part name="x2" type="xsd:double"/>
+
+      <wsdl:part name="y2" type="xsd:double"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="listNetworksResponse">
+
+      <wsdl:part name="listNetworksReturn" type="impl:ArrayOfNetworkData"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="deleteUserRequest">
+
+      <wsdl:part name="userID" type="xsd:string"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="listAllLACsModifiedSinceResponse">
+
+      <wsdl:part name="listAllLACsModifiedSinceReturn" type="impl:ArrayOfLacData"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="updateUserResponse">
+
+      <wsdl:part name="updateUserReturn" type="xsd:boolean"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="createUserRequest">
+
+      <wsdl:part name="userData" type="impl:UserData"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="listAllCellsModifiedSinceRequest">
+
+      <wsdl:part name="since" type="xsd:long"/>
+
+      <wsdl:part name="includeMeasurements" type="xsd:boolean"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="listLACsRequest">
+
+      <wsdl:part name="countryID" type="xsd:int"/>
+
+      <wsdl:part name="networkID" type="xsd:int"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getNewCellCountResponse">
+
+      <wsdl:part name="getNewCellCountReturn" type="xsd:int"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="listUsersResponse">
+
+      <wsdl:part name="listUsersReturn" type="impl:ArrayOfUserData"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="listCellsResponse">
+
+      <wsdl:part name="listCellsReturn" type="impl:ArrayOfCellData"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="storeCellDataRequest">
+
+      <wsdl:part name="countryID" type="xsd:int"/>
+
+      <wsdl:part name="networkID" type="xsd:int"/>
+
+      <wsdl:part name="cellID" type="xsd:int"/>
+
+      <wsdl:part name="name" type="xsd:string"/>
+
+      <wsdl:part name="latitude" type="xsd:double"/>
+
+      <wsdl:part name="longitude" type="xsd:double"/>
+
+      <wsdl:part name="signalStrength" type="xsd:int"/>
+
+      <wsdl:part name="date" type="xsd:long"/>
+
+      <wsdl:part name="localAreaCode" type="xsd:int"/>
+
+      <wsdl:part name="userID" type="xsd:long"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="listCellsResponse2">
+
+      <wsdl:part name="listCellsReturn" type="impl:ArrayOfCellData"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="listCellsResponse3">
+
+      <wsdl:part name="listCellsReturn" type="impl:ArrayOfCellData"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getCellRequest">
+
+      <wsdl:part name="countryID" type="xsd:int"/>
+
+      <wsdl:part name="networkID" type="xsd:int"/>
+
+      <wsdl:part name="cellID" type="xsd:int"/>
+
+      <wsdl:part name="localAreaCode" type="xsd:int"/>
+
+      <wsdl:part name="includeMeasurements" type="xsd:boolean"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="listCellsResponse1">
+
+      <wsdl:part name="listCellsReturn" type="impl:ArrayOfCellData"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="updateUserRequest">
+
+      <wsdl:part name="userData" type="impl:UserData"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="listNetworksRequest">
+
+   </wsdl:message>
+
+   <wsdl:message name="authenticateRequest">
+
+      <wsdl:part name="userName" type="xsd:string"/>
+
+      <wsdl:part name="password" type="xsd:string"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getCellsResponse">
+
+      <wsdl:part name="getCellsReturn" type="impl:ArrayOfCellData"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="listUsersRequest">
+
+   </wsdl:message>
+
+   <wsdl:message name="deleteUserResponse">
+
+      <wsdl:part name="deleteUserReturn" type="xsd:string"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getLocationResponse">
+
+      <wsdl:part name="getLocationReturn" type="impl:LocationInfo"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getCellResponse">
+
+      <wsdl:part name="getCellReturn" type="impl:CellData"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getCellsRequest">
+
+      <wsdl:part name="countryID" type="xsd:int"/>
+
+      <wsdl:part name="networkID" type="xsd:int"/>
+
+      <wsdl:part name="cellIDs" type="impl:ArrayOf_xsd_int"/>
+
+      <wsdl:part name="localAreaCodes" type="impl:ArrayOf_xsd_int"/>
+
+      <wsdl:part name="includeMeasurements" type="xsd:boolean"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="listCellsRequest">
+
+      <wsdl:part name="x1" type="xsd:double"/>
+
+      <wsdl:part name="y1" type="xsd:double"/>
+
+      <wsdl:part name="x2" type="xsd:double"/>
+
+      <wsdl:part name="y2" type="xsd:double"/>
+
+      <wsdl:part name="includeMeasurements" type="xsd:boolean"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="listAllCellsModifiedSinceResponse">
+
+      <wsdl:part name="listAllCellsModifiedSinceReturn" type="impl:ArrayOfCellData"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="listAllLACsModifiedSinceRequest">
+
+      <wsdl:part name="since" type="xsd:long"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="createUserResponse">
+
+      <wsdl:part name="createUserReturn" type="xsd:string"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getLocationRequest">
+
+      <wsdl:part name="countryID" type="xsd:int"/>
+
+      <wsdl:part name="networkID" type="xsd:int"/>
+
+      <wsdl:part name="cellID" type="xsd:int"/>
+
+      <wsdl:part name="localAreaCode" type="xsd:int"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="storeCellDataResponse">
+
+      <wsdl:part name="storeCellDataReturn" type="xsd:boolean"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="cellExistsResponse">
+
+      <wsdl:part name="cellExistsReturn" type="xsd:boolean"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getNewCellCountRequest">
+
+      <wsdl:part name="userId" type="xsd:long"/>
+
+      <wsdl:part name="startTime" type="xsd:long"/>
+
+      <wsdl:part name="endTime" type="xsd:long"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="listLACsResponse2">
+
+      <wsdl:part name="listLACsReturn" type="impl:ArrayOfLacData"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="listLACsResponse">
+
+      <wsdl:part name="listLACsReturn" type="impl:ArrayOfLacData"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="listLACsResponse1">
+
+      <wsdl:part name="listLACsReturn" type="impl:ArrayOfLacData"/>
+
+   </wsdl:message>
+
+   <wsdl:portType name="CellStore2">
+
+      <wsdl:operation name="getLocation" parameterOrder="countryID networkID cellID localAreaCode">
+
+         <wsdl:input message="impl:getLocationRequest" name="getLocationRequest"/>
+
+         <wsdl:output message="impl:getLocationResponse" name="getLocationResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="storeCellData" parameterOrder="countryID networkID cellID name latitude longitude signalStrength date localAreaCode userID">
+
+         <wsdl:input message="impl:storeCellDataRequest" name="storeCellDataRequest"/>
+
+         <wsdl:output message="impl:storeCellDataResponse" name="storeCellDataResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="listNetworks">
+
+         <wsdl:input message="impl:listNetworksRequest" name="listNetworksRequest"/>
+
+         <wsdl:output message="impl:listNetworksResponse" name="listNetworksResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="listCells" parameterOrder="x1 y1 x2 y2 includeMeasurements">
+
+         <wsdl:input message="impl:listCellsRequest" name="listCellsRequest"/>
+
+         <wsdl:output message="impl:listCellsResponse" name="listCellsResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="listCells" parameterOrder="countryID networkID x1 y1 x2 y2 includeMeasurements">
+
+         <wsdl:input message="impl:listCellsRequest1" name="listCellsRequest1"/>
+
+         <wsdl:output message="impl:listCellsResponse1" name="listCellsResponse1"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="listCells" parameterOrder="countryID networkID localAreaCode includeMeasurements">
+
+         <wsdl:input message="impl:listCellsRequest2" name="listCellsRequest2"/>
+
+         <wsdl:output message="impl:listCellsResponse2" name="listCellsResponse2"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="listCells" parameterOrder="countryID networkID includeMeasurements">
+
+         <wsdl:input message="impl:listCellsRequest3" name="listCellsRequest3"/>
+
+         <wsdl:output message="impl:listCellsResponse3" name="listCellsResponse3"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getCell" parameterOrder="countryID networkID cellID localAreaCode includeMeasurements">
+
+         <wsdl:input message="impl:getCellRequest" name="getCellRequest"/>
+
+         <wsdl:output message="impl:getCellResponse" name="getCellResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getCells" parameterOrder="countryID networkID cellIDs localAreaCodes includeMeasurements">
+
+         <wsdl:input message="impl:getCellsRequest" name="getCellsRequest"/>
+
+         <wsdl:output message="impl:getCellsResponse" name="getCellsResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="authenticate" parameterOrder="userName password">
+
+         <wsdl:input message="impl:authenticateRequest" name="authenticateRequest"/>
+
+         <wsdl:output message="impl:authenticateResponse" name="authenticateResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="cellExists" parameterOrder="countryID networkID cellID localAreaCode">
+
+         <wsdl:input message="impl:cellExistsRequest" name="cellExistsRequest"/>
+
+         <wsdl:output message="impl:cellExistsResponse" name="cellExistsResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="listAllCellsModifiedSince" parameterOrder="since includeMeasurements">
+
+         <wsdl:input message="impl:listAllCellsModifiedSinceRequest" name="listAllCellsModifiedSinceRequest"/>
+
+         <wsdl:output message="impl:listAllCellsModifiedSinceResponse" name="listAllCellsModifiedSinceResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="createUser" parameterOrder="userData">
+
+         <wsdl:input message="impl:createUserRequest" name="createUserRequest"/>
+
+         <wsdl:output message="impl:createUserResponse" name="createUserResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="updateUser" parameterOrder="userData">
+
+         <wsdl:input message="impl:updateUserRequest" name="updateUserRequest"/>
+
+         <wsdl:output message="impl:updateUserResponse" name="updateUserResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="deleteUser" parameterOrder="userID">
+
+         <wsdl:input message="impl:deleteUserRequest" name="deleteUserRequest"/>
+
+         <wsdl:output message="impl:deleteUserResponse" name="deleteUserResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="listUsers">
+
+         <wsdl:input message="impl:listUsersRequest" name="listUsersRequest"/>
+
+         <wsdl:output message="impl:listUsersResponse" name="listUsersResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="listLACs" parameterOrder="countryID networkID">
+
+         <wsdl:input message="impl:listLACsRequest" name="listLACsRequest"/>
+
+         <wsdl:output message="impl:listLACsResponse" name="listLACsResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="listLACs" parameterOrder="x1 y1 x2 y2">
+
+         <wsdl:input message="impl:listLACsRequest1" name="listLACsRequest1"/>
+
+         <wsdl:output message="impl:listLACsResponse1" name="listLACsResponse1"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="listLACs" parameterOrder="countryID networkID x1 y1 x2 y2">
+
+         <wsdl:input message="impl:listLACsRequest2" name="listLACsRequest2"/>
+
+         <wsdl:output message="impl:listLACsResponse2" name="listLACsResponse2"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="listAllLACsModifiedSince" parameterOrder="since">
+
+         <wsdl:input message="impl:listAllLACsModifiedSinceRequest" name="listAllLACsModifiedSinceRequest"/>
+
+         <wsdl:output message="impl:listAllLACsModifiedSinceResponse" name="listAllLACsModifiedSinceResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getNewCellCount" parameterOrder="userId startTime endTime">
+
+         <wsdl:input message="impl:getNewCellCountRequest" name="getNewCellCountRequest"/>
+
+         <wsdl:output message="impl:getNewCellCountResponse" name="getNewCellCountResponse"/>
+
+      </wsdl:operation>
+
+   </wsdl:portType>
+
+   <wsdl:binding name="CellStore2ServiceSoapBinding" type="impl:CellStore2">
+
+      <wsdlsoap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+      <wsdl:operation name="getLocation">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getLocationRequest">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getLocationResponse">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="storeCellData">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="storeCellDataRequest">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="storeCellDataResponse">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="listNetworks">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="listNetworksRequest">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="listNetworksResponse">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="listCells">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="listCellsRequest">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="listCellsResponse">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="listCells">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="listCellsRequest1">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="listCellsResponse1">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="listCells">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="listCellsRequest2">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="listCellsResponse2">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="listCells">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="listCellsRequest3">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="listCellsResponse3">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getCell">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getCellRequest">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getCellResponse">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getCells">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getCellsRequest">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getCellsResponse">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="authenticate">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="authenticateRequest">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="authenticateResponse">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="cellExists">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="cellExistsRequest">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="cellExistsResponse">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="listAllCellsModifiedSince">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="listAllCellsModifiedSinceRequest">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="listAllCellsModifiedSinceResponse">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="createUser">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="createUserRequest">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="createUserResponse">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="updateUser">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="updateUserRequest">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="updateUserResponse">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="deleteUser">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="deleteUserRequest">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="deleteUserResponse">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="listUsers">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="listUsersRequest">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="listUsersResponse">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="listLACs">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="listLACsRequest">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="listLACsResponse">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="listLACs">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="listLACsRequest1">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="listLACsResponse1">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="listLACs">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="listLACsRequest2">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="listLACsResponse2">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="listAllLACsModifiedSince">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="listAllLACsModifiedSinceRequest">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="listAllLACsModifiedSinceResponse">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getNewCellCount">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getNewCellCountRequest">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getNewCellCountResponse">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://cellstore.wasp.freeband.nl" use="encoded"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+   </wsdl:binding>
+
+   <wsdl:service name="CellStore2Service">
+
+      <wsdl:port binding="impl:CellStore2ServiceSoapBinding" name="CellStore2Service">
+
+         <wsdlsoap:address location="http://client338.lab.telin.nl/wasp/services/CellStore2Service"/>
+
+      </wsdl:port>
+
+   </wsdl:service>
+
+</wsdl:definitions>

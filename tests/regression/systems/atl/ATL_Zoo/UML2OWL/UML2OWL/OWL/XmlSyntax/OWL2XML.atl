@@ -1,0 +1,548 @@
+-- @atlcompiler atl2006
+
+module OWL2XML; -- Module Template
+create OUT : XML from IN : OWL;
+
+-- =============================================================================
+-- OWL2XML
+-- Version 1.0
+-- Release date : 20/02/2007
+-- Author : Guillaume Hillairet (g.hillairet@gmail.com)
+-- =============================================================================
+	
+helper context OWL!RDFSResource def: getURI() : String =
+	let r : OWL!UniformResourceIdentifier = 
+		self.uriRef->any( e | e.oclIsKindOf(OWL!URIReference)).uri
+	in if not r.oclIsUndefined() then r.name else '' endif;
+
+helper context OWL!RDFSResource def: getLabel() : String =
+	let r : OWL!PlainLiteral =
+		self.label->select( e | e.oclIsTypeOf( OWL!PlainLiteral ))->first()
+	in if r.oclIsUndefined() then '' else r.lexicalForm endif	;
+
+helper context OWL!CardinalityRestriction def: getDatatypeURI() : String = 
+	let d : OWL!URIReference = self.OWLCardinality.datatypeURI
+	in if not d.oclIsUndefined()
+		then d.uri.name
+		else ''
+	endif;
+
+helper context OWL!MaxCardinalityRestriction def: getDatatypeURI() : String = 
+	let d : OWL!URIReference = self.OWLMaxCardinality.datatypeURI
+	in if not d.oclIsUndefined()
+		then d.uri.name
+		else ''
+	endif;
+
+helper context OWL!MinCardinalityRestriction def: getDatatypeURI() : String = 
+	let d : OWL!URIReference = self.OWLMinCardinality.datatypeURI
+	in if not d.oclIsUndefined()
+		then d.uri.name
+		else ''
+	endif;
+
+-- =============================================================================
+-- RULES
+-- =============================================================================
+	
+rule Graph2Root {
+	from
+		g : OWL!OWLGraph
+		
+	to
+		r : XML!Root (
+			name <- 'rdf:RDF',
+			children <- Sequence {
+				att1, att2, att3, att4, att5, att6,
+				g.ontology
+			}
+		),
+		att1 : XML!Attribute (name <- 'xmlns:rdf',	value <- 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'),
+		att2 : XML!Attribute (name <- 'xmlns:rdfs', value <- 'http://www.w3.org/2000/01/rdf-schema#'),
+		att3 : XML!Attribute (name <- 'xmlns:xsd',	value <- 'http://www.w3.org/2001/XMLSchema#'),
+		att4 : XML!Attribute (name <- 'xmlns:owl',	value <- 'http://www.w3.org/2002/07/owl#'),
+		att5 : XML!Attribute (name <- 'xmlns', value <- g.ontology->first().getURI() + '#'),
+		att6 : XML!Attribute (name <- 'xml:base', value <- g.ontology->first().getURI())		
+}
+
+rule Ontology2Element {
+	from
+		o : OWL!OWLOntology
+	to
+		e : XML!Element ( name <- 'owl:Ontology', children <- about ),
+		about : XML!Attribute ( name <- 'rdf:about', 
+			value <- o.uriRef->collect( e | e.fragmentIdentifier.name )->flatten()->first() 
+		)	
+	do {
+		for ( i in o.OWLImports ) {
+			thisModule.addImports( o, i );
+		}
+	}
+}
+
+rule addImports( o : OWL!OWLOntology, i : OWL!OWLOntology ) {
+	to
+		imports : XML!Element ( parent <- o, name <- 'owl:imports', children <- imports_att ),
+		imports_att : XML!Attribute ( name <- 'rdf:resource', value <- '#' + i.getURI() )
+}
+
+rule Class2Element{
+	from
+		c : OWL!OWLClass (
+			c.oclIsTypeOf(OWL!OWLClass)
+		)
+	to
+		e : XML!Element (
+			name <- 'owl:Class',
+			children <- Sequence{ID,label},
+			parent <- OWL!OWLGraph.allInstances()->any( e | e.oclIsTypeOf(OWL!OWLGraph))
+		),
+		ID : XML!Attribute ( name <- 'rdf:ID', value <- c.getURI() ),
+		label : XML!Element ( name <- 'rdfs:label', children <- label_text ),
+		label_text : XML!Text ( name <- '#text', value <- c.getLabel() )
+		
+		do {
+			 for (s in c.subClassOf ) {
+		 		if (s.oclIsTypeOf(OWL!OWLClass))
+					thisModule.makeSubClass(c,s);
+		 		
+		 		if (s.oclIsTypeOf(OWL!UnionClass))
+					thisModule.makeSubClass(c,s);
+		 		
+				if (s.oclIsTypeOf(OWL!CardinalityRestriction))
+					thisModule.makeCardinalityRestrictionSubClass(c,s);
+				
+				if (s.oclIsTypeOf(OWL!MaxCardinalityRestriction))
+					thisModule.makeMaxCardinalityRestrictionSubClass(c,s);
+				
+				if (s.oclIsTypeOf(OWL!MinCardinalityRestriction))
+					thisModule.makeMinCardinalityRestrictionSubClass(c,s);
+			 }
+		}
+}
+
+rule UnionClass2Element{
+	from
+		c : OWL!UnionClass (
+			c.oclIsTypeOf(OWL!UnionClass)
+		)
+	to
+		e : XML!Element (
+			name <- 'owl:Class',
+			children <- Sequence{ID,label,unionOf},
+			parent <- OWL!OWLGraph.allInstances()->any( e | e.oclIsTypeOf(OWL!OWLGraph))
+		),
+		ID : XML!Attribute ( name <- 'rdf:ID', value <- c.getURI() ),
+		label : XML!Element ( name <- 'rdfs:label', children <- label_text ),
+		label_text : XML!Text ( name <- '#text', value <- c.getLabel() ),
+		unionOf : XML!Element (
+			name <- 'owl:unionOf',
+			children <- Sequence{unionOf_att, c.OWLUnionOf->collect( e | 
+				thisModule.makeUnionOf(e) ) 
+			}
+		),
+		unionOf_att : XML!Attribute (
+			name <- 'rdf:parseType',
+			value <- 'Collection'
+		)
+		
+		do {
+			 for (s in c.subClassOf ) {
+		 		if (s.oclIsKindOf(OWL!OWLClass))
+					thisModule.makeSubClass(c,s);
+				
+				if (s.oclIsTypeOf(OWL!CardinalityRestriction))
+					thisModule.makeCardinalityRestrictionSubClass(c,s);
+				
+				if (s.oclIsTypeOf(OWL!MaxCardinalityRestriction))
+					thisModule.makeMaxCardinalityRestrictionSubClass(c,s);
+				
+				if (s.oclIsTypeOf(OWL!MinCardinalityRestriction))
+					thisModule.makeMinCardinalityRestrictionSubClass(c,s);
+			 }
+		}
+}
+
+lazy rule makeUnionOf {
+	from
+		u : OWL!OWLClass
+	to
+		e : XML!Element ( name <- 'owl:Class', children <- Sequence{ e_att } ),
+		e_att : XML!Attribute ( name <- 'rdf:about', value <- '#' + u.getURI() )
+}
+
+rule makeSubClass( c : OWL!OWLClass,  s : OWL!OWLClass ) {
+	to
+		e : XML!Element (
+			name <- 'rdfs:subClassOf',
+			children <-  subClassAttr,
+			parent <- c
+		),
+		subClassAttr : XML!Attribute ( name <- 'rdf:resource', value <- '#' + s.getURI() )
+}
+
+rule makeCardinalityRestrictionSubClass( c : OWL!OWLClass,  s : OWL!CardinalityRestriction ) {
+	to
+		x : XML!Element (
+			name <- 'rdfs:subClassOf',
+			children <-  e,
+			parent <- c
+		),
+		e : XML!Element ( name <- 'owl:Restriction', children <- Sequence{on, card} ),
+		on : XML!Element (	name <- 'owl:onProperty', children <- on_attr ),
+		on_attr : XML!Attribute ( name <- 'rdf:resource', value <- '#' + s.OWLOnProperty.getURI() ),
+		card : XML!Element ( name <- 'owl:cardinality ', children <- Sequence{card_attr, card_text}	),
+		card_attr : XML!Attribute (	name <- 'rdf:datatype', value <- s.getDatatypeURI()	),
+		card_text : XML!Text ( name <- '#text',	value <- s.OWLCardinality.lexicalForm )
+}
+
+rule makeMaxCardinalityRestrictionSubClass( c : OWL!OWLClass,  s : OWL!MaxCardinalityRestriction ) {
+	to
+		x : XML!Element (
+			name <- 'rdfs:subClassOf',
+			children <-  e,
+			parent <- c
+		),
+		e : XML!Element ( name <- 'owl:Restriction', children <- Sequence{on, card} ),
+		on : XML!Element (	name <- 'owl:onProperty', children <- on_attr ),
+		on_attr : XML!Attribute ( name <- 'rdf:resource', value <- '#' + s.OWLOnProperty.getURI() ),
+		card : XML!Element ( name <- 'owl:maxCardinality ',	children <- Sequence{card_attr, card_text} ),
+		card_attr : XML!Attribute (	name <- 'rdf:datatype', value <- s.getDatatypeURI()	),
+		card_text : XML!Text ( name <- '#text',	value <- s.OWLMaxCardinality.lexicalForm )
+}
+
+rule makeMinCardinalityRestrictionSubClass( c : OWL!OWLClass,  s : OWL!MinCardinalityRestriction ) {
+	to
+		x : XML!Element (
+			name <- 'rdfs:subClassOf',
+			children <-  e,
+			parent <- c
+		),
+		e : XML!Element (
+			name <- 'owl:Restriction',
+			children <- Sequence{on, card}
+		),
+		on : XML!Element (	name <- 'owl:onProperty', children <- on_attr ),
+		on_attr : XML!Attribute ( name <- 'rdf:resource', value <- '#' + s.OWLOnProperty.getURI() ),
+		card : XML!Element ( name <- 'owl:minCardinality ',	children <- Sequence{card_attr, card_text} ),
+		card_attr : XML!Attribute (	name <- 'rdf:datatype', value <- s.getDatatypeURI()	),
+		card_text : XML!Text ( name <- '#text',	value <- s.OWLMinCardinality.lexicalForm )
+}
+
+rule DatatypeProperty2Element {
+	from
+		d : OWL!OWLDatatypeProperty
+	to
+		e : XML!Element (
+			name <- 'owl:DatatypeProperty',
+			children <- Sequence{ID,domain,range},
+			parent <- OWL!OWLGraph.allInstances()->any( e | e.oclIsTypeOf(OWL!OWLGraph))
+		),
+		ID : XML!Attribute (
+			name <- 'rdf:ID',
+			value <- d.getURI()
+		),
+		domain : XML!Element (
+			name <- 'rdfs:domain',
+			children <- domain_attr
+		),
+		domain_attr : XML!Attribute (
+			name <- 'rdf:resource',
+			value <- '#' + d.domain->any( c | c.oclIsKindOf(OWL!OWLClass)).getURI()
+		),
+		range : XML!Element (
+			name <- 'rdfs:range',
+			children <- range_attr
+		),
+		range_attr : XML!Attribute (
+			name <- 'rdf:resource',
+			value <-  d.range->any(c | c.oclIsKindOf(OWL!RDFSDataType)).getURI()
+		)
+}
+
+rule ObjectProperty2Element {
+	from
+		o : OWL!OWLObjectProperty ( 
+			o.oclIsTypeOf(OWL!OWLObjectProperty) 
+		)
+	to
+		e : XML!Element (
+			name <- 'owl:ObjectProperty',
+			children <- Sequence{ID, domain, range},
+			parent <- OWL!OWLGraph.allInstances()->any( e | e.oclIsTypeOf(OWL!OWLGraph))
+		),
+		ID : XML!Attribute (
+			name <- 'rdf:ID',
+			value <- o.getURI()
+		),
+		domain : XML!Element (
+			name <- 'rdfs:domain',
+			children <- domain_attr
+		),
+		domain_attr : XML!Attribute (
+			name <-  'rdf:resource',
+			value <- '#' + o.domain->any( c | c.oclIsKindOf(OWL!OWLClass)).getURI()
+		),
+		range : XML!Element (
+			name <- 'rdfs:range',
+			children <- range_attr
+		),
+		range_attr : XML!Attribute (
+			name <- 'rdf:resource',
+			value <- '#' + o.range->any( c | c.oclIsKindOf(OWL!OWLClass)).getURI()
+		)
+		
+		do {
+			if (not o.OWLInverseOf.oclIsUndefined())
+				thisModule.addInverse(o);
+			
+			for (s in o.subPropertyOf ) {
+		 		if (s.oclIsKindOf(OWL!OWLObjectProperty))
+					thisModule.makeSubProperty(o,s);
+			}
+		}
+}
+
+rule makeSubProperty( c : OWL!OWLObjectProperty,  s : OWL!OWLObjectProperty ) {
+	to
+		e : XML!Element (
+			name <- 'rdfs:subPropertyOf',
+			children <-  subPropertyAttr,
+			parent <- c
+		),
+		subPropertyAttr : XML!Attribute ( name <- 'rdf:resource', value <- '#' + s.getURI() )
+}
+
+rule addInverse( o : OWL!OWLObjectProperty ) {
+	to
+		e : XML!Element (
+			name <- 'owl:inverseOf',
+			children <- e_attr,
+			parent <- o
+		),
+		e_attr : XML!Attribute (
+			name <- 'rdf:resource',
+			value <- '#' + o.OWLInverseOf.getURI()
+		)
+}
+
+rule SymmetricProperty2Element {
+	from
+		o : OWL!SymmetricProperty ( 
+			o.oclIsTypeOf(OWL!SymmetricProperty) 
+		)
+	to
+		e : XML!Element (
+			name <- 'owl:SymmetricProperty',
+			children <- Sequence{ID, domain, range},
+			parent <- OWL!OWLGraph.allInstances()->any( e | e.oclIsTypeOf(OWL!OWLGraph))
+		),
+		ID : XML!Attribute (
+			name <- 'rdf:ID',
+			value <- o.getURI()
+		),
+		domain : XML!Element (
+			name <- 'rdfs:domain',
+			children <- domain_attr
+		),
+		domain_attr : XML!Attribute (
+			name <-  'rdf:resource',
+			value <- '#' + o.domain->any( c | c.oclIsKindOf(OWL!OWLClass)).getURI()
+		),
+		range : XML!Element (
+			name <- 'rdfs:range',
+			children <- range_attr
+		),
+		range_attr : XML!Attribute (
+			name <- 'rdf:resource',
+			value <- '#' + o.range->any( c | c.oclIsKindOf(OWL!OWLClass)).getURI()
+		)
+		
+		do {
+			if (not o.OWLInverseOf.oclIsUndefined())
+				thisModule.addInverse(o);
+			
+			for (s in o.subPropertyOf ) {
+		 		if (s.oclIsKindOf(OWL!OWLObjectProperty))
+					thisModule.makeSubProperty(o,s);
+			}
+		}
+}
+
+rule InverseFunctionalProperty2Element {
+	from
+		o : OWL!InverseFunctionalProperty ( 
+			o.oclIsTypeOf(OWL!InverseFunctionalProperty) 
+		)
+	to
+		e : XML!Element (
+			name <- 'owl:InverseFunctionalProperty',
+			children <- Sequence{ID, domain, range},
+			parent <- OWL!OWLGraph.allInstances()->any( e | e.oclIsTypeOf(OWL!OWLGraph))
+		),
+		ID : XML!Attribute (
+			name <- 'rdf:ID',
+			value <- o.getURI()
+		),
+		domain : XML!Element (
+			name <- 'rdfs:domain',
+			children <- domain_attr
+		),
+		domain_attr : XML!Attribute (
+			name <-  'rdf:resource',
+			value <- '#' + o.domain->any( c | c.oclIsKindOf(OWL!OWLClass)).getURI()
+		),
+		range : XML!Element (
+			name <- 'rdfs:range',
+			children <- range_attr
+		),
+		range_attr : XML!Attribute (
+			name <- 'rdf:resource',
+			value <- '#' + o.range->any( c | c.oclIsKindOf(OWL!OWLClass)).getURI()
+		)
+		
+		do {
+			if (not o.OWLInverseOf.oclIsUndefined())
+				thisModule.addInverse(o);
+			
+			for (s in o.subPropertyOf ) {
+		 		if (s.oclIsKindOf(OWL!OWLObjectProperty))
+					thisModule.makeSubProperty(o,s);
+			}
+		}
+}
+
+rule FunctionalProperty {
+	from
+		o : OWL!FunctionalProperty (
+			o.oclIsTypeOf( OWL!FunctionalProperty )
+		)
+	to
+		e : XML!Element (
+			name <- 'owl:FunctionalProperty',
+			children <- a,
+			parent <- OWL!OWLGraph.allInstances()->any( e | e.oclIsTypeOf(OWL!OWLGraph))
+		),
+		a : XML!Attribute (
+			name <- 'rdf:about',
+			value <- '#' + o.isDefinedBy->asSequence()->any( e | e.oclIsKindOf(OWL!Property ) ).getURI()
+		)
+}
+
+--rule DataRange2Element {
+--	from
+--		d : OWL!OWLDataRange
+--	to
+--		e : XML!Element (
+--			name <- 'owl:DataRange',
+--			children <- oneOf
+--		),
+--		oneOf : XML!Element (
+--			name <- 'owl:oneOf'
+--		)
+--}
+
+rule EnumeratedClass2Element {
+	from
+		ec : OWL!EnumeratedClass (
+			ec.oclIsTypeOf( OWL!EnumeratedClass )
+		)
+	to
+		e : XML!Element (
+			name <- 'owl:Class',
+			children <- Sequence{ID,label,oneOf},
+			parent <- OWL!OWLGraph.allInstances()->any( e | e.oclIsTypeOf(OWL!OWLGraph))
+		),
+		ID : XML!Attribute (
+			name <- 'rdf:ID',
+			value <- ec.getURI()
+		),
+		label : XML!Element (
+			name <- 'rdfs:label',
+			children <- label_text
+		),
+		label_text : XML!Text (
+			name <- '#text',
+			value <- ec.getLabel()
+		),
+		oneOf : XML!Element (
+			name <- 'owl:oneOf',
+			children <- Sequence{ oneOf_Att, ec.OWLOneOf->collect( e | 
+				thisModule.IndividualLiteral2Element( e ) )
+			}
+		),
+		oneOf_Att : XML!Attribute (
+			name <- 'rdf:parseType',
+			value <- 'Collection'
+		)
+	
+}
+
+lazy rule IndividualLiteral2Element {
+	from
+		i : OWL!Individual
+	to
+		e : XML!Element (
+			name <- 'owl:Thing',
+			children <- e_att
+		),
+		e_att : XML!Attribute (
+			name <- 'rdf:about',
+			value <- i.getURI()
+		)
+}
+
+rule Individual2Element {
+	from
+		i : OWL!Individual (
+			i.type->any( c | c.oclIsKindOf(OWL!OWLClass)).oclIsTypeOf(OWL!OWLClass)
+		)
+	to
+		e : XML!Element (
+			name  <- i.type->any( c | c.oclIsKindOf(OWL!OWLClass)).getURI(),
+			children <- Sequence{ e_att },
+			parent <- OWL!OWLGraph.allInstances()->any( e | e.oclIsTypeOf(OWL!OWLGraph))
+		),
+		e_att : XML!Attribute (
+			name <- 'rdf:ID',
+			value <- i.getURI()
+		)
+}
+
+rule StatementPredicateOfDatatype2Element {
+	from
+		s : OWL!OWLStatement (
+			s.RDFpredicate.oclIsTypeOf(OWL!OWLDatatypeProperty)
+		)
+	to
+		p : XML!Element (
+			parent <- s.RDFsubject,
+			name <- s.RDFpredicate.getURI(),
+			children <- Sequence{ p_att, p_text }
+		),
+		p_att : XML!Attribute (
+			name <- 'rdf:datatype',
+			value <- s.RDFpredicate.range->any(c | c.oclIsKindOf(OWL!RDFSDataType)).getURI()
+		),
+		p_text : XML!Text (
+			name <- '#text',
+			value <- s.RDFobject.getURI()
+		)	
+}
+
+rule StatementPredicateOfObjectProperty2Element {
+	from
+		s : OWL!OWLStatement (
+			s.RDFpredicate.oclIsKindOf(OWL!OWLObjectProperty)
+		)
+	to
+		p : XML!Element (
+			parent <- s.RDFsubject,
+			name <- s.RDFpredicate.getURI(),
+			children <- Sequence{ p_att }
+		),
+		p_att : XML!Attribute (
+			name <- 'rdf:resource',
+			value <- '#' + s.RDFobject.getURI()
+		)
+}

@@ -1,0 +1,84 @@
+module Public2Private;
+create OUT : UML refining IN : UML;
+
+helper context String def: firstToUpper() : String =
+	self.substring(1, 1).toUpper() + self.substring(2, self.size());
+
+rule ReadOnlyPublicAttribute {
+	from
+		s : UML!Attribute (
+			(s.visibility = #vk_public) and
+			(s.changeability = #ck_frozen)
+		)
+	to
+		t : UML!Attribute (
+			name <- s.name,
+			owner <- s.owner,
+			type <- s.type,
+			ownerScope <- s.ownerScope,
+			visibility <- #vk_private,
+			changeability <- s.changeability
+		),
+
+		-- getter
+		tg : UML!Operation (
+			name <- 'get' + s.name.firstToUpper(),
+			owner <- s.owner,
+			visibility <- #vk_public,
+			ownerScope <- s.ownerScope,
+			isQuery <- true,
+			parameter <- tgr
+		),
+		tgr : UML!Parameter (
+			name <- 'return',
+			kind <- #pdk_return,
+			type <- s.type
+		)
+}
+
+rule ReadWritePublicAttribute {
+	from
+		s : UML!Attribute (
+			(s.visibility = #vk_public) and
+			(s.changeability <> #ck_frozen)
+		)
+	to
+		t : UML!Attribute (
+			name <- s.name,
+			owner <- s.owner,
+			type <- s.type,
+			ownerScope <- s.ownerScope,
+			visibility <- #vk_private,
+			changeability <- s.changeability
+		),
+
+		-- getter
+		tg : UML!Operation (
+			name <- 'get' + s.name.firstToUpper(),
+			owner <- s.owner,
+			visibility <- #vk_public,
+			ownerScope <- s.ownerScope,
+			isQuery <- true,
+			parameter <- tgr
+		),
+		tgr : UML!Parameter (
+			name <- 'return',
+			kind <- #pdk_return,
+			type <- s.type
+		),
+
+		-- setter
+		ts : UML!Operation (
+			name <- 'set' + s.name.firstToUpper(),
+			owner <- s.owner,
+			visibility <- #vk_public,
+			ownerScope <- s.ownerScope,
+			parameter <- tsp
+		),
+		tsp : UML!Parameter (
+			name <- 'newValue',
+			kind <- #pdk_in,
+			type <- s.type
+		)
+}
+

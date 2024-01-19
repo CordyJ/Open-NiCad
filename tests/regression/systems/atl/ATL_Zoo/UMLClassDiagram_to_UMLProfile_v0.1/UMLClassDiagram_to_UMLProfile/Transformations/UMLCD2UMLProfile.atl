@@ -1,0 +1,128 @@
+-- @atlcompiler atl2006
+-- @nsURI UML2=http://www.eclipse.org/uml2/2.1.0/UML
+-- @description	In this transformation, a class diagram will be transformed in a UML profile
+module UMLCD2UMLProfile;
+create OUT : UML2 from IN : UML2, UMLCD : UML2, PRO_STD : UML2;
+
+-- Rule Stereotype to Class
+-- @description	This rule transforms each UML Class in a UML Stereotype. A UML property and extension are added "containing" the link with the metaclass (on which this stereotype will be applicable).
+-- (Stereotype extends Class)
+rule Class {
+    from s : UML2!"uml::Class" in IN
+    to t : UML2!"uml::Stereotype" (
+        name <- s.name,
+        visibility <- s.visibility,
+        isLeaf <- s.isLeaf,
+        isAbstract <- s.isAbstract,
+        isActive <- s.isActive,
+        eAnnotations <- s.eAnnotations,
+        ownedComment <- s.ownedComment,
+        clientDependency <- s.clientDependency,
+        nameExpression <- s.nameExpression,
+        elementImport <- s.elementImport,
+        packageImport <- s.packageImport,
+        ownedRule <- s.ownedRule,
+        templateParameter <- s.templateParameter,
+        templateBinding <- s.templateBinding,
+        ownedTemplateSignature <- s.ownedTemplateSignature,
+        generalization <- s.generalization,
+        powertypeExtent <- s.powertypeExtent,
+        redefinedClassifier <- s.redefinedClassifier,
+        substitution <- s.substitution,
+        representation <- s.representation,
+        collaborationUse <- s.collaborationUse,
+        ownedUseCase <- s.ownedUseCase,
+        useCase <- s.useCase,
+		ownedAttribute <- Set {s.ownedAttribute->flatten(), base_element},
+        ownedConnector <- s.ownedConnector,
+        ownedBehavior <- s.ownedBehavior,
+        classifierBehavior <- s.classifierBehavior,
+        interfaceRealization <- s.interfaceRealization,
+        ownedTrigger <- s.ownedTrigger,
+        nestedClassifier <- s.nestedClassifier,
+        ownedOperation <- s.ownedOperation,
+        ownedReception <- s.ownedReception
+	),
+    base_element : UML2!Property (
+        name <- 'base_Element_' + s.name,
+        isUnique <- false
+		, type <- thisModule.resolveTemp(UML2!Model.allInstancesFrom('IN')->any(e | e.oclIsTypeOf(UML2!"uml::Model")), 'elementImport').importedElement
+        , association <- extension
+	),
+	extension : UML2!Extension (
+		name <- 'Extension_' + s.name
+		, memberEnd <- Set { extensionEnd, base_element }
+		, ownedEnd <- Set { extensionEnd }
+	),
+	extensionEnd : UML2!ExtensionEnd (
+		name <- 'extension_' + s.name,
+		aggregation <- #composite,
+		type <- t,
+		association <- extension
+	)
+}
+
+-- Rule Model to Profile
+-- @description	This rule transforms each UML Model in a UML Profile. An element import is created and will be used to add notion of metaclass.
+rule Model {
+	from s : UML2!"uml::Model" in IN (s.oclIsTypeOf(UML2!"uml::Model"))
+	to t : UML2!"uml::Profile" (
+		name <- s.name,
+        visibility <- s.visibility,
+        eAnnotations <- s.eAnnotations,
+        ownedComment <- s.ownedComment,
+        clientDependency <- s.clientDependency,
+        nameExpression <- s.nameExpression,
+        elementImport <- s.elementImport,
+        packageImport <- s.packageImport,
+        ownedRule <- s.ownedRule,
+        templateParameter <- s.templateParameter,
+        templateBinding <- s.templateBinding,
+        ownedTemplateSignature <- s.ownedTemplateSignature,
+        packageMerge <- s.packageMerge,
+        packagedElement <- Set {
+			s.packagedElement, 
+			UML2!Class.allInstancesFrom('IN')->collect(e | thisModule.resolveTemp(e, 'extension'))
+		},
+        profileApplication <- s.profileApplication,
+		metaclassReference <- Set { elementImport }
+        , ownedStereotype <- s.packagedElement->select(e | e.oclIsTypeOf(UML2!"uml::Class"))
+	)
+	, elementImport : UML2!ElementImport (
+		alias <- 'Class',
+		visibility <- #public
+		, importedElement <- UML2!Class.allInstancesFrom('UMLCD')->any(e|e.name = 'Class')
+	)
+}
+
+-- Rule Package to Profile
+-- @description	This rule transforms each UML Package in a UML Profile.
+rule Package {
+    from s : UML2!"uml::Package" in IN (s.oclIsTypeOf(UML2!"uml::Package"))
+    to t : UML2!"uml::Profile" (
+        name <- s.name,
+        visibility <- s.visibility,
+        eAnnotations <- s.eAnnotations,
+        ownedComment <- s.ownedComment,
+        clientDependency <- s.clientDependency,
+        nameExpression <- s.nameExpression,
+        elementImport <- s.elementImport,
+        packageImport <- s.packageImport,
+        ownedRule <- s.ownedRule,
+        templateParameter <- s.templateParameter,
+        templateBinding <- s.templateBinding,
+        ownedTemplateSignature <- s.ownedTemplateSignature,
+        packageMerge <- s.packageMerge,
+        packagedElement <- s.packagedElement,
+        profileApplication <- s.profileApplication
+	)
+}
+
+-- Profile and Stereotype applications will be done at the end of the transformation
+endpoint rule end() {
+	do {
+		for	(elm in UML2!Property.allInstancesFrom('OUT')->select(e | e.name.startsWith('base_Element_'))) {
+			elm.type <- thisModule.resolveTemp(UML2!Model.allInstancesFrom('IN')->any(e | e.oclIsTypeOf(UML2!"uml::Model")), 'elementImport').importedElement;
+		}
+	}
+}

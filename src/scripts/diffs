@@ -1,0 +1,992 @@
+#!/bin/bash
+#ifndef NEW
+# Generic NiCad extract and find clones script
+# J.R. Cordy, Queen's University, April 2010
+#else /* NEW */
+# Generic NiCad cross-system extract and find clones script
+# J.R. Cordy, Queen's University, January 2011
+#endif /* NEW */
+
+#ifndef NEW
+# Revised 11.1.24
+#else /* NEW */
+# Revised 11.1.23
+#endif /* NEW */
+
+usage() {
+#ifndef NEW
+    echo "Usage:  nicad granularity language systems/systemdir [ config ]"
+#else /* NEW */
+    echo "Usage:  nicadcross granularity language systemdir system2dir [ config ]"
+#endif /* NEW */
+    echo "          where granularity is one of:  { functions blocks files ... }"
+    echo "          and   language    is one of:  { c java cs py ... }"
+    echo "          and   config      is one of:  { blindrename ... }"
+    echo ""
+}
+
+echo ""
+#ifndef NEW
+echo "NiCad Clone Detector v7.0 (11.1.24)"
+#else /* NEW */
+echo "NiCad Cross-Clone Detector v7.0 (11.1.24)"
+#endif /* NEW */
+echo ""
+
+# check we have an installation
+if [ -d "$1" ]
+then
+    lib="$1"
+    shift
+else
+    lib=.
+fi
+
+if [ ! -d ${lib}/tools ]
+then
+    echo "*** Error:  Cannot find NiCad installation ${lib}"
+    echo ""
+    exit 99
+fi
+ 
+# check we compiled the tools
+#ifndef NEW
+if [ ! -x ${lib}/tools/clonepairs.x ]
+#else /* NEW */
+if [ ! -x ${lib}/tools/crossclones.x ]
+#endif /* NEW */
+then
+#ifndef NEW
+    echo "*** Error:  Missing ${lib}/tools/clonepairs.x - type 'make' to make the NiCad tools"
+#else /* NEW */
+    echo "*** Error:  Missing ${lib}/tools/crossclones.x - type 'make' to make the NiCad tools"
+#endif /* NEW */
+    echo ""
+    exit 99
+fi
+
+# check granularity
+if [ "$1" != "" ]
+then
+    granularity=$1
+    shift
+else
+    usage
+    exit 99
+fi
+
+# check language
+if [ "$1" != "" ]
+then
+    language=$1
+    shift
+else
+    usage
+    exit 99
+fi
+
+# check we have a system directory
+if [ -d "$1" ]
+then
+#ifndef NEW
+    system="${1%/}"
+#else /* NEW */
+    system1="${1%/}"
+#endif /* NEW */
+    shift
+else
+    usage
+    exit 99
+fi
+
+#ifdef NEW
+# check we have a second system directory 
+if [ -d "$1" ]
+then
+    system2="${1%/}"
+    shift
+else
+    usage
+fi
+
+#endif /* NEW */
+# check for a configuration
+if [ "$1" = "" ]
+then
+    config="${lib}/config/default.cfg"
+else
+    config="${lib}/config/$1.cfg"
+fi
+
+if [ ! -s "${config}" ]
+then
+    usage
+    exit 99
+fi
+
+echo "config=${config}"
+
+# get NiCad configuration parameters
+#ifndef NEW
+source "${config}"
+#else /* NEW */
+source ${config}
+#endif /* NEW */
+
+# normalize threshold to 2 digits
+if [[ "$threshold" =~ [0-9].[0-9]$ ]]
+then
+    threshold="${threshold}0"
+fi
+
+#ifndef NEW
+echo "system=${system}"
+#else /* NEW */
+echo "system1=${system1}"
+echo "system2=${system2}"
+#endif /* NEW */
+echo "threshold=${threshold}"
+echo "granularity=${granularity}"
+echo "language=${language}"
+echo "transform=${transform}"
+echo "rename=${rename}"
+echo "filter=${filter}"
+echo "abstract=${abstract}"
+echo "normalize=${normalize}"
+echo "cluster=${cluster}"
+echo "report=${report}"
+echo "include=${include}"
+echo "exclude=${exclude}"
+echo ""
+
+# Check we have a system
+#ifndef NEW
+if [ ! -d "${system}" ]
+#else /* NEW */
+if [ ! -d "${system1}" ]
+#endif /* NEW */
+then
+#ifndef NEW
+    echo "*** ERROR: Can't find system source directory ${system}"
+#else /* NEW */
+    echo "*** ERROR: Can't find system source directory ${system1}"
+#endif /* NEW */
+    exit 99
+fi
+
+#ifdef NEW
+# And a second system to compare to it
+if [ ! -d "${system2}" ]
+then
+    echo "*** ERROR: Can't find system source directory ${system2}"
+    exit 99
+fi
+
+#endif /* NEW */
+# Set up results directory
+#ifndef NEW
+systempath=`readlink -f "${system}"`
+systemfile="${system##*/}"
+resultsdir="nicadclones/${systemfile}"
+#else /* NEW */
+system1path=`readlink -f "${system1}"`
+system1file="${system1##*/}"
+#endif /* NEW */
+
+#ifdef NEW
+system2path=`readlink -f "${system2}"`
+system2file="${system2##*/}"
+
+resultsdir="nicadclones/${system1file}"
+#endif /* NEW */
+mkdir -p "${resultsdir}"
+
+#ifndef NEW
+if [ ! -h "${resultsdir}/${systemfile}" ]
+#else /* NEW */
+if [ ! -h "${resultsdir}/${system1file}" ]
+#endif /* NEW */
+then
+#ifndef NEW
+    ln -s "${systempath}" "${resultsdir}/${systemfile}"
+#else /* NEW */
+    ln -s "${system1path}" "${resultsdir}/${system1file}"
+#endif /* NEW */
+fi
+
+#ifndef NEW
+system="${resultsdir}/${systemfile}"
+#else /* NEW */
+if [ ! -h "${resultsdir}/${system2file}" ]
+then
+    ln -s "${system2path}" "${resultsdir}/${system2file}"
+fi
+#endif /* NEW */
+
+#ifndef NEW
+# Extract potential clones
+#else /* NEW */
+system1="${resultsdir}/${system1file}"
+system2="${resultsdir}/${system2file}"
+
+# Extract system potential clones
+#endif /* NEW */
+date
+datestamp=`date +%F-%T`
+echo ""
+
+#ifndef NEW
+if [ -s "${system}_${granularity}.xml" ]
+#else /* NEW */
+if [ -s "${system1}_${granularity}.xml" ]
+#endif /* NEW */
+then
+#ifndef NEW
+    echo "Using previously extracted ${granularity} from ${language} files in ${system}"
+    echo > "${system}_${granularity}-clones-${datestamp}.log" 2>&1
+#else /* NEW */
+    echo "Using previously extracted ${granularity} from ${language} files in ${system1}"
+    echo > "${system1}_${granularity}-crossclones-${datestamp}.log" 2>&1
+#endif /* NEW */
+else
+#ifndef NEW
+    echo "Extracting ${granularity} from ${language} files in ${system}"
+    time ${lib}/scripts/extract.sh ${granularity} ${language} "${system}" "${include}" "${exclude}" > "${system}_${granularity}-clones-${datestamp}.log" 2>&1
+#else /* NEW */
+    echo "Extracting ${granularity} from ${language} files in ${system1}"
+    time ${lib}/scripts/extract.sh ${granularity} ${language} "${system1}" "${include}" "${exclude}" > "${system1}_${granularity}-crossclones-${datestamp}.log" 2>&1
+#endif /* NEW */
+fi
+
+result=$?
+echo ""
+
+if [ $result -ge 99 ]
+then
+    echo "*** ERROR: Extraction failed, code $result"
+#ifndef NEW
+    echo "Detailed log in ${system}_${granularity}-clones-${datestamp}.log"
+#else /* NEW */
+    echo "Detailed log in ${system1}_${granularity}-crossclones-${datestamp}.log"
+#endif /* NEW */
+    echo ""
+    exit 99
+fi
+
+#ifdef NEW
+# Check for parsing problems
+syntaxerrors=`(grep "TXL019[12]E" "${system1}_${granularity}-crossclones-${datestamp}.log" | wc -l)`
+if [ ${syntaxerrors} != 0 ]
+then
+    if [ ${syntaxerrors} = 1 ]
+    then
+	echo "*** Warning: 1 source file failed to parse"
+    else
+	echo "*** Warning: ${syntaxerrors} source files failed to parse"
+    fi
+    echo ""
+fi
+#endif /* NEW */
+
+#ifdef NEW
+npcs=`grep "^<source " "${system1}_${granularity}.xml" | wc -l`
+echo "Extracted ${npcs} ${granularity}"
+echo ""
+
+pc1file="${system1}_${granularity}"
+
+
+# Extract second system potential clones
+date
+datestamp=`date +%F-%T`
+echo ""
+
+if [ -s "${system2}_${granularity}.xml" ]
+then
+    echo "Using previously extracted ${granularity} from ${language} files in ${system2}"
+    echo > "${system2}_${granularity}-crossclones-${datestamp}.log" 2>&1
+else
+    echo "Extracting ${granularity} from ${language} files in ${system2}"
+    time ${lib}/scripts/extract.sh ${granularity} ${language} "${system2}" "${include}" "${exclude}" > "${system2}_${granularity}-crossclones-${datestamp}.log" 2>&1
+fi
+
+result=$?
+echo ""
+
+if [ $result -ge 99 ]
+then
+    echo "*** ERROR: Extraction failed, code $result"
+    echo "Detailed log in ${system2}_${granularity}-crossclones-${datestamp}.log"
+    echo ""
+    exit 99
+fi
+
+#endif /* NEW */
+# Check for parsing problems
+#ifndef NEW
+syntaxerrors=`(grep "TXL019[12]E" "${system}_${granularity}-clones-${datestamp}.log" | wc -l)`
+#else /* NEW */
+syntaxerrors=`(grep "TXL019[12]E" "${system2}_${granularity}-crossclones-${datestamp}.log" | wc -l)`
+#endif /* NEW */
+if [ ${syntaxerrors} != 0 ]
+then
+    if [ ${syntaxerrors} = 1 ]
+    then
+	echo "*** Warning: 1 source file failed to parse"
+    else
+	echo "*** Warning: ${syntaxerrors} source files failed to parse"
+    fi
+    echo ""
+fi
+
+#ifndef NEW
+npcs=`grep "^<source " "${system}_${granularity}.xml" | wc -l`
+#else /* NEW */
+npcs=`grep "^<source " "${system2}_${granularity}.xml" | wc -l`
+#endif /* NEW */
+echo "Extracted ${npcs} ${granularity}"
+echo ""
+
+#ifndef NEW
+pcfile="${system}_${granularity}"
+#else /* NEW */
+pc2file="${system2}_${granularity}"
+#endif /* NEW */
+
+#ifndef NEW
+# Check for transforming to be done
+#else /* NEW */
+
+# Check for transformation to be done
+#endif /* NEW */
+if [ "${transform}" != none ]
+then
+#ifndef NEW
+    if [ -s "${pcfile}-${transform}.xml" ]
+#else /* NEW */
+    if [ -s "${pc1file}-${transform}.xml" ]
+#endif /* NEW */
+    then
+#ifndef NEW
+	echo "Using previously ${transform} transformed extracted ${granularity} from ${language} files in ${system}"
+#else /* NEW */
+	echo "Using previously ${transform} transformd extracted ${granularity} from ${language} files in ${system1}"
+#endif /* NEW */
+    else
+#ifndef NEW
+	echo "Applying ${transform} transformation to extracted ${granularity} from ${language} files in ${system}"
+	time ${lib}/scripts/transform.sh ${granularity} ${language} "${pcfile}.xml" ${transform} >> "${system}_${granularity}-clones-${datestamp}.log" 2>&1
+#else /* NEW */
+	echo "Applying ${transform} transformation to extracted ${granularity} from ${language} files in ${system1}"
+	time ${lib}/scripts/transform.sh ${granularity} ${language} "${pc1file}.xml" ${transform} >> "${system1}_${granularity}-crossclones-${datestamp}.log" 2>&1
+#endif /* NEW */
+    fi
+
+    result=$?
+    echo ""
+
+    if [ $result != 0 ]
+    then
+        echo "*** ERROR: Renaming failed, code $result"
+#ifndef NEW
+        echo "Detailed log in ${system}_${granularity}-clones-${datestamp}.log"
+#else /* NEW */
+        echo "Detailed log in ${system1}_${granularity}-crossclones-${datestamp}.log"
+#endif /* NEW */
+        echo ""
+        exit 99
+    fi
+
+#ifndef NEW
+    pcfile="${pcfile}-${transform}"
+#else /* NEW */
+    pc1file="${pc1file}-${transform}"
+
+    if [ -s "${pc2file}-${transform}.xml" ]
+    then
+	echo "Using previously ${transform} transformd extracted ${granularity} from ${language} files in ${system2}"
+    else
+	echo "Applying ${transform} transformation to extracted ${granularity} from ${language} files in ${system2}"
+	time ${lib}/scripts/transform.sh ${granularity} ${language} "${pc2file}.xml" ${transform} >> "${system2}_${granularity}-crossclones-${datestamp}.log" 2>&1
+    fi
+
+    result=$?
+    echo ""
+
+    if [ $result != 0 ]
+    then
+        echo "*** ERROR: Renaming failed, code $result"
+        echo "Detailed log in ${system2}_${granularity}-crossclones-${datestamp}.log"
+        echo ""
+        exit 99
+    fi
+
+    pc2file="${pc2file}-${transform}"
+#endif /* NEW */
+fi
+
+# Check for renaming to be done
+if [ "${rename}" != none ]
+then
+#ifndef NEW
+    if [ -s "${pcfile}-${rename}.xml" ]
+#else /* NEW */
+    if [ -s "${pc1file}-${rename}.xml" ]
+#endif /* NEW */
+    then
+#ifndef NEW
+	echo "Using previously ${rename} renamed extracted ${granularity} from ${language} files in ${system}"
+#else /* NEW */
+	echo "Using previously ${rename} renamed extracted ${granularity} from ${language} files in ${system1}"
+#endif /* NEW */
+    else
+#ifndef NEW
+	echo "Applying ${rename} renaming to extracted ${granularity} from ${language} files in ${system}"
+	time ${lib}/scripts/rename.sh ${granularity} ${language} "${pcfile}.xml" ${rename} >> "${system}_${granularity}-clones-${datestamp}.log" 2>&1
+#else /* NEW */
+	echo "Applying ${rename} renaming to extracted ${granularity} from ${language} files in ${system1}"
+	time ${lib}/scripts/rename.sh ${granularity} ${language} "${pc1file}.xml" ${rename} >> "${system1}_${granularity}-crossclones-${datestamp}.log" 2>&1
+#endif /* NEW */
+    fi
+
+    result=$?
+    echo ""
+
+    if [ $result != 0 ]
+    then
+        echo "*** ERROR: Renaming failed, code $result"
+#ifndef NEW
+        echo "Detailed log in ${system}_${granularity}-clones-${datestamp}.log"
+#else /* NEW */
+        echo "Detailed log in ${system1}_${granularity}-crossclones-${datestamp}.log"
+#endif /* NEW */
+        echo ""
+        exit 99
+    fi
+
+#ifndef NEW
+    pcfile="${pcfile}-${rename}"
+#else /* NEW */
+    pc1file="${pc1file}-${rename}"
+
+    if [ -s "${pc2file}-${rename}.xml" ]
+    then
+	echo "Using previously ${rename} renamed extracted ${granularity} from ${language} files in ${system2}"
+    else
+	echo "Applying ${rename} renaming to extracted ${granularity} from ${language} files in ${system2}"
+	time ${lib}/scripts/rename.sh ${granularity} ${language} "${pc2file}.xml" ${rename} >> "${system2}_${granularity}-crossclones-${datestamp}.log" 2>&1
+    fi
+
+    result=$?
+    echo ""
+
+    if [ $result != 0 ]
+    then
+        echo "*** ERROR: Renaming failed, code $result"
+        echo "Detailed log in ${system2}_${granularity}-crossclones-${datestamp}.log"
+        echo ""
+        exit 99
+    fi
+
+    pc2file="${pc2file}-${rename}"
+#endif /* NEW */
+fi
+
+# Check for filtering to be done
+if [ "${filter}" != none ]
+then
+#ifndef NEW
+    if [ -s "${pcfile}-filter.xml" ]
+#else /* NEW */
+    if [ -s "${pc1file}-filter.xml" ]
+#endif /* NEW */
+    then
+#ifndef NEW
+	echo "Using previously filtered extracted ${granularity} from ${language} files in ${system}"
+#else /* NEW */
+	echo "Using previously filtered extracted ${granularity} from ${language} files in ${system1}"
+#endif /* NEW */
+    else
+#ifndef NEW
+	echo "Applying filtering of ${filter} to extracted ${granularity} from ${language} files in ${system}"
+	time ${lib}/scripts/filter.sh ${granularity} ${language} "${pcfile}.xml" ${filter} >> "${system}_${granularity}-clones-${datestamp}.log" 2>&1
+#else /* NEW */
+	echo "Applying filtering of ${filter} to extracted ${granularity} from ${language} files in ${system1}"
+	time ${lib}/scripts/filter.sh ${granularity} ${language} "${pc1file}.xml" ${filter} >> "${system1}_${granularity}-crossclones-${datestamp}.log" 2>&1
+#endif /* NEW */
+    fi
+
+    result=$?
+    echo ""
+
+    if [ $result != 0 ]
+    then
+        echo "*** ERROR: Filtering failed, code $result"
+#ifndef NEW
+        echo "Detailed log in ${system}_${granularity}-clones-${datestamp}.log"
+#else /* NEW */
+        echo "Detailed log in ${system1}_${granularity}-crossclones-${datestamp}.log"
+#endif /* NEW */
+        echo ""
+        exit 99
+    fi
+
+#ifndef NEW
+    pcfile="${pcfile}-filter"
+#else /* NEW */
+    pc1file="${pc1file}-filter"
+
+    if [ -s "${pc2file}-filter.xml" ]
+    then
+	echo "Using previously filtered extracted ${granularity} from ${language} files in ${system2}"
+    else
+	echo "Applying filtering of ${filter} to extracted ${granularity} from ${language} files in ${system2}"
+	time ${lib}/scripts/filter.sh ${granularity} ${language} "${pc2file}.xml" ${filter} >> "${system2}_${granularity}-crossclones-${datestamp}.log" 2>&1
+    fi
+
+    result=$?
+    echo ""
+
+    if [ $result != 0 ]
+    then
+        echo "*** ERROR: Filtering failed, code $result"
+        echo "Detailed log in ${system2}_${granularity}-crossclones-${datestamp}.log"
+        echo ""
+        exit 99
+    fi
+
+    pc2file="${pc2file}-filter"
+#endif /* NEW */
+fi
+
+# Check for abstraction to be done
+if [ "${abstract}" != none ]
+then
+#ifndef NEW
+    if [ -s "${pcfile}-abstract.xml" ]
+#else /* NEW */
+    if [ -s "${pc1file}-abstract.xml" ]
+#endif /* NEW */
+    then
+#ifndef NEW
+	echo "Using previously abstracted extracted ${granularity} from ${language} files in ${system}"
+#else /* NEW */
+	echo "Using previously abstracted extracted ${granularity} from ${language} files in ${system1}"
+#endif /* NEW */
+    else
+#ifndef NEW
+	echo "Applying abstraction of ${abstract} to extracted ${granularity} from ${language} files in ${system}"
+	time ${lib}/scripts/abstract.sh ${granularity} ${language} "${pcfile}.xml" ${abstract} >> "${system}_${granularity}-clones-${datestamp}.log" 2>&1
+#else /* NEW */
+	echo "Applying abstraction of ${abstract} to extracted ${granularity} from ${language} files in ${system1}"
+	time ${lib}/scripts/abstract.sh ${granularity} ${language} "${pc1file}.xml" ${abstract} >> "${system1}_${granularity}-crossclones-${datestamp}.log" 2>&1
+#endif /* NEW */
+    fi
+
+    result=$?
+    echo ""
+
+    if [ $result != 0 ]
+    then
+        echo "*** ERROR: Abstraction failed, code $result"
+#ifndef NEW
+        echo "Detailed log in ${system}_${granularity}-clones-${datestamp}.log"
+#else /* NEW */
+        echo "Detailed log in ${system1}_${granularity}-crossclones-${datestamp}.log"
+#endif /* NEW */
+        echo ""
+        exit 99
+    fi
+
+#ifndef NEW
+    pcfile="${pcfile}-abstract"
+#else /* NEW */
+    pc1file="${pc1file}-abstract"
+
+    if [ -s "${pc2file}-abstract.xml" ]
+    then
+	echo "Using previously abstracted extracted ${granularity} from ${language} files in ${system2}"
+    else
+	echo "Applying abstraction of ${abstract} to extracted ${granularity} from ${language} files in ${system2}"
+	time ${lib}/scripts/abstract.sh ${granularity} ${language} "${pc2file}.xml" ${abstract} >> "${system2}_${granularity}-crossclones-${datestamp}.log" 2>&1
+    fi
+
+    result=$?
+    echo ""
+
+    if [ $result != 0 ]
+    then
+        echo "*** ERROR: Abstraction failed, code $result"
+        echo "Detailed log in ${system2}_${granularity}-crossclones-${datestamp}.log"
+        echo ""
+        exit 99
+    fi
+
+    pc2file="${pc2file}-abstract"
+#endif /* NEW */
+fi
+
+# Check for custom normalization to be done
+if [ "${normalize}" != none ]
+then
+#ifndef NEW
+    if [ -s "${pcfile}-normalize.xml" ]
+#else /* NEW */
+    if [ -s "${pc1file}-normalize.xml" ]
+#endif /* NEW */
+    then
+#ifndef NEW
+	echo "Using previously normalized extracted ${granularity} from ${language} files in ${system}"
+#else /* NEW */
+	echo "Using previously normalized extracted ${granularity} from ${language} files in ${system1}"
+#endif /* NEW */
+    else
+#ifndef NEW
+	echo "Applying custom normalization ${normalize} to extracted ${granularity} from ${language} files in ${system}"
+	time ${lib}/scripts/normalize.sh ${granularity} ${language} "${pcfile}.xml" ${normalize} >> "${system}_${granularity}-clones-${datestamp}.log" 2>&1
+#else /* NEW */
+	echo "Applying custom normalization ${normalize} to extracted ${granularity} from ${language} files in ${system1}"
+	time ${lib}/scripts/normalize.sh ${granularity} ${language} "${pc1file}.xml" ${normalize} >> "${system1}_${granularity}-crossclones-${datestamp}.log" 2>&1
+#endif /* NEW */
+    fi
+
+    result=$?
+    echo ""
+
+    if [ $result != 0 ]
+    then
+        echo "*** ERROR: Custom normalization failed, code $result"
+#ifndef NEW
+        echo "Detailed log in ${system}_${granularity}-clones-${datestamp}.log"
+#else /* NEW */
+        echo "Detailed log in ${system1}_${granularity}-crossclones-${datestamp}.log"
+#endif /* NEW */
+        echo ""
+        exit 99
+    fi
+
+#ifndef NEW
+    pcfile="${pcfile}-normalized"
+#else /* NEW */
+    pc1file="${pc1file}-normalized"
+
+    if [ -s "${pc2file}-normalize.xml" ]
+    then
+	echo "Using previously normalized extracted ${granularity} from ${language} files in ${system2}"
+    else
+	echo "Applying custom normalization ${normalize} to extracted ${granularity} from ${language} files in ${system2}"
+	time ${lib}/scripts/normalize.sh ${granularity} ${language} "${pc2file}.xml" ${normalize} >> "${system2}_${granularity}-crossclones-${datestamp}.log" 2>&1
+    fi
+
+    result=$?
+    echo ""
+
+    if [ $result != 0 ]
+    then
+        echo "*** ERROR: Custom normalization failed, code $result"
+        echo "Detailed log in ${system2}_${granularity}-crossclones-${datestamp}.log"
+        echo ""
+        exit 99
+    fi
+
+    pc2file="${pc2file}-normalized"
+#endif /* NEW */
+fi
+
+# Find near-miss clones
+#ifndef NEW
+echo "Finding clones between ${minsize} and ${maxsize} lines at UPI threshold ${threshold}"
+time ${lib}/scripts/findclonepairs.sh "${pcfile}.xml" ${threshold} ${minsize} ${maxsize} >> "${system}_${granularity}-clones-${datestamp}.log" 2>&1
+#else /* NEW */
+echo "Finding cross-clones between ${minsize} and ${maxsize} lines at UPI threshold ${threshold}"
+time ${lib}/scripts/findcrossclones.sh "${pc1file}.xml" "${pc2file}.xml" ${threshold} ${minsize} ${maxsize} >> "${system1}_${granularity}-crossclones-${datestamp}.log" 2>&1
+#endif /* NEW */
+
+result=$?
+echo ""
+
+if [ $result != 0 ]
+then
+#ifndef NEW
+echo "*** ERROR: Clone analysis failed, code $result"
+echo "Detailed log in ${system}_${granularity}-clones-${datestamp}.log"
+echo ""
+exit 99
+#else /* NEW */
+    echo "*** ERROR: Cross-clone analysis failed, code $result"
+    echo "Detailed log in ${system1}_${granularity}-crossclones-${datestamp}.log"
+    echo ""
+    exit 99
+#endif /* NEW */
+fi
+
+#ifndef NEW
+grep "^Found " "${system}_${granularity}-clones-${datestamp}.log" | tail -1
+#else /* NEW */
+grep "^Found " "${system1}_${granularity}-crossclones-${datestamp}.log" | tail -1
+#endif /* NEW */
+echo ""
+
+if [ "${cluster}" = "yes" ]
+then
+    # Compute clone classes
+    echo "Clustering clone pairs into classes"
+#ifndef NEW
+    time ${lib}/scripts/clusterpairs.sh "${pcfile}-clones/*_${granularity}*-clones-${threshold}.xml" >> "${system}_${granularity}-clones-${datestamp}.log" 2>&1
+#else /* NEW */
+    time ${lib}/scripts/clusterpairs.sh "${pc1file}-crossclones/*_${granularity}*-crossclones-${threshold}.xml" >> "${system1}_${granularity}-crossclones-${datestamp}.log" 2>&1
+#endif /* NEW */
+
+    result=$?
+    echo ""
+
+    if [ $result != 0 ]
+    then
+	echo "*** ERROR: Clustering failed, code $result"
+#ifndef NEW
+	echo "Detailed log in ${system}_${granularity}-clones-${datestamp}.log"
+#else /* NEW */
+	echo "Detailed log in ${system1}_${granularity}-crossclones-${datestamp}.log"
+#endif /* NEW */
+	echo ""
+	exit 99
+    fi
+
+#ifndef NEW
+    grep "^Clustered " "${system}_${granularity}-clones-${datestamp}.log" | tail -1
+#else /* NEW */
+    grep "^Clustered " "${system1}_${granularity}-crossclones-${datestamp}.log" | tail -1
+#endif /* NEW */
+    echo ""
+fi
+
+if [ "${report}" = "yes" -o "${report}" = "pairs" ]
+then
+    # Get original sources
+    echo "Getting original sources for clones"
+
+    if [ "${report}" = "pairs" ]
+    then
+#ifndef NEW
+	time ${lib}/scripts/getsource.sh "${pcfile}-clones/*_${granularity}*-clones-${threshold}.xml" >> "${system}_${granularity}-clones-${datestamp}.log" 2>&1
+#else /* NEW */
+	time ${lib}/scripts/getsource.sh "${pc1file}-crossclones/*_${granularity}*-crossclones-${threshold}.xml" >> "${system1}_${granularity}-crossclones-${datestamp}.log" 2>&1
+#endif /* NEW */
+
+	result=$?
+	echo ""
+
+	if [ $result != 0 ]
+	then
+	    echo "*** ERROR: Get sources failed, code $result"
+#ifndef NEW
+	    echo "Detailed log in ${system}_${granularity}-clones-${datestamp}.log"
+#else /* NEW */
+	    echo "Detailed log in ${system1}_${granularity}-crossclones-${datestamp}.log"
+#endif /* NEW */
+	    echo ""
+	    exit 99
+	fi
+    fi
+
+    if [ "${cluster}" = "yes" ]
+    then
+#ifndef NEW
+	time ${lib}/scripts/getsource.sh "${pcfile}-clones/*_${granularity}*-clones-${threshold}-classes.xml" >> "${system}_${granularity}-clones-${datestamp}.log" 2>&1
+#else /* NEW */
+	time ${lib}/scripts/getsource.sh "${pc1file}-crossclones/*_${granularity}*-crossclones-${threshold}-classes.xml" >> "${system1}_${granularity}-crossclones-${datestamp}.log" 2>&1
+#endif /* NEW */
+
+	result=$?
+	echo ""
+
+	if [ $result != 0 ]
+	then
+	    echo "*** ERROR: Get sources failed, code $result"
+#ifndef NEW
+	    echo "Detailed log in ${system}_${granularity}-clones-${datestamp}.log"
+#else /* NEW */
+	    echo "Detailed log in ${system1}_${granularity}-crossclones-${datestamp}.log"
+#endif /* NEW */
+	    echo ""
+	    exit 99
+	fi
+    fi
+
+    # Convert to HTML
+    echo "Making HTML reports"
+    if [ "${report}" = "pairs" ]
+    then
+#ifndef NEW
+	time ${lib}/scripts/makepairhtml.sh "${pcfile}-clones/*_${granularity}*-clones-${threshold}-withsource.xml" >> "${system}_${granularity}-clones-${datestamp}.log" 2>&1
+#else /* NEW */
+	time ${lib}/scripts/makepairhtml.sh "${pc1file}-crossclones/*_${granularity}*-crossclones-${threshold}-withsource.xml" >> "${system1}_${granularity}-crossclones-${datestamp}.log" 2>&1
+#endif /* NEW */
+
+	result=$?
+	echo ""
+
+	if [ $result != 0 ]
+	then
+	    echo "*** ERROR: Make HTML failed, code $result"
+#ifndef NEW
+	    echo "Detailed log in ${system}_${granularity}-clones-${datestamp}.log"
+#else /* NEW */
+	    echo "Detailed log in ${system1}_${granularity}-crossclones-${datestamp}.log"
+#endif /* NEW */
+	    echo ""
+	    exit 99
+	fi
+    fi
+
+    if [ "${cluster}" = "yes" ]
+    then
+#ifndef NEW
+	time ${lib}/scripts/makepairhtml.sh "${pcfile}-clones/*_${granularity}*-clones-${threshold}-classes-withsource.xml" >> "${system}_${granularity}-clones-${datestamp}.log" 2>&1
+#else /* NEW */
+	time ${lib}/scripts/makepairhtml.sh "${pc1file}-crossclones/*_${granularity}*-crossclones-${threshold}-classes-withsource.xml" >> "${system1}_${granularity}-crossclones-${datestamp}.log" 2>&1
+#endif /* NEW */
+
+	result=$?
+	echo ""
+
+	if [ $result != 0 ]
+	then
+	    echo "*** ERROR: Make HTML failed, code $result"
+#ifndef NEW
+	    echo "Detailed log in ${system}_${granularity}-clones-${datestamp}.log"
+#else /* NEW */
+	    echo "Detailed log in ${system1}_${granularity}-crossclones-${datestamp}.log"
+#endif /* NEW */
+	    echo ""
+	    exit 99
+	fi
+    fi
+
+#ifndef NEW
+elif [ "${report}" = "normalized" -o "${report}" = "normalizedpairs" ]
+#else /* NEW */
+elif [ "${report}" = "normalized" -o ${report} = "normalizedpairs" ]
+#endif /* NEW */
+then
+    # Get normalized sources
+    echo "Getting normalized sources for clones"
+    if [ "${report}" = "normalizedpairs" ]
+    then
+#ifndef NEW
+	time ${lib}/scripts/getnormsource.sh "${pcfile}.xml" "${pcfile}-clones/*_${granularity}*-clones-${threshold}.xml" >> "${system}_${granularity}-clones-${datestamp}.log" 2>&1
+#else /* NEW */
+	time ${lib}/scripts/getnormsource.sh "${pc1file}.xml" "${pc1file}-clones/*_${granularity}*-crossclones-${threshold}.xml" >> "${system1}_${granularity}-clones-${datestamp}.log" 2>&1
+#endif /* NEW */
+
+	result=$?
+	echo ""
+
+	if [ $result != 0 ]
+	then
+	    echo "*** ERROR: Get normalized sources failed, code $result"
+#ifndef NEW
+	    echo "Detailed log in ${system}_${granularity}-clones-${datestamp}.log"
+#else /* NEW */
+	    echo "Detailed log in ${system1}_${granularity}-clones-${datestamp}.log"
+#endif /* NEW */
+	    echo ""
+	    exit 99
+	fi
+    fi
+
+    if [ "${cluster}" = "yes" ]
+    then
+#ifndef NEW
+	time ${lib}/scripts/getnormsource.sh "${pcfile}.xml" "${pcfile}-clones/*_${granularity}*-clones-${threshold}-classes.xml" >> "${system}_${granularity}-clones-${datestamp}.log" 2>&1
+#else /* NEW */
+	time ${lib}/scripts/getnormsource.sh "${pc1file}.xml" "${pc1file}-clones/*_${granularity}*-crossclones-${threshold}-classes.xml" >> "${system1}_${granularity}-clones-${datestamp}.log" 2>&1
+#endif /* NEW */
+
+	result=$?
+	echo ""
+
+	if [ $result != 0 ]
+	then
+	    echo "*** ERROR: Get normalized sources failed, code $result"
+#ifndef NEW
+	    echo "Detailed log in ${system}_${granularity}-clones-${datestamp}.log"
+#else /* NEW */
+	    echo "Detailed log in ${system1}_${granularity}-clones-${datestamp}.log"
+#endif /* NEW */
+	    echo ""
+	    exit 99
+	fi
+    fi
+
+    # Convert to HTML
+    echo "Making HTML reports"
+    if [ "${report}" = "normalizedpairs" ]
+    then
+#ifndef NEW
+	time ${lib}/scripts/makepairhtml.sh "${pcfile}-clones/*_${granularity}*-clones-${threshold}-normsource.xml" >> "${system}_${granularity}-clones-${datestamp}.log" 2>&1
+#else /* NEW */
+	time ${lib}/scripts/makepairhtml.sh "${pc1file}-clones/*_${granularity}*-crossclones-${threshold}-normsource.xml" >> "${system1}_${granularity}-clones-${datestamp}.log" 2>&1
+#endif /* NEW */
+
+	result=$?
+	echo ""
+
+	if [ $result != 0 ]
+	then
+	    echo "*** ERROR: Make HTML failed, code $result"
+#ifndef NEW
+	    echo "Detailed log in ${system}_${granularity}-clones-${datestamp}.log"
+#else /* NEW */
+	    echo "Detailed log in ${system1}_${granularity}-clones-${datestamp}.log"
+#endif /* NEW */
+	    echo ""
+	    exit 99
+	fi
+    fi
+
+    if [ "${cluster}" = "yes" ]
+    then
+#ifndef NEW
+	time ${lib}/scripts/makepairhtml.sh "${pcfile}-clones/*_${granularity}*-clones-${threshold}-classes-normsource.xml" >> "${system}_${granularity}-clones-${datestamp}.log" 2>&1
+#else /* NEW */
+	time ${lib}/scripts/makepairhtml.sh "${pc1file}-clones/*_${granularity}*-crossclones-${threshold}-classes-normsource.xml" >> "${system1}_${granularity}-clones-${datestamp}.log" 2>&1
+#endif /* NEW */
+
+	result=$?
+	echo ""
+
+	if [ $result != 0 ]
+	then
+	    echo "*** ERROR: Make HTML failed, code $result"
+#ifndef NEW
+	    echo "Detailed log in ${system}_${granularity}-clones-${datestamp}.log"
+#else /* NEW */
+	    echo "Detailed log in ${system1}_${granularity}-clones-${datestamp}.log"
+#endif /* NEW */
+	    echo ""
+	    exit 99
+	fi
+    fi
+fi
+
+echo "Done."
+echo ""
+#ifndef NEW
+echo "Detailed log in ${system}_${granularity}-clones-${datestamp}.log"
+echo "Results in ${pcfile}-clones/"
+#else /* NEW */
+echo "Detailed log in ${system1}_${granularity}-crossclones-${datestamp}.log"
+echo "Results in ${pc1file}-crossclones/"
+#endif /* NEW */
+if [ "${report}" != "no" ]
+then
+#ifndef NEW
+    echo "Report in" ${pcfile}-clones/*_${granularity}*-clones-${threshold}-*.html
+#else /* NEW */
+    echo "Report in" ${pc1file}-crossclones/*_${granularity}*-crossclones-${threshold}-*.html
+#endif /* NEW */
+fi
+echo ""
+date
+echo ""

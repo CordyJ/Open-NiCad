@@ -1,0 +1,365 @@
+-- DSL to Ecore
+-- first transformation : XML to DSL
+
+module XML2DSL;
+create OUT : DSL from IN : XML;
+
+-------------------------------------------------------------------------------
+-- HELPERS --------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- This helper gets the Attribute who has value name = name and return it to a Boolean
+-- CONTEXT: XML!Element
+-- RETURN:  Boolean
+helper context XML!Element def: getAttrBool(name : String) : Boolean =
+	let a : String = 
+    self.children->select(c | c.oclIsTypeOf(XML!Attribute) and c.name = name)->first().value
+	in if a ='true' then true else false endif;
+
+-- This helper gets the Attribute who has value name = name
+-- CONTEXT: XML!Element
+-- RETURN:  String
+helper context XML!Element def: getAttrVal(name : String) : String =
+    self.children->select(c | c.oclIsTypeOf(XML!Attribute) and c.name = name)->first().value;
+
+-- This helper gets the value of the attribute who has value name=name 
+-- from a child of self
+-- CONTEXT: XML!Element
+-- RETURN:  String
+helper context XML!Element def: get(child : String,name : String) : String =
+    self.children -> select(c | c.oclIsTypeOf(XML!Element) and c.name = child)->collect(d | d.children)->flatten()
+	->select(b | b.oclIsTypeOf(XML!Attribute) and b.name = name )->first().value;
+
+-- This helper gets the Type of a property.
+-- CONTEXT: XML!Element
+-- RETURN:  String
+helper context XML!Element def: getType() : String =
+	let type : String = self.children->select(c | c.oclIsTypeOf(XML!Element) 
+		and c.name = 'propertyInfo')->first().getAttrVal('xsi:type') 
+	in	type.substring(1,type.size()-12);
+
+-- This helper stores an integer value used to assign an ID to each generated.
+-- CONTEXT: XML!Element
+-- RETURN:  String
+helper context XML!Element def: getEnumId() : String =
+  self.children->select(c | c.oclIsTypeOf(XML!Element) and c.name = 'propertyInfo')
+	->first().getText('enumeration');
+
+-- This helper gets Text from an XML!Element who has a child with a name value = name 
+-- and with a child XML!Text.
+-- CONTEXT: XML!Element
+-- RETURN:  String
+helper context XML!Element def: getText(name : String) : String =
+	let e :Sequence(XML!Element) =
+	self.children-> select(m | m.oclIsTypeOf(XML!Element) )
+	in
+	if e.isEmpty() then '' else
+		let r:Sequence(XML!Element) =
+	    e->select (f|f.name=name)
+		in
+		if r.isEmpty() then '' else
+			r-> collect(d | d.children )->flatten()
+			->select(f | f.oclIsTypeOf(XML!Text) )
+			->select ( g | g.name = '#text' )->first().value
+		endif
+	endif;
+
+-- This helper return a Sequence of XML!Element from a child name of a child names of self
+-- CONTEXT: XML!Element
+-- RETURN:  Sequence(XML!Element)
+helper context XML!Element def: getSeq(names : String,name : String) : Sequence(XML!Element) =
+	self.children -> select(m | m.oclIsTypeOf(XML!Element) and m.name = names )
+	-> collect(d | d.children )->flatten()->select(m | m.oclIsTypeOf(XML!Element) and m.name = name );
+
+-- This helper say if an XML!Element has a child with value name = name
+-- CONTEXT: XML!Element
+-- RETURN:  Boolean
+helper context XML!Element def: hasChildren(name : String) : Boolean =
+	let a : XML!Element =
+	self.children-> select(m | m.oclIsTypeOf(XML!Element) and m.name = name )->first()
+	in if (a.oclIsTypeOf(XML!Element) and a.name = name) 
+		then true else false 
+	endif;
+
+-- This helper stores an integer value used to assign an ID to each generated
+-- CONTEXT: XML!Element
+-- RETURN:  Boolean
+--teste si l'element possede un certain XMLattribut
+helper context XML!Element def: hasAttr(name : String) : Boolean =
+	let a : XML!Attribute =
+	self.children-> select(m | m.oclIsTypeOf(XML!Attribute) and m.name = name )->first()
+	in if not a.oclIsUndefined()
+		then (a.name = name) else false
+	endif;
+
+-- This helper indicates if a Classifier is Abstract or not by searching in
+-- the child mdfmetada of self
+-- CONTEXT: XML!Element
+-- RETURN:  Boolean
+helper context XML!Element def: isAbstract() : Boolean = 
+	let a : XML!Element =
+		if self.hasChildren('mdfmetadata')
+		then
+		self.children->select(n|n.name = 'mdfmetadata')->first()
+		else self
+		endif
+		in
+	if a = self
+		then false
+		else
+			if a.hasAttr('classmodifier') 
+				then a.getAttrVal('classmodifier') = 'abstract'
+				else false 
+			endif
+	endif;
+
+-- This helper produce a Map of XML!Element corresponding to concept,relationship,enumeration
+-- by identity to help majing references
+-- CONTEXT: thisModule
+-- RETURN:  Map(String, XML!Element)
+helper def: dslElementsById : Map(String, XML!Element) =
+    XML!Element.allInstances()->iterate(e; acc : Map(String,XML!Element) = Map {} |
+        if ((e.name='concept' or e.name='relationship' or e.name ='enumeration') and e.hasAttr('id')) then
+             acc->including( e.getAttrVal('id'), e)
+        else
+             acc
+        endif
+    );
+
+-- This helper produce a Map of roles, containmentstyle
+-- for all the roles of the selected Relationship, we look for it in the map
+-- return true for embedding, false for reference
+helper context XML!Element def: getContainment() : Boolean =
+	let id1: String =self.getSeq('roles','role').first().getAttrVal('id') in
+	let id2: String =self.getSeq('roles','role').last().getAttrVal('id') in
+	let containmentstyle : Boolean =
+	XML!Element.allInstances()->
+	select(t|  
+	if t.name='role'  
+	then if t.parent.name='treeExpression' 
+		then (t.parent.getText('role')=id1 or
+			t.parent.getText('role')=id2) 
+			and	t.parent.getAttrVal('containmentstyle')<>'fromsource'
+			and	t.parent.getAttrVal('containmentstyle')<>'reference'
+		else false endif 
+	else false endif)
+	->first().oclIsUndefined()
+	in not containmentstyle;
+	
+-- This helper return a Sequence of XML!Element who are subType of the XML!Element 
+-- who has is id = id
+-- CONTEXT: thisModule
+-- RETURN:  Sequence(XML!Element)
+helper def: getSubTypes(id:String): Sequence(XML!Element)=
+XML!Element.allInstances()->iterate(e; acc : Sequence(XML!Element) = Sequence {} |
+        if ((e.name='concept' or e.name='relationship') and e.hasAttr('superType')) then
+			if e.getText('superType')=id 
+				then  acc->including(e)
+        		else  acc
+        	endif else acc 
+		endif );
+
+-- This helper return the DSL!SimpleType that match String
+-- CONTEXT: thisModule
+-- RETURN:  DSL!SimpleType
+helper def: findType(s:String) : DSL!SimpleType =
+	let a : XML!Element =
+		XML!Element.allInstances() -> select(e | if e.name = 'model'
+					then if e.parent.name = 'dmd'
+						then e.getAttrVal('name') <> 'Core'
+						else false endif
+					else false
+				endif )-> first() 
+	in
+	if s='String' 
+	then thisModule.resolveTemp(a,'str')
+	else 
+		if s='Integer' or s='Long' 
+		then thisModule.resolveTemp(a,'int')
+		else 
+			if s='Double' 
+			then thisModule.resolveTemp(a,'double')
+			else thisModule.resolveTemp(a,'bool') 
+			endif
+		endif
+	endif;
+
+-------------------------------------------------------------------------------
+-- RULES ----------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- Rule 'DomainModel'.
+-- This rule generates the DomainModel, which will content all the relevants 
+-- informations of the model
+rule DomainModel {
+	from
+		e : XML!Element (
+				if e.name = 'model'
+					then if e.parent.name = 'dmd'
+						then e.getAttrVal('name') <> 'Core'
+						else false endif
+					else false
+				endif
+		)
+	to
+		d : DSL!DomainModel (
+			name <- e.getAttrVal('name'),
+			identity <- e.getAttrVal('identity'),		
+			namespace <- e.getAttrVal('namespace'),
+			isLoaded <- e.getAttrBool('isLoaded'),
+			classifiers <- Sequence{
+					e.getSeq('concepts','concept'),
+					e.getSeq('relationships','relationship')			
+					},
+			types <- Sequence{e.getSeq('enumerations','enumeration'),str,int,bool,double}
+		),
+		str : DSL!SimpleType (
+			name<-'String'
+		),	
+		int : DSL!SimpleType (
+			name<-'Integer'
+		),		
+		bool : DSL!SimpleType (
+			name<-'Boolean'
+		),
+		double : DSL!SimpleType (
+			name<-'Double'
+		)	
+}
+
+-- Rule 'Class'.
+-- This rule generates a DSL!Class and link it to his supertypes,
+-- subtypes and properties
+rule Class {
+	from 
+		e : XML!Element (
+			e.name = 'concept'				
+		)
+	to 
+		c : DSL!Class (
+			name <- e.getAttrVal('name'),
+			identity <- e.getAttrVal('identity'),
+			namespace <- e.getAttrVal('namespace'),
+			isLoaded <- e.getAttrBool('isLoaded'),
+			isAbstract <- e.isAbstract(),
+--			properties <- Sequence{e.getSeq('valueProperties','property').append(nm)},
+			properties <- Sequence{e.getSeq('valueProperties','property')},
+			domainModel <- e.parent.parent,
+			superType <- thisModule.dslElementsById.get(e.getText('superType')),
+			subTypes<-thisModule.getSubTypes(e.getAttrVal('id'))
+		)--,
+--		nm : DSL!ValueProperty (
+--			name<-'Name',
+--			type<-thisModule.findType('String')
+--		)
+}
+
+-- Rule 'Relationship'.
+-- This rule generates a DSL!Relationship and link it to his supertypes,
+-- subtypes, roles and properties
+rule Relationship {
+	from 
+		e : XML!Element (
+			e.name = 'relationship'
+		)
+	to 
+		r : DSL!Relationship (
+			name <- e.getAttrVal('name'),
+			identity <- e.getAttrVal('identity'),
+			namespace <- e.getAttrVal('namespace'),
+			isLoaded <- e.getAttrBool('isLoaded'),
+			isAbstract <- e.isAbstract(),
+			roles <- e.getSeq('roles','role'),
+			domainModel <- e.parent.parent,
+			isEmbedding <- e.getContainment(),
+			properties <- e.getSeq('valueProperties','property'),
+			superType <- thisModule.dslElementsById.get(e.getText('superType')),
+			subTypes<-thisModule.getSubTypes(e.getAttrVal('id'))
+		)		
+}
+
+-- Rule 'Role'.
+-- This rule generates a DSL!Role and link it to his ends
+rule Role {
+	from 
+		e : XML!Element (
+			if e.name = 'role' 
+				then e.parent.name = 'roles'
+				else false
+			endif			
+		)
+	to 
+		r : DSL!Role (
+			name <- e.getAttrVal('name'),
+			identity <- e.getAttrVal('identity'),
+			source <- thisModule.dslElementsById.get(e.getText('source')),
+			type <- thisModule.dslElementsById.get(e.getText('type')),
+			relation <- e.parent.parent,
+			min<-e.getAttrVal('min').toInteger(),
+			max<-e.getAttrVal('max').toInteger(),
+			accepts <- e.getAttrVal('accepts'),
+			isUnbounded <- e.getAttrBool('isUnbounded'),
+			isOrdered <- e.children->select(a | a.oclIsTypeOf(XML!Element) and a.name='mdfmetadata')
+						->first().getAttrBool('isordered'),
+			isNavigableFrom <- e.children->select(a | a.oclIsTypeOf(XML!Element) and a.name='mdfmetadata')
+						->first().getAttrBool('isnavigablefrom')
+		)
+}
+
+-- Rule 'ValueProperty'.
+-- This rule generates a property of a classifier
+rule ValueProperty {
+	from 
+		e : XML!Element (
+			if (e.name = 'property') 
+				then e.parent.name = 'valueProperties'
+				else false
+			endif
+		)
+	to 
+		p : DSL!ValueProperty (
+			name <- e.getAttrVal('name'),
+			identity <- e.getAttrVal('identity'),
+			type <- if e.getType()<>'Enumeration' 
+						then thisModule.findType(e.getType()) 
+						else thisModule.dslElementsById.get(e.getEnumId())
+					endif
+		)
+}	
+
+-- Rule 'Enumeration'.
+-- This rule generates an Enumeration
+rule Enumeration {
+	from 
+		e : XML!Element (
+			if e.name = 'enumeration' 
+				then e.parent.name = 'enumerations'
+				else false
+			endif			
+		)
+	to 
+		r : DSL!Enumeration (
+			name <- e.getAttrVal('name'),
+			identity <- e.getAttrVal('identity'),
+			namespace <- e.getAttrVal('namespace'),
+			literals <- e.getSeq('literals','enumerationLiteral')
+		)
+}
+
+-- Rule 'EnumerationLiteral'.
+-- This rule generates an single element of an Enumeration
+rule EnumerationLiteral {
+	from 
+		e : XML!Element (
+			if e.name = 'enumerationLiteral' 
+				then e.parent.name = 'literals'
+				else false
+			endif			
+		)
+	to 
+		r : DSL!EnumerationLiteral (
+			name <- e.getAttrVal('name'),
+			identity <- e.getAttrVal('identity'),
+			value <- e.getAttrVal('value').toInteger()
+		)
+}

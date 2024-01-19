@@ -1,0 +1,222 @@
+module PetriNet2XML;
+create OUT : XML from IN : PetriNet;
+
+
+-------------------------------------------------------------------------------
+-- HELPERS --------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-- This helper computes a Sequence that contains all the Places of the input
+-- PetriNet model.
+-- CONTEXT: thisModule
+-- RETURN:	Sequence(PetriNet!Place)
+helper def: allPlaces : Sequence(PetriNet!Place) = 
+	PetriNet!Place.allInstances()->asSequence();
+
+
+-- This helper computes a Sequence that contains all the Transitions of the
+-- input PetriNet model.
+-- CONTEXT: thisModule
+-- RETURN:	Sequence(PetriNet!Transition)
+helper def: allTransitions : Sequence(PetriNet!Transition) = 
+	PetriNet!Transition.allInstances()->asSequence();
+
+
+-- This helper computes a Sequence that contains all the Arcs of the input
+-- PetriNet model.
+-- CONTEXT: thisModule
+-- RETURN:	Sequence(PetriNet!Arc)
+helper def: allArcs : Sequence(PetriNet!Arc) = 
+	PetriNet!Arc.allInstances()->asSequence();
+
+
+-------------------------------------------------------------------------------
+-- RULES ----------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-- Rule 'Main'
+-- This rule generates the "pnml" root tag from the input PetriNet element.
+-- This tag has an "xmlns" attribute and a "net" element as child element.
+-- The "net" tag has an "id", a "type" and a "name" attributes, and the
+-- following children elements:
+--  * a "place" element for each Place of the input PetriNet model
+--  * a "transition" element for each Transition of the input PetriNet model
+--  * an "arc" element for each Arc of the input PetriNet model.
+rule Main {
+	from
+        pn : PetriNet!PetriNet
+	to 
+		root : XML!Root (
+			name <- 'pnml',
+			children <- Sequence{xmlns, net}
+		),
+		xmlns: XML!Attribute (
+			name <- 'xmlns',
+			value <- 'http://www.example.org/pnpl'
+		),
+		
+		net : XML!Element (
+			name <- 'net',
+			children <- Sequence{
+							id,
+							type,
+							name,
+							thisModule.allPlaces,
+							thisModule.allTransitions,
+							thisModule.allArcs
+						}
+		),
+		id : XML!Attribute (
+			name <- 'id',
+			value <- 'n1'
+		),
+		type : XML!Attribute (
+			name <- 'type',
+			value <- 'http://www.example.org/pnpl/PTNet'
+		),
+		
+		name : XML!Element (
+			name <- 'name',
+			children <- Sequence{text}
+		),
+		text : XML!Element (
+			name <- 'text',
+			children <- Sequence{val}
+		),
+		val : XML!Text (
+			value <- pn.name
+		)
+}
+
+
+-- Rule 'Place'
+-- This rule generates a "place" tag from an input Place element.
+-- This tag has an "id" attribute which value corresponds to the Place rank
+-- within the allPlaces sequence.
+-- The "place" tag also has a "name" child element, which has itself a "text"
+-- child element that contains the name of the place (copied from the input
+-- Place element).
+rule Place {
+	from
+        pn_s : PetriNet!Place
+	to 
+		xml_place : XML!Element (
+			name <- 'place',
+			children <- Sequence{id, name}
+		),
+		id : XML!Attribute (
+			name <- 'id',
+			value <- thisModule.allPlaces->indexOf(pn_s).toString()
+		),
+		
+		name : XML!Element (
+			name <- 'name',
+			children <- Sequence{text}
+		),
+		text : XML!Element (
+			name <- 'text',
+			children <- Sequence{val}
+		),
+		val : XML!Text (
+			value <- pn_s.name
+		)
+}
+
+
+-- Rule 'Transition'
+-- This rule generates a "transition" tag from an input Transition element.
+-- This tag has an "id" attribute which value corresponds to (the size of the
+-- allPlaces sequence + the Transition rank within the allTransitions
+-- sequence).
+rule Transition {
+	from
+       pn_t : PetriNet!Transition
+	to 
+		xml_trans : XML!Element (
+			name <- 'transition',
+			children <- Sequence{trans_id}
+		),
+		trans_id : XML!Attribute (
+			name <- 'id',
+			value <- (thisModule.allPlaces->size() +
+					  thisModule.allTransitions->indexOf(pn_t)).toString()
+		)
+}
+
+
+-- Rule 'PlaceToTransArc'
+-- This rule generates an "arc" tag from an input PlaceToTransArc element.
+-- This tag has an "id", a "source" and a "target" attributes.
+-- Value of the "id" attribute corresponds to (the size of the allPlaces
+-- sequence + the size of the allTransitions sequence + the Arc rank within
+-- the allArcs sequence).
+-- Value of the "source" attribute corresponds to the source Place rank
+-- within the allPlaces sequence.
+-- Value of the "target" attribute corresponds to (the size of the allPlaces
+-- sequence + the target Transition rank within the allTransitions sequence).
+rule PlaceToTransArc {
+	from
+		pn_a : PetriNet!PlaceToTransArc
+	to 
+		xml_arc : XML!Element (
+			name <- 'arc',
+			children <- Sequence{id, source, target}
+		),
+		id : XML!Attribute (
+			name <- 'id',
+			value <- (thisModule.allPlaces->size() +
+					  thisModule.allTransitions->size() +
+					  thisModule.allArcs->indexOf(pn_a)).toString()
+		),
+		source : XML!Attribute (
+			name <- 'source',
+			value <- thisModule.allPlaces
+						->indexOf(pn_a.source).toString()
+		),
+		target : XML!Attribute (
+			name <- 'target',
+			value <- (thisModule.allPlaces->size() + 
+					  thisModule.allTransitions
+						->indexOf(pn_a.target)).toString()
+		)
+}
+
+
+-- Rule 'TransToPlaceArc'
+-- This rule generates an "arc" tag from an input TransToPlaceArc element.
+-- This tag has an "id", a "source" and a "target" attributes.
+-- Value of the "id" attribute corresponds to (the size of the allPlaces
+-- sequence + the size of the allTransitions sequence + the Arc rank within
+-- the allArcs sequence).
+-- Value of the "source" attribute corresponds to (the size of the allPlaces
+-- sequence + the source Transition rank within the allTransitions sequence).
+-- Value of the "target" attribute corresponds to the target Place rank
+-- within the allPlaces sequence.
+rule TransToPlaceArc {
+	from
+		pn_a : PetriNet!TransToPlaceArc
+	to 
+		xml_arc : XML!Element (
+			name <- 'arc',
+			children <- Sequence{id, source, target}
+		),
+		id : XML!Attribute (
+			name <- 'id',
+			value <- (thisModule.allPlaces->size() +
+					  thisModule.allTransitions->size() +
+					  thisModule.allArcs->indexOf(pn_a)).toString()
+		),
+		source : XML!Attribute (
+			name <- 'source',
+			value <- (thisModule.allPlaces->size() + 
+					  thisModule.allTransitions
+						->indexOf(pn_a.source)).toString()
+		),
+		target : XML!Attribute (
+			name <- 'target',
+			value <- thisModule.allPlaces
+						->indexOf(pn_a.target).toString()
+		)
+}

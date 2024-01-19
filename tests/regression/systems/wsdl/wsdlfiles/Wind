@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://opendap.co-ops.nos.noaa.gov/axis/webservices/wind/wsdl" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://opendap.co-ops.nos.noaa.gov/axis/webservices/wind/wsdl" xmlns:intf="http://opendap.co-ops.nos.noaa.gov/axis/webservices/wind/wsdl" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<!--WSDL created by Apache Axis version: 1.4
+Built on Apr 22, 2006 (06:55:48 PDT)-->
+ <wsdl:types>
+  <schema elementFormDefault="qualified" targetNamespace="http://opendap.co-ops.nos.noaa.gov/axis/webservices/wind/wsdl" xmlns="http://www.w3.org/2001/XMLSchema">
+   <element name="Parameters">
+    <complexType>
+     <sequence>
+      <element name="stationId" type="xsd:string"/>
+      <element name="beginDate" type="xsd:string"/>
+      <element name="endDate" type="xsd:string"/>
+      <element name="timeZone" type="xsd:int"/>
+     </sequence>
+    </complexType>
+   </element>
+   <complexType name="Data">
+    <sequence>
+     <element name="timeStamp" type="xsd:string"/>
+     <element name="WS" type="xsd:double"/>
+     <element name="WD" type="xsd:int"/>
+     <element name="WG" type="xsd:double"/>
+     <element name="X" type="xsd:int"/>
+     <element name="R" type="xsd:int"/>
+    </sequence>
+   </complexType>
+   <complexType name="item">
+    <sequence>
+     <element maxOccurs="unbounded" name="item" type="impl:Data"/>
+    </sequence>
+   </complexType>
+   <element name="WindMeasurements">
+    <complexType>
+     <sequence>
+      <element name="data" type="impl:item"/>
+     </sequence>
+    </complexType>
+   </element>
+  </schema>
+ </wsdl:types>
+
+   <wsdl:message name="getWindRequest">
+
+      <wsdl:part element="impl:Parameters" name="Parameters"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getWindResponse">
+
+      <wsdl:part element="impl:WindMeasurements" name="WindMeasurements"/>
+
+   </wsdl:message>
+
+   <wsdl:portType name="WindPortType">
+
+      <wsdl:operation name="getWind" parameterOrder="Parameters">
+
+         <wsdl:input message="impl:getWindRequest" name="getWindRequest"/>
+
+         <wsdl:output message="impl:getWindResponse" name="getWindResponse"/>
+
+      </wsdl:operation>
+
+   </wsdl:portType>
+
+   <wsdl:binding name="WindSoapBinding" type="impl:WindPortType">
+
+      <wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+      <wsdl:operation name="getWind">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getWindRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getWindResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+   </wsdl:binding>
+
+   <wsdl:service name="WindService">
+
+      <wsdl:port binding="impl:WindSoapBinding" name="Wind">
+
+         <wsdlsoap:address location="http://opendap.co-ops.nos.noaa.gov/axis/services/Wind"/>
+
+      </wsdl:port>
+
+   </wsdl:service>
+
+</wsdl:definitions>

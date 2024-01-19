@@ -1,0 +1,369 @@
+#!groovy
+
+// MODIFY the values below to customize the script for your project
+String projectKey = 'REP'
+String repo = 'ios'
+String slackChannel = "#jenkins"
+String schemeName = 'REPerformance'
+String projectName = 'REPerformance'
+
+def buildTypesList = [
+        //Follows the form of output fileName, buildType
+        ["REPerformance", "Release"]
+];
+
+// DO NOT modify values below this line
+String gitAuthor = ""
+String gitMessage = ""
+String gitAlternateBranch = ""
+
+currentBuild.displayName = "${env.BRANCH_NAME}: ${env.BUILD_NUMBER}"
+forceSlackMessage = false
+
+pipeline {
+    agent none
+    options {
+        timeout(time: 30, unit: 'MINUTES')
+        retry(1)
+    }
+    stages {
+        stage('Checkout') {
+            agent {
+                label 'iOSBuilder'
+            }
+            steps {
+                checkout scm
+                sh "" +
+                        "git submodule update --init \n" +
+                        "echo `git show -s --pretty=%an` > GIT_AUTHOR\n" +
+                        "echo `git log -1 --pretty=%B` > GIT_MESSAGE\n" +
+                        "echo `git branch -a --merged | sed -E '/(develop|master|(HEAD detached at .*))/D' | sed -E 's/(\\*| ) //' | sed -E '/^PR\\//D'` > ALTERNATE_GIT_BRANCH"
+                script {
+                    gitAuthor = readFile "GIT_AUTHOR"
+                    gitAuthor = gitAuthor.trim()
+                    gitMessage = readFile "GIT_MESSAGE"
+                    gitMessage = gitMessage.trim()
+                    gitAlternateBranch = readFile "ALTERNATE_GIT_BRANCH"
+                    gitAlternateBranch = gitAlternateBranch.trim()
+                }
+            }
+        }
+        stage('Test And Analyze') {
+            agent {
+                label 'iOSBuilder'
+            }
+            steps {
+                // prepare the iOS simulator
+                sh "osascript -e 'tell application \"iOS Simulator\" to quit'"
+                sh "osascript -e 'tell application \"Simulator\" to quit'"
+
+                sh "eval \"\$(rbenv init -)\"\n" +
+                "rbenv local 2.4.0\n" +
+                "bundle install\n" +
+                "bundle update\n" +
+
+                // Build, Test and Analyze the app. Put test results in a .json file.
+                "set -o pipefail && /usr/bin/xcrun /usr/bin/xcodebuild -scheme '${schemeName}' -workspace ${projectName}.xcworkspace -destination 'name=iPhone SE,OS=latest' -enableCodeCoverage YES -configuration Debug build test analyze | tee xcodebuild.log | XCPRETTY_JSON_FILE_OUTPUT=xcodebuild.json xcpretty -r junit -r json-compilation-database -f `xcpretty-json-formatter`"
+
+                // Publish Test results
+                step([$class: 'JUnitResultArchiver', allowEmptyResults: true, testResults: 'build/reports/junit.xml'])
+            }
+        }
+        stage('Code Coverage') {
+            agent {
+                label 'iOSBuilder'
+            }
+            steps {
+                sh "eval \"\$(rbenv init -)\"\n" +
+                "rbenv local 2.4.0\n" +
+                "bundle install\n" +
+                "bundle update\n" +
+                "bundle exec slather coverage --html --output-directory build/coverage/ --jenkins --scheme ${projectName} --workspace ${projectName}.xcworkspace/ ${projectName}.xcodeproj/"
+
+                publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'build/coverage/', reportFiles: 'index.html', reportName: 'Code Coverage Report', reportTitles: ''])
+                
+            }
+        }
+        stage('Export IPA') {
+            agent {
+                label 'iOSArchiver'
+            }
+            steps {
+                sh "whoami"
+                sh "security unlock-keychain -p `cat /Users/canary/jenkins_pass` /Users/canary/Library/Keychains/login.keychain"
+                sh "xcodebuild -workspace ${projectName}.xcworkspace -scheme '${schemeName}' -sdk iphoneos -archivePath ${env.WORKSPACE}/build/${projectName}.xcarchive -configuration 'Release' PROVISIONING_PROFILE='a6745838-42ed-4c87-a110-be77955f3d61' archive"
+                // Export the archive to .ipa
+                sh "xcodebuild -exportArchive -archivePath ${env.WORKSPACE}/build/${projectName}.xcarchive -exportOptionsPlist ${env.WORKSPACE}/${projectName}/enterpriseExportOptions.plist -exportPath ${env.WORKSPACE}/build"
+
+                stash includes: '**/*.ipa', name: 'IPAS'
+
+            }
+        }
+        stage('Create Debug Links') {
+            agent {
+                label 'iOSArchiver'
+            }
+            steps {
+                script {
+                    for (List<String> buildInfo : buildTypesList) {
+                        createLinks(buildInfo[0], buildInfo[1], projectName)
+                    }
+                    script {
+                        def pngs = findFiles(glob: 'build/*.png')
+                        if (pngs.length > 0) {
+                            stash includes: 'build/*.png', name: 'QR_LINKS'
+                        }
+                        def txts = findFiles(glob: 'build/*.txt')
+                        if (txts.length > 0) {
+                            stash includes: 'build/*.txt', name: 'LINKS'
+                        }
+                    }
+                    
+                    
+                }
+            }
+        }
+        stage('Upload') {
+            agent {
+                label 'Uploader'
+            }
+            steps {
+                unstash 'IPAS'
+                script {
+                    if (shouldUploadRelease(gitAlternateBranch)) {
+                        for (List<String> buildInfo : buildTypesList) {
+                            upload(buildInfo[0], buildInfo[1])
+                        }
+                        stash includes: '*.png', name: 'QR_LINKS'
+                        stash includes: '*.txt', name: 'LINKS'
+                    }
+                }
+            }
+        }
+        stage("Get Links") {
+            agent {
+                label 'iOSBuilder'
+            }
+            steps {
+                script {
+                    if (shouldUploadDevelop() || shouldUploadRelease(gitAlternateBranch)) {
+                        unstash 'QR_LINKS'
+                        unstash 'LINKS'
+                    }
+                }
+            }
+        }
+        stage('Archive') {
+            agent {
+                label 'iOSBuilder'
+            }
+            steps {
+                archiveArtifacts 'build/*.ipa, *_QR.png, APP_LINK*.txt'
+            }
+        }
+        stage('Post') {
+            agent {
+                label 'iOSBuilder'
+            }
+            steps {
+                parallel(
+                        "Bitbucket": {
+                            script {
+                                if (isPr()) {
+                                    forceSlackMessage = true
+                                    postBitbucketComment(repo, projectKey, gitAlternateBranch, buildTypesList)
+                                }
+                            }
+                        },
+                        "Slack": {
+                            script {
+                                if (!isPr() && currentBuild.previousBuild != null && currentBuild.previousBuild.result == "FAILURE" && (currentBuild.result == null || currentBuild.result != "FAILURE")) {
+                                    echo "Sending Slack Message"
+                                    forceSlackMessage = false
+                                    def blueOceanUrl = "makeUrlSafe(${env.BUILD_URL})display/redirect"
+                                    slackSend(
+                                            channel: "${slackChannel}",
+                                            color: '#8CC04F',
+                                            tokenCredentialId: '9301bb25-1aba-4052-a4c7-aae79ac23248',
+                                            message: "" +
+                                                    "*${env.BRANCH_NAME}* *<${blueOceanUrl}|(Link)>*\n" +
+                                                    "*BUILD SUCCESS* Fixed by ${gitAuthor} \n" +
+                                                    "*Last Commit Message:* ${gitMessage}")
+                                }
+                            }
+                        }
+                )
+            }
+            post {
+                success {
+                    script {
+                        currentBuild.result = 'SUCCESS'
+                        bitbucketStatusNotify()
+                    }
+                }
+            }
+        }
+    }
+    post {
+        failure {
+            script {
+                if (!isUserTriggeredError) {
+                    handleError(slackChannel, gitAuthor, gitMessage, forceSlackMessage)
+                    postBitbucketComment(repo, projectKey, gitAlternateBranch, buildTypesList)
+                }
+            }
+        }
+    }
+}
+
+private boolean shouldUploadRelease(gitAlternateBranch) {
+    return isRelease(gitAlternateBranch) || isMaster() || isDevelop()
+}
+
+private boolean shouldUploadDevelop() {
+    isPr() || isDevelop() || isMaster()
+}
+
+private void postBitbucketComment(repo, projectKey, gitAlternateBranch, buildTypesList) {
+    if (isPr() && currentBuild.result != 'ABORTED') {
+        Integer branch = getBranchId()
+
+        String blueOceanUrl = makeUrlSafe(env.BUILD_URL)+"display/redirect"
+        String commentText = ""
+        if (currentBuild.result == "FAILURE") {
+            commentText = "**BUILD FAILED**\\n\\n"
+            commentText += "**BUILD URL**: " + blueOceanUrl + " \\n\\n";
+        } else {
+            commentText += "**BUILD SUCCESS**\\n"
+            commentText += "**BUILD URL**: " + blueOceanUrl + " \\n\\n";
+            for (List<String> buildInfo : buildTypesList) {
+                commentText += getTextForComment(buildInfo[1], false);
+            }
+
+            if (isRelease(gitAlternateBranch)) {
+                for (List<String> buildInfo : buildTypesList) {
+                    commentText += getTextForComment(buildInfo[1], true);
+                }
+            }
+        }
+        commentText = commentText.trim();
+
+        postComment(projectKey, repo, branch, commentText)
+    }
+}
+
+private void postViolationsToBitbucketServer(String projectKey, String repo, int branch) {
+    step([
+            $class: 'ViolationsToBitbucketServerRecorder',
+            config: [
+                    bitbucketServerUrl                    : 'https://push-dev.com',
+                    commentOnlyChangedContent             : true,
+                    commentOnlyChangedContentContext      : 0,
+                    createCommentWithAllSingleFileComments: false,
+                    createSingleFileComments              : true,
+                    password                              : '',
+                    projectKey                            : "${projectKey}",
+                    pullRequestId                         : "${branch}",
+                    repoSlug                              : "${repo}",
+                    useUsernamePassword                   : false,
+                    useUsernamePasswordCredentials        : true,
+                    username                              : '',
+                    usernamePasswordCredentialsId         : 'af502964-ed2c-4a51-84f7-050d2e85eba4'
+                    ]])
+}
+
+private String getTextForComment(String buildType, boolean shouldGetLink) {
+    String safeBuildUrl = makeUrlSafe(env.BUILD_URL)
+
+    String commentText = "**${buildType} QR Code:** [QR Code](${safeBuildUrl}artifact/${buildType}_QR.png)\\n"
+    if (shouldGetLink) {
+        String buildLink = readFile "APP_LINK_${buildType}.txt"
+        buildLink = buildLink.trim()
+        commentText += "**${buildType} Link:** [Link](${buildLink})\\n"
+    }
+    commentText += "\\n"
+    return commentText
+}
+
+private String makeUrlSafe(String unsafeUrl) {
+    modifiedBuildUrl = unsafeUrl.replaceAll("\\(", "&#40;")
+    modifiedBuildUrl = modifiedBuildUrl.replaceAll("\\)", "&#41;")
+    return modifiedBuildUrl
+}
+
+private void createLinks(fileName, buildType, projectName) {
+    String appLinkVariableName = "APP_LINK_${buildType}"
+    sh "" +
+            "source /Users/canary/.bash_profile\n" +
+            "echo \"${env.BUILD_URL}artifact/build/${projectName}.ipa\" > build/${appLinkVariableName}.txt\n" +
+            "qrencode -t PNG -o build/${buildType}_QR.png \"${env.BUILD_URL}artifact/build/${projectName}.ipa\"\n"
+    String tempfile = readFile "build/${appLinkVariableName}.txt"
+    if (tempfile.trim() == "ERROR") {
+        def errorMessage = "The file ${projectName}.ipa, was not found. This may occur if the JenkinsFile's `buildTypesList` was not updated after the projects flavor or build types has changed."
+        echo errorMessage
+        error(errorMessage)
+    }
+}
+
+private void upload(fileName, buildType) {
+    String appLinkVariableName = "APP_LINK_${buildType}"
+    sh "" +
+            "source /Users/canary/.bash_profile\n" +
+            appLinkVariableName + "=`/Applications/AppUploader.app/Contents/MacOS/AppUploader -file \"./build/${fileName}.ipa\"`\n" +
+            "echo \$${appLinkVariableName} > ${appLinkVariableName}.txt\n" +
+            "qrencode -t PNG -o app-debug_${buildType}_QR.png \"\${" + appLinkVariableName + "}\"\n"
+    String tempfile = readFile "build/${appLinkVariableName}.txt"
+    if (tempfile.trim() == "ERROR") {
+        def errorMessage = "The file ${fileName}.ipa, was not found. This may occur if the JenkinsFile's `buildTypesList` was not updated after the projects flavor or build types has changed."
+        echo errorMessage
+        error(errorMessage)
+    }
+}
+
+private void postComment(String projectKey, String repo, int branch, String commentText) {
+    sh "curl  -H \"Authorization: Basic Y2kuc2VydmVyOnJldGhpbmtzb2Z0d2FyZTU=\" -X POST -H \"Content-Type: application/json\" \"https://www.push-dev.com/rest/api/1.0/projects/${projectKey}/repos/${repo}/pull-requests/${branch}/comments\" -d '{\"text\":\"$commentText\"}'"
+}
+
+private int getBranchId() {
+    String branchName = env.BRANCH_NAME;
+    Integer branchId = Integer.parseInt(branchName.substring(3));
+    return branchId
+}
+
+private void handleError(String slackChannel, String gitAuthor, String gitMessage, Boolean forceSlackMessage) {
+    if (currentBuild.result != 'ABORTED') {
+        def blueOceanUrl = "makeUrlSafe(${env.BUILD_URL})display/redirect"
+        currentBuild.result = 'FAILURE'
+        bitbucketStatusNotify()
+
+        if (!isPr() || forceSlackMessage) {
+            slackMessage = "" +
+                    "*${env.BRANCH_NAME}* *<${blueOceanUrl}|(Link)>*\n" +
+                    "*BUILD FAILED* Caused by ${gitAuthor} \n" +
+                    "*Last Commit Message:* ${gitMessage}";
+
+            slackSend(
+                    channel: "${slackChannel}",
+                    color: '#D54C53',
+                    tokenCredentialId: '9301bb25-1aba-4052-a4c7-aae79ac23248',
+                    message: slackMessage)
+        }
+        error("Marking build step status as FAILURE")
+    }
+}
+
+private boolean isPr() {
+    return env.BRANCH_NAME.startsWith("PR")
+}
+
+private static boolean isRelease(String gitAlternateBranch) {
+    return gitAlternateBranch.contains("/release/")
+}
+
+private boolean isDevelop() {
+    return env.BRANCH_NAME == "develop"
+}
+
+private boolean isMaster() {
+    return env.BRANCH_NAME == "master"
+}

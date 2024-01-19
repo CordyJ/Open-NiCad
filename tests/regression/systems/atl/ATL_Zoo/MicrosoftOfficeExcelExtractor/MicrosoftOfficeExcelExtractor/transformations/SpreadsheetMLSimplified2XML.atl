@@ -1,0 +1,248 @@
+module SpreadsheetMLSimplified2XML; -- Module Template
+create  OUT : XML from  IN : SpreadsheetMLSimplified;
+
+
+
+-- This helper permits to obtain the string associated
+-- to a DateTimeType value.
+-- CONTEXT: n/a
+-- RETURN: String
+helper def: getDateTimeStringValue(dtv : SpreadsheetMLSimplified!DateTimeType) : String =
+	dtv.year.toString() + '-' + dtv.month.toString() + '-' + dtv.day.toString() + 'T' 
+	+ dtv.hour.toString() + ':' + dtv.minute.toString() + ':' + dtv.second.toString() + '.000';
+	
+
+
+-- Rule 'DocumentRoot'.
+-- This rule generates the root element of an Excel xml file
+-- which is the "Workbook" element
+rule DocumentRoot {
+	 from 
+	 	wb : SpreadsheetMLSimplified!Workbook
+	 to 
+	 	r : XML!Root(
+		 	name<-'Workbook',
+			value <- '',
+			children <- Sequence{	att1,att2,
+		 							wb.wb_worksheets->collect(e | thisModule.resolveTemp(e, 'wsElt')) }
+		),
+		att1 : XML!Attribute (
+			name <- 'xmlns',
+			value <- 'urn:schemas-microsoft-com:office:spreadsheet'
+		),
+		att2 : XML!Attribute (
+			name <- 'xmlns:ss',
+			value <-'urn:schemas-microsoft-com:office:spreadsheet'
+		)
+}
+
+
+-- Rule 'Worksheets'.
+-- This rule generates the different "Worksheet" elements 
+-- contained in a "Workbook" element
+rule Worksheets {
+	from 
+		ws : SpreadsheetMLSimplified!Worksheet
+		
+	to
+		wsElt : XML!Element (
+			name <- 'Worksheet',
+			children <- Sequence{nameAtt,Sequence{ws.ws_table}->collect(e | thisModule.resolveTemp(e, 'tElt'))->first()}
+		),
+		nameAtt : XML!Attribute (
+			name <- 'ss:Name',
+			value <- ws.name,
+			parent <- wsElt
+		)
+}
+
+
+-- Rule 'WorksheetTable'.
+-- This rule generates the "Table" element  
+-- contained in a "Worksheet" element
+rule WorksheetTable {
+	from 
+		t : SpreadsheetMLSimplified!Table
+
+	to
+		tElt : XML!Element (
+			name <- 'Table',
+			children <- Sequence{
+									t.t_cols->collect(e | thisModule.resolveTemp(e, 'colElt')),
+									t.t_rows->collect(e | thisModule.resolveTemp(e, 'rowElt'))
+								}
+		)
+}
+
+
+-- Rule 'TableColumn'.
+-- This rule generates the "Column" elements  
+-- contained in a "Table" element
+rule TableColumn {
+	from 
+		col : SpreadsheetMLSimplified!Column
+	
+	using {
+		widthOrNot : Sequence(String) =
+			let wdh : Real = col.width
+			in
+				if wdh.oclIsUndefined()
+				then
+					Sequence{}
+				else
+					Sequence{wdh.toString()}
+				endif;		
+	}
+
+	to
+		colElt : XML!Element (
+			name <- 'Column',
+			children <- Sequence{colWidth}
+		),
+		colWidth : distinct XML!Attribute foreach(widthValue in widthOrNot)(
+			name <- 'ss:Width',
+			value <- widthValue
+		)
+}
+
+
+-- Rule 'TableRow'.
+-- This rule generates the "Row" elements  
+-- contained in a "Table" element
+rule TableRow {
+	from 
+		row : SpreadsheetMLSimplified!Row
+
+	to
+		rowElt : XML!Element (
+			name <- 'Row',
+			children <- Sequence{row.r_cells->collect(e | thisModule.resolveTemp(e, 'cellElt'))}
+		)
+}
+
+
+-- Rule 'RowCell'.
+-- This rule generates the "Cell" elements  
+-- contained in a "Row" element
+rule RowCell {
+	from 
+		cell : SpreadsheetMLSimplified!Cell
+
+	to
+		cellElt : XML!Element (
+			name <- 'Cell',
+			children <- Sequence{
+							Sequence{cell.c_data}->collect(e | thisModule.resolveTemp(e, 'dataElt'))->first()
+						}
+		)
+}
+
+
+-- Rule 'CellData'.
+-- This rule generates the "Data" element  
+-- contained in a "Cell" element
+rule CellData {
+	from 
+		data : SpreadsheetMLSimplified!Data
+
+	to
+		dataElt : XML!Element (
+			name <- 'Data'
+		)
+}
+
+
+-- Rule 'DataStringValue'.
+-- This rule generates the string value  
+-- associated to a "Data" element
+rule DataStringValue {
+	from 
+		strVal: SpreadsheetMLSimplified!StringValue
+
+	to
+		strValAtt : XML!Attribute (
+			parent <- Sequence{strVal.vt_data}->collect(e | thisModule.resolveTemp(e, 'dataElt'))->first(),
+			name <- 'ss:Type',
+			value <- 'String'
+		),
+		strValTxt : XML!Text (
+			parent <- Sequence{strVal.vt_data}->collect(e | thisModule.resolveTemp(e, 'dataElt'))->first(),
+			value <- strVal.value
+		)
+}
+
+
+-- Rule 'DataNumberValue'.
+-- This rule generates the number value  
+-- associated to a "Data" element
+rule DataNumberValue {
+	from 
+		numVal: SpreadsheetMLSimplified!NumberValue
+
+	to
+		numValAtt : XML!Attribute (
+			parent <- Sequence{numVal.vt_data}->collect(e | thisModule.resolveTemp(e, 'dataElt'))->first(),
+			name <- 'ss:Type',
+			value <- 'Number'
+		),
+		numValTxt : XML!Text (
+			parent <- Sequence{numVal.vt_data}->collect(e | thisModule.resolveTemp(e, 'dataElt'))->first(),
+			value <- numVal.value.toString()
+		)
+}
+
+
+-- Rule 'DataBooleanValue'.
+-- This rule generates the boolean value  
+-- associated to a "Data" element
+rule DataBooleanValue {
+	from 
+		boolVal: SpreadsheetMLSimplified!BooleanValue
+
+	to
+		boolValAtt : XML!Attribute (
+			parent <- Sequence{boolVal.vt_data}->collect(e | thisModule.resolveTemp(e, 'dataElt'))->first(),
+			name <- 'ss:Type',
+			value <- 'Boolean'
+		),
+		boolValTxt : XML!Text (
+			parent <- Sequence{boolVal.vt_data}->collect(e | thisModule.resolveTemp(e, 'dataElt'))->first(),
+			value <- boolVal.value.toString()
+		)
+}
+
+
+-- Rule 'DataErrorValue'.
+-- This rule generates the error value  
+-- associated to a "Data" element
+rule DataErrorValue {
+	from 
+		errVal: SpreadsheetMLSimplified!ErrorValue
+
+	to
+		errValAtt : XML!Attribute (
+			parent <- Sequence{errVal.vt_data}->collect(e | thisModule.resolveTemp(e, 'dataElt'))->first(),
+			name <- 'ss:Type',
+			value <- 'Error'
+		)
+}
+
+
+-- Rule 'DataDateTimeValue'.
+-- This rule generates the date/time value  
+-- associated to a "Data" element
+rule DataDateTimeValue {
+	from 
+		dtVal: SpreadsheetMLSimplified!DateTimeTypeValue
+
+	to
+		dtValAtt : XML!Attribute (
+			parent <- Sequence{dtVal.vt_data}->collect(e | thisModule.resolveTemp(e, 'dataElt'))->first(),
+			name <- 'ss:Type',
+			value <- 'DateTime'
+		),
+		dtValTxt : XML!Text (
+			parent <- Sequence{dtVal.vt_data}->collect(e | thisModule.resolveTemp(e, 'dataElt'))->first(),
+			value <- thisModule.getDateTimeStringValue(dtVal.value)
+		)
+}

@@ -1,0 +1,1532 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tns="https://www.travcorpdata.com/webservices/electricvine/schema.wsdl" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" targetNamespace="https://www.travcorpdata.com/webservices/electricvine/schema.wsdl" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="https://www.travcorpdata.com/webservices/electricvine/schema.wsdl">
+      <s:element name="RunSearch">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="oParams" type="tns:SearchParams" />
+            <s:element minOccurs="1" maxOccurs="1" name="Host" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="User" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Country" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Company" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sAffiliateCode" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="SearchParams">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Continents" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Countries" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DesiredTravelMonths" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TourStyles" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TourCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TourName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CategoryCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="SearchServices" type="tns:ArrayOfString" />
+          <s:element minOccurs="0" maxOccurs="1" name="KeyWords" type="tns:ArrayOfString" />
+          <s:element minOccurs="1" maxOccurs="1" name="MinDuration" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="MaxDuration" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="BrochureCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="BrochureDescription" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="WebServiceUser" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="WebUserPassword" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Country" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Company" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="AffiliateCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Filter" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="OrderBy" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="StartIndex" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="NumResults" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="UsePaging" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="PageSize" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="StartPage" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Cache" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="ReturnAttributes" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfString">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="string" nillable="true" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="RunSearchResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="RunSearchResult" type="tns:SearchResults" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="SearchResults">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Success" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="ErrorCode" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="ErrorDescription" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="TotalRecordsCount" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="ReturnedRecordsCount" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Cache" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Tours" type="tns:ArrayOfTour" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfTour">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Tour" nillable="true" type="tns:Tour" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Tour">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="ID" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="SystemServiceID" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Code" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Description" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Duration" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Regions" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Highlights" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Accomodations" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Extras" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DatesRatesNotes" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="MinTwinRate" type="s:double" />
+          <s:element minOccurs="0" maxOccurs="1" name="CurrencySymbol" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="IsCityTour" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="IsBookable" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="IsAvailable" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="Gateway" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ConsumerPhoneNumber" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="AgentPhoneNumber" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Picture1" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Picture2" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Caption1" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Caption2" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="MapPicture" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="MapPictureBlowUp" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="SmallMapPicture1" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="SmallMapPicture2" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="MaxVRID" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="BrochureCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="BrochureDescription" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="OptionalExcursions" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TourStyle" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Countries" type="tns:ArrayOfString" />
+          <s:element minOccurs="0" maxOccurs="1" name="Continents" type="tns:ArrayOfString" />
+          <s:element minOccurs="0" maxOccurs="1" name="DatesPrices" type="tns:ArrayOfTourDatesPrices" />
+          <s:element minOccurs="0" maxOccurs="1" name="Itinerary" type="tns:TourItinerary" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfTourDatesPrices">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="TourDatesPrices" nillable="true" type="tns:TourDatesPrices" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="TourDatesPrices">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="StartDate" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="EndDate" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="IsGuaranteed" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="IsAvailable" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="AvailabilityStatusID" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="LandPrices" type="tns:TourPrices" />
+          <s:element minOccurs="0" maxOccurs="1" name="AirLandPrices" type="tns:TourPrices" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="SearchResultsExtended">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Success" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="ErrorCode" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="ErrorDescription" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="TotalRecordsCount" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="ReturnedRecordsCount" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Cache" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ToursExtended" type="tns:ArrayOfTourExtended" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfTourExtended">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="TourExtended" nillable="true" type="tns:TourExtended" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="TourExtended">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="ID" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="SystemServiceID" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Code" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Name" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Description" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Duration" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Regions" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Highlights" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Accomodations" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Extras" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DatesRatesNotes" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="MinTwinRate" type="s:double" />
+          <s:element minOccurs="0" maxOccurs="1" name="CurrencySymbol" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="IsCityTour" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="IsBookable" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="IsAvailable" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="Gateway" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ConsumerPhoneNumber" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="AgentPhoneNumber" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Picture1" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Picture2" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Caption1" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Caption2" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="MapPicture" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="MapPictureBlowUp" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="SmallMapPicture1" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="SmallMapPicture2" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="MaxVRID" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="BrochureCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="BrochureDescription" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="OptionalExcursions" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TourStyle" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Countries" type="tns:ArrayOfString" />
+          <s:element minOccurs="0" maxOccurs="1" name="Continents" type="tns:ArrayOfString" />
+          <s:element minOccurs="0" maxOccurs="1" name="DatesPricesExtended" type="tns:ArrayOfTourDatesPricesExtended" />
+          <s:element minOccurs="0" maxOccurs="1" name="Itinerary" type="tns:TourItinerary" />
+          <s:element minOccurs="1" maxOccurs="1" name="TropicsMarketVariationID" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="TropicsMarketVariationCode" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfTourDatesPricesExtended">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="TourDatesPricesExtended" nillable="true" type="tns:TourDatesPricesExtended" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="TourDatesPricesExtended">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="StartDate" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="EndDate" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="IsGuaranteed" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="IsAvailable" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="AvailabilityStatusID" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="LandPrices" type="tns:TourPrices" />
+          <s:element minOccurs="0" maxOccurs="1" name="AirLandPrices" type="tns:TourPrices" />
+          <s:element minOccurs="1" maxOccurs="1" name="TropicsMarketVariationID" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="TropicsMarketVariationCode" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="TropicsDepartureID" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="TropicsDepartureCode" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="TourPrices">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="SingleRate" type="s:double" />
+          <s:element minOccurs="1" maxOccurs="1" name="TwinRate" type="s:double" />
+          <s:element minOccurs="1" maxOccurs="1" name="TripleRate" type="s:double" />
+          <s:element minOccurs="1" maxOccurs="1" name="ChildRate" type="s:double" />
+          <s:element minOccurs="1" maxOccurs="1" name="TeenRate" type="s:double" />
+          <s:element minOccurs="1" maxOccurs="1" name="QuadRate" type="s:double" />
+          <s:element minOccurs="1" maxOccurs="1" name="DefaultRoomType" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="TourItinerary">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Type" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Full" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Days" type="tns:ArrayOfString" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="RunSearchNoHTML">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="oParams" type="tns:SearchParams" />
+            <s:element minOccurs="1" maxOccurs="1" name="Host" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="User" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Country" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Company" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sAffiliateCode" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RunSearchNoHTMLResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="RunSearchNoHTMLResult" type="tns:SearchResults" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RunSearchParamsNoHTML">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sCountries" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sContinents" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sTourCodes" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sTourName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sBrochureCode" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sDesiredMonths" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sMinDuration" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sMaxDuration" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sTourStyles" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sKeyWords" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sCategoryCodes" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sSearchServices" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="nReturnAttributes" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="sUser" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sPassword" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="Host" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="sCountry" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sCompany" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sAffiliateCode" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RunSearchParamsNoHTMLResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="RunSearchParamsNoHTMLResult" type="tns:SearchResults" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RunSearchParams">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sCountries" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sContinents" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sTourCodes" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sTourName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sBrochureCode" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sDesiredMonths" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sMinDuration" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sMaxDuration" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sTourStyles" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sKeyWords" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sCategoryCodes" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sSearchServices" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="nReturnAttributes" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="sUser" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sPassword" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="Host" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="sCountry" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sCompany" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sAffiliateCode" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RunSearchParamsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="RunSearchParamsResult" type="tns:SearchResults" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RunSearchParamsExtended">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sCountries" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sContinents" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sTourCodes" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sTourName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sBrochureCode" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sDesiredMonths" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sMinDuration" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sMaxDuration" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sTourStyles" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sKeyWords" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sCategoryCodes" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sSearchServices" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="nReturnAttributes" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="sUser" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sPassword" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="Host" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="sCountry" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sCompany" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="sAffiliateCode" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RunSearchParamsExtendedResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="RunSearchParamsExtendedResult" type="tns:SearchResultsExtended" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetTourDataFromSystem">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="TourID" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="nReturnAttributes" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="SystemServiceID" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="User" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Country" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="Preview" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetTourDataFromSystemResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetTourDataFromSystemResult" type="tns:Result" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="Result">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Success" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="ErrorCode" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="ErrorDescription" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Value" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetTourData">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="TourID" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="nReturnAttributes" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="Host" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="User" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Country" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="Preview" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetTourDataResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetTourDataResult" type="tns:Result" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetContinents">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="Host" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="User" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Country" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetContinentsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetContinentsResult" type="tns:Result" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetContinentCountries">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sContinent" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="Host" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="User" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Country" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetContinentCountriesResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetContinentCountriesResult" type="tns:Result" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CountryFromURL">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="RefURL" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="SystemServiceID" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CountryFromURLResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CountryFromURLResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetAffiliateTheme">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sAffiliateCode" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="Host" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="User" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Country" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="Theme">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Header" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Footer" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="StyleSheet" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="LayoutStyle" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="CoBrandedAffiliate" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="Authorized" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="AllowAir" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="AffilName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="AffilPhone" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="ShowOnlyGuaranteed" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="GuaranteedInResults" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="DatesRatesBookNow" type="s:boolean" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetAffiliateThemeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetAffiliateThemeResult" type="tns:Theme" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ContentManagement">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="TourCode" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="TourName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="User" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Continents" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Countries" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="TourStyle" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Description" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Regions" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Highlights" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Picture1" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Picture2" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="MapPicture" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="MapPictureBlowup" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Caption1" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Caption2" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Extras" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="ItineraryTypeID" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Itinerary" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="MaxVRID" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="OptionalExcursions" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ContentManagementResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ContentManagementResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ItineraryManagement">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="RegionID" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="Itinerary" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="TourCode" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="User" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ItineraryManagementResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ItineraryManagementResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="TestService">
+        <s:complexType />
+      </s:element>
+      <s:element name="TestServiceResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="TestServiceResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SearchResults" nillable="true" type="tns:SearchResults" />
+      <s:element name="Result" nillable="true" type="tns:Result" />
+      <s:element name="string" nillable="true" type="s:string" />
+      <s:element name="Theme" nillable="true" type="tns:Theme" />
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="RunSearchSoapIn">
+    <wsdl:part name="parameters" element="tns:RunSearch" />
+  </wsdl:message>
+  <wsdl:message name="RunSearchSoapOut">
+    <wsdl:part name="parameters" element="tns:RunSearchResponse" />
+  </wsdl:message>
+  <wsdl:message name="RunSearchNoHTMLSoapIn">
+    <wsdl:part name="parameters" element="tns:RunSearchNoHTML" />
+  </wsdl:message>
+  <wsdl:message name="RunSearchNoHTMLSoapOut">
+    <wsdl:part name="parameters" element="tns:RunSearchNoHTMLResponse" />
+  </wsdl:message>
+  <wsdl:message name="RunSearchParamsNoHTMLSoapIn">
+    <wsdl:part name="parameters" element="tns:RunSearchParamsNoHTML" />
+  </wsdl:message>
+  <wsdl:message name="RunSearchParamsNoHTMLSoapOut">
+    <wsdl:part name="parameters" element="tns:RunSearchParamsNoHTMLResponse" />
+  </wsdl:message>
+  <wsdl:message name="RunSearchParamsSoapIn">
+    <wsdl:part name="parameters" element="tns:RunSearchParams" />
+  </wsdl:message>
+  <wsdl:message name="RunSearchParamsSoapOut">
+    <wsdl:part name="parameters" element="tns:RunSearchParamsResponse" />
+  </wsdl:message>
+  <wsdl:message name="RunSearchParamsExtendedSoapIn">
+    <wsdl:part name="parameters" element="tns:RunSearchParamsExtended" />
+  </wsdl:message>
+  <wsdl:message name="RunSearchParamsExtendedSoapOut">
+    <wsdl:part name="parameters" element="tns:RunSearchParamsExtendedResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetTourDataFromSystemSoapIn">
+    <wsdl:part name="parameters" element="tns:GetTourDataFromSystem" />
+  </wsdl:message>
+  <wsdl:message name="GetTourDataFromSystemSoapOut">
+    <wsdl:part name="parameters" element="tns:GetTourDataFromSystemResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetTourDataSoapIn">
+    <wsdl:part name="parameters" element="tns:GetTourData" />
+  </wsdl:message>
+  <wsdl:message name="GetTourDataSoapOut">
+    <wsdl:part name="parameters" element="tns:GetTourDataResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetContinentsSoapIn">
+    <wsdl:part name="parameters" element="tns:GetContinents" />
+  </wsdl:message>
+  <wsdl:message name="GetContinentsSoapOut">
+    <wsdl:part name="parameters" element="tns:GetContinentsResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetContinentCountriesSoapIn">
+    <wsdl:part name="parameters" element="tns:GetContinentCountries" />
+  </wsdl:message>
+  <wsdl:message name="GetContinentCountriesSoapOut">
+    <wsdl:part name="parameters" element="tns:GetContinentCountriesResponse" />
+  </wsdl:message>
+  <wsdl:message name="CountryFromURLSoapIn">
+    <wsdl:part name="parameters" element="tns:CountryFromURL" />
+  </wsdl:message>
+  <wsdl:message name="CountryFromURLSoapOut">
+    <wsdl:part name="parameters" element="tns:CountryFromURLResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetAffiliateThemeSoapIn">
+    <wsdl:part name="parameters" element="tns:GetAffiliateTheme" />
+  </wsdl:message>
+  <wsdl:message name="GetAffiliateThemeSoapOut">
+    <wsdl:part name="parameters" element="tns:GetAffiliateThemeResponse" />
+  </wsdl:message>
+  <wsdl:message name="ContentManagementSoapIn">
+    <wsdl:part name="parameters" element="tns:ContentManagement" />
+  </wsdl:message>
+  <wsdl:message name="ContentManagementSoapOut">
+    <wsdl:part name="parameters" element="tns:ContentManagementResponse" />
+  </wsdl:message>
+  <wsdl:message name="ItineraryManagementSoapIn">
+    <wsdl:part name="parameters" element="tns:ItineraryManagement" />
+  </wsdl:message>
+  <wsdl:message name="ItineraryManagementSoapOut">
+    <wsdl:part name="parameters" element="tns:ItineraryManagementResponse" />
+  </wsdl:message>
+  <wsdl:message name="TestServiceSoapIn">
+    <wsdl:part name="parameters" element="tns:TestService" />
+  </wsdl:message>
+  <wsdl:message name="TestServiceSoapOut">
+    <wsdl:part name="parameters" element="tns:TestServiceResponse" />
+  </wsdl:message>
+  <wsdl:message name="RunSearchParamsNoHTMLHttpGetIn">
+    <wsdl:part name="sCountries" type="s:string" />
+    <wsdl:part name="sContinents" type="s:string" />
+    <wsdl:part name="sTourCodes" type="s:string" />
+    <wsdl:part name="sTourName" type="s:string" />
+    <wsdl:part name="sBrochureCode" type="s:string" />
+    <wsdl:part name="sDesiredMonths" type="s:string" />
+    <wsdl:part name="sMinDuration" type="s:string" />
+    <wsdl:part name="sMaxDuration" type="s:string" />
+    <wsdl:part name="sTourStyles" type="s:string" />
+    <wsdl:part name="sKeyWords" type="s:string" />
+    <wsdl:part name="sCategoryCodes" type="s:string" />
+    <wsdl:part name="sSearchServices" type="s:string" />
+    <wsdl:part name="nReturnAttributes" type="s:string" />
+    <wsdl:part name="sUser" type="s:string" />
+    <wsdl:part name="sPassword" type="s:string" />
+    <wsdl:part name="Host" type="s:string" />
+    <wsdl:part name="sCountry" type="s:string" />
+    <wsdl:part name="sCompany" type="s:string" />
+    <wsdl:part name="sAffiliateCode" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="RunSearchParamsNoHTMLHttpGetOut">
+    <wsdl:part name="Body" element="tns:SearchResults" />
+  </wsdl:message>
+  <wsdl:message name="RunSearchParamsHttpGetIn">
+    <wsdl:part name="sCountries" type="s:string" />
+    <wsdl:part name="sContinents" type="s:string" />
+    <wsdl:part name="sTourCodes" type="s:string" />
+    <wsdl:part name="sTourName" type="s:string" />
+    <wsdl:part name="sBrochureCode" type="s:string" />
+    <wsdl:part name="sDesiredMonths" type="s:string" />
+    <wsdl:part name="sMinDuration" type="s:string" />
+    <wsdl:part name="sMaxDuration" type="s:string" />
+    <wsdl:part name="sTourStyles" type="s:string" />
+    <wsdl:part name="sKeyWords" type="s:string" />
+    <wsdl:part name="sCategoryCodes" type="s:string" />
+    <wsdl:part name="sSearchServices" type="s:string" />
+    <wsdl:part name="nReturnAttributes" type="s:string" />
+    <wsdl:part name="sUser" type="s:string" />
+    <wsdl:part name="sPassword" type="s:string" />
+    <wsdl:part name="Host" type="s:string" />
+    <wsdl:part name="sCountry" type="s:string" />
+    <wsdl:part name="sCompany" type="s:string" />
+    <wsdl:part name="sAffiliateCode" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="RunSearchParamsHttpGetOut">
+    <wsdl:part name="Body" element="tns:SearchResults" />
+  </wsdl:message>
+  <wsdl:message name="RunSearchParamsExtendedHttpGetIn">
+    <wsdl:part name="sCountries" type="s:string" />
+    <wsdl:part name="sContinents" type="s:string" />
+    <wsdl:part name="sTourCodes" type="s:string" />
+    <wsdl:part name="sTourName" type="s:string" />
+    <wsdl:part name="sBrochureCode" type="s:string" />
+    <wsdl:part name="sDesiredMonths" type="s:string" />
+    <wsdl:part name="sMinDuration" type="s:string" />
+    <wsdl:part name="sMaxDuration" type="s:string" />
+    <wsdl:part name="sTourStyles" type="s:string" />
+    <wsdl:part name="sKeyWords" type="s:string" />
+    <wsdl:part name="sCategoryCodes" type="s:string" />
+    <wsdl:part name="sSearchServices" type="s:string" />
+    <wsdl:part name="nReturnAttributes" type="s:string" />
+    <wsdl:part name="sUser" type="s:string" />
+    <wsdl:part name="sPassword" type="s:string" />
+    <wsdl:part name="Host" type="s:string" />
+    <wsdl:part name="sCountry" type="s:string" />
+    <wsdl:part name="sCompany" type="s:string" />
+    <wsdl:part name="sAffiliateCode" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="RunSearchParamsExtendedHttpGetOut">
+    <wsdl:part name="Body" element="tns:SearchResults" />
+  </wsdl:message>
+  <wsdl:message name="GetTourDataFromSystemHttpGetIn">
+    <wsdl:part name="TourID" type="s:string" />
+    <wsdl:part name="nReturnAttributes" type="s:string" />
+    <wsdl:part name="SystemServiceID" type="s:string" />
+    <wsdl:part name="User" type="s:string" />
+    <wsdl:part name="Password" type="s:string" />
+    <wsdl:part name="Country" type="s:string" />
+    <wsdl:part name="Preview" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetTourDataFromSystemHttpGetOut">
+    <wsdl:part name="Body" element="tns:Result" />
+  </wsdl:message>
+  <wsdl:message name="GetTourDataHttpGetIn">
+    <wsdl:part name="TourID" type="s:string" />
+    <wsdl:part name="nReturnAttributes" type="s:string" />
+    <wsdl:part name="Host" type="s:string" />
+    <wsdl:part name="User" type="s:string" />
+    <wsdl:part name="Password" type="s:string" />
+    <wsdl:part name="Country" type="s:string" />
+    <wsdl:part name="Preview" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetTourDataHttpGetOut">
+    <wsdl:part name="Body" element="tns:Result" />
+  </wsdl:message>
+  <wsdl:message name="GetContinentsHttpGetIn">
+    <wsdl:part name="Host" type="s:string" />
+    <wsdl:part name="User" type="s:string" />
+    <wsdl:part name="Password" type="s:string" />
+    <wsdl:part name="Country" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetContinentsHttpGetOut">
+    <wsdl:part name="Body" element="tns:Result" />
+  </wsdl:message>
+  <wsdl:message name="GetContinentCountriesHttpGetIn">
+    <wsdl:part name="sContinent" type="s:string" />
+    <wsdl:part name="Host" type="s:string" />
+    <wsdl:part name="User" type="s:string" />
+    <wsdl:part name="Password" type="s:string" />
+    <wsdl:part name="Country" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetContinentCountriesHttpGetOut">
+    <wsdl:part name="Body" element="tns:Result" />
+  </wsdl:message>
+  <wsdl:message name="CountryFromURLHttpGetIn">
+    <wsdl:part name="RefURL" type="s:string" />
+    <wsdl:part name="SystemServiceID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="CountryFromURLHttpGetOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="GetAffiliateThemeHttpGetIn">
+    <wsdl:part name="sAffiliateCode" type="s:string" />
+    <wsdl:part name="Host" type="s:string" />
+    <wsdl:part name="User" type="s:string" />
+    <wsdl:part name="Password" type="s:string" />
+    <wsdl:part name="Country" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetAffiliateThemeHttpGetOut">
+    <wsdl:part name="Body" element="tns:Theme" />
+  </wsdl:message>
+  <wsdl:message name="ContentManagementHttpGetIn">
+    <wsdl:part name="TourCode" type="s:string" />
+    <wsdl:part name="TourName" type="s:string" />
+    <wsdl:part name="User" type="s:string" />
+    <wsdl:part name="Password" type="s:string" />
+    <wsdl:part name="Continents" type="s:string" />
+    <wsdl:part name="Countries" type="s:string" />
+    <wsdl:part name="TourStyle" type="s:string" />
+    <wsdl:part name="Description" type="s:string" />
+    <wsdl:part name="Regions" type="s:string" />
+    <wsdl:part name="Highlights" type="s:string" />
+    <wsdl:part name="Picture1" type="s:string" />
+    <wsdl:part name="Picture2" type="s:string" />
+    <wsdl:part name="MapPicture" type="s:string" />
+    <wsdl:part name="MapPictureBlowup" type="s:string" />
+    <wsdl:part name="Caption1" type="s:string" />
+    <wsdl:part name="Caption2" type="s:string" />
+    <wsdl:part name="Extras" type="s:string" />
+    <wsdl:part name="ItineraryTypeID" type="s:string" />
+    <wsdl:part name="Itinerary" type="s:string" />
+    <wsdl:part name="MaxVRID" type="s:string" />
+    <wsdl:part name="OptionalExcursions" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="ContentManagementHttpGetOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="ItineraryManagementHttpGetIn">
+    <wsdl:part name="RegionID" type="s:string" />
+    <wsdl:part name="Itinerary" type="s:string" />
+    <wsdl:part name="TourCode" type="s:string" />
+    <wsdl:part name="User" type="s:string" />
+    <wsdl:part name="Password" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="ItineraryManagementHttpGetOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="TestServiceHttpGetIn" />
+  <wsdl:message name="TestServiceHttpGetOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="RunSearchParamsNoHTMLHttpPostIn">
+    <wsdl:part name="sCountries" type="s:string" />
+    <wsdl:part name="sContinents" type="s:string" />
+    <wsdl:part name="sTourCodes" type="s:string" />
+    <wsdl:part name="sTourName" type="s:string" />
+    <wsdl:part name="sBrochureCode" type="s:string" />
+    <wsdl:part name="sDesiredMonths" type="s:string" />
+    <wsdl:part name="sMinDuration" type="s:string" />
+    <wsdl:part name="sMaxDuration" type="s:string" />
+    <wsdl:part name="sTourStyles" type="s:string" />
+    <wsdl:part name="sKeyWords" type="s:string" />
+    <wsdl:part name="sCategoryCodes" type="s:string" />
+    <wsdl:part name="sSearchServices" type="s:string" />
+    <wsdl:part name="nReturnAttributes" type="s:string" />
+    <wsdl:part name="sUser" type="s:string" />
+    <wsdl:part name="sPassword" type="s:string" />
+    <wsdl:part name="Host" type="s:string" />
+    <wsdl:part name="sCountry" type="s:string" />
+    <wsdl:part name="sCompany" type="s:string" />
+    <wsdl:part name="sAffiliateCode" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="RunSearchParamsNoHTMLHttpPostOut">
+    <wsdl:part name="Body" element="tns:SearchResults" />
+  </wsdl:message>
+  <wsdl:message name="RunSearchParamsHttpPostIn">
+    <wsdl:part name="sCountries" type="s:string" />
+    <wsdl:part name="sContinents" type="s:string" />
+    <wsdl:part name="sTourCodes" type="s:string" />
+    <wsdl:part name="sTourName" type="s:string" />
+    <wsdl:part name="sBrochureCode" type="s:string" />
+    <wsdl:part name="sDesiredMonths" type="s:string" />
+    <wsdl:part name="sMinDuration" type="s:string" />
+    <wsdl:part name="sMaxDuration" type="s:string" />
+    <wsdl:part name="sTourStyles" type="s:string" />
+    <wsdl:part name="sKeyWords" type="s:string" />
+    <wsdl:part name="sCategoryCodes" type="s:string" />
+    <wsdl:part name="sSearchServices" type="s:string" />
+    <wsdl:part name="nReturnAttributes" type="s:string" />
+    <wsdl:part name="sUser" type="s:string" />
+    <wsdl:part name="sPassword" type="s:string" />
+    <wsdl:part name="Host" type="s:string" />
+    <wsdl:part name="sCountry" type="s:string" />
+    <wsdl:part name="sCompany" type="s:string" />
+    <wsdl:part name="sAffiliateCode" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="RunSearchParamsHttpPostOut">
+    <wsdl:part name="Body" element="tns:SearchResults" />
+  </wsdl:message>
+  <wsdl:message name="RunSearchParamsExtendedHttpPostIn">
+    <wsdl:part name="sCountries" type="s:string" />
+    <wsdl:part name="sContinents" type="s:string" />
+    <wsdl:part name="sTourCodes" type="s:string" />
+    <wsdl:part name="sTourName" type="s:string" />
+    <wsdl:part name="sBrochureCode" type="s:string" />
+    <wsdl:part name="sDesiredMonths" type="s:string" />
+    <wsdl:part name="sMinDuration" type="s:string" />
+    <wsdl:part name="sMaxDuration" type="s:string" />
+    <wsdl:part name="sTourStyles" type="s:string" />
+    <wsdl:part name="sKeyWords" type="s:string" />
+    <wsdl:part name="sCategoryCodes" type="s:string" />
+    <wsdl:part name="sSearchServices" type="s:string" />
+    <wsdl:part name="nReturnAttributes" type="s:string" />
+    <wsdl:part name="sUser" type="s:string" />
+    <wsdl:part name="sPassword" type="s:string" />
+    <wsdl:part name="Host" type="s:string" />
+    <wsdl:part name="sCountry" type="s:string" />
+    <wsdl:part name="sCompany" type="s:string" />
+    <wsdl:part name="sAffiliateCode" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="RunSearchParamsExtendedHttpPostOut">
+    <wsdl:part name="Body" element="tns:SearchResults" />
+  </wsdl:message>
+  <wsdl:message name="GetTourDataFromSystemHttpPostIn">
+    <wsdl:part name="TourID" type="s:string" />
+    <wsdl:part name="nReturnAttributes" type="s:string" />
+    <wsdl:part name="SystemServiceID" type="s:string" />
+    <wsdl:part name="User" type="s:string" />
+    <wsdl:part name="Password" type="s:string" />
+    <wsdl:part name="Country" type="s:string" />
+    <wsdl:part name="Preview" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetTourDataFromSystemHttpPostOut">
+    <wsdl:part name="Body" element="tns:Result" />
+  </wsdl:message>
+  <wsdl:message name="GetTourDataHttpPostIn">
+    <wsdl:part name="TourID" type="s:string" />
+    <wsdl:part name="nReturnAttributes" type="s:string" />
+    <wsdl:part name="Host" type="s:string" />
+    <wsdl:part name="User" type="s:string" />
+    <wsdl:part name="Password" type="s:string" />
+    <wsdl:part name="Country" type="s:string" />
+    <wsdl:part name="Preview" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetTourDataHttpPostOut">
+    <wsdl:part name="Body" element="tns:Result" />
+  </wsdl:message>
+  <wsdl:message name="GetContinentsHttpPostIn">
+    <wsdl:part name="Host" type="s:string" />
+    <wsdl:part name="User" type="s:string" />
+    <wsdl:part name="Password" type="s:string" />
+    <wsdl:part name="Country" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetContinentsHttpPostOut">
+    <wsdl:part name="Body" element="tns:Result" />
+  </wsdl:message>
+  <wsdl:message name="GetContinentCountriesHttpPostIn">
+    <wsdl:part name="sContinent" type="s:string" />
+    <wsdl:part name="Host" type="s:string" />
+    <wsdl:part name="User" type="s:string" />
+    <wsdl:part name="Password" type="s:string" />
+    <wsdl:part name="Country" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetContinentCountriesHttpPostOut">
+    <wsdl:part name="Body" element="tns:Result" />
+  </wsdl:message>
+  <wsdl:message name="CountryFromURLHttpPostIn">
+    <wsdl:part name="RefURL" type="s:string" />
+    <wsdl:part name="SystemServiceID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="CountryFromURLHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="GetAffiliateThemeHttpPostIn">
+    <wsdl:part name="sAffiliateCode" type="s:string" />
+    <wsdl:part name="Host" type="s:string" />
+    <wsdl:part name="User" type="s:string" />
+    <wsdl:part name="Password" type="s:string" />
+    <wsdl:part name="Country" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetAffiliateThemeHttpPostOut">
+    <wsdl:part name="Body" element="tns:Theme" />
+  </wsdl:message>
+  <wsdl:message name="ContentManagementHttpPostIn">
+    <wsdl:part name="TourCode" type="s:string" />
+    <wsdl:part name="TourName" type="s:string" />
+    <wsdl:part name="User" type="s:string" />
+    <wsdl:part name="Password" type="s:string" />
+    <wsdl:part name="Continents" type="s:string" />
+    <wsdl:part name="Countries" type="s:string" />
+    <wsdl:part name="TourStyle" type="s:string" />
+    <wsdl:part name="Description" type="s:string" />
+    <wsdl:part name="Regions" type="s:string" />
+    <wsdl:part name="Highlights" type="s:string" />
+    <wsdl:part name="Picture1" type="s:string" />
+    <wsdl:part name="Picture2" type="s:string" />
+    <wsdl:part name="MapPicture" type="s:string" />
+    <wsdl:part name="MapPictureBlowup" type="s:string" />
+    <wsdl:part name="Caption1" type="s:string" />
+    <wsdl:part name="Caption2" type="s:string" />
+    <wsdl:part name="Extras" type="s:string" />
+    <wsdl:part name="ItineraryTypeID" type="s:string" />
+    <wsdl:part name="Itinerary" type="s:string" />
+    <wsdl:part name="MaxVRID" type="s:string" />
+    <wsdl:part name="OptionalExcursions" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="ContentManagementHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="ItineraryManagementHttpPostIn">
+    <wsdl:part name="RegionID" type="s:string" />
+    <wsdl:part name="Itinerary" type="s:string" />
+    <wsdl:part name="TourCode" type="s:string" />
+    <wsdl:part name="User" type="s:string" />
+    <wsdl:part name="Password" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="ItineraryManagementHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="TestServiceHttpPostIn" />
+  <wsdl:message name="TestServiceHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:portType name="ServiceSoap">
+    <wsdl:operation name="RunSearch">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns search results for a tour search.</documentation>
+      <wsdl:input message="tns:RunSearchSoapIn" />
+      <wsdl:output message="tns:RunSearchSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RunSearchNoHTML">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns search results for a tour search without the HTML tags.</documentation>
+      <wsdl:input message="tns:RunSearchNoHTMLSoapIn" />
+      <wsdl:output message="tns:RunSearchNoHTMLSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RunSearchParamsNoHTML">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns tour description without HTML tags.</documentation>
+      <wsdl:input message="tns:RunSearchParamsNoHTMLSoapIn" />
+      <wsdl:output message="tns:RunSearchParamsNoHTMLSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RunSearchParams">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns tour description.</documentation>
+      <wsdl:input message="tns:RunSearchParamsSoapIn" />
+      <wsdl:output message="tns:RunSearchParamsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RunSearchParamsExtended">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns extended tour description.</documentation>
+      <wsdl:input message="tns:RunSearchParamsExtendedSoapIn" />
+      <wsdl:output message="tns:RunSearchParamsExtendedSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetTourDataFromSystem">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns tour info from the specified system.</documentation>
+      <wsdl:input message="tns:GetTourDataFromSystemSoapIn" />
+      <wsdl:output message="tns:GetTourDataFromSystemSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetTourData">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns the current system's tour info.</documentation>
+      <wsdl:input message="tns:GetTourDataSoapIn" />
+      <wsdl:output message="tns:GetTourDataSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetContinents">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns array of available continents.</documentation>
+      <wsdl:input message="tns:GetContinentsSoapIn" />
+      <wsdl:output message="tns:GetContinentsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetContinentCountries">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns countries in specified continent.</documentation>
+      <wsdl:input message="tns:GetContinentCountriesSoapIn" />
+      <wsdl:output message="tns:GetContinentCountriesSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CountryFromURL">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns the country based on the passed URL.</documentation>
+      <wsdl:input message="tns:CountryFromURLSoapIn" />
+      <wsdl:output message="tns:CountryFromURLSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAffiliateTheme">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns countries in specified continent.</documentation>
+      <wsdl:input message="tns:GetAffiliateThemeSoapIn" />
+      <wsdl:output message="tns:GetAffiliateThemeSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ContentManagement">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Content Management</documentation>
+      <wsdl:input message="tns:ContentManagementSoapIn" />
+      <wsdl:output message="tns:ContentManagementSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ItineraryManagement">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Itinerary Management</documentation>
+      <wsdl:input message="tns:ItineraryManagementSoapIn" />
+      <wsdl:output message="tns:ItineraryManagementSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="TestService">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Test Method</documentation>
+      <wsdl:input message="tns:TestServiceSoapIn" />
+      <wsdl:output message="tns:TestServiceSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="ServiceHttpGet">
+    <wsdl:operation name="RunSearchParamsNoHTML">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns tour description without HTML tags.</documentation>
+      <wsdl:input message="tns:RunSearchParamsNoHTMLHttpGetIn" />
+      <wsdl:output message="tns:RunSearchParamsNoHTMLHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RunSearchParams">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns tour description.</documentation>
+      <wsdl:input message="tns:RunSearchParamsHttpGetIn" />
+      <wsdl:output message="tns:RunSearchParamsHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RunSearchParamsExtended">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns extended tour description.</documentation>
+      <wsdl:input message="tns:RunSearchParamsExtendedHttpGetIn" />
+      <wsdl:output message="tns:RunSearchParamsExtendedHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetTourDataFromSystem">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns tour info from the specified system.</documentation>
+      <wsdl:input message="tns:GetTourDataFromSystemHttpGetIn" />
+      <wsdl:output message="tns:GetTourDataFromSystemHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetTourData">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns the current system's tour info.</documentation>
+      <wsdl:input message="tns:GetTourDataHttpGetIn" />
+      <wsdl:output message="tns:GetTourDataHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetContinents">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns array of available continents.</documentation>
+      <wsdl:input message="tns:GetContinentsHttpGetIn" />
+      <wsdl:output message="tns:GetContinentsHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetContinentCountries">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns countries in specified continent.</documentation>
+      <wsdl:input message="tns:GetContinentCountriesHttpGetIn" />
+      <wsdl:output message="tns:GetContinentCountriesHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CountryFromURL">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns the country based on the passed URL.</documentation>
+      <wsdl:input message="tns:CountryFromURLHttpGetIn" />
+      <wsdl:output message="tns:CountryFromURLHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAffiliateTheme">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns countries in specified continent.</documentation>
+      <wsdl:input message="tns:GetAffiliateThemeHttpGetIn" />
+      <wsdl:output message="tns:GetAffiliateThemeHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ContentManagement">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Content Management</documentation>
+      <wsdl:input message="tns:ContentManagementHttpGetIn" />
+      <wsdl:output message="tns:ContentManagementHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ItineraryManagement">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Itinerary Management</documentation>
+      <wsdl:input message="tns:ItineraryManagementHttpGetIn" />
+      <wsdl:output message="tns:ItineraryManagementHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="TestService">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Test Method</documentation>
+      <wsdl:input message="tns:TestServiceHttpGetIn" />
+      <wsdl:output message="tns:TestServiceHttpGetOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="ServiceHttpPost">
+    <wsdl:operation name="RunSearchParamsNoHTML">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns tour description without HTML tags.</documentation>
+      <wsdl:input message="tns:RunSearchParamsNoHTMLHttpPostIn" />
+      <wsdl:output message="tns:RunSearchParamsNoHTMLHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RunSearchParams">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns tour description.</documentation>
+      <wsdl:input message="tns:RunSearchParamsHttpPostIn" />
+      <wsdl:output message="tns:RunSearchParamsHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RunSearchParamsExtended">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns extended tour description.</documentation>
+      <wsdl:input message="tns:RunSearchParamsExtendedHttpPostIn" />
+      <wsdl:output message="tns:RunSearchParamsExtendedHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetTourDataFromSystem">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns tour info from the specified system.</documentation>
+      <wsdl:input message="tns:GetTourDataFromSystemHttpPostIn" />
+      <wsdl:output message="tns:GetTourDataFromSystemHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetTourData">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns the current system's tour info.</documentation>
+      <wsdl:input message="tns:GetTourDataHttpPostIn" />
+      <wsdl:output message="tns:GetTourDataHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetContinents">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns array of available continents.</documentation>
+      <wsdl:input message="tns:GetContinentsHttpPostIn" />
+      <wsdl:output message="tns:GetContinentsHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetContinentCountries">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns countries in specified continent.</documentation>
+      <wsdl:input message="tns:GetContinentCountriesHttpPostIn" />
+      <wsdl:output message="tns:GetContinentCountriesHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CountryFromURL">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns the country based on the passed URL.</documentation>
+      <wsdl:input message="tns:CountryFromURLHttpPostIn" />
+      <wsdl:output message="tns:CountryFromURLHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAffiliateTheme">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns countries in specified continent.</documentation>
+      <wsdl:input message="tns:GetAffiliateThemeHttpPostIn" />
+      <wsdl:output message="tns:GetAffiliateThemeHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ContentManagement">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Content Management</documentation>
+      <wsdl:input message="tns:ContentManagementHttpPostIn" />
+      <wsdl:output message="tns:ContentManagementHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ItineraryManagement">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Itinerary Management</documentation>
+      <wsdl:input message="tns:ItineraryManagementHttpPostIn" />
+      <wsdl:output message="tns:ItineraryManagementHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="TestService">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Test Method</documentation>
+      <wsdl:input message="tns:TestServiceHttpPostIn" />
+      <wsdl:output message="tns:TestServiceHttpPostOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="ServiceSoap" type="tns:ServiceSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document" />
+    <wsdl:operation name="RunSearch">
+      <soap:operation soapAction="https://www.travcorpdata.com/webservices/electricvine/server.php/RunSearch" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RunSearchNoHTML">
+      <soap:operation soapAction="https://www.travcorpdata.com/webservices/electricvine/server.php/RunSearchNoHTML" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RunSearchParamsNoHTML">
+      <soap:operation soapAction="https://www.travcorpdata.com/webservices/electricvine/server.php/RunSearchParamsNoHTML" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RunSearchParams">
+      <soap:operation soapAction="https://www.travcorpdata.com/webservices/electricvine/server.php/RunSearchParams" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RunSearchParamsExtended">
+      <soap:operation soapAction="https://www.travcorpdata.com/webservices/electricvine/server.php/RunSearchParamsExtended" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetTourDataFromSystem">
+      <soap:operation soapAction="https://www.travcorpdata.com/webservices/electricvine/server.php/GetTourDataFromSystem" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetTourData">
+      <soap:operation soapAction="https://www.travcorpdata.com/webservices/electricvine/server.php/GetTourData" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetContinents">
+      <soap:operation soapAction="https://www.travcorpdata.com/webservices/electricvine/server.php/GetContinents" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetContinentCountries">
+      <soap:operation soapAction="https://www.travcorpdata.com/webservices/electricvine/server.php/GetContinentCountries" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CountryFromURL">
+      <soap:operation soapAction="https://www.travcorpdata.com/webservices/electricvine/server.php/CountryFromURL" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAffiliateTheme">
+      <soap:operation soapAction="https://www.travcorpdata.com/webservices/electricvine/server.php/GetAffiliateTheme" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ContentManagement">
+      <soap:operation soapAction="https://www.travcorpdata.com/webservices/electricvine/server.php/ContentManagement" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ItineraryManagement">
+      <soap:operation soapAction="https://www.travcorpdata.com/webservices/electricvine/server.php/ItineraryManagement" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="TestService">
+      <soap:operation soapAction="https://www.travcorpdata.com/webservices/electricvine/server.php/TestService" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="ServiceHttpGet" type="tns:ServiceHttpGet">
+    <http:binding verb="GET" />
+    <wsdl:operation name="RunSearchParamsNoHTML">
+      <http:operation location="/RunSearchParamsNoHTML" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RunSearchParams">
+      <http:operation location="/RunSearchParams" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RunSearchParamsExtended">
+      <http:operation location="/RunSearchParamsExtended" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetTourDataFromSystem">
+      <http:operation location="/GetTourDataFromSystem" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetTourData">
+      <http:operation location="/GetTourData" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetContinents">
+      <http:operation location="/GetContinents" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetContinentCountries">
+      <http:operation location="/GetContinentCountries" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CountryFromURL">
+      <http:operation location="/CountryFromURL" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAffiliateTheme">
+      <http:operation location="/GetAffiliateTheme" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ContentManagement">
+      <http:operation location="/ContentManagement" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ItineraryManagement">
+      <http:operation location="/ItineraryManagement" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="TestService">
+      <http:operation location="/TestService" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="ServiceHttpPost" type="tns:ServiceHttpPost">
+    <http:binding verb="POST" />
+    <wsdl:operation name="RunSearchParamsNoHTML">
+      <http:operation location="/RunSearchParamsNoHTML" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RunSearchParams">
+      <http:operation location="/RunSearchParams" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RunSearchParamsExtended">
+      <http:operation location="/RunSearchParamsExtended" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetTourDataFromSystem">
+      <http:operation location="/GetTourDataFromSystem" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetTourData">
+      <http:operation location="/GetTourData" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetContinents">
+      <http:operation location="/GetContinents" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetContinentCountries">
+      <http:operation location="/GetContinentCountries" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CountryFromURL">
+      <http:operation location="/CountryFromURL" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAffiliateTheme">
+      <http:operation location="/GetAffiliateTheme" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ContentManagement">
+      <http:operation location="/ContentManagement" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ItineraryManagement">
+      <http:operation location="/ItineraryManagement" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="TestService">
+      <http:operation location="/TestService" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="Service">
+    <documentation xmlns="http://schemas.xmlsoap.org/wsdl/" />
+    <wsdl:port name="ServiceSoap" binding="tns:ServiceSoap">
+      <soap:address location="https://www.travcorpdata.com/webservices/electricvine/server.php" />
+    </wsdl:port>
+    <wsdl:port name="ServiceHttpGet" binding="tns:ServiceHttpGet">
+      <http:address location="https://www.travcorpdata.com/webservices/electricvine/server.php" />
+    </wsdl:port>
+    <wsdl:port name="ServiceHttpPost" binding="tns:ServiceHttpPost">
+      <http:address location="https://www.travcorpdata.com/webservices/electricvine/server.php" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

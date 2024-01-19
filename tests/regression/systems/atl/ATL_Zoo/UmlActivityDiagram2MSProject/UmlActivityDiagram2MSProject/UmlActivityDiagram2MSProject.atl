@@ -1,0 +1,115 @@
+module UmlActivityDiagram2MSProject;
+create OUT : MSProject from IN : UML;
+
+
+-------------------------------------------------------------------------------
+-- HELPERS --------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- This helper stores an integer value used to assign an ID to each generated
+-- Task.
+-- CONTEXT: thisModule
+-- RETURN:	Integer
+helper def: curId : Integer = 0;
+
+-- This helper computes the value to be assigned to the ID field of a generated
+-- Task. It increments the value stored by the "curId" helper and returns its
+-- new value as a String.
+-- CONTEXT: thisModule
+-- RETURN:	String
+helper def: getId() : String =
+	thisModule.refSetValue('curId', thisModule.curId + 1).curId.toString();
+
+
+-- This helper computes the set of StateVertex that will be associated with
+-- the predecessors of a Task.
+-- The computed set contains all the ActionState and Pseudostate of "initial"
+-- type (ie. the initial state) that point to the current StateVertex
+-- (the context one) either directly or through "fork" and "join" Pseudostate.
+--
+-- WARNING: this helper is not able to deal with loops. However, there shall
+-- be no loops in a diagram dedicated to the representation of a project.
+--
+-- CONTEXT:	UML!StateVertex
+-- RETURN:	Set(UML!StateVertex)
+helper context UML!StateVertex def: getPredecessors() : Set(UML!StateVertex) =
+	let trans : Set(UML!StateVertex) = self.incoming in
+	
+	if trans.isEmpty() then
+		Set{}
+	else trans->collect(t | t.source)
+			->iterate(e; ret : Set(UML!StateVertex) = Sequence{} |
+				if e.oclIsKindOf(UML!ActionState) then
+					ret->including(e)
+				else
+					if e.oclIsKindOf(UML!Pseudostate) then
+						if e.kind = #pk_initial then
+							ret->including(e)
+						else
+							ret->including(e.getPredecessors())
+						endif
+					else
+						ret
+					endif
+				endif 
+			)
+	endif;
+
+
+
+-------------------------------------------------------------------------------
+-- RULES ----------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- Rule 'Main'
+-- This rule generates the Project element. Contained tasks are those
+-- associated with:
+--  * UML Final State
+--  * UML Action State
+--  * UML Pseudostate of "initial" kind.
+rule Main {
+	from
+		s : UML!StateMachine
+	to 
+		pro : MSProject!MSProject (
+			tasks <- UML!StateVertex.allInstances()
+		)
+}
+
+-- Rule 'Pseudostate'
+-- This rule generates a Task for the Pseudostate of "initial" type (that is,
+-- the diagram initial state).
+-- The generated initial Task has no predecessors (sine it corresponds to the
+-- intial state of the UML activity diagram).
+rule Pseudostate {
+	from
+		s : UML!Pseudostate (
+				s.kind = #pk_initial
+		)
+	to 
+		t : MSProject!Task (
+			UID <- thisModule.getId(),
+			name <- s.name,
+			predecessors <- Set{}
+		)
+}
+
+-- Rule 'StateVertex'
+-- This rule generates Tasks for both ActionStates and FinalStates.
+-- The set of predecessors of a Task is computed by the getPredecessors helper.
+-- It corresponds to the set of ActionState/"initial" Pseudostate pointing to
+-- the current state directly, or through one or several "fork" and "join"
+-- Pseudostates.
+rule StateVertex {
+	from
+		s : UML!StateVertex (
+				s.oclIsKindOf(UML!FinalState)
+				or s.oclIsKindOf(UML!ActionState)
+		)
+	to 
+		t : MSProject!Task (
+			UID <- thisModule.getId(),
+			name <- s.name,
+			predecessors <- s.getPredecessors()
+		)
+}

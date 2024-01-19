@@ -1,0 +1,374 @@
+-- Ecore to DSL
+-- first transformation : KM3 to DSL
+
+module KM32DSL;
+create OUT : DSL from IN : KM3;
+
+-------------------------------------------------------------------------------
+-- HELPERS --------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- Those helper store integer values used to assign ID or to difference similar names
+-- RETURN:  Integer
+helper def: curId : Integer = 0; 
+helper def: diff1 : Integer = 0;
+
+-- This helper increments diff1 value
+-- CONTEXT: thisModule
+-- RETURN:  Integer
+helper def: incDiff1() : Integer =
+thisModule.refSetValue('diff1', thisModule.diff1+1).diff1; 
+
+helper def: diff2 : Integer = 0;
+
+-- This helper increments diff1 value
+-- CONTEXT: thisModule
+-- RETURN:  Integer
+helper def: incDiff2() : Integer =
+thisModule.refSetValue('diff2', thisModule.diff2+1).diff2; 
+
+-- This helper stores the namespace
+-- CONTEXT: thisModule
+-- RETURN:  String
+helper def: Namespace : String = '.DomainModel';
+
+-- This helper sets the namespace
+-- CONTEXT: thisModule
+-- RETURN:  String
+helper context KM3!Package def: setNamespace() : String = 
+	thisModule.refSetValue('Namespace', self.name+thisModule.Namespace).Namespace;
+
+-- This helper computes the value to be assigned to the ID field of a
+-- generated Task. 
+-- It increments the value stored by the "curId" helper and returns its
+-- new value as a String.
+-- CONTEXT: thisModule
+-- RETURN: String
+helper def: makeIdentity() : String =
+	let i : Integer = thisModule.refSetValue('curId', thisModule.curId + 1).curId 
+in '10000000-0000-0000-0000-'+
+if i<=9 then '00000000000'+i.toString()
+	else if i<=99 then '0000000000'+i.toString()
+		else if i<=999 then '000000000'+i.toString()
+			else '00000000'+i.toString()
+			endif
+		endif
+	endif; 
+
+-- This helper get a list of references which need to be turned
+-- into relationship
+-- CONTEXT: thisModule
+-- RETURN: Sequence(KM3!Reference)
+helper def: list:Sequence(KM3!Reference) = 
+self.getRefs()->iterate(e; seq : Sequence(KM3!Reference) = Sequence{} |  
+ if e.opposite.oclIsUndefined() 
+  then seq.append(e)
+  else  	
+  	if seq->includes(e.opposite) or seq->includes(e)
+	then seq 
+    else   	
+    	if e.isEmbedding() 
+		then 
+-- EMBEDDING 
+			if e.isContainer
+			-- e is the first role
+			then seq.append(e)
+			-- e.opposite is the first role
+			else seq.append(e.opposite)
+			endif
+		else
+-- REFERENCE
+			seq.append(e)
+		endif
+	endif
+  endif
+); 
+
+-- This helper get the list of all references
+-- CONTEXT: thisModule
+-- RETURN: Sequence(KM3!Reference)
+helper def: getRefs() : Sequence(KM3!Reference) = 
+	self.getClasses()
+		->iterate(e; acc : Sequence(KM3!Reference) = Sequence {} |
+			acc->union(e.getRefs())
+		);
+
+-- This helper get the list of the references owned by a class
+-- CONTEXT: thisModule
+-- RETURN: Sequence(KM3!Reference)
+helper context KM3!Class def: getRefs() : Sequence(KM3!Reference) = 
+	self.structuralFeatures
+		->select(e | e.oclIsTypeOf(KM3!Reference))
+		->asSequence();
+
+-- This helper get the list of all classes
+-- CONTEXT: thisModule
+-- RETURN: Sequence(KM3!Class)
+helper def: getClasses() : Sequence(KM3!Class) = 
+	KM3!Package.allInstances()
+		->select(p | p.name<>'PrimitiveTypes')
+		->asSequence()
+		->first().contents
+			->select(e | e.oclIsTypeOf(KM3!Class))
+			->asSequence();
+
+-- This helper get the list of all enumerations
+-- CONTEXT: thisModule
+-- RETURN: Sequence(KM3!Enumeration)
+helper context KM3!Package def: getEnumerations() : Sequence(KM3!Enumeration) = 
+  self.contents->select(e|e.oclIsTypeOf(KM3!Enumeration))->asSequence(); 
+
+-- This helper get the list of all Datatypes
+-- CONTEXT: thisModule
+-- RETURN: Sequence(KM3!DataType)
+helper context KM3!Package def: getTypes() : Sequence(KM3!DataType) = 
+  KM3!DataType.allInstances()->asSequence(); 
+
+-- This helper checks the Unbounded constraint
+-- CONTEXT: KM3!Reference
+-- RETURN: Boolean
+helper context KM3!Reference def: isUnbounded() : Boolean =
+self.lower=0 and self.upper=(0-1);	
+
+-- This helper get the type of the relation of the input role
+-- CONTEXT: KM3!Reference
+-- RETURN: Boolean
+helper context KM3!Reference def: isEmbedding() : Boolean =
+self.isContainer or 
+if not self.opposite.oclIsUndefined() then self.opposite.isContainer
+else false endif;
+
+-- This helper checks if the Relationship name we are going to create
+-- is ever used
+-- CONTEXT: KM3!Reference
+-- RETURN: Boolean
+helper context KM3!Reference def: notExists() : Boolean =
+thisModule.list->
+iterate(e; acc : Boolean = true |acc and 
+not (self.owner=e.owner and self.type=e.type and self<>e));
+
+-- This helper checks if the Relationship name we are going to create
+-- is ever used
+-- CONTEXT: KM3!Reference
+-- RETURN: Boolean
+helper context KM3!Reference def: everUsed() : Boolean =
+KM3!Reference.allInstances()->
+iterate(e; acc : Boolean = false |acc or 
+(self.name=e.name and self.type=e.type and self<>e));
+
+-------------------------------------------------------------------------------
+-- RULES ----------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- Rule 'DomainModel'.
+-- This rule generates the DomainModel
+rule DomainModel {
+	from
+		e : KM3!Package (
+			e.name <> 'PrimitiveTypes'
+		)
+	to
+		d : DSL!DomainModel (
+			identity<-thisModule.makeIdentity(),
+			namespace <- e.setNamespace(),
+			name <- e.name,	
+			isLoaded <- true,
+			classifiers <-
+				Sequence{
+					thisModule.getClasses(),
+					thisModule.getRefs()
+						->select(e | thisModule.list->includes(e))
+				},			
+			types <-Sequence{e.getEnumerations(),e.getTypes()}
+		)				
+}
+
+-- Rule 'Class'.
+-- This rule generates a DSL!Class and link it to his supertypes,
+-- and properties, and generates an identity
+rule Class {
+	from 
+		e : KM3!Class 
+	to 
+		c : DSL!Class (		
+			namespace <- thisModule.Namespace,
+			isLoaded <- true,
+			superType <- e.supertypes->select(a|a.oclIsTypeOf(KM3!Class))->first(),		
+			identity<-thisModule.makeIdentity(),
+			name <- e.name,
+			isAbstract<-e.isAbstract,
+		    properties<-e.structuralFeatures->select(a|a.oclIsTypeOf(KM3!Attribute))
+			)
+}
+
+-- Rule 'Relationship'.
+-- This rule generates a DSL!Relationship and his roles,
+-- getting them in the list previously created
+rule Relationship {
+	from 
+		e : KM3!Reference (
+		thisModule.list->includes(e) and not e.opposite.oclIsUndefined() 
+	)
+		to 
+		r: DSL!Relationship (
+			name<-		
+			let link : String =
+					if e.isEmbedding()
+					then 'has' else 'to' endif
+				in 
+			let n : String =
+				e.owner.name+link+e.type.name
+			in
+				if e.notExists() then n
+				else n+'-'+thisModule.incDiff1().toString()
+				 endif
+				,
+			identity<-thisModule.makeIdentity(),
+			namespace <- thisModule.Namespace,
+			roles <- Sequence{s,t},
+		    isEmbedding<-e.isEmbedding(),
+			--default values
+			isAbstract<-false,
+			isLoaded <- true		
+			),
+			
+		s : DSL!Role (
+			identity<-thisModule.makeIdentity(),
+			accepts<-'all' ,
+			name<-e.name,
+			relation<- r,
+			source<-e.owner,
+			type<-e.type,
+			min<-e.lower,
+			max<-if e.upper=(0-1) then 0 else e.upper endif,		 
+			isOrdered<-e.isOrdered,
+			isUnbounded <- e.isUnbounded(),
+			isNavigableFrom <- false
+			),
+			
+		t : DSL!Role (
+			identity<-thisModule.makeIdentity(),
+			accepts<-'all' , 
+			name<-e.opposite.name,
+			relation<- r,
+			source<-e.opposite.owner,
+			type<-e.opposite.type,
+			min<-e.opposite.lower,
+			max<-if e.opposite.upper=(0-1) then 0 else e.opposite.upper endif,		
+			isOrdered<-e.opposite.isOrdered,	
+			isUnbounded <-e.opposite.isUnbounded(),
+			isNavigableFrom <-  false
+			)
+}
+
+-- Rule 'RelationshipFromSingle'.
+-- This rule generates a DSL!Relationship and his roles,
+-- if the reference of the list has no opposite
+rule RelationshipFromSingle {
+	from 
+		e : KM3!Reference 
+		(
+		thisModule.list->includes(e) and e.opposite.oclIsUndefined() 
+	)
+	to 
+		r: DSL!Relationship (
+			name<-		
+			let link : String =
+					if e.isEmbedding()
+					then 'has' else 'to' endif
+				in 
+			let n : String =
+				e.owner.name+link+e.type.name
+			in
+				if e.notExists() then n
+				else n+'-'+thisModule.incDiff1().toString()
+				 endif
+				,
+			identity<-thisModule.makeIdentity(),
+			namespace <- thisModule.Namespace,
+			roles <- Sequence{s,t},
+		    isEmbedding<-e.isEmbedding(),
+			--default values
+			isAbstract<-false,
+			isLoaded <- true		
+			),
+			
+		s : DSL!Role (
+			identity<-thisModule.makeIdentity(),
+			accepts<-'all' ,
+			name<-e.name,
+			relation<- r,
+			source<-e.owner,
+			type<-e.type,
+			min<-e.lower,
+			max<-if e.upper=(0-1) then 0 else e.upper endif,		 
+			isOrdered<-e.isOrdered,
+			isUnbounded <- e.isUnbounded(),
+			isNavigableFrom <- false
+			),
+			
+		t : DSL!Role (
+			identity<-thisModule.makeIdentity(),
+			accepts<-'all' , 
+			name<-if e.everUsed() then
+			e.name+thisModule.incDiff2().toString() 
+			else e.name endif +'Opposite',
+			relation<- r,
+			source<-e.type,
+			type<-e.owner,
+			min<-1,
+			max<-1,		
+			isOrdered<-false,	
+			isUnbounded <-false,
+			isNavigableFrom <-  false
+			)
+}
+
+-- Rule 'ValueProperty'.
+-- This rule generates a property
+rule ValueProperty {
+	from 
+		e : KM3!Attribute
+	to 
+		p : DSL!ValueProperty (
+			identity<-thisModule.makeIdentity(),
+			name <- e.name,
+			type<- e.type
+			)		
+}	
+
+-- Rule 'Enumeration'.
+-- This rule generates an Enumeration
+rule Enumeration {
+	from 
+		e : KM3!Enumeration
+	to 
+		r : DSL!Enumeration (
+			name <- e.name,
+			namespace <- thisModule.Namespace,
+			identity <- thisModule.makeIdentity(),
+			literals <- e.literals->select(a|a.oclIsTypeOf(KM3!EnumLiteral))
+		)
+}
+
+-- Rule 'EnumerationLiteral'.
+-- This rule generates an single element of an Enumeration
+rule EnumerationLiteral {
+	from 
+	e : KM3!EnumLiteral
+	to
+	r : DSL!EnumerationLiteral(
+		name<-e.name,
+		identity <- thisModule.makeIdentity(),
+		value<-0	
+	)
+}
+
+-- Rule 'SimpleType'.
+-- This rule generates the DSL!SimpleType corresponding to a KM3!Datatype
+rule SimpleType {
+	from 
+	e : KM3!DataType
+	to
+	t : DSL!SimpleType (name<-if e.name = 'Real' then 'Double' else e.name endif )	
+}

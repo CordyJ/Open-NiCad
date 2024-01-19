@@ -1,0 +1,708 @@
+Change Log
+----------
+
+Version 4.4.0:
+released as version 4.4.0
+
+- upgraded chardet to version 2.0.1
+- added a dialog to edit open search engine data
+
+Version 4.4-snapshot-20091129:
+- bug fixes
+
+Version 4.4-snapshot-20091025:
+- bug fixes
+- fixed forgotten disabling of favicons for private browsing mode
+- improved the eric4 web browser with respect to privacy
+- updated Pygments to version 1.1
+- added support for PySide
+- added configuration options to always break on exceptions and to suppress
+  the client exit dialog for a clean exit
+- added code to save passwords in encoded form in the settings file
+- added a password manager to save and restore passwords used to login
+  to web services via the authentication dialog or login forms
+- added AdBlock support to the web browser
+
+Version 4.4-snapshot-20090913:
+- bug fixes
+- added a little icon editor tool
+- added an option to the find file dialog to open the first hit automatically
+- added option to toggle breakpoints from off to permannet to temporary to off
+  (patch provided by Michele Petrazzo)
+- removed Qt3 support from eric4
+- updated the QColorDialog wizard for Qt 4.5
+- made some font attributes configurable for Terminal and Shell
+- added menu entries to copy the file or directory name to the clipboard to the 
+  various browsers
+- added a little context menu to the find files dialog
+- updated coverage.py to version 3.0.1
+
+Version 4.4-snapshot-20090821:
+- bug fixes
+- added capability to send a bug email, if an error log file is detected
+  upon startup of eric4
+- added capability to use the system email client for sending reports
+- added an improved history system to the eric web browser
+- added a few actions to the eric web browser
+- added keywords to the eric web browser search engines
+- added a separate configuration page for the eric web browser
+- added a nice start page to the eric web browser
+- added an embedded search dialog to the eric web browser
+- removed all separate search and search/replace dialogs
+- added the "selection only" option to the embedded search and replace dialogs
+
+Version 4.4-snapshot-20090726:
+- bug fixes
+- added the SQL Browser tool to inspect databases
+- added an improved bookmark system to the help viewer
+- added some additional actions to improve the help viewer
+
+Version 4.4-snapshot-20090627:
+- bug fixes
+- added support for opensearch search engines to the help viewer
+- added a few zoom related actions to the help viewer
+- added config option for printing backgrounds to the help viewer
+
+Version 4.4-snapshot-20090523:
+- bug fixes
+- added option to suppress debuggee's stdout and stderr output for 
+  the shell window
+- added option to sort the file contents by occurrence in file browsers
+- added option to not show the log-viewer automatically upon new output
+- added option to enable web plugins for the help viewer
+- added private browsing to the help viewer
+- added navigation menus to the back and forward buttons of the help viewer
+- added option to have a close button on each tab
+- added option to request download filename from user
+- added a web search entry to the help viewer
+- added a full screen mode to the help viewer
+- added an action to the help viewer to clear private data
+- added support for the new QScintilla lexer properties
+- added a network monitor dialog to the help viewer
+- added a disk cache to the help viewer
+- added an action to show the page source in an editor to the help viewer
+- added a dialog to configure the accepted languages for web pages to the
+  help viewer
+- added cookie handling to the help viewer
+- changed to latest coverage.py (v3.0b3)
+
+Version 4.4-snapshot-20090419:
+- bug fixes
+- added a thread list viewer to the debug viewer
+- added support for forking to the Python debuggers Python debuggers
+- added code for handling infinite recursions to the 
+- added code to make it compatible with PyQt 4.5.0 or newer
+- added Italian translations contributed by Gianluca
+- added capability to open the help window with a search word
+- added configuration option to disable spell checking
+- added Python 3 compatibility code to the Pythe re wizard
+- added code to check, if a project needs to be reread after an update
+  from the repository (e.g. if files have been added or deleted)
+- removed the Python cycles finder because that is not needed anymore
+- changed the find in files dialog to show the current file
+- added a navigation menu to the tabview viewmanager
+- added an auto update feature to the VCS status monitor (needs to be
+  activated via the configuration dialog)
+- added some improvements to the find/replace in files dialog
+
+Version 4.4-snapshot-20090330:
+- bug fixes
+- added a Python3 compatible debugger and a respective project type
+- added a "wrap around" option to the embedded search and replace dialogs
+- changed code so that shell follows the selected stack frame of the local 
+  variables viewer
+- added an option to start the debugger in a console window to the various
+  start dialogs
+- made shell to be used by the terminal configurable for non-win systems
+- added support for QtHelp files generation to eric4-doc and the IDE
+- added support for "qthelp" URLs to the eric4 help viewer
+- added widgets to show a table of contents, a search window and an index 
+  of the eric4 QtHelp database and added functions to manage this database
+- added the --debug and --config=configDir commandline options
+- changed to latest coverage.py (v3.0b1)
+- added option to configure the comment position (column 0 or first non-whitespace)
+
+Version 4.3.0:
+released as version 4.3.0
+
+Version 4.3-snapshot-20090201:
+- bug fixes
+
+Version 4.3-snapshot-20090118:
+- bug fixes
+- added the capability to associate an alternative (Pygments) lexer with a 
+  filename pattern
+- added the capability to have project specific lexer associations
+- added the capability to have project type specific lexer associations
+- added a auto-collapsing feature to the sidebars
+
+Version 4.3-snapshot-20090111:
+- bug fixes
+- changed PyCoverage to use coverage.py v2.85
+- added a "dedent def" to the Python typing completer
+
+Version 4.3-snapshot-20081227:
+- bug fixes
+- introduced project specific word and exclude lists (for spell checking)
+- added action to editor's context menu to remove a word from the dictionary
+  (actually it is added to the personal/project exclusion list)
+- added a new window layout called "Sidebars", that gives more space 
+  to the editors by having retractable sidebars
+- enhanced template auto completion by showing a selection, if the template
+  name is not unique
+- added support for icons in auto completion lists
+
+Version 4.3-snapshot-20081208:
+- bug fixes
+- made the email server port configurable
+- added keyboard navigation to listview viewmanager
+- added spell checking functionality (pyenchant needs to be installed)
+- enhanced the Python typing completer to cover more cases
+
+Version 4.3-snapshot-20081130:
+- bug fixes
+- added a lexer type that guesses the style based on the current text
+  (default for unknown source types)
+- added context menu entry to select an alternative (Pygments) lexer
+- updated pygments to version 1.0
+- added capability to auto complete using templates (press Tab after
+  entering a valid template name)
+
+Version 4.3-snapshot-20081122:
+- bug fixes
+- added more button types to the KQMessageBox KDE wrapper
+- added capability to configure exceptions to be ignored and add to them
+  at run-time, when an exception occurs
+- added capability to export and import the eric4 configuration
+- added capability to define keyboard shortcuts for plug-ins
+- changed CompareDialog to be suitable as an external diff viewer for svn
+- added the capability to export and import syntax highlighting styles
+  (Configuration dialog->Highlighters->Styles page)
+- added a configuration dialog to the help viewer (webkit based)
+- extended the shortcuts configuration dialog
+- added capability to implement custom lexers as plug-ins (s. Django plug-in)
+  (This needs a patch to the latest QScintilla release, s. qscintilla.cpp.diff)
+
+Version 4.3-snapshot-20081019:
+- bug fixes
+- added Subversion changelist support
+- extended editor to show separate margins for bookmarks, breakpoints and
+  other indicators
+- added keyboard shortcut to toggle between current and previous current 
+  tab
+
+Version 4.3-snapshot-20081005:
+- bug fixes
+- added a dialog to replace in files (Ctrl+Shift+R)
+- reenabled the support for KDE dialogs
+- added editor context menu entry to toggle the typing aids support
+- added shortcut to the configuration dialog to several eric4 components
+- extended the help facility to support remote documentation (starting with
+  http:// or https://)
+- added display of the eol string used by the editor and improved eol handling
+- made eol and encoding user selectable
+- made the usage of the universal character encoding detector configurable
+
+Version 4.3-snapshot-20080920:
+- bug fixes
+- changed license to GPL v3
+- added support for TLS mode to the Email dialog
+- added support for the new QScintilla Lexers (Fortran, Fortran77, Pascal,
+  PostScript, XML, YAML)
+- added options to change the margins colors
+- added Drag & Drop to reorder editor tabs, to relocate them from one
+  view to another and to clone them
+- added support for wheel events to the various tab bars
+- made the translations handling code more flexible with respect to the 
+  naming of translation files
+- added embedded Find and Find&Replace dialogs
+- unified the log viewer tabs into one log view with configurable color
+  for the stderr text
+- added restart functionality needed by some plug-ins (plug-ins must have
+  "needsRestart = True" in their header)
+- added capability to prepopulate the plug-in installation dialog from the 
+  plug-in repository dialog
+- added the universal character encoding detector from 
+  http://chardet.feedparser.org to improve the encoding guessing
+- added a simple terminal like window
+- added capability to select files based on a file name pattern to the
+  find in files dialog
+- improved IPv6 support
+- added buttons to the highlighters styles page to set styles to the 
+  default values
+- added a new window layout called "Toolboxes", that gives more space 
+  to the editors
+
+Version 4.2.0:
+released as version 4.2.0
+
+Version 4.2-snapshot-20080802:
+- bug fixes
+
+Version 4.2-snapshot-20080726:
+- bug fixes
+- reorganized the configuration dialog to use a QScrollArea and combined
+  some (split) settings onto a big scrolling page
+- extended the templates system to support a few predefined variables
+  (thanks to Dan Bullok)
+
+Version 4.2-snapshot-20080719:
+- bug fixes
+- updated Turkish translations from Serdar Koçdaş
+- updated Spanish translations from Jaime Seuma
+- updated Czech translations from Zdenek Böhm
+- added API file for Ruby
+- added Ruby API file for eric4 Ruby files
+- enhanced the API file generation tool and dialog
+- updated the plug-in document
+
+Version 4.2-snapshot-20080706:
+- bug fixes
+- changed subversion relocate function to perform a relocation inside
+  a repository
+- added an indication of the current editor's language to the status bar
+- moved all supporting project management files (e.g. tasks file) to a
+  management sub-directory
+- changed the auto-completion and calltips hook support
+  Note: the latest rope plug-in snapshot is required
+- updated Turkish translations from Serdar Koçdaş
+- updated Spanish translations from Jaime Seuma
+
+Version 4.2-snapshot-20080628:
+- bug fixes
+- updated French translations from Julien Vienne
+- updated Spanish translations from Jaime Seuma
+- added Turkish translations from Serdar Koçdaş
+- added a double click action and a reload button to the shell history dialog
+- made improvements to the Plug-in Info dialog
+- added capability to save the folding state of a file in the session file
+- added capability to save the open multi project and the open project in
+  the global session file
+- added a Ctrl-Click action to the editor to show the info related to a
+  syntax error
+- added an action to send a feature request using the email dialog
+- separated QScintilla specific auto-completion and calltips configuration
+  from general configuration
+- moved configuration of the VCS indicator colours to the VCS configuration page
+- added the --noopen command line parameter to override the OpenOnStartup 
+  configuration setting (mostly used for eric4 development)
+
+Version 4.2-snapshot-20080615:
+- bug fixes
+- compatibility fix for Ubuntu and Mandriva
+- added the relocate action to the vcsSubversion plug-in
+- added an action to insert a new line below the current one (Shift+Return)
+- added a QWebKit based help viewer (available if Qt 4.4 is installed)
+- made some network related aspects configurable
+- added storage key PROJECTTYPESPECIFICDATA for project type specific
+  data (may be used by project type plug-ins)
+- made Shell history more comfortable by
+  -- selecting from history via a dialog
+  -- list the history in a dialog with capabilities to
+     --- delete entries
+     --- copy entries to the current editor
+     --- execute entries in the shell
+- made the size grip of the main window configurable (s. Interface (Part 1))
+
+Version 4.2-snapshot-20080525:
+- bug fixes
+- added print preview capability (available if Qt 4.4 is installed)
+- added new default icon set based on the Oxygen icons
+- added some more icons
+
+Version 4.2-snapshot-20080519:
+- bug fixes
+- compatibility fix for Qt 4.4
+
+Version 4.2-snapshot-20080503:
+- bug fixes
+- added capability to the API generator to extract global variables
+  and class variables
+- added double click action to the tabview viewmanager. Double clicking
+  the space right of the last tab opens a new editor.
+- added indicator for the current editors encoding to the status bar
+- changed compare and side-by-side compare dialogs to have the file name
+  of the current editor as the first file
+- added hook support for plug-ins providing calltips
+
+Version 4.2-snapshot-20080406:
+- bug fixes
+- added double click support for attributes and globals
+- reorganized the configuration dialog some more
+- added various start-up configuration options (application page)
+- added functionality to mark all occurrences of a searched text
+  (s.a. configuration dialog editor->searching page)
+- enhanced Unicode support (added utf-16 and utf-32)
+- a few changes to the PyKDE4 support code to work around a PyKDE4
+  problem with the Oxygen style (this workaround allows eric4 to
+  use the Oxygen style, when KDE4 dialogs are disabled)
+- added hook support for plug-ins providing auto-completion
+- added action and menu entries to show calltips
+
+Version 4.2-snapshot-20080319:
+- bug fixes
+- added support for the coding line to the Python and Ruby class browsers
+- added support for module global variables and class (global) variables
+
+Version 4.2-snapshot-20080318:
+- bug fixes
+- added an LED to signal the project's VCS status to the project viewer
+- reorganized the configuration dialog
+- added a button to configure the eol fill setting for all styles of a lexer
+- added capability to save UML like graphics as SVG
+- added capability to display SVG files
+- made some improvements to the code metrics dialog
+- enhanced the printing support
+- added lexer support for TCL/Tk files
+- added the PyKDE4 compatibility code
+- added project support for KDE 4 projects
+
+Version 4.2-snapshot-20080302:
+- bug fixes
+- added hook support to ProjectFormsBrowser, ProjectResourcesBrowser and
+  ProjectTranslationsBrowser
+- added support to provide API files by plug-ins
+- moved Django support to an external plug-in
+- moved TurboGears support to an external plug-in
+- moved wxPython support to an external plug-in
+
+Version 4.2-snapshot-20080224:
+- bug fixes
+- changed settings from native format to ini format
+- made number of recently opened projects and files configurable
+- added multiproject support
+- changed formats of some XML files
+- extended the workspace view manager
+- added a viewmanager using the new QMdiArea
+- added HTTPS support to plug-in repository dialog (for Qt 4.3 and newer)
+- added actions to the graphics views to align the shapes
+
+Version 4.2-snapshot-20080210:
+- bug fixes
+- added configuration option to select the text shown in the
+  tabview viewmanager tabs
+- changed project browsers to override the default double click
+  action
+- added a toolbar manager and a toolbar configuration dialog
+- cleaned up the default toolbars
+- changed watch point to watch expression to make it's use clearer
+- added additional move actions to TabWidget
+- cleaned up the API of E4Action and replace E4ActionGroup by 
+  the createActionGroup module function
+
+Version 4.1.0:
+released as version 4.1.0
+- added API files for wxPython
+- added API files for Zope 2 and Zope 3
+
+Version 4.1-snapshot-20080118:
+- bug fixes
+- added and changed a few methods of the VCS interface modules, which 
+  were needed by the rope refactoring plug-in
+- added some methods needed for the rope plug-in
+
+Version 4.1-snapshot-20080107:
+- bug fixes
+- changed the plug-in repository dialog to download multiple files
+- added a button to the plug-in repository dialog to close it and
+  open the plug-in installation dialog
+- changed the plug-in repository dialog to indicate, if a plug-in
+  needs a fresh download
+- changed the plug-in repository dialog to indicate the 
+  status of a plug-in as given in the repository file
+- added Spanish translations from Daniel Malisani (still incomplete)
+- added API files for Django and TurboGears
+
+Version 4.1-snapshot-20071224:
+- bug fixes
+- made number of Subversion commit messages to remember configurable
+- added buttons to edit the Subversion config and servers file to the
+  Subversion configuration page
+- changed the plug-in installation dialog to be able to 
+  install multiple plug-in archives
+- added menu entry and code to create a snapshot plug-in archive
+- added a simplified editor dialog and an associated main script
+- created a main script to start the plug-in repository dialog
+
+Version 4.1-snapshot-20071216:
+- bug fixes
+- added a Repository Browser to the PySvn VCS plug-in
+- added a Repository Browser to the Subversion VCS plug-in
+- added a Log Browser to the PySvn VCS plug-in
+- added a Log Browser to the Subversion VCS plug-in
+- made the visible project browsers configurable
+- added project type for wxPython
+- added functionality to strip trailing white-space upon saving to the editor
+- removed the scripting stuff because the plug-in system is much more capable
+- added a stop function to the find in files dialog
+- added a search text entry to the keyboard shortcuts dialog
+
+Version 4.1-snapshot-20071118:
+- bug fixes
+- added version info to the plug-in repository dialog
+- refactored PyLint plug-in as a separate plug-in distribution package
+- refactored CVS plug-in as a separate plug-in distribution package
+
+Version 4.1-snapshot-20071111:
+- bug fixes
+- added an action to stop the running script to the "Start" menu/toolbar
+- added a config option for the plug-ins download directory
+- added dialog to display the plug-in repository and download plug-ins
+- refactored CxFreeze plug-in as a separate plug-in distribution package
+
+Version 4.1-snapshot-20071021:
+- bug fixes
+- added a dialog to show the eric4 versions available for download
+- added the project types "Django" and "TurboGears"
+- added a button to the Start ... dialog to clear the history lists
+- added a configuration option (Project page) to enable a recursive search
+  for new files
+- added configuration option (Plugin Manager page) to disable loading
+  of 3rd party plug-ins
+- added code to the imports diagram to cope with relative imports as of
+  Python 2.5 and to show external imports
+- added code to the application diagram to cope with relative imports as of
+  Python 2.5 
+
+Version 4.1-snapshot-20070924:
+- bug fixes
+- added the menu entry "New package..." to the project sources browser 
+  context menus
+- removed configuration option to specify the directory of the Qt4 installation
+  (it is now required, that the Qt bin directory is in the PATH)
+- changed code of Python debug client to better intercept output
+- added a source code exporter to write the colourised source as HTML, PDF, 
+  RTF and LaTeX
+
+Version 4.1-snapshot-20070813:
+- bug fixes
+- compatibility fixes for Debian
+- added 'load', 'save' and 'next match' actions to the regexp wizards
+- made the VCS clients update their status after a commit, update and revert
+- added '-z' to the installer to inhibit compilation of the python files
+- added documentation of the new plug-in system
+
+Version 4.1-snapshot-20070721:
+- bug fixes
+- changed VCS interfaces to plug-ins
+- changed wizards to plug-ins
+- added methods to register/unregister a toolbar with the UserInterface.
+  This must be used by plug-ins, which create their own toolbar.
+- added code to allow a plug-in to clean up before it gets uninstalled
+
+Version 4.1-snapshot-20070708:
+- bug fixes
+- made plug-ins deactivateable and added a context menu to the plug-ins
+  info dialog
+- added code to remember the deactivated plug-ins
+- added dialog to install new plug-ins
+- added dialog to uninstall plug-ins
+- added the methods registerPluginObject/unregisterPluginObject to 
+  KQApplication to allow Plug-ins to register their object.
+- added code to allow registered plug-ins, that have a getActions() method
+  to have the shortcuts configured via the shortcuts configuration dialog
+- added code to allow active plug-ins to be configured via the
+  configuration dialog
+- added the command line option --plug-in=pluginfile to eric4.py. This
+  option can be used for plug-in development to specify a plug-in file
+  to load (e.g. eric4 --plug-in=/my/plug-in/development/area/PluginTest.py).
+- added actions and code to create eric4 plug-in archive files
+- added the new project type "Eric4 Plugin"
+- added code to run/debug/... an eric4 plug-in from within eric4 by starting
+  another eric4 process instead of the plug-in main script
+- removed the character tables dialog
+  (will be provided as a plug-in by Jürgen Urner)
+- removed the Bicycle Repair Man code and converted it to a standalone
+  plug-in
+- added option to configure, whether the project browsers should highlight
+  the entry for the file of the current editor
+- added a field to enter a more descriptive text for a task
+- changed the way how files and directories can be added to a project in
+  order to respect the project's file type associations
+
+Version 4.1-snapshot-20070622:
+- bug fixes
+- implemented a (basic) plug-in system to allow people to extend eric4
+- converted view managers to plug-ins
+- converted the About functionality to a plug-in
+- converted the checkers to plug-ins
+- converted the packagers to plug-ins
+- converted the documentation tools to plug-ins
+
+Version 4.0.0:
+- first official release
+
+Version 4.0-snapshot-20070526:
+- bug fixes
+- made improvements to the typing completers
+- added more rules to the Ruby typing completer
+
+Version 4.0-snapshot-20070517:
+- bug fixes
+- added code for the final QScintilla2 calltips API
+- added a check to see, if eric4 has been configured. If not, the
+  configuration dialog is started automatically.
+- added Python typing rules for try-except-finally blocks
+- updated PyLint support for 0.13.0
+- moved VCS status monitor LED code from UserInterface to it's own class
+  and gave it a context menu
+- added the '-p' switch to eric4-api to include private classes, methods
+  and functions in the resulting API file
+
+Version 4.0-snapshot-20070506:
+- bug fixes
+
+Version 4.0-snapshot-20070505:
+- bug fixes
+- added CMake lexer support
+- added VHDL lexer support
+- made the help viewer keyboard shortcuts configurable
+- added support for the case insensitive variant of the C++ lexer
+- added some code to perform automatic insertions while typing (Ruby)
+- added config options for entering a prefix and/or a postfix for
+  Qt tools (e.g. on Kubuntu it is "-qt4" to make "designer-qt4")
+
+Version 4.0-snapshot-20070411:
+- bug fixes
+- added Czech translations (thanks to Zdenek Böhm)
+- added some code to perform automatic insertions while typing (Python)
+- more win32 compatibility issues fixed
+
+Version 4.0-snapshot-20070402:
+- bug fixes
+- changed the shortcuts dialog to show icons of the actions
+- moved the dialog showing external tools used by eric4 to the
+  preferences menu
+- changed the handling of the commit message dialogs to enhance
+  their usability.
+- added a dialog to derive code for a forms implementation for Qt4
+- enhanced win32 compatibility
+
+Version 4.0-snapshot-20070325:
+- bug fixes
+- updated to chartables 0.5.2
+- extended the svn diff capabilities
+- extended the eric4-api and eric4-doc tools
+- added @see, @since and {@link} to eric4-doc
+- changed structure of debug server
+- extended the subversion status dialogs by an add and revert action
+- added a "Recreate project tasks" action to the taskviewer context menu
+- added D lexer support
+- added Povray lexer support
+- added file and directory completers to various dialogs
+- added a top level exception handler to log the exception info
+
+Version 4.0-snapshot-20070218:
+- bug fixes
+- changed graphics to use QGraphicsView
+- changed Pylint support for pylint >= 0.12.0
+- changed the compare dialog to be more specific about changed lines
+- changed install script to patch pyXML in order to fix a bug there
+
+Version 4.0-snapshot-20070204:
+- bug fixes
+- added check for syntax errors when a project run/debug/... action
+  is invoked. The number of faulty files will be displayed and the
+  action aborted.
+- added an option to hide generated source of forms files (those
+  starting with Ui_)
+- added an entry "Find in this directory" to the browser context
+  menu
+- extended the compare dialog by movement buttons
+- changed the debugger to accept environment settings of the form
+  'var+=value' in order to amend an existing environment variable
+- added support for svn diff against HEAD and COMMITTED
+- added esc handlers to the email and template dialogs
+- changed dialogs to use QDialogButtonBox
+
+Version 4.0-snapshot-20070114:
+- bug fixes
+- added configuration option to enable/disable the usage of
+  auto-completion fill-up characters
+- added support for the new QScintilla2 APIs interface
+
+Version 4.0-snapshot-20061230:
+- bug fixes
+- added configuration option to select the font used for the graphics
+  displays
+- changed the logic of the editor search and replace dialogs
+- added even more compatibility changes for Subversion 1.4.0
+- backed out the Qt4 workaround for Linux because it was causing trouble
+
+Version 4.0-snapshot-20061222:
+- bug fixes
+- reworked the Edit menu to make it a bit shorter
+- added capability to add existing translation files
+- added a close button to the tab view, which closes the current editor
+- added capability to save the help window size and position (and a
+  configuration option to enable this)
+- added close tab and new tab buttons to the help viewer window
+- added more compatibility changes for Subversion 1.4.0
+
+Version 4.0-snapshot-20061217:
+- bug fixes
+- added capability to exclude files and directories from translation
+- updated to chartables v. 0.5.0
+- added actions to go to the next/previous task of an open editor
+- added a dialog to override some global settings on a per project basis
+- added the capability to resize the configuration dialog's contents via
+  a splitter
+- added tabbed browsing to the help viewer
+- added configuration option to use just one help browser window
+- rearranged editor context menu and introduced an option to show a
+  minimalistic context menu (for small screens)
+- extended help texts for the Python and Qt regexp wizard dialogs
+
+Version 4.0-snapshot-20061112:
+- bug fixes
+- more Qt 4.2.0 changes
+- added the character tables dialog from Jürgen Urner
+- added support for Qt style sheets
+- added an apply and reset action to the configuration dialog
+
+Version 4.0-snapshot-20061029:
+- bug fixes
+- added a configuration option for the default font of the editor
+- changed layout of the editors search and replace dialogs
+- added an eric4 tray starter application. It adds an icon to the
+  systemtray, which gives a context menu to start eric4 with
+  recently opened projects or files and to start the various
+  tools included in eric4
+
+Version 4.0-snapshot-20061022:
+- bug fixes
+- adaptation to Qt 4.2.0 (Qt 4.2.0 is a prerequisite)
+- completed Russian translation (thanks to Alexander Darovsky)
+
+Version 4.0-snapshot-20061014:
+- bug fixes
+- some Qt 4.2.0 compatibility fixes
+- added capability to reset the window layout via eric4-configure
+
+Version 4.0-snapshot-20061009:
+- many bug fixes
+- added a QFileIconProvider derived class to show more specific
+  icons in the file dialog.
+- made code changes for latest QScintilla2 snapshot
+
+Version 4.0-snapshot-20061002:
+- many bug fixes
+- added capability to set several lexer styles (font and colours)
+  simultaneously
+- added capability to clear the interpreter window on activation
+  of a run, debug, ... action
+- added capability to not stop the debugger on the first executable
+  line
+- all selections made in the run, debug, ... start dialog are saved
+  across invocations of eric4
+- added capability to restrict the network interfaces, the debug server
+  listens on, and the hosts allowed to connect to the debug server
+
+Version 4.0-snapshot-20060923:
+- many bug fixes
+- added compatibility with Subversion 1.4.0
+- added option to select the UI style (Preferences->Interface->Style)
+
+Version 4.0-snapshot-20060913:
+- first public snapshot of eric4
+

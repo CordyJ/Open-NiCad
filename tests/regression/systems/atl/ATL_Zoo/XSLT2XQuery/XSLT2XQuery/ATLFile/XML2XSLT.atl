@@ -1,0 +1,222 @@
+-- @path XML=/XSLT2XQuery/XML/XML.ecore
+-- @path XQuery=/XSLT2XQuery/XQuery/XQuery.ecore
+-- @path XSLT=/XSLT2XQuery/XSLT/XSLT.ecore
+
+module XML2XSLT;
+create OUT : XSLT from IN : XML;
+
+rule Stylesheet {
+	from
+		iroot : XML!Root (
+			iroot.name = 'xsl:stylesheet'
+		)
+	-- without verify iroot.name = xsl:"stylesheet"
+	to
+		out : XSLT!XSLTRootNode (
+			-- default value is xsl:"stylesheet"
+			name <- iroot.name,
+			parentNode <- iroot.parent	-- TODO : Root n'a pas de parent
+		)
+}
+
+-- Rule for creating NodeText 
+
+rule T2T {
+	from
+		it : XML!TextNode
+	to
+		out : XSLT!TextNode (
+		   	name <- it.name,
+		   	value <- it.value,
+		   	nodes <- it.children,
+			output <- 'Peter_test'
+		)
+}
+
+-- Rule for creating Template elements 
+
+rule E2T {
+	from
+		it : XML!Element (
+				it.name = 'xsl:template'
+		)
+	to
+		out : XSLT!Template (
+			name <- it.name,
+			match <- it.children->select(c | c.name = 'match')->first().value,
+			 -- we are sure that each element of template have only one attribute
+			nodes <- it.children->select(c | c.name <> 'select'),
+			parentNode <- it.parent
+		)
+}
+
+-- Rule for creating ValueOf elements 
+rule E2V {
+	from
+		iv : XML!Element (
+			iv.name = 'xsl:value-of'
+		)
+	to
+		out : XSLT!ValueOf (
+			name <- 'xsl:value-of',
+			select <- iv.children->select(c | c.name = 'select')->first().value,
+			nodes <- iv.children->select(c | c.name <> 'select')
+		)
+}
+
+-- Rule for creating ApplyTemplates elements 
+rule E2A {
+	from
+		iat : XML!Element (
+			iat.name = 'xsl:apply-templates'
+		)
+	to
+		out : XSLT!ApplyTemplates (
+			name <- iat.name,
+			select <- iat.children->select(c | c.name='select')->first().value,
+			nodes <- iat.children->select(c | c.name <> 'select')
+		)
+}
+
+-- Rule for creating Condition element
+-- IF
+rule E2I {
+	from
+		iif : XML!Element (
+			iif.name = 'xsl:if'
+		)
+	to
+		out : XSLT!If (
+			name <- iif.name,
+			test <- iif.children->select(c | c.name = 'test')->first().value,
+			nodes <- iif.children->select(c | c.name <> 'test')
+		)
+}
+
+-- ForEach
+rule E2FE {
+	from
+		ife : XML!Element (
+			ife.name = 'xsl:foreach'
+		)
+	to
+		out : XSLT!ForEach (
+			name <- ife.name,
+			select <- ife.children->select(c | c.name = 'select')->first().value,
+			nodes <- ife.children
+		)
+}
+
+
+-- Sort
+rule E2S {
+	from
+		is : XML!Element (
+			is.name = 'xsl:short'
+		)
+	to
+		out : XSLT!Sort (
+			name <- is.name,
+			select <- is.children->select(c | c.name = 'select')->first().value,
+			nodes <- is.children
+		)
+}
+
+-- CopyOF
+rule E2CO {
+	from
+		icp : XML!Element (
+			icp.name = 'xsl:copy-of'
+		)
+	to
+		out : XSLT!CopyOf (
+			name <- icp.name,
+			select <- icp.children->select(c | c.name = 'select')->first().value,
+			nodes <- icp.children
+		)
+}
+
+-- Choose
+rule E2C1 {
+	from
+		ich : XML!Element( ich.name = 'xsl:choose' )
+	to
+		out : XSLT!Choose (
+			name <- ich.name,
+			nodes <- ich.children
+	)
+}
+
+-- When
+rule E2W {
+	from
+		iw : XML!Element (
+			iw.name = 'xsl:when'
+		)
+	to
+		ow : XSLT!When (
+			name <- iw.name,
+			test <- iw.children->select(c | c.name = 'test')->first().value,
+			nodes <- iw.children
+		)
+}
+
+-- Otherwise
+rule E2C2 {
+	from
+		io : XML!Element (
+			io.name = 'xsl:otherwise'
+		)
+	to
+		oo : XSLT!Choose (
+			name <- io.name,
+			nodes <- io.children
+		)
+}
+
+
+rule El2El {
+	from
+		io : XML!Element (
+			(io.name <> 'xsl:otherwise') and
+			(io.name <> 'xsl:when') and
+			(io.name <> 'xsl:choose') and
+			(io.name <> 'xsl:copy-of') and
+			(io.name <> 'xsl:short') and
+			(io.name <> 'xsl:foreach') and
+			(io.name <> 'xsl:if') and
+			(io.name <> 'xsl:apply-templates') and
+			(io.name <> 'xsl:value-of') and
+			(io.name <> 'xsl:template') and
+			(io.name <> 'xsl:stylesheet') 
+		)
+	
+	to
+		oo : XSLT!ElementNode (
+			name <- io.name,
+			nodes <- io.children
+		)
+	
+}
+
+rule At2At {
+ 	from
+		attr : XML!Attribute (
+			(attr.parent.name <> 'xsl:otherwise') and
+			(attr.parent.name <> 'xsl:when') and
+			(attr.parent.name <> 'xsl:choose') and
+			(attr.parent.name <> 'xsl:copy-of') and
+			(attr.parent.name <> 'xsl:short') and
+			(attr.parent.name <> 'xsl:foreach') and
+			(attr.parent.name <> 'xsl:if') and
+			(attr.parent.name <> 'xsl:apply-templates') and
+			(attr.parent.name <> 'xsl:value-of') and
+			(attr.parent.name <> 'xsl:template') and
+			(attr.parent.name <> 'xsl:stylesheet') 
+		)
+	to
+		out : XSLT!AttributeNode (
+		  	name <- attr.name,
+		  	value <- attr.value
+		)
+} 

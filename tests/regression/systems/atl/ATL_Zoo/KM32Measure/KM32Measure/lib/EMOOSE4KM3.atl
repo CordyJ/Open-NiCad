@@ -1,0 +1,66 @@
+--@atlcompiler	atl2006
+--@name			EMOOSE4KM3
+--@version		1.0
+--@domains		KM3, MOOSE, EMOOSE, metrics
+--@authors		Eric Vepa (evepa <at> sodius.com) for SODIUS (www.sodius.com)
+--@date			2007/06/05
+--@description	This library provides MOOSE (Metrics for Object-Oriented Software Engineering) and EMOOSE (Extended MOOSE) metrics suites on KM3 metamodels. Only the metrics that fit to KM3 metamodels have been implemented.
+--@see			Baroni, A.L.: Formal Definition of Object-Oriented Design Metrics. Master Thesis, Vrije University, Brussel, Belgium, 2002.
+
+library EMOOSE4KM3; -- Library Template
+
+-- ===============
+-- MOOSE Metrics =
+-- ===============
+
+--@begin helper MOOSE::WRC
+--@comments Weighted References per Class
+--@comments The sum of complexities of the References in the current Class. If all method complexities are considered to be unique, WRC is equal to the number of References.
+--@comments The authors do not propose any algorithm for calculating the complexities of methods.
+--@comments As such, in the formalization above, the complexities were considered unitary.
+helper context KM3!Classifier
+def : WRC() : Integer =
+	self.allReferences->size();
+--@end helper MOOSE::WRC
+
+--@begin helper MOOSE::DIT
+--@comments Depth of Inheritance Tree
+--@comments The length of the longest path of inheritance from the current Class to the root of the tree.
+helper context KM3!Classifier
+def : DIT() : Integer =
+	if self.isRoot
+		then 0
+		else if self.PARN() = 1
+				then 1
+				else 0
+			endif + self.parents->iterate(c; acc : Integer = 0|acc + c.DIT())
+	endif;
+--@end helper MOOSE::DIT
+
+--@begin helper MOOSE::NOC
+--@comments Number of Children
+--@comments The number of classes that inherit directly from the current Class.
+helper context KM3!Classifier
+def : NOC() : Integer =
+	self.CHIN();
+--@end helper MOOSE::NOC
+
+--@begin helper MOOSE::CBO
+--@comments Coupling Between Objects
+--@comments The number of other Classes that are coupled to the current one. Two Classes are coupled when methods declared in one Class use References or instance variables defined by the other Class.
+helper context KM3!Classifier
+def : CBO() : Integer =
+	self.coupledClasses->size();
+--@end helper MOOSE::CBO
+
+
+-- ================
+-- EMOOSE Metrics =
+-- ================
+
+--@begin helper EMOOSE::SIZE2
+--@comments Number of local Attributes and References (only the containment ones) defined in the Class.
+helper context KM3!Classifier
+def : SIZE2() : Integer =
+	self.NRN() + self.NAN();
+--@end helper EMOOSE::SIZE2

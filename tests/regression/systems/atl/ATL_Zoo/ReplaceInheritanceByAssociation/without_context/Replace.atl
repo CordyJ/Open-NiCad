@@ -1,0 +1,101 @@
+-- @name		Replacing inheritance by association
+-- @version		1.0
+-- @domains		Catalogue of Model Transformations
+-- @authors		Baudry Julien (jul.baudry<at>gmail.com)
+-- @date		2006/08/02
+-- @description	The purpose of this transformation is to replace inheritances by associations
+-- @see http://www.dcs.kcl.ac.uk/staff/kcl/tcat.pdf   
+-- @see section 1.1, page 2
+-- @see author of article : K. Lano
+
+module Replace; -- Module Template
+create OUT : KM3 from IN : KM3;
+
+--@begin rule Metamodel
+--	For a Metamodel element, another Metamodel element is created :
+--			with the same name and location,
+--			Linked to the same contents.
+rule Metamodel {
+	from
+		inputMm:KM3!Metamodel
+	to
+		outputMm:KM3!Metamodel (
+			location <- inputMm.location,
+			contents <- inputMm.contents
+		)
+}
+--@end rule Metamodel
+
+--@begin rule Package
+--	For a Package element, another Package element is created :
+--			with the same name, 
+--			Linked to the same contents.
+rule Package {
+	from
+		inputPkg:KM3!Package
+	to
+		outputPkg:KM3!Package (
+			name <- inputPkg.name,
+			contents <- inputPkg.contents
+		)
+}
+--@end rule Package
+
+--@begin rule Class without supertype
+--	This class has no supertypes :
+--			We create another class with the same name,
+--			Abstract if the source class is abstract. 	
+rule ClassA {
+	from
+		inputA:KM3!Class (
+			inputA.supertypes.isEmpty()
+		)
+	to
+		outputA:KM3!Class (
+			name <- inputA.name,
+			isAbstract <- inputA.isAbstract
+		)
+}
+--@end rule without supertype
+
+--@begin rule Class with supertype
+rule ClassB {
+	from
+		inputB:KM3!Class (
+			not(inputB.supertypes.isEmpty())
+		)
+	to
+		outputB:KM3!Class (
+			name <- inputB.name,
+			isAbstract <- inputB.isAbstract,
+			structuralFeatures <- inputB.supertypes->iterate(a;acc : Sequence(KM3!StructuralFeature) = Sequence{}|
+																acc->including(thisModule.Inherit2Association(a,inputB))
+															)
+		)
+}
+--@end rule Class  with supertype
+
+
+lazy rule Inherit2Association {
+	from
+		supertype:KM3!Class,
+		children:KM3!Class
+	to
+		refChildren : KM3!Reference (
+			name <- 'inherit'+supertype.name,
+			opposite <- refSupertype,
+			owner <- children,
+			type <- supertype,
+			lower <- 1,
+			upper <- 1
+		),
+
+		refSupertype : KM3!Reference( 
+			name <- 'children'+children.name,
+			opposite <- refChildren,
+			owner <- supertype,
+			type <- children,
+			lower <- 1,
+			upper <- 1
+		)	
+}

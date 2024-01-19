@@ -1,0 +1,546 @@
+<?xml version="1.0" encoding="UTF-8"?><definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="urn:/WServicesDev/wsdl" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="TicketRetrieve" targetNamespace="urn:/WServicesDev/wsdl">
+  <types>
+    <schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:soap11-enc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ns2="http://java.sun.com/jax-rpc-ri/internal" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" targetNamespace="urn:/WServicesDev/wsdl">
+      <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+      <import namespace="http://java.sun.com/jax-rpc-ri/internal"/>
+      <complexType name="RetrievedReservation">
+        <sequence>
+          <element name="PNRCreatorPCC" type="string"/>
+          <element name="TAgentID" type="string"/>
+          <element name="aaa_pcc" type="string"/>
+          <element name="agt_pcc" type="string"/>
+          <element name="atxSegments" type="tns:ArrayOfatxSegment"/>
+          <element name="autHotSegments" type="tns:ArrayOfautHotSegment"/>
+          <element name="busSegments" type="tns:ArrayOfbusSegment"/>
+          <element name="carSegments" type="tns:ArrayOfcarSegment"/>
+          <element name="creationDate" type="tns:DateWrapper"/>
+          <element name="creationTime" type="tns:TimeWrapper"/>
+          <element name="dkNumber" type="string"/>
+          <element name="lanSegments" type="tns:ArrayOflanSegment"/>
+          <element name="manHotSegments" type="tns:ArrayOfmanHotSegment"/>
+          <element name="othSegments" type="tns:ArrayOfothSegment"/>
+          <element name="pnr" type="string"/>
+          <element name="ralSegments" type="tns:ArrayOfralSegment"/>
+          <element name="receivedFrom" type="string"/>
+          <element name="resEmails" type="tns:ArrayOfEmail"/>
+          <element name="resFFNumber" type="tns:ArrayOfFreqFlyer"/>
+          <element name="resPhones" type="tns:ArrayOfPhone"/>
+          <element name="resProfiles" type="tns:ArrayOfPaxProfile"/>
+          <element name="seaSegments" type="tns:ArrayOfseaSegment"/>
+          <element name="segments" type="int"/>
+          <element name="theAccountLines" type="tns:ArrayOfAccLine"/>
+          <element name="theRemarks" type="tns:ArrayOfRemark"/>
+          <element name="theStoredFares" type="tns:ArrayOfStoredFare"/>
+          <element name="theTickets" type="tns:ArrayOfAirTicket"/>
+          <element name="theTripLegs" type="tns:ArrayOfRetrievedTripLeg"/>
+          <element name="torSegments" type="tns:ArrayOftorSegment"/>
+          <element name="transactionID" type="string"/></sequence></complexType>
+      <complexType name="ArrayOfatxSegment">
+        <complexContent>
+          <restriction base="soap11-enc:Array">
+            <attribute ref="soap11-enc:arrayType" wsdl:arrayType="tns:atxSegment[]"/></restriction></complexContent></complexType>
+      <complexType name="atxSegment">
+        <sequence>
+          <element name="NumberInParty" type="int"/>
+          <element name="SegmentDate" type="tns:DateWrapper"/>
+          <element name="SegmentNumber" type="int"/>
+          <element name="SegmentStatus" type="string"/>
+          <element name="SegmentType" type="string"/>
+          <element name="ServiceDescription" type="tns:ArrayOfstring"/>
+          <element name="nameOf1" type="string"/>
+          <element name="nameOf2" type="string"/>
+          <element name="pcc1" type="string"/>
+          <element name="pcc2" type="string"/>
+          <element name="vendorCode" type="string"/></sequence></complexType>
+      <complexType name="DateWrapper">
+        <sequence>
+          <element name="date" type="int"/>
+          <element name="month" type="int"/>
+          <element name="year" type="int"/></sequence></complexType>
+      <complexType name="ArrayOfstring">
+        <complexContent>
+          <restriction base="soap11-enc:Array">
+            <attribute ref="soap11-enc:arrayType" wsdl:arrayType="string[]"/></restriction></complexContent></complexType>
+      <complexType name="ArrayOfautHotSegment">
+        <complexContent>
+          <restriction base="soap11-enc:Array">
+            <attribute ref="soap11-enc:arrayType" wsdl:arrayType="tns:autHotSegment[]"/></restriction></complexContent></complexType>
+      <complexType name="autHotSegment">
+        <sequence>
+          <element name="AdtsQtty" type="int"/>
+          <element name="CCCode" type="string"/>
+          <element name="CCExpMonth" type="string"/>
+          <element name="CCExpYear" type="string"/>
+          <element name="CCLastName" type="string"/>
+          <element name="CCNumber" type="string"/>
+          <element name="CheckIn" type="tns:DateWrapper"/>
+          <element name="CheckOut" type="tns:DateWrapper"/>
+          <element name="CorporateDiscount" type="string"/>
+          <element name="Crib" type="int"/>
+          <element name="ExtraBed" type="int"/>
+          <element name="ExtraPerson" type="int"/>
+          <element name="Fqtv" type="string"/>
+          <element name="IATA" type="string"/>
+          <element name="Loyalty" type="string"/>
+          <element name="NameSeg" type="string"/>
+          <element name="NegotiatedRate" type="string"/>
+          <element name="Package" type="string"/>
+          <element name="Phone" type="string"/>
+          <element name="PropertyNbr" type="int"/>
+          <element name="RateCode" type="string"/>
+          <element name="RoomQtty" type="int"/>
+          <element name="ShopLineNumber" type="int"/>
+          <element name="SpecialInformation" type="string"/>
+          <element name="SpecialServices" type="string"/>
+          <element name="addressLine1" type="string"/>
+          <element name="addressLine2" type="string"/>
+          <element name="confNumber" type="string"/>
+          <element name="country" type="string"/>
+          <element name="currency" type="string"/>
+          <element name="dateRange" type="string"/>
+          <element name="guaranteeMethod" type="string"/>
+          <element name="hiredRateToken" type="string"/>
+          <element name="hotelName" type="string"/>
+          <element name="nightsNumber" type="int"/>
+          <element name="reservationName" type="string"/>
+          <element name="roomRate" type="float"/>
+          <element name="roomType" type="string"/>
+          <element name="segmentNumber" type="int"/>
+          <element name="segmentStatus" type="string"/>
+          <element name="vendorCode" type="string"/>
+          <element name="vendorName" type="string"/></sequence></complexType>
+      <complexType name="ArrayOfbusSegment">
+        <complexContent>
+          <restriction base="soap11-enc:Array">
+            <attribute ref="soap11-enc:arrayType" wsdl:arrayType="tns:busSegment[]"/></restriction></complexContent></complexType>
+      <complexType name="busSegment">
+        <sequence>
+          <element name="ArrPoint" type="string"/>
+          <element name="DepPoint" type="string"/>
+          <element name="NumberInParty" type="int"/>
+          <element name="SegmentNumber" type="int"/>
+          <element name="SegmentStatus" type="string"/>
+          <element name="arr_date" type="tns:DateWrapper"/>
+          <element name="arr_time" type="tns:TimeWrapper"/>
+          <element name="cabinOrSeat" type="string"/>
+          <element name="confNumber" type="string"/>
+          <element name="dep_date" type="tns:DateWrapper"/>
+          <element name="dep_time" type="tns:TimeWrapper"/>
+          <element name="nameOf1" type="string"/>
+          <element name="nameOf2" type="string"/>
+          <element name="nameOfBus" type="string"/>
+          <element name="pcc1" type="string"/>
+          <element name="pcc2" type="string"/>
+          <element name="serviceInformation" type="string"/>
+          <element name="vendorCode" type="string"/>
+          <element name="vendorName" type="string"/></sequence></complexType>
+      <complexType name="TimeWrapper">
+        <sequence>
+          <element name="hour" type="int"/>
+          <element name="hour_of_day" type="int"/>
+          <element name="minute" type="int"/>
+          <element name="pm" type="boolean"/>
+          <element name="second" type="int"/></sequence></complexType>
+      <complexType name="ArrayOfcarSegment">
+        <complexContent>
+          <restriction base="soap11-enc:Array">
+            <attribute ref="soap11-enc:arrayType" wsdl:arrayType="tns:carSegment[]"/></restriction></complexContent></complexType>
+      <complexType name="carSegment">
+        <sequence>
+          <element name="aproxTotal" type="float"/>
+          <element name="conf_number" type="string"/>
+          <element name="corp_disc" type="string"/>
+          <element name="decodedType" type="string"/>
+          <element name="dropoff_charge" type="float"/>
+          <element name="dropoff_date" type="tns:DateWrapper"/>
+          <element name="dropoff_location_code" type="string"/>
+          <element name="dropoff_pcc" type="string"/>
+          <element name="dropoff_time" type="tns:TimeWrapper"/>
+          <element name="freq_flyr" type="string"/>
+          <element name="guar_ind" type="string"/>
+          <element name="itn_remarks" type="string"/>
+          <element name="location_code" type="string"/>
+          <element name="location_desc" type="string"/>
+          <element name="loyalty" type="string"/>
+          <element name="nameOf1" type="string"/>
+          <element name="nameOf2" type="string"/>
+          <element name="paxFlight" type="string"/>
+          <element name="pickup_date" type="tns:DateWrapper"/>
+          <element name="pickup_location_code" type="string"/>
+          <element name="pickup_pcc" type="string"/>
+          <element name="pickup_time" type="tns:TimeWrapper"/>
+          <element name="rate" type="tns:carRate"/>
+          <element name="rateChanged" type="boolean"/>
+          <element name="rate_code" type="string"/>
+          <element name="rental_phone" type="string"/>
+          <element name="reservationName" type="string"/>
+          <element name="segmentNumber" type="int"/>
+          <element name="segmentStatus" type="string"/>
+          <element name="spec_equip" type="string"/>
+          <element name="type" type="string"/>
+          <element name="units" type="int"/>
+          <element name="vendorCode" type="string"/>
+          <element name="vendorName" type="string"/></sequence></complexType>
+      <complexType name="carRate">
+        <sequence>
+          <element name="currency" type="string"/>
+          <element name="distanceRR" type="int"/>
+          <element name="distanceUnits" type="string"/>
+          <element name="distanceXD" type="int"/>
+          <element name="distanceXH" type="int"/>
+          <element name="ilimDistRR" type="boolean"/>
+          <element name="ilimDistXD" type="boolean"/>
+          <element name="ilimDistXH" type="boolean"/>
+          <element name="rateChanged" type="boolean"/>
+          <element name="rateRR" type="float"/>
+          <element name="rateXD" type="float"/>
+          <element name="rateXH" type="float"/>
+          <element name="rateplan" type="int"/>
+          <element name="rateplan_decoded" type="string"/></sequence></complexType>
+      <complexType name="ArrayOflanSegment">
+        <complexContent>
+          <restriction base="soap11-enc:Array">
+            <attribute ref="soap11-enc:arrayType" wsdl:arrayType="tns:lanSegment[]"/></restriction></complexContent></complexType>
+      <complexType name="lanSegment">
+        <sequence>
+          <element name="NumberInParty" type="int"/>
+          <element name="SegmentDate" type="tns:DateWrapper"/>
+          <element name="SegmentNumber" type="int"/>
+          <element name="SegmentStatus" type="string"/>
+          <element name="SegmentType" type="string"/>
+          <element name="ServiceDescription" type="tns:ArrayOfstring"/>
+          <element name="nameOf1" type="string"/>
+          <element name="nameOf2" type="string"/>
+          <element name="pcc1" type="string"/>
+          <element name="pcc2" type="string"/>
+          <element name="vendorCode" type="string"/></sequence></complexType>
+      <complexType name="ArrayOfmanHotSegment">
+        <complexContent>
+          <restriction base="soap11-enc:Array">
+            <attribute ref="soap11-enc:arrayType" wsdl:arrayType="tns:manHotSegment[]"/></restriction></complexContent></complexType>
+      <complexType name="manHotSegment">
+        <sequence>
+          <element name="CheckIn" type="tns:DateWrapper"/>
+          <element name="CheckOut" type="tns:DateWrapper"/>
+          <element name="GuarranteeType" type="int"/>
+          <element name="PCC" type="string"/>
+          <element name="Phone" type="string"/>
+          <element name="RoomQuantity" type="int"/>
+          <element name="addressLine1" type="string"/>
+          <element name="addressLine2" type="string"/>
+          <element name="confNumber" type="string"/>
+          <element name="country" type="string"/>
+          <element name="currency" type="string"/>
+          <element name="hotelName" type="string"/>
+          <element name="nightsNumber" type="int"/>
+          <element name="remark" type="string"/>
+          <element name="roomRate" type="float"/>
+          <element name="roomType" type="string"/>
+          <element name="segmentNumber" type="int"/>
+          <element name="segmentStatus" type="string"/>
+          <element name="vendorCode" type="string"/>
+          <element name="vendorName" type="string"/></sequence></complexType>
+      <complexType name="ArrayOfothSegment">
+        <complexContent>
+          <restriction base="soap11-enc:Array">
+            <attribute ref="soap11-enc:arrayType" wsdl:arrayType="tns:othSegment[]"/></restriction></complexContent></complexType>
+      <complexType name="othSegment">
+        <sequence>
+          <element name="city" type="string"/>
+          <element name="description" type="string"/>
+          <element name="nameOf1" type="string"/>
+          <element name="numberInParty" type="int"/>
+          <element name="pcc" type="string"/>
+          <element name="segmentNumber" type="int"/>
+          <element name="segmentStatus" type="string"/>
+          <element name="startDate" type="tns:DateWrapper"/>
+          <element name="vendorCode" type="string"/></sequence></complexType>
+      <complexType name="ArrayOfralSegment">
+        <complexContent>
+          <restriction base="soap11-enc:Array">
+            <attribute ref="soap11-enc:arrayType" wsdl:arrayType="tns:ralSegment[]"/></restriction></complexContent></complexType>
+      <complexType name="ralSegment">
+        <sequence>
+          <element name="ArrPoint" type="string"/>
+          <element name="DepPoint" type="string"/>
+          <element name="NumberInParty" type="int"/>
+          <element name="SegmentNumber" type="int"/>
+          <element name="SegmentStatus" type="string"/>
+          <element name="arr_date" type="tns:DateWrapper"/>
+          <element name="arr_time" type="tns:TimeWrapper"/>
+          <element name="cabinOrSeat" type="string"/>
+          <element name="confNumber" type="string"/>
+          <element name="dep_date" type="tns:DateWrapper"/>
+          <element name="dep_time" type="tns:TimeWrapper"/>
+          <element name="flightLengthInHours" type="float"/>
+          <element name="mealCode1" type="string"/>
+          <element name="mealCode2" type="string"/>
+          <element name="nameOf1" type="string"/>
+          <element name="nameOf2" type="string"/>
+          <element name="nameOfRail" type="string"/>
+          <element name="pcc1" type="string"/>
+          <element name="pcc2" type="string"/>
+          <element name="serviceInformation" type="string"/>
+          <element name="smoking" type="boolean"/>
+          <element name="vendorCode" type="string"/>
+          <element name="vendorName" type="string"/></sequence></complexType>
+      <complexType name="ArrayOfEmail">
+        <complexContent>
+          <restriction base="soap11-enc:Array">
+            <attribute ref="soap11-enc:arrayType" wsdl:arrayType="tns:Email[]"/></restriction></complexContent></complexType>
+      <complexType name="Email">
+        <sequence>
+          <element name="EMAIL_TYPE" type="int"/>
+          <element name="LANGUAGE" type="int"/>
+          <element name="address" type="string"/>
+          <element name="name" type="string"/></sequence></complexType>
+      <complexType name="ArrayOfFreqFlyer">
+        <complexContent>
+          <restriction base="soap11-enc:Array">
+            <attribute ref="soap11-enc:arrayType" wsdl:arrayType="tns:FreqFlyer[]"/></restriction></complexContent></complexType>
+      <complexType name="FreqFlyer">
+        <sequence>
+          <element name="ffAirline" type="string"/>
+          <element name="ffNumber" type="string"/>
+          <element name="pax_name" type="string"/>
+          <element name="pax_number" type="string"/>
+          <element name="segmentCarrier" type="string"/>
+          <element name="segmentStatus" type="string"/></sequence></complexType>
+      <complexType name="ArrayOfPhone">
+        <complexContent>
+          <restriction base="soap11-enc:Array">
+            <attribute ref="soap11-enc:arrayType" wsdl:arrayType="tns:Phone[]"/></restriction></complexContent></complexType>
+      <complexType name="Phone">
+        <sequence>
+          <element name="PHONE_TYPE" type="int"/>
+          <element name="area_code" type="string"/>
+          <element name="country_code" type="string"/>
+          <element name="extension" type="string"/>
+          <element name="pcc" type="string"/>
+          <element name="phone_number" type="string"/></sequence></complexType>
+      <complexType name="ArrayOfPaxProfile">
+        <complexContent>
+          <restriction base="soap11-enc:Array">
+            <attribute ref="soap11-enc:arrayType" wsdl:arrayType="tns:PaxProfile[]"/></restriction></complexContent></complexType>
+      <complexType name="PaxProfile">
+        <sequence>
+          <element name="PaxEmails" type="tns:ArrayOfEmail"/>
+          <element name="PaxFreqFlyers" type="tns:ArrayOfFrequentFlyer"/>
+          <element name="PaxInformation" type="tns:Pax"/>
+          <element name="PaxPhones" type="tns:ArrayOfPhone"/>
+          <element name="cabinNumber" type="int"/>
+          <element name="country_base" type="string"/>
+          <element name="emails" type="ns2:arrayList"/>
+          <element name="employee_id" type="int"/>
+          <element name="freqflys" type="ns2:arrayList"/>
+          <element name="pcc_alt" type="string"/>
+          <element name="pcc_base" type="string"/>
+          <element name="phones" type="ns2:arrayList"/>
+          <element name="preferredSeat" type="int"/>
+          <element name="profile_id" type="int"/>
+          <element name="roomNumber" type="int"/>
+          <element name="trip_number" type="int"/></sequence></complexType>
+      <complexType name="ArrayOfFrequentFlyer">
+        <complexContent>
+          <restriction base="soap11-enc:Array">
+            <attribute ref="soap11-enc:arrayType" wsdl:arrayType="tns:FrequentFlyer[]"/></restriction></complexContent></complexType>
+      <complexType name="FrequentFlyer">
+        <sequence>
+          <element name="ffAirline" type="string"/>
+          <element name="ffNumber" type="string"/>
+          <element name="pax_name" type="string"/>
+          <element name="pax_number" type="string"/>
+          <element name="segmentCarrier" type="string"/>
+          <element name="segmentStatus" type="string"/></sequence></complexType>
+      <complexType name="Pax">
+        <sequence>
+          <element name="lastname" type="string"/>
+          <element name="name" type="string"/>
+          <element name="paxId" type="int"/>
+          <element name="pax_age" type="int"/>
+          <element name="pax_number" type="string"/>
+          <element name="pax_type" type="string"/></sequence></complexType>
+      <complexType name="ArrayOfseaSegment">
+        <complexContent>
+          <restriction base="soap11-enc:Array">
+            <attribute ref="soap11-enc:arrayType" wsdl:arrayType="tns:seaSegment[]"/></restriction></complexContent></complexType>
+      <complexType name="seaSegment">
+        <sequence>
+          <element name="ArrPoint" type="string"/>
+          <element name="DepPoint" type="string"/>
+          <element name="NumberInParty" type="int"/>
+          <element name="SegmentNumber" type="int"/>
+          <element name="SegmentStatus" type="string"/>
+          <element name="arr_date" type="tns:DateWrapper"/>
+          <element name="arr_time" type="tns:TimeWrapper"/>
+          <element name="cabinOrSeat" type="string"/>
+          <element name="confNumber" type="string"/>
+          <element name="dep_date" type="tns:DateWrapper"/>
+          <element name="dep_time" type="tns:TimeWrapper"/>
+          <element name="nameOf1" type="string"/>
+          <element name="nameOf2" type="string"/>
+          <element name="nameOfShip" type="string"/>
+          <element name="pcc1" type="string"/>
+          <element name="pcc2" type="string"/>
+          <element name="serviceInformation" type="string"/>
+          <element name="vendorCode" type="string"/>
+          <element name="vendorName" type="string"/></sequence></complexType>
+      <complexType name="ArrayOfAccLine">
+        <complexContent>
+          <restriction base="soap11-enc:Array">
+            <attribute ref="soap11-enc:arrayType" wsdl:arrayType="tns:AccLine[]"/></restriction></complexContent></complexType>
+      <complexType name="AccLine">
+        <sequence>
+          <element name="AirlineCode" type="string"/>
+          <element name="BaseFare" type="float"/>
+          <element name="CommisionAmount" type="float"/>
+          <element name="CurrencyCode" type="string"/>
+          <element name="DocumentsNumber" type="int"/>
+          <element name="GSTAmount" type="float"/>
+          <element name="PaxDecimalNumber" type="string"/>
+          <element name="PaxName" type="string"/>
+          <element name="PaymentMethod" type="int"/>
+          <element name="QSTAmount" type="float"/>
+          <element name="QSTCode" type="string"/>
+          <element name="TariffBasis" type="string"/>
+          <element name="TaxAmount" type="float"/>
+          <element name="TaxSurchargeCode" type="string"/>
+          <element name="TicketNumber" type="string"/></sequence></complexType>
+      <complexType name="ArrayOfRemark">
+        <complexContent>
+          <restriction base="soap11-enc:Array">
+            <attribute ref="soap11-enc:arrayType" wsdl:arrayType="tns:Remark[]"/></restriction></complexContent></complexType>
+      <complexType name="Remark">
+        <sequence>
+          <element name="publicRemark" type="boolean"/>
+          <element name="text" type="string"/>
+          <element name="type" type="int"/></sequence></complexType>
+      <complexType name="ArrayOfStoredFare">
+        <complexContent>
+          <restriction base="soap11-enc:Array">
+            <attribute ref="soap11-enc:arrayType" wsdl:arrayType="tns:StoredFare[]"/></restriction></complexContent></complexType>
+      <complexType name="StoredFare">
+        <sequence>
+          <element name="LocalCurr" type="string"/>
+          <element name="TAXLocalCurr" type="string"/>
+          <element name="TUA" type="float"/>
+          <element name="currUSD" type="string"/>
+          <element name="iva" type="float"/>
+          <element name="totalImpuestos" type="float"/>
+          <element name="totalLocalCurr" type="float"/>
+          <element name="totalLocalCurrwithTAX" type="float"/>
+          <element name="totalUSD" type="float"/></sequence></complexType>
+      <complexType name="ArrayOfAirTicket">
+        <complexContent>
+          <restriction base="soap11-enc:Array">
+            <attribute ref="soap11-enc:arrayType" wsdl:arrayType="tns:AirTicket[]"/></restriction></complexContent></complexType>
+      <complexType name="AirTicket">
+        <sequence>
+          <element name="AddTicketNumbers" type="tns:ArrayOfstring"/>
+          <element name="AgentSignIn" type="string"/>
+          <element name="PrintCountry" type="string"/>
+          <element name="PrintedDate" type="tns:DateWrapper"/>
+          <element name="PrintedTime" type="tns:TimeWrapper"/>
+          <element name="PrinterPCC" type="string"/>
+          <element name="TicketNumber" type="string"/>
+          <element name="TicketStatus" type="string"/>
+          <element name="TicketType" type="string"/>
+          <element name="paxLastName" type="string"/>
+          <element name="paxNameInitial" type="string"/></sequence></complexType>
+      <complexType name="ArrayOfRetrievedTripLeg">
+        <complexContent>
+          <restriction base="soap11-enc:Array">
+            <attribute ref="soap11-enc:arrayType" wsdl:arrayType="tns:RetrievedTripLeg[]"/></restriction></complexContent></complexType>
+      <complexType name="RetrievedTripLeg">
+        <sequence>
+          <element name="AirSegments" type="tns:ArrayOfAirSegment"/>
+          <element name="bookingClass" type="string"/>
+          <element name="carrierCode" type="string"/>
+          <element name="confAirline" type="string"/>
+          <element name="confNumber" type="string"/>
+          <element name="confType" type="string"/>
+          <element name="eTicket" type="boolean"/>
+          <element name="flightNumber" type="string"/>
+          <element name="married" type="boolean"/>
+          <element name="seatsBooked" type="int"/>
+          <element name="segmentNumber" type="int"/>
+          <element name="specialMeal" type="boolean"/>
+          <element name="status" type="string"/>
+          <element name="stopOvers" type="int"/></sequence></complexType>
+      <complexType name="ArrayOfAirSegment">
+        <complexContent>
+          <restriction base="soap11-enc:Array">
+            <attribute ref="soap11-enc:arrayType" wsdl:arrayType="tns:AirSegment[]"/></restriction></complexContent></complexType>
+      <complexType name="AirSegment">
+        <sequence>
+          <element name="SegmentNumber" type="int"/>
+          <element name="SegmentStatus" type="string"/>
+          <element name="airCraft" type="string"/>
+          <element name="arr_date" type="tns:DateWrapper"/>
+          <element name="arr_time" type="tns:TimeWrapper"/>
+          <element name="carrierCode" type="string"/>
+          <element name="carrierName" type="string"/>
+          <element name="dep_date" type="tns:DateWrapper"/>
+          <element name="dep_time" type="tns:TimeWrapper"/>
+          <element name="flightLengthInHours" type="float"/>
+          <element name="mealCode1" type="string"/>
+          <element name="mealCode2" type="string"/>
+          <element name="miles" type="int"/>
+          <element name="nameOf1" type="string"/>
+          <element name="nameOf2" type="string"/>
+          <element name="pcc1" type="string"/>
+          <element name="pcc2" type="string"/>
+          <element name="smoking" type="boolean"/></sequence></complexType>
+      <complexType name="ArrayOftorSegment">
+        <complexContent>
+          <restriction base="soap11-enc:Array">
+            <attribute ref="soap11-enc:arrayType" wsdl:arrayType="tns:torSegment[]"/></restriction></complexContent></complexType>
+      <complexType name="torSegment">
+        <sequence>
+          <element name="ITNumber" type="string"/>
+          <element name="NumberInParty" type="int"/>
+          <element name="OccupancyCode" type="string"/>
+          <element name="SegmentDate" type="tns:DateWrapper"/>
+          <element name="SegmentNumber" type="int"/>
+          <element name="SegmentStatus" type="string"/>
+          <element name="SegmentType" type="string"/>
+          <element name="TourName" type="string"/>
+          <element name="confNumber" type="string"/>
+          <element name="nameOf1" type="string"/>
+          <element name="pcc1" type="string"/>
+          <element name="serviceInformation" type="string"/>
+          <element name="vendorCode" type="string"/></sequence></complexType></schema>
+    <schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://java.sun.com/jax-rpc-ri/internal" xmlns:soap11-enc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" targetNamespace="http://java.sun.com/jax-rpc-ri/internal">
+      <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+      <import namespace="urn:/WServicesDev/wsdl"/>
+      <complexType name="arrayList">
+        <complexContent>
+          <extension base="tns:list">
+            <sequence/></extension></complexContent></complexType>
+      <complexType name="list">
+        <complexContent>
+          <extension base="tns:collection">
+            <sequence/></extension></complexContent></complexType>
+      <complexType name="collection">
+        <complexContent>
+          <restriction base="soap11-enc:Array">
+            <attribute ref="soap11-enc:arrayType" wsdl:arrayType="anyType[]"/></restriction></complexContent></complexType></schema></types>
+  <message name="TicketRetrieveInterface_getOnlyTicketingData">
+    <part name="String_1" type="xsd:string"/></message>
+  <message name="TicketRetrieveInterface_getOnlyTicketingDataResponse">
+    <part name="result" type="tns:RetrievedReservation"/></message>
+  <portType name="TicketRetrieveInterface">
+    <operation name="getOnlyTicketingData" parameterOrder="String_1">
+      <input message="tns:TicketRetrieveInterface_getOnlyTicketingData"/>
+      <output message="tns:TicketRetrieveInterface_getOnlyTicketingDataResponse"/></operation></portType>
+  <binding name="TicketRetrieveInterfaceBinding" type="tns:TicketRetrieveInterface">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="rpc"/>
+    <operation name="getOnlyTicketingData">
+      <soap:operation soapAction=""/>
+      <input>
+        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" use="encoded" namespace="urn:/WServicesDev/wsdl"/></input>
+      <output>
+        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" use="encoded" namespace="urn:/WServicesDev/wsdl"/></output></operation></binding>
+  <service name="TicketRetrieve">
+    <port name="TicketRetrieveInterfacePort" binding="tns:TicketRetrieveInterfaceBinding">
+      <soap:address location="http://tvazteca.viajez.com:80/WServicesDev/TicketRetrieve" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"/></port></service></definitions>

@@ -1,0 +1,52 @@
+module ATL2BindingDebugger;
+create OUT : ATL, trace : Trace refining IN : ATL;
+
+-- We copy the ATL!Module to make sure the whole program is actually copied even if it contains no binding.
+rule Module {
+  from
+    s : ATL!Module
+  to
+    t : ATL!Module (
+      name <- s.name,
+      libraries <- s.libraries,
+      isRefining <- s.isRefining,
+      inModels <- s.inModels,
+      outModels <- s.outModels,
+      elements <- s.elements
+    ),
+    traceLink : Trace!TraceLink (
+      ruleName <- 'Module',
+      targetElements <- Sequence {t}
+    )
+  do {
+    traceLink.refSetValue('sourceElements', Sequence {s});
+  }
+}
+
+-- We change the value of each binding so that it calls the OclAny.debug(msg : String)
+-- operation with information about the current rule, target element and property name
+-- as a message.
+rule Binding {
+  from
+    s : ATL!Binding
+  to
+    t : ATL!Binding (
+      propertyName <- s.propertyName,
+      value <- debugger
+    ),
+    debugger : ATL!OperationCallExp (
+      source <- s.value,
+      operationName <- 'debug',
+      arguments <- Sequence {arg}
+    ),
+    arg : ATL!StringExp (
+      stringSymbol <- s.outPatternElement.outPattern."rule".name + '.' + s.outPatternElement.varName + '.' + s.propertyName
+    ),
+    traceLink : Trace!TraceLink (
+      ruleName <- 'Binding',
+      targetElements <- Sequence {t, debugger, arg}
+    )
+  do {
+    traceLink.refSetValue('sourceElements', Sequence {s});
+  }
+}

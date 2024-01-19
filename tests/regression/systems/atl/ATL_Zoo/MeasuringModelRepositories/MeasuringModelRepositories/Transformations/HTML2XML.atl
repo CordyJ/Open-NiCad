@@ -1,0 +1,133 @@
+--@name HTML2XML
+--@version 1.0
+--@domains HTML, Table
+--@authors Eric Vepa (eric.vepa <at> gmail.com)
+--@date 2006/08/04
+--@description XML extractor for HTML tabular representation.
+--@see
+--@comments
+
+module HTML2XML; -- Module Template
+create OUT : XML from IN : HTML;
+
+--@begin rule HTML2Root
+rule HTML2Root {
+	from
+		html:HTML!HTML
+	to
+		root:XML!Root (
+			name <- 'HTML',
+			children <- html.head,
+			children <- html.body
+		)
+}	
+--@end rule HTML2Root
+
+--@begin rule HEAD2Element
+rule HEAD2Element {
+	from
+		head:HTML!HEAD
+	to
+		elmt:XML!Element (
+			name <- 'HEAD',
+			children <- head.headElements
+		)
+}	
+--@end rule HEAD2Element
+
+--@begin rule TITLE2Element
+rule TITLE2Element {
+	from
+		title:HTML!TITLE
+	to
+		elmt:XML!Element (
+			name <- 'TITLE',
+			children <- value
+		),
+		value:XML!Text (
+			value <- if not title.value.oclIsUndefined() then title.value else '' endif
+		)
+}	
+--@end rule TITLE2Element
+
+--@begin rule BODY2Element
+rule BODY2Element {
+	from
+		body:HTML!BODY
+	to
+		elmt:XML!Element (
+			name <- 'BODY',
+			children <- body.bodyElements
+		)
+}	
+--@end rule BODY2Element
+
+--@begin rule TABLE2Element
+rule TABLE2Element {
+	from
+		table:HTML!TABLE
+	to
+		elmt:XML!Element (
+			name <- 'TABLE',
+			children <- thisModule.Attribute('border', if not table.border.oclIsUndefined() then table.border else '0' endif),
+			children <- table.trs
+		)
+}	
+--@end rule TABLE2Element
+
+--@begin rule TR2Element
+rule TR2Element {
+	from
+		tr:HTML!TR
+	to
+		elmt:XML!Element (
+			name <- 'TR',
+			children <- tr.tds
+		)
+}	
+--@end rule TR2Element
+
+--@begin rule TH2Element
+rule TH2Element {
+	from
+		th:HTML!TH
+	to
+		elmt:XML!Element (
+			name <- 'TH',
+			children <- value
+		),
+		value:XML!Text (
+			value <- if not th.value.oclIsUndefined() then th.value else '' endif
+		)
+}	
+--@end rule TH2Element
+
+--@begin rule TD2Element
+rule TD2Element {
+	from
+		td:HTML!TD (
+			not td.oclIsTypeOf(HTML!TH)
+		)
+	to
+		elmt:XML!Element (
+			name <- 'TD',
+			children <- value
+		),
+		value:XML!Text (
+			value <- if not td.value.oclIsUndefined() then td.value else '' endif
+		)
+}	
+--@end rule TD2Element
+
+--@begin lazy rule Attribute
+lazy rule Attribute {
+	from
+		attrName:String,
+		attrValue:String
+	to
+		attr:XML!Attribute (
+			name <- attrName,
+			value <- attrValue
+		)
+}	
+--@end lazy rule Attribute

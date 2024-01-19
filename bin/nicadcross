@@ -1,0 +1,15 @@
+#!/bin/bash 
+# NiCad 7.0 wrapper script
+
+# Where's NICAD?
+if [ -d ./lib/nicad ]
+then
+    NICADLIB=./lib/nicad
+else
+    NICADLIB=/usr/local/lib/nicad
+fi
+
+# Run the NiCad cross script
+$NICADLIB/scripts/nicadcross.sh $NICADLIB "$1" "$2" "$3" "$4" "$5"
+
+# Rev 15.1.24

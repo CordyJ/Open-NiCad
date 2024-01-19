@@ -1,0 +1,29 @@
+-- @path TypeA=/SideEffect/Metamodels/TypeA.ecore
+-- @path TypeB=/SideEffect/Metamodels/TypeB.ecore
+
+module TypeA2TypeB;
+create b : TypeB from a : TypeA;
+
+-- This helper retrieves all names and removes all duplicates
+helper context TypeA!RootA def : getDefNameSet() : Set(String) =
+	self.elms->collect(e|e.name).asSet();
+
+rule RootA2RootB {
+	from 
+		rtA : TypeA!RootA
+	to
+		-- this rule is dangerous as we suppose the ATL engine executes...
+		rtB : TypeB!RootB (
+			-- this line before...
+			defs <- defBLst,
+			-- this one.
+			elms <- elmBLst
+		),
+		defBLst : distinct TypeB!DefinitionB foreach(defName in rtA.getDefNameSet ())(
+			name <- defName
+		),
+		elmBLst : distinct TypeB!ElementB foreach (elmA in rtA.elms) (
+				-- here the target model is browsed
+				definition <- rtB.defs->select (d | d.name = elmA.name )->first()
+		)
+}

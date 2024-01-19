@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<definitions xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:s0="urn:thecave-com:SnowReport" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" targetNamespace="urn:thecave-com:SnowReport" xmlns="http://schemas.xmlsoap.org/wsdl/">
+  <types>
+  <s:schema xmlns="urn:thecave-com:SnowReport" xmlns:s="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="urn:thecave-com:SnowReport">
+	<s:element name="DailyDump">
+		<s:complexType />
+	</s:element>
+	<s:element name="DailyDumpResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="DailyDumpResult" type="ArrayOfResort" />
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:complexType name="ArrayOfResort">
+		<s:sequence>
+			<s:element minOccurs="0" maxOccurs="unbounded" name="Resort" nillable="true" type="Resort" />
+		</s:sequence>
+	</s:complexType>
+	<s:complexType name="Resort">
+		<s:sequence>
+			<s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string" />
+			<s:element minOccurs="0" maxOccurs="1" name="Url" type="s:string" />
+			<s:element minOccurs="0" maxOccurs="1" name="RecentSnowFall" type="s:string" />
+		</s:sequence>
+	</s:complexType>
+</s:schema>
+
+  </types>
+  <message name="DailyDumpSoapIn">
+    <part name="parameters" element="s0:DailyDump" />
+  </message>
+  <message name="DailyDumpSoapOut">
+    <part name="parameters" element="s0:DailyDumpResponse" />
+  </message>
+  <portType name="SnowReportSoap">
+    <operation name="DailyDump">
+      <documentation>DailyDump lists the resorts with the top snow fall accumulation within the last 24 hours.</documentation>
+      <input message="s0:DailyDumpSoapIn" />
+      <output message="s0:DailyDumpSoapOut" />
+    </operation>
+  </portType>
+  <binding name="SnowReportSoap" type="s0:SnowReportSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document" />
+    <operation name="DailyDump">
+      <soap:operation soapAction="urn:thecave-com:SnowReport/DailyDump" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+  </binding>
+  <service name="SnowReport">
+    <documentation>SnowReport provides a set of Web methods for retrieving information from various ski resorts such as latest snow fall accumulations.</documentation>
+    <port name="SnowReportSoap" binding="s0:SnowReportSoap">
+      <soap:address location="http://www.thecave.com/ws/SnowReport.asmx" />
+    </port>
+  </service>
+</definitions>

@@ -1,0 +1,540 @@
+module Mantis2XML; -- Module Template
+create OUT : XML from IN : Mantis;
+
+
+-- This helper permits to obtain the string associated
+-- to an RelationshipType value.
+-- CONTEXT: n/a
+-- RETURN: String
+helper def: getRelationshipTypeStringValue(rt : Mantis!RelationshipType) : String =
+	let rv : String = rt.toString()
+	in
+		rv.substring(4,rv.size());
+
+
+
+-- Rule 'MantisRoot2Root'
+-- This rule generates the root of the XML model
+-- from the "MantisRoot" element
+rule  MantisRoot2Root {
+	from
+		mr : Mantis!MantisRoot
+	
+	to
+		xr : XML!Root (
+			name <- 'mantis',
+			children <- Sequence{att1,att2,att3,
+								mr.issues->collect(e | thisModule.resolveTemp(e, 'xi'))
+								}
+		),
+		att1 : XML!Attribute (
+			name <- 'xmlns',
+			value <- 'http://www.mantisbt.org'
+		),
+		att2 : XML!Attribute (
+			name <- 'xmlns:xsi',
+			value <- 'http://www.w3.org/2001/XMLSchema-instance'
+		),
+		att3 : XML!Attribute (
+			name <- 'xsi:schemaLocation',
+			value <- 'http://www.mantisbt.org mantis.xsd'
+		)
+}
+
+
+-- Rule 'Issue2Issue'
+-- This rule generates the XML issue's tags
+-- from the "Issue" element
+rule  Issue2Issue {
+	from
+		mi : Mantis!Issue
+	using {
+		privateOrNot : Sequence(String) =
+			let priv : Boolean = mi.private
+			in
+				if priv.oclIsUndefined()
+				then
+					Sequence{}
+				else
+					Sequence{priv.toString()}
+				endif;
+		versionOrNot : Sequence(String) =
+			let vv : String = mi.version
+			in
+				if vv.oclIsUndefined()
+				then
+					Sequence{}
+				else
+					Sequence{vv}
+				endif;
+		buildOrNot : Sequence(String) =
+			let bv : String = mi.build
+			in
+				if bv.oclIsUndefined()
+				then
+					Sequence{}
+				else
+					Sequence{bv}
+				endif;
+		platformOrNot : Sequence(String) =
+			let pv : String = mi.platform
+			in
+				if pv.oclIsUndefined()
+				then
+					Sequence{}
+				else
+					Sequence{pv}
+				endif;
+		osOrNot : Sequence(String) =
+			let ov : String = mi.os
+			in
+				if ov.oclIsUndefined()
+				then
+					Sequence{}
+				else
+					Sequence{ov}
+				endif;
+		osVersionOrNot : Sequence(String) =
+			let ovv : String = mi.osVersion
+			in
+				if ovv.oclIsUndefined()
+				then
+					Sequence{}
+				else
+					Sequence{ovv}
+				endif;
+		stepsToReproduceOrNot : Sequence(String) =
+			let strv : String = mi.stepsToReproduce
+			in
+				if strv.oclIsUndefined()
+				then
+					Sequence{}
+				else
+					Sequence{strv}
+				endif;
+		additionalInfoOrNot : Sequence(String) =
+			let aiv : String = mi.additionalInfo
+			in
+				if aiv.oclIsUndefined()
+				then
+					Sequence{}
+				else
+					Sequence{aiv}
+				endif;
+		fixedInVersionOrNot : Sequence(String) =
+			let fivv : String = mi.fixedInVersion
+			in
+				if fivv.oclIsUndefined()
+				then
+					Sequence{}
+				else
+					Sequence{fivv}
+				endif;
+		assignedToOrNot : Sequence(Mantis!Person) =
+			let atv : Mantis!Person = mi.assignedTo
+			in
+				if atv.oclIsUndefined()
+				then
+					Sequence{}
+				else
+					Sequence{atv}
+				endif;	
+		projectionOrNot : Sequence(Mantis!ValueWithId) =
+			let projv : Mantis!ValueWithId = mi.projection
+			in
+				if projv.oclIsUndefined()
+				then
+					Sequence{}
+				else
+					Sequence{projv}
+				endif;
+		etaOrNot : Sequence(Mantis!ValueWithId) =
+			let ev : Mantis!ValueWithId = mi.eta
+			in
+				if ev.oclIsUndefined()
+				then
+					Sequence{}
+				else
+					Sequence{ev}
+				endif;
+		resolutionOrNot : Sequence(Mantis!ValueWithId) =
+			let resv : Mantis!ValueWithId = mi.resolution
+			in
+				if resv.oclIsUndefined()
+				then
+					Sequence{}
+				else
+					Sequence{resv}
+				endif;
+	}
+	to
+		xi : XML!Element (
+			name <- 'issue',
+			children <- Sequence{	idAtt,privAtt,proj,cat,prior,sev,stat,rep,sum,desc,
+									vers,buil,plat,o,overs,repro,sTr,addInfo,dateSub,
+									assi,proje,e,res,fiv,
+									mi.attachments->collect(e | thisModule.resolveTemp(e, 'xa')),
+									mi.relationships->collect(e | thisModule.resolveTemp(e, 'xrs')),
+									mi.notes->collect(e | thisModule.resolveTemp(e, 'xn')),
+									lastUp }
+		),
+		idAtt : XML!Attribute (
+			name <- 'id',
+			value <- mi.id.toString()
+		),
+		privAtt : distinct XML!Attribute foreach(privateVal in privateOrNot)(
+			name <- 'private',
+			value <- privateVal
+		),
+		proj : XML!Element (
+			name <- 'project',
+			children <- Sequence{projIdAtt,projVal}
+		),
+		projIdAtt : XML!Attribute (
+			name <- 'id',
+			value <- mi.project.id.toString()
+		),
+		projVal : XML!Text (
+			value <- mi.project.value
+		),
+		cat : XML!Element (
+			name <- 'category',
+			children <- Sequence{catVal}
+		),
+		catVal : XML!Text (
+			value <- mi.category
+		),
+		prior : XML!Element (
+			name <- 'priority',
+			children <- Sequence{priorIdAtt,priorVal}
+		),
+		priorIdAtt : XML!Attribute (
+			name <- 'id',
+			value <- mi.priority.id.toString()
+		),
+		priorVal : XML!Text (
+			value <- mi.priority.value
+		),
+		sev : XML!Element (
+			name <- 'severity',
+			children <- Sequence{sevIdAtt,sevVal}
+		),
+		sevIdAtt : XML!Attribute (
+			name <- 'id',
+			value <- mi.severity.id.toString()
+		),
+		sevVal : XML!Text (
+			value <- mi.severity.value
+		),
+		stat : XML!Element (
+			name <- 'status',
+			children <- Sequence{statIdAtt,statVal}
+		),
+		statIdAtt : XML!Attribute (
+			name <- 'id',
+			value <- mi.status.id.toString()
+		),
+		statVal : XML!Text (
+			value <- mi.status.value
+		),
+		rep : XML!Element (
+			name <- 'reporter',
+			children <- Sequence{repIdAtt,repLogAtt,repVal}
+		),
+		repIdAtt : XML!Attribute (
+			name <- 'id',
+			value <- mi.reporter.id.toString()
+		),
+		repLogAtt : XML!Attribute (
+			name <- 'login',
+			value <- mi.reporter.login
+		),
+		repVal : XML!Text (
+			value <- mi.reporter.value
+		),
+		sum : XML!Element (
+			name <- 'summary',
+			children <- Sequence{sumVal}
+		),
+		sumVal : XML!Text (
+			value <- mi.summary
+		),
+		desc : XML!Element (
+			name <- 'description',
+			children <- Sequence{descVal}
+		),
+		descVal : XML!Text (
+			value <- mi.description
+		),
+		vers : distinct XML!Element foreach(versionVal in versionOrNot)(
+			name <- 'version',
+			children <- Sequence{versVal}
+		),
+		versVal : distinct XML!Text foreach(versionVal in versionOrNot)(
+			value <- versionVal
+		),
+		buil : distinct XML!Element foreach(buildVal in buildOrNot)(
+			name <- 'build',
+			children <- Sequence{builVal}
+		),
+		builVal : distinct XML!Text foreach(buildVal in buildOrNot)(
+			value <- buildVal
+		),
+		plat : distinct XML!Element foreach(platformVal in platformOrNot)(
+			name <- 'platform',
+			children <- Sequence{platVal}
+		),
+		platVal : distinct XML!Text foreach(platformVal in platformOrNot)(
+			value <- platformVal
+		),
+		o : distinct XML!Element foreach(osVal in osOrNot)(
+			name <- 'os',
+			children <- Sequence{oVal}
+		),
+		oVal : distinct XML!Text foreach(osVal in osOrNot)(
+			value <- osVal
+		),
+		overs : distinct XML!Element foreach(osVersionVal in osVersionOrNot)(
+			name <- 'osVersion',
+			children <- Sequence{oversVal}
+		),
+		oversVal : distinct XML!Text foreach(osVersionVal in osVersionOrNot)(
+			value <- osVersionVal
+		),
+		repro : XML!Element (
+			name <- 'reproducibility',
+			children <- Sequence{reproIdAtt,reproVal}
+		),
+		reproIdAtt : XML!Attribute (
+			name <- 'id',
+			value <- mi.reproducibility.id.toString()
+		),
+		reproVal : XML!Text (
+			value <- mi.reproducibility.value
+		),
+		sTr : distinct XML!Element foreach(stepsToReproduceVal in stepsToReproduceOrNot)(
+			name <- 'stepsToReproduce',
+			children <- Sequence{sTrVal}
+		),
+		sTrVal : distinct XML!Text foreach(stepsToReproduceVal in stepsToReproduceOrNot)(
+			value <- stepsToReproduceVal
+		),
+		addInfo : distinct XML!Element foreach(additionalInfoVal in additionalInfoOrNot)(
+			name <- 'additionalInfo',
+			children <- Sequence{addInfoVal}
+		),
+		addInfoVal : distinct XML!Text foreach(additionalInfoVal in additionalInfoOrNot)(
+			value <- additionalInfoVal
+		),
+		dateSub : XML!Element (
+			name <- 'dateSubmitted',
+			children <- Sequence{dateSubVal}
+		),
+		dateSubVal : XML!Text (
+			value <- mi.dateSubmitted.toString()
+		),
+		assi : distinct XML!Element foreach(assignedToVal in assignedToOrNot) (
+			name <- 'assignedTo',
+			children <- Sequence{assiIdAtt,assiLogAtt,assiVal}
+		),
+		assiIdAtt : distinct XML!Attribute foreach(assignedToVal in assignedToOrNot)(
+			name <- 'id',
+			value <- assignedToVal.id.toString()
+		),
+		assiLogAtt : distinct XML!Attribute foreach(assignedToVal in assignedToOrNot) (
+			parent <- assi,
+			name <- 'login',
+			value <- assignedToVal.login
+		),
+		assiVal : distinct XML!Text foreach(assignedToVal in assignedToOrNot) (
+			parent <- assi,
+			value <- assignedToVal.value
+		),
+		proje : distinct XML!Element foreach(projectionVal in projectionOrNot) (
+			name <- 'projection',
+			children <- Sequence{projeIdAtt,projeVal}
+		),
+		projeIdAtt : distinct XML!Attribute foreach(projectionVal in projectionOrNot) (
+			name <- 'id',
+			value <- projectionVal.id.toString()
+		),
+		projeVal : distinct XML!Text foreach(projectionVal in projectionOrNot) (
+			parent <- proje,
+			value <- projectionVal.value
+		),
+		e : distinct XML!Element foreach(etaVal in etaOrNot) (
+			name <- 'eta',
+			children <- Sequence{eIdAtt,eVal}
+		),
+		eIdAtt : distinct XML!Attribute foreach(etaVal in etaOrNot) (
+			name <- 'id',
+			value <- etaVal.id.toString()
+		),
+		eVal : distinct XML!Text foreach(etaVal in etaOrNot) (
+			parent <- e,
+			value <- etaVal.value
+		),
+		res : distinct XML!Element foreach(resolutionVal in resolutionOrNot) (
+			name <- 'resolution',
+			children <- Sequence{resIdAtt,resVal}
+		),
+		resIdAtt : distinct XML!Attribute foreach(resolutionVal in resolutionOrNot) (
+			name <- 'id',
+			value <- resolutionVal.id.toString()
+		),
+		resVal : distinct XML!Text foreach(resolutionVal in resolutionOrNot) (
+			parent <- res,
+			value <- resolutionVal.value
+		),
+		fiv : distinct XML!Element foreach(fixedInVersionVal in fixedInVersionOrNot)(
+			name <- 'fixedInVersion',
+			children <- Sequence{fivVal}
+		),
+		fivVal : distinct XML!Text foreach(fixedInVersionVal in fixedInVersionOrNot)(
+			value <- fixedInVersionVal
+		),
+		lastUp : XML!Element (
+			name <- 'lastUpdate',
+			children <- Sequence{lastUpVal}
+		),
+		lastUpVal : XML!Text (
+			value <- mi.lastUpdate.toString()
+		) 
+} 
+
+
+-- Rule 'Attachment2Attachment'
+-- This rule generates the attachment's XML tags
+-- from the "Attachment" element
+rule  Attachment2Attachment {
+	from
+		ma : Mantis!Attachment
+	
+	to
+		xa : XML!Element (
+			name <- 'attachment',
+			children <- Sequence{fileN,si,cType,ts,dlU}
+		),
+		fileN : XML!Element (
+			name <- 'filename',
+			children <- Sequence{fileNVal}
+		),
+		fileNVal : XML!Text (
+			value <- ma.filename
+		),
+		si : XML!Element (
+			name <- 'size',
+			children <- Sequence{siVal}
+		),
+		siVal : XML!Text (
+			value <- ma.size.toString()
+		),
+		cType : XML!Element (
+			name <- 'contentType',
+			children <- Sequence{cTypeVal}
+		),
+		cTypeVal : XML!Text (
+			value <- ma.contentType
+		),
+		ts : XML!Element (
+			name <- 'timestamp',
+			children <- Sequence{tsVal}
+		),
+		tsVal : XML!Text (
+			value <- ma.timestamp
+		),
+		dlU : XML!Element (
+			name <- 'downloadUrl',
+			children <- Sequence{dlUVal}
+		),
+		dlUVal : XML!Text (
+			value <- ma.downloadUrl
+		)
+}
+
+
+-- Rule 'Relationship2Relationship'
+-- This rule generates the relationship's XML tags
+-- from the "Relationship" element
+rule  Relationship2Relationship {
+	from
+		mr : Mantis!Relationship
+	
+	to
+		xrs : XML!Element (
+			name <- 'relationship',
+			children <- Sequence{typ,rid}
+		),
+		typ : XML!Element (
+			name <- 'type',
+			children <- Sequence{typVal}
+		),
+		typVal : XML!Text (
+			value <- thisModule.getRelationshipTypeStringValue(mr.type)
+		),
+		rid : XML!Element (
+			name <- 'id',
+			children <- Sequence{ridVal}
+		),
+		ridVal : XML!Text (
+			value <- mr.id
+		)
+}
+
+
+-- Rule 'Note2Note'
+-- This rule generates the note's XML tags
+-- from the "Note" element
+rule  Note2Note {
+	from
+		mn : Mantis!Note
+	using {
+		privateOrNot : Sequence(String) =
+			let priv : Boolean = mn.private
+			in
+				if priv.oclIsUndefined()
+				then
+					Sequence{}
+				else
+					Sequence{priv.toString()}
+				endif;
+	}
+	to
+		xn : XML!Element (
+			name <- 'note',
+			children <- Sequence{privAtt,auth,ts,tex}
+		),
+		privAtt : distinct XML!Attribute foreach(privateVal in privateOrNot)(
+			name <- 'private',
+			value <- privateVal
+		),
+		auth : XML!Element (
+			name <- 'author',
+			children <- Sequence{authId,authLog,authVal}
+		),
+		authId : XML!Attribute (
+			name <- 'id',
+			value <- mn.author.id.toString()
+		),
+		authLog : XML!Attribute (
+			name <- 'login',
+			value <- mn.author.login
+		),
+		authVal : XML!Text (
+			value <- mn.author.value
+		),
+		ts : XML!Element (
+			name <- 'timestamp',
+			children <- Sequence{tsVal}
+		),
+		tsVal : XML!Text (
+			value <- mn.timestamp.toString()
+		),
+		tex : XML!Element (
+			name <- 'text',
+			children <- Sequence{texVal}
+		),
+		texVal : XML!Text (
+			value <- mn.text
+		)	
+}

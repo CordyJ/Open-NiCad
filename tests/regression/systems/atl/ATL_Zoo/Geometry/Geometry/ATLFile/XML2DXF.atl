@@ -1,0 +1,53 @@
+--
+-- Written in January 2005 by Peter Rosenthal
+--
+
+module XML2DXF;
+create OUT : DXF from IN : XML;
+
+helper context XML!Element def: getAttrVal(name : String) : String =
+	if (self.children->select(c | c.oclIsKindOf(XML!Attribute) and c.name = name)->size()=0) then
+		''
+	else
+		self.children->select(c | c.oclIsKindOf(XML!Attribute) and c.name = name)->first().value
+	endif
+;
+
+
+rule DXF {
+	from
+		e : XML!Element (
+			e.name = 'DXF'		
+		)
+	to
+		out : DXF!DXF (
+			meshes <-  e.children->select( c | c.name = 'Mesh' )
+		)
+}
+
+rule Point {
+	from
+		e : XML!Element (
+			e.name = 'Point'		
+		)
+	to
+		out : DXF!Point (
+			name <- e.getAttrVal('name'),
+			x <- e.getAttrVal('x').toReal(),
+			y <- e.getAttrVal('y').toReal(),
+			z <- e.getAttrVal('z').toReal()
+		)
+}
+
+
+rule Mesh {
+	from
+		e : XML!Element (
+			e.name = 'Mesh'		
+		)
+	to
+		out : DXF!Mesh (
+			name <- e.getAttrVal('name'),
+			points <- e.children
+		)
+}

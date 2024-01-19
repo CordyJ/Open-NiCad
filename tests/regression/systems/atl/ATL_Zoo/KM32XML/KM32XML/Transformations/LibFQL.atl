@@ -1,0 +1,32 @@
+-- @atlcompiler atl2006
+library FQL;
+
+helper context KM3!ModelElement def: getFQL() : String =
+	self.getFQLWithSeparator('::');
+
+helper context KM3!ModelElement def: getFQLWithSeparator(separator: String) : String =
+	if (self.oclIsKindOf(KM3!EnumLiteral)) then
+		if (self.enumeration <> OclUndefined) then
+			self.enumeration.getFQLWithSeparator(separator) + separator + self.name
+		else 
+			self.name
+		endif
+	else
+		if (self.oclIsKindOf(KM3!StructuralFeature)) then
+				if (self.owner <> OclUndefined) then
+					self.owner.getFQLWithSeparator(separator) + separator + self.name
+				else
+					self.name
+				endif
+		else
+			if (self.oclIsKindOf(KM3!Classifier)) then
+				if (self.package <> OclUndefined) then
+					self.package.getFQLWithSeparator(separator) + separator + self.name
+				else 
+					self.name
+				endif
+			else
+				self.name
+			endif
+		endif
+	endif;

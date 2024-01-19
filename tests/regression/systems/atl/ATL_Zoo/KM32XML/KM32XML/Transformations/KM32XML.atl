@@ -1,0 +1,138 @@
+-- @atlcompiler atl2006
+module km32xml;
+create OUT: XML from IN: KM3;
+
+uses FQL;
+
+abstract rule ModelElement {
+	from
+		i: KM3!ModelElement
+	to
+		attribute_name: XML!Attribute (
+			name <- 'name',
+			value <- i.name
+		)
+}
+
+rule Metamodel {
+	from 
+		i: KM3!Metamodel
+	to
+		o: XML!Root (
+			name <- 'Metamodel',
+			children <- i.contents
+		)
+}
+
+rule Package extends ModelElement {
+	from
+		i: KM3!Package
+	to
+		o: XML!Element (
+			name <- 'Package',
+			children <- Sequence{attribute_name}->union(i.contents)
+		)
+}
+
+rule Class extends ModelElement {
+	from
+		i: KM3!Class
+	to
+		o: XML!Element (
+			name <- 'Class',
+			children <- Sequence{attribute_name, attribute_isAbstract, reference_supertypes}->union(i.structuralFeatures)
+		),
+		attribute_isAbstract: XML!Attribute (
+			name <- 'isAbstract',
+			value <- i.isAbstract->toString()
+		),
+		reference_supertypes: XML!Attribute (
+			name <- 'supertypes',
+			value <- i.supertypes->iterate(e ; acc : String = '' | if acc = '' then acc else acc + ', '  endif + e.getFQL())
+		)
+}
+
+rule DataType extends ModelElement {
+	from
+		i: KM3!DataType
+	to
+		o: XML!Element (
+			name <- 'DataType',
+			children <- Sequence{attribute_name}
+		)
+}
+
+rule Enumeration extends ModelElement {
+	from
+		i: KM3!Enumeration
+	to
+		o: XML!Element (
+			name <- 'Enumeration',
+			children <- Sequence{attribute_name}->union(i.literals)
+		)
+}
+
+rule EnumLiteral extends ModelElement {
+	from
+		i: KM3!EnumLiteral
+	to
+		o: XML!Element (
+			name <- 'EnumLiteral',
+			children <- Sequence{attribute_name}
+		)
+}
+
+abstract rule StructuralFeature extends ModelElement {
+	from
+		i: KM3!StructuralFeature
+	to
+		attribute_lower: XML!Attribute (
+			name <- 'lower',
+			value <- i.lower->toString()
+		),
+		attribute_upper: XML!Attribute (
+			name <- 'upper',
+			value <- i.upper->toString()
+		),
+		attribute_isOrdered: XML!Attribute (
+			name <- 'isOrdered',
+			value <- i.isOrdered->toString()
+		),
+		reference_type: XML!Attribute (
+			name <- 'type',
+			value <- i.type.getFQL()
+		)
+		--type
+}
+
+rule Attribute extends StructuralFeature {
+	from
+		i: KM3!Attribute
+	to
+		o: XML!Element (
+			name <- 'Attribute',
+			children <- Sequence{attribute_name, attribute_lower, attribute_upper, attribute_isOrdered, attribute_isUnique, reference_type}
+		),
+		attribute_isUnique: XML!Attribute (
+			name <- 'isUnique',
+			value <- i.isUnique->toString()
+		)
+}
+
+rule Reference extends StructuralFeature {
+	from
+		i: KM3!Reference
+	to
+		o: XML!Element (
+			name <- 'Reference',
+			children <- Sequence{attribute_name, attribute_lower, attribute_upper, attribute_isOrdered, attribute_isContainer, reference_type, reference_opposite}
+		),
+		attribute_isContainer: XML!Attribute (
+			name <- 'isContainer',
+			value <- i.isContainer->toString()
+		),
+		reference_opposite: XML!Attribute(
+			name <- 'opposite',
+			value <- if i.opposite->oclIsUndefined() then '' else  i.opposite.getFQL() endif
+		)
+}

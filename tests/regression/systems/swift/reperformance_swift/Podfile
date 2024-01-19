@@ -1,0 +1,43 @@
+
+platform :ios, '10.0'
+
+target 'REPerformance' do
+  use_frameworks!
+  inhibit_all_warnings!
+
+  pod 'NVActivityIndicatorView'
+  pod 'SwiftGen', '~> 5.2.1'
+  pod 'SnapKit', '~> 4.0.0'
+  pod 'SwiftyJSON', '~> 4.0'
+  pod 'IQKeyboardManagerSwift'
+  pod 'Bugsnag'
+  pod 'Moya'
+  pod 'Moya-SwiftyJSONMapper', '~> 3.0.0'
+  pod 'FBSDKCoreKit'
+  pod 'FBSDKLoginKit'
+  pod 'M13Checkbox', '~> 3.2.1'
+  pod 'youtube-ios-player-helper'
+  pod 'VimeoNetworking'
+  pod 'VimeoUpload', :git => 'https://github.com/vimeo/VimeoUpload.git', :tag => '3.0.0'
+  pod 'KeychainAccess'
+  pod 'Firebase/Auth'
+  pod 'Firebase/Functions'
+  pod 'Firebase/Analytics'
+  pod 'Firebase/Firestore'
+  pod 'Firebase/Messaging'
+  pod 'GoogleMaps'
+  pod 'GooglePlaces'
+  pod 'GooglePlacePicker'
+  pod 'AlamofireImage'
+
+  target 'REPerformanceTests' do
+    inherit! :search_paths
+    # Pods for testing
+  end
+
+  target 'REPerformanceUITests' do
+    inherit! :search_paths
+    # Pods for testing
+  end
+
+end

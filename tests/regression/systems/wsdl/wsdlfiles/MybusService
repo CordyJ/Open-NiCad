@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://mybus.transit.ws.its.washington.edu" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://mybus.transit.ws.its.washington.edu" xmlns:intf="http://mybus.transit.ws.its.washington.edu" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><wsdl:types><schema targetNamespace="http://mybus.transit.ws.its.washington.edu" xmlns="http://www.w3.org/2001/XMLSchema"><import namespace="http://schemas.xmlsoap.org/soap/encoding/"/><complexType name="EventEstimate"><sequence><element name="goalDeviation" type="xsd:int"/><element name="schedTime" type="xsd:int"/><element name="timestamp" type="xsd:long"/><element name="goalTime" type="xsd:int"/><element name="type" nillable="true" type="xsd:string"/><element name="distanceToGoal" type="xsd:int"/><element name="destination" nillable="true" type="xsd:string"/><element name="route" type="xsd:int"/></sequence></complexType><complexType name="ArrayOf_xsd_string"><complexContent><restriction base="soapenc:Array"><attribute ref="soapenc:arrayType" wsdl:arrayType="xsd:string[]"/></restriction></complexContent></complexType><complexType name="ArrayOfEventEstimate"><complexContent><restriction base="soapenc:Array"><attribute ref="soapenc:arrayType" wsdl:arrayType="impl:EventEstimate[]"/></restriction></complexContent></complexType></schema></wsdl:types>
+  <wsdl:message name="getAgenciesResponse">
+    <wsdl:part name="getAgenciesReturn" type="intf:ArrayOf_xsd_string"/>
+  </wsdl:message>
+  <wsdl:message name="getTimeResponse">
+    <wsdl:part name="getTimeReturn" type="xsd:long"/>
+  </wsdl:message>
+  <wsdl:message name="getEventDataRequest">
+    <wsdl:part name="in0" type="xsd:string"/>
+    <wsdl:part name="in1" type="xsd:int"/>
+    <wsdl:part name="in2" type="xsd:int"/>
+    <wsdl:part name="in3" type="xsd:int"/>
+  </wsdl:message>
+  <wsdl:message name="getEventDataResponse">
+    <wsdl:part name="getEventDataReturn" type="intf:ArrayOfEventEstimate"/>
+  </wsdl:message>
+  <wsdl:message name="getTimeRequest">
+  </wsdl:message>
+  <wsdl:message name="getAgenciesRequest">
+  </wsdl:message>
+  <wsdl:portType name="MybusPortType">
+    <wsdl:operation name="getTime">
+      <wsdl:input message="intf:getTimeRequest" name="getTimeRequest"/>
+      <wsdl:output message="intf:getTimeResponse" name="getTimeResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="getAgencies">
+      <wsdl:input message="intf:getAgenciesRequest" name="getAgenciesRequest"/>
+      <wsdl:output message="intf:getAgenciesResponse" name="getAgenciesResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="getEventData" parameterOrder="in0 in1 in2 in3">
+      <wsdl:input message="intf:getEventDataRequest" name="getEventDataRequest"/>
+      <wsdl:output message="intf:getEventDataResponse" name="getEventDataResponse"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="MybusPortSoapBinding" type="intf:MybusPortType">
+    <wsdlsoap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="getTime">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="getTimeRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://mybus.transit.ws.its.washington.edu" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="getTimeResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://mybus.transit.ws.its.washington.edu" use="encoded"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getAgencies">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="getAgenciesRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://mybus.transit.ws.its.washington.edu" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="getAgenciesResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://mybus.transit.ws.its.washington.edu" use="encoded"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getEventData">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="getEventDataRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://mybus.transit.ws.its.washington.edu" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="getEventDataResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://mybus.transit.ws.its.washington.edu" use="encoded"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="MybusService">
+    <wsdl:port binding="intf:MybusPortSoapBinding" name="MybusPort">
+      <wsdlsoap:address location="http://ws.its.washington.edu:9090/transit/mybus/services/MybusService"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

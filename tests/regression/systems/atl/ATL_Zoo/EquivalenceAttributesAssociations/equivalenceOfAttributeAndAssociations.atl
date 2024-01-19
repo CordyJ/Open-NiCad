@@ -1,0 +1,107 @@
+-- @name		Equivalence of attributes and associations
+-- @version		1.0
+-- @domains		Catalogue of Model Transformations
+-- @authors		Baudry Julien (jul.baudry<at>gmail.com)
+-- @date		2006/08/02
+-- @description	The purpose of this transformation is to replace association by equivalent attributes.
+-- @see http://www.dcs.kcl.ac.uk/staff/kcl/tcat.pdf   
+-- @see section 1.5, page 4
+-- @see author of article : K. Lano
+
+module UML2Transformations; -- Module Template
+create OUT : UML2target from IN : UML2;
+
+helper context UML2!Class def : getProperties : Sequence(UML2!Properties) =
+		UML2!Association.allInstances()->select(a|a.endType->includes(self))
+				->iterate(a;acc : Sequence(UML2!Property) = Sequence {}|
+							acc->including(a.ownedEnd->select(p|p.type <> self)
+										->first()))
+	;
+
+--@begin rule model
+rule model {
+	from
+		inputModel : UML2!Model 
+	to
+		outputModel : UML2target!Model (
+			name <- inputModel.name,
+			visibility <- inputModel.visibility,
+			packageableElement_visibility <- inputModel.packageableElement_visibility,
+			ownedMember <-inputModel.ownedMember
+		)
+}
+--@end rule model
+
+--@begin rule class
+rule class {
+	from
+		inputClass : UML2!Class 
+	to
+		outputClass : UML2target!Class (
+			name <- inputClass.name,
+			visibility <- inputClass.visibility,
+			packageableElement_visibility <- inputClass.packageableElement_visibility,
+			isAbstract <- inputClass.isAbstract,
+			isLeaf <- inputClass.isLeaf,
+			isActive <- inputClass.isActive,
+			ownedAttribute <- inputClass.getProperties->union(inputClass.ownedAttribute)	
+		)
+}
+--@end rule class
+
+--@begin rule property
+rule property {
+	from
+		inputProperty : UML2!Property 
+	to
+		outputProperty : UML2target!Property (
+			isDerived <- inputProperty.isDerived,
+			isDerivedUnion <- inputProperty.isDerivedUnion,
+			isLeaf <- inputProperty.isLeaf,
+			isOrdered <- inputProperty.isOrdered,
+			isReadOnly <- inputProperty.isReadOnly,
+			isStatic <- inputProperty.isStatic,
+			isUnique <- inputProperty.isUnique,
+			name <- inputProperty.name,
+			visibility <- inputProperty.visibility,
+			lowerValue <- inputProperty.lowerValue,
+			upperValue <- inputProperty.upperValue
+		)
+}
+--@end rule property
+
+--@begin literal null
+rule literalNull {
+	from 
+		inputLiteral : UML2!LiteralNull
+	to 
+		outputLiteral : UML2target!LiteralNull (
+			name <- inputLiteral.name,
+			value <- inputLiteral.value
+		)
+}
+--@end literal null
+
+--@begin literal integer 
+rule literalInteger {
+	from 
+		inputLiteral : UML2!LiteralInteger
+	to 
+		outputLiteral : UML2target!LiteralInteger (
+			name <- inputLiteral.name,
+			value <- inputLiteral.value
+		)
+}
+--@end literal integer
+
+--@begin literal unlimited natural 
+rule literalUnlimitedNatural {
+	from 
+		inputLiteral : UML2!LiteralUnlimitedNatural
+	to 
+		outputLiteral : UML2target!LiteralUnlimitedNatural (
+			name <- inputLiteral.name,
+			value <- inputLiteral.value
+		)	
+}
+--@end literal unlimited natural

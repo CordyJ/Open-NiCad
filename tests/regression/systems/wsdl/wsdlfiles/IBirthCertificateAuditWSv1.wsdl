@@ -1,0 +1,92 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<definitions
+   name="BirthCertificateAuditWSv1"
+   targetNamespace="http://com/clarkston/cts/webservice/birthcertificate/audit/BirthCertificateAuditWSv1.wsdl"
+   xmlns="http://schemas.xmlsoap.org/wsdl/"
+   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+   xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+   xmlns:tns="http://com/clarkston/cts/webservice/birthcertificate/audit/BirthCertificateAuditWSv1.wsdl"
+   xmlns:ns1="http://com.clarkston.cts.webservice.birthcertificate.audit/IBirthCertificateAuditWSv1.xsd">
+   <types>
+      <schema
+         targetNamespace="http://com.clarkston.cts.webservice.birthcertificate.audit/IBirthCertificateAuditWSv1.xsd"
+         xmlns="http://www.w3.org/2001/XMLSchema"
+         xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/">
+         <complexType name="com_clarkston_cts_webservice_birthcertificate_audit_AuditWSValue" jdev:packageName="com.clarkston.cts.webservice.birthcertificate.audit" xmlns:jdev="http://xmlns.oracle.com/jdeveloper/webservices">
+            <all>
+               <element name="auditAction" type="string"/>
+               <element name="certificateId" type="string"/>
+               <element name="status" type="string"/>
+               <element name="auditCertificateId" type="string"/>
+               <element name="auditType" type="string"/>
+               <element name="premiseId" type="string"/>
+               <element name="location" type="string"/>
+               <element name="comments" type="string"/>
+               <element name="auditFindingSummmaryCode" type="string"/>
+               <element name="auditFindings" type="ns1:ArrayOfcom_clarkston_cts_webservice_birthcertificate_audit_AuditFindingWSValue"/>
+               <element name="auditFindingSummaryCodeId" type="int"/>
+            </all>
+         </complexType>
+         <complexType name="com_clarkston_cts_webservice_birthcertificate_audit_AuditFindingWSValue" jdev:packageName="com.clarkston.cts.webservice.birthcertificate.audit" xmlns:jdev="http://xmlns.oracle.com/jdeveloper/webservices">
+            <all>
+               <element name="startRange" type="string"/>
+               <element name="endRange" type="string"/>
+               <element name="comments" type="string"/>
+               <element name="status" type="string"/>
+            </all>
+         </complexType>
+         <complexType name="ArrayOfcom_clarkston_cts_webservice_birthcertificate_audit_AuditFindingWSValue" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+            <complexContent>
+               <restriction base="SOAP-ENC:Array">
+                  <attribute ref="SOAP-ENC:arrayType" wsdl:arrayType="ns1:com_clarkston_cts_webservice_birthcertificate_audit_AuditFindingWSValue[]"/>
+               </restriction>
+            </complexContent>
+         </complexType>
+         <complexType name="com_clarkston_cts_webservice_birthcertificate_audit_AuditResponseWSValue" jdev:packageName="com.clarkston.cts.webservice.birthcertificate.audit" xmlns:jdev="http://xmlns.oracle.com/jdeveloper/webservices">
+            <all>
+               <element name="status" type="string"/>
+               <element name="auditCertificateId" type="string"/>
+               <element name="message" type="ns1:ArrayOfString"/>
+            </all>
+         </complexType>
+         <complexType name="ArrayOfString" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+            <complexContent>
+               <restriction base="SOAP-ENC:Array">
+                  <attribute ref="SOAP-ENC:arrayType" wsdl:arrayType="xsd:string[]"/>
+               </restriction>
+            </complexContent>
+         </complexType>
+      </schema>
+   </types>
+   <message name="submitAudit0Request">
+      <part name="auditValue" type="ns1:com_clarkston_cts_webservice_birthcertificate_audit_AuditWSValue"/>
+   </message>
+   <message name="submitAudit0Response">
+      <part name="return" type="ns1:com_clarkston_cts_webservice_birthcertificate_audit_AuditResponseWSValue"/>
+   </message>
+   <portType name="BirthCertificateAuditWSv1PortType">
+      <operation name="submitAudit">
+         <input name="submitAudit0Request" message="tns:submitAudit0Request"/>
+         <output name="submitAudit0Response" message="tns:submitAudit0Response"/>
+      </operation>
+   </portType>
+   <binding name="BirthCertificateAuditWSv1Binding" type="tns:BirthCertificateAuditWSv1PortType">
+      <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+      <operation name="submitAudit">
+         <soap:operation soapAction="" style="rpc"/>
+         <input name="submitAudit0Request">
+            <soap:body use="encoded" namespace="BirthCertificateAuditWSv1" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+         </input>
+         <output name="submitAudit0Response">
+            <soap:body use="encoded" namespace="BirthCertificateAuditWSv1" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+         </output>
+      </operation>
+   </binding>
+   <service name="BirthCertificateAuditWSv1">
+      <documentation>The Service Endpoint for handling the Birth Certificate Audit web service.
+</documentation>
+      <port name="BirthCertificateAuditWSv1Port" binding="tns:BirthCertificateAuditWSv1Binding">
+         <soap:address location="https://www.clia.livestockid.ca/CLTS/BirthCertificateAuditWSv1"/>
+      </port>
+   </service>
+</definitions>

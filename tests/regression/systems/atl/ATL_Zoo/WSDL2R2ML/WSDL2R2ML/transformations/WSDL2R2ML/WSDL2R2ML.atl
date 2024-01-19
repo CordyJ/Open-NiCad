@@ -1,0 +1,358 @@
+--@atlcompiler atl2006
+
+--------------------------------------------------------------------------------
+-- Transforms a WSDL metamodel to R2ML metamodel.
+-- Created as part of M.Sc. theses at GOOD OLD AI Research Group
+-- Author: Marko Ribaric
+-- Works for R2ML v0.5-beta
+--------------------------------------------------------------------------------
+-- Version: 0.1 - 29.05.2007.
+--
+-- TODO:
+-- 	1) fix for XsSimpleTypeDefinition
+--	2) fix ObjectVariable name
+--	3) fix lexicalValue for DataSlot
+--	4) add Bindings
+--  5) fix ruleID (ReactionRule)
+--  6) fix sender (MessageEventExpression)
+--
+-- ANNOTATION: With MDR, Enumerations must be located in top-most package
+--------------------------------------------------------------------------------
+
+module WSDL2R2ML; 					-- Module Template
+create OUT : R2ML from IN : WSDL;
+
+-- uses strings;
+
+-------------------------------------------------------------------------------
+-- HELPERS --------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- HELPER:	IsInputOrOutputElement()
+-- Returns true if the "value" is the same as the "element" attribute from "input" or "output" element
+-- CONTEXT:	thisModule
+-- IN:		String
+-- OUT:		Boolean
+helper def: IsInputOrOutputElement(value: String) : Boolean = 
+	let operations: Sequence(WSDL!Operation) = WSDL!Interface.allInstances()->asSequence()->first().operation in
+	let inputElem: Sequence(WSDL!Input) = operations->collect(i| i.input)->flatten() in
+	let outputElem: Sequence(WSDL!Output) = operations->collect(o| o.output)->flatten() in
+
+	if ( (inputElem->size() > 0) and (inputElem->select(e| e.element.name = value)->size() > 0) ) then
+		true
+	else if ( (outputElem->size() > 0) and (outputElem->select(e| e.element.name = value)->size() > 0) ) then
+			true
+		 else
+		 	false
+		 endif
+	endif;
+
+	
+-- HELPER:	IsInfaultOrOutfaultElement()
+-- Returns true if the value is the same as the "fault" attribute from "infault" or "outfault" element
+-- CONTEXT:	thisModule
+-- IN:		String
+-- OUT:		Boolean
+helper def: IsInfaultOrOutfaultElement(value: String) : Boolean = 
+	let operations: Sequence(WSDL!Operation) = WSDL!Interface.allInstances()->asSequence()->first().operation in
+	let infaultElem: Sequence(WSDL!Infault) = operations->collect(i| i.infault)->flatten() in
+	let outfaultElem: Sequence(WSDL!Outfault) = operations->collect(o| o.outfault)->flatten() in
+
+	if ( (infaultElem->size() > 0) and (infaultElem->select(e| e.fault.name = value)->size() > 0) ) then
+		true
+	else if ( (outfaultElem->size() > 0) and (outfaultElem->select(e| e.fault.element.name = value)->size() > 0) ) then
+			true
+		 else
+		 	false
+		 endif
+	endif;
+
+-- HELPER:	resolveMEP
+-- resolve the MEP type
+-- CONTEXT:	thisModule
+-- IN:		String
+-- OUT:		String
+helper def: resolveMEP(value : String) : String =
+	if value = #inout then
+			'http://www.w3.org/2006/01/wsdl/in-out'
+		else if value = #inonly then
+				'http://www.w3.org/2006/01/wsdl/inonly'
+			else if value = #outin then
+					'http://www.w3.org/2006/01/wsdl/out-in'
+				else if value = #robustoutonly then
+						'http://www.w3.org/2006/01/wsdl/robustoutonly'
+					else if value = #outonly then
+							'http://www.w3.org/2006/01/wsdl/outonly'
+						else if value = #robust_in_only then
+								'http://www.w3.org/2006/01/wsdl/robustinonly'
+							else if value = #outoptionalin then
+									'http://www.w3.org/2006/01/wsdl/outoptionalin'
+								else if value = #inoptionalout then
+										'http://www.w3.org/2006/01/wsdl/inoptionalout'
+								else OclUndefined
+								endif
+							endif
+						endif
+					endif
+				endif
+			endif
+		endif
+	endif;
+
+
+-------------------------------------------------------------------------------
+-- RULES ----------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- Rule 'RuleBase'
+-- Creates R2ML!RuleBase element from an WSDL!Description. These are root elements.
+rule RuleBase {
+	from
+		i : WSDL!Description (
+				i.oclIsTypeOf(WSDL!Description)
+			)		
+	to
+		o : R2ML!RuleBase (                 
+				rules <- Sequence { i.service, i.interface },
+				vocabularies <- i.types->asSequence()->first()
+		) 
+}
+
+-- Rule 'Vocabulary'
+-- Creates R2ML!Vocabulary element from an WSDL!ElementType.
+rule Vocabulary {
+	from i : WSDL!ElementType (
+			i.oclIsTypeOf(WSDL!ElementType)
+		)
+	to o : R2ML!Vocabulary (
+			entries <- i.schema.elementDeclarations
+		)
+}
+
+-- Rule 'ClassR'
+-- Creates R2ML!Class element from an WSDL!XsElementDeclaration.
+rule ClassR {
+	from i : WSDL!XsElementDeclaration (
+			i.oclIsTypeOf(WSDL!XsElementDeclaration) and
+			not i.typeDefinition.oclIsTypeOf(WSDL!XsSimpleTypeDefinition) and
+			not thisModule.IsInputOrOutputElement(i.name) and
+			not thisModule.IsInfaultOrOutfaultElement(i.name)
+			
+		)
+	to o : R2ML!Class (
+			name <- i.name,
+			attributes <- if i.typeDefinition.oclIsTypeOf(WSDL!XsComplexTypeDefinition) then
+								i.typeDefinition.content.term.particles->collect(e| thisModule.AttributeR(e)) 
+						  else	OclUndefined
+						  endif
+		)
+}
+
+-- Rule 'MessageType'
+-- Creates R2ML!MessageType element from an WSDL!XsElementDeclaration.
+rule MessageType {
+	from i : WSDL!XsElementDeclaration (
+			i.oclIsTypeOf(WSDL!XsElementDeclaration) and
+			not i.typeDefinition.oclIsTypeOf(WSDL!XsSimpleTypeDefinition) and
+			thisModule.IsInputOrOutputElement(i.name)
+		)
+	to o : R2ML!MessageType (
+			name <- i.name,
+			attributes <- if i.typeDefinition.oclIsTypeOf(WSDL!XsComplexTypeDefinition) then
+								Sequence { i.typeDefinition.content.term.particles->select(c| not c.content.name.oclIsUndefined())->collect(e| thisModule.AttributeR(e))
+										 }
+						  else	OclUndefined
+						  endif,
+			referencePropertyRef <- if i.typeDefinition.oclIsTypeOf(WSDL!XsComplexTypeDefinition) then
+									i.typeDefinition.content.term.particles->select(c| not c.content.resolvedElementDeclaration.oclIsUndefined())
+						  else	OclUndefined
+						  endif
+		)
+}
+
+-- Rule 'FaultMessageType'
+-- Creates R2ML!FaultMessageType element from an WSDL!XsElementDeclaration.
+rule FaultMessageType {
+	from i : WSDL!XsElementDeclaration (
+			i.oclIsTypeOf(WSDL!XsElementDeclaration) and
+			not i.typeDefinition.oclIsTypeOf(WSDL!XsSimpleTypeDefinition) and
+			thisModule.IsInfaultOrOutfaultElement(i.name)
+		)
+	to o : R2ML!FaultMessageType (
+			name <- i.name,
+			attributes <- if i.typeDefinition.oclIsTypeOf(WSDL!XsComplexTypeDefinition) then
+							i.typeDefinition.content.term.particles->collect(e| thisModule.AttributeR(e)) 
+						else	OclUndefined
+						  endif
+		)
+}
+
+-- Rule 'AttributeR'
+-- Creates R2ML!Attribute element from an WSDL!XsParticle.
+-- This rule is lazy rule, which means that is called from other rules
+lazy rule AttributeR {
+	from i : WSDL!XsParticle (
+			i.oclIsTypeOf(WSDL!XsParticle)
+		)
+	to o : R2ML!Attribute (
+			name <- i.content.name,
+			range <- thisModule.Datatype(i.content.typeDefinition)
+		)
+}
+
+-- Rule 'Datatype'
+-- Creates R2ML!Datatype element from an WSDL!XsElementDeclaration.
+-- This rule is unique lazy rule, which means that is called from other rules
+unique lazy rule Datatype {
+	from i : XML!XsSimpleTypeDefinition 
+	to o : R2ML!Datatype (
+			predicateCategory <- #closed,
+			name <- i.name
+		)
+}
+
+-- TODO: fix this
+unique lazy rule XsSimpleTypeDefinition {
+	from i : WSDL!XsElementDeclaration (
+			i.oclIsTypeOf(WSDL!XsElementDeclaration)
+		)
+	to o : R2ML!GenericVariable (
+		
+		)
+}
+
+-- Rule 'ReferenceProperty'
+-- Creates R2ML!ReferenceProperty element from an WSDL!XsParticle.
+rule ReferenceProperty {
+	from i : WSDL!XsParticle (
+			i.oclIsTypeOf(WSDL!XsParticle) and
+			i.content->asSequence()->select(c| not c.resolvedElementDeclaration.oclIsUndefined() )->size() > 0
+		)
+	to o : R2ML!ReferenceProperty (
+			name <- i.content.resolvedElementDeclaration.name,
+			range <- i.content.resolvedElementDeclaration 
+		)
+}
+
+-- Rule 'ReactionRuleSet'
+-- Creates R2ML!ReactionRuleSet element from an WSDL!Interface.
+-- TODO: fix this for other patterns
+rule ReactionRuleSet {
+	from i : WSDL!Interface (
+			i.oclIsTypeOf(WSDL!Interface)
+		)
+	to o : R2ML!ReactionRuleSet (
+			rules <- i.operation.asSequence()->collect(e| 
+					 			if (thisModule.resolveMEP(e.pattern) = 'http://www.w3.org/2006/01/wsdl/in-out') then
+									Sequence {thisModule.RrRight(e),  thisModule.RrWrong(e)}				
+					 			else
+					 				thisModule.RrRight(e)
+						 		endif
+											    		),
+			ruleSetID <- i.name 
+		)
+}
+
+-- Rule 'RrRight'
+-- Creates R2ML!ReactionRule element from an WSDL!Operation.
+-- This rule is lazy rule, which means that is called from other rules
+lazy rule RrRight {
+	from i : WSDL!Operation (
+			i.oclIsTypeOf(WSDL!Operation)
+		)
+	to o : R2ML!ReactionRule (
+			ruleID <- '???',
+			groupID <- i.name,
+			triggeringEvent <- i.input->asSequence()->first(),
+			producedAction <- i.output->asSequence()->first()
+		)
+}
+
+-- Rule 'RrWrong'
+-- Creates R2ML!ReactionRule element from an WSDL!Operation.
+-- This rule is lazy rule, which means that is called from other rules
+lazy rule RrWrong {
+	from i : WSDL!Operation (
+			i.oclIsTypeOf(WSDL!Operation)
+		)
+	to o : R2ML!ReactionRule (
+			ruleID <- '???',
+			groupID <- i.name,
+			triggeringEvent <- i.input->asSequence()->first(),
+			producedAction <- i.outfault->asSequence()->first()
+		)
+}
+
+-- Rule 'TriggeringEvent'
+-- Creates R2ML!MessageEventExpression element from an WSDL!Input.
+rule TriggeringEvent {
+	from i : WSDL!Input (
+			i.oclIsTypeOf(WSDL!Input)
+		)
+	to o : R2ML!MessageEventExpression (
+			sender <- 'to_be_defined',
+			objectVariable <- thisModule.ObjectVariable(i.element),
+			type <- i.element
+		)
+}
+
+-- Rule 'ObjectVariable'
+-- Creates R2ML!ObjectVariable element from an WSDL!XsElementDeclaration.
+-- This rule is lazy rule, which means that is called from other rules
+unique lazy rule ObjectVariable {
+	from i : WSDL!XsElementDeclaration (
+			i.oclIsTypeOf(WSDL!XsElementDeclaration) 
+		)
+	to o : R2ML!ObjectVariable (
+ 	        name <- '???',					--TODO: fix this
+			typeCategory <- #individual,
+			classRef <- i
+		)		
+}
+
+-- Rule 'ProducedActionRight'
+-- Creates R2ML!MessageEventExpression element from an WSDL!Output.
+-- TODO: fix for ObjectSlot		
+rule ProducedActionRight {
+	from i : WSDL!Output (
+			i.oclIsTypeOf(WSDL!Output)
+		)
+	to o : R2ML!MessageEventExpression (
+			sender <- WSDL!Endpoint.allInstances()->asSequence()->first().address,
+			type <- i.element,
+			slot <- i.element.typeDefinition.content.term.particles->first()
+		)
+}
+
+-- Rule 'ProducedActionWrong'
+-- Creates R2ML!MessageEventExpression element from an WSDL!Outfault.
+rule ProducedActionWrong {
+	from i : WSDL!Outfault (
+			i.oclIsTypeOf(WSDL!Outfault)
+		)
+	to o : R2ML!MessageEventExpression (
+			sender <- WSDL!Endpoint.allInstances()->asSequence()->first().address,
+			type <- i.fault.element,
+			slot <- i.fault.element.typeDefinition.content.term.particles->first()
+		)
+}
+
+-- Rule 'DataSlot'
+-- Creates R2ML!DataSlot element from an WSDL!XsParticle.
+-- This rule is lazy rule, which means that is called from other rules
+rule DataSlot {
+	from i : WSDL!XsParticle (
+			i.oclIsTypeOf(WSDL!XsParticle) and 
+			( WSDL!Outfault.allInstancesFrom('IN')->asSequence()->collect(e| e.fault.element.typeDefinition.content.term.particles)->flatten()->includes(i)
+ 			or WSDL!Output.allInstancesFrom('IN')->asSequence()->collect(e| e.element.typeDefinition.content.term.particles)->flatten()->includes(i))
+		)
+	to o : R2ML!DataSlot (
+			value <- type,
+			attribute <- thisModule.AttributeR(i)
+		),
+	type : R2ML!TypedLiteral (
+			type <- thisModule.Datatype(i.content.typeDefinition),
+			lexicalValue <- '???'		-- this should be a default value
+	)
+}
+

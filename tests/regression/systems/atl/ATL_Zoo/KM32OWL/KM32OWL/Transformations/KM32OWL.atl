@@ -1,0 +1,307 @@
+-- @atlcompiler atl2006
+
+module KM32OWL; -- Module Template
+create OUT : OWL from IN : KM3;
+
+-- =============================================================================
+-- KM32OWL
+-- Version 1.0
+-- Release date : 26/02/2007
+-- Author : Guillaume Hillairet (g.hillairet@gmail.com)
+-- =============================================================================
+	
+helper def: addNamespace( s : String ) : String = 'http://example.org/' + s;
+
+helper def: primitiveTypeMap : Map(String, String) =
+	Map {
+		('String', 'http://www.w3.org/2001/XMLSchema#string'),
+		('Integer', 'http://www.w3.org/2001/XMLSchema#nonNegativeInteger'),
+		('Boolean', 'http://www.w3.org/2001/XMLSchema#boolean'),
+		('UnlimitedNatural', 'http://www.w3.org/2001/XMLSchema#integer' )
+	};
+	
+helper context KM3!Reference def: isSymmetric() : Boolean =
+	if self.opposite.oclIsUndefined()
+		then false
+		else self.type = self.opposite.type
+	endif;
+			 
+helper context KM3!Reference def: isInverseFunctional() : Boolean =
+	if self.opposite.oclIsUndefined()
+		then false
+		else self.opposite.upper = 1 and self.opposite.lower = 1
+	endif;
+
+-- =============================================================================
+-- RULES
+-- =============================================================================
+
+rule Metamodel2Graph {
+	from
+		m : KM3!Metamodel
+	to
+		g : OWL!OWLGraph (
+			uriRef <- uri,
+			ontology <- m.contents
+		),
+		uri : OWL!URIReference ( uri <- u_r_i ),
+		u_r_i : OWL!UniformResourceIdentifier ( name <- '' )
+}
+
+rule Package2Ontology {
+	from
+		p : KM3!Package(
+			not (p.name = 'PrimitiveTypes')
+		)
+	to
+		o : OWL!OWLOntology (
+			owlGraph <- p.metamodel,
+			owlUniverse <- p.contents,
+			uriRef <- uri
+		),
+		u : OWL!OWLUniverse (
+			ontology <- p
+		),
+		uri : OWL!URIReference ( 
+			fragmentIdentifier <- l, 
+			uri <- u_r_i ),
+		l : OWL!LocalName ( name <- p.name ),
+		u_r_i : OWL!UniformResourceIdentifier ( name <- thisModule.addNamespace(p.name) )
+}
+
+rule PrimitiveType2RDFSDataType {
+	from
+		dt : KM3!DataType
+	to
+		d : OWL!RDFSDataType (
+			uriRef <- u
+		),
+		u : OWL!URIReference (
+			uri <- uri
+		),
+		uri : OWL!UniformResourceIdentifier ( name <- thisModule.primitiveTypeMap.get(dt.name) )
+}
+
+rule Class2Class {
+	from
+		c : KM3!Class
+	to
+		oc : OWL!OWLClass (
+			uriRef <- uri,
+			label <- label,
+			subClassOf <- c.supertypes
+		),
+		label : OWL!PlainLiteral ( lexicalForm <- c.name ),
+		uri : OWL!URIReference ( uri <- u_r_i ),
+		u_r_i : OWL!UniformResourceIdentifier ( name <- c.name )
+}
+
+abstract rule StructuralFeature2Property {
+	from 
+		f : KM3!StructuralFeature
+	to
+		p : OWL!Property (
+			domain <- f.owner,
+			range <- f.type,
+			uriRef <- o_u
+		),
+		o_u : OWL!URIReference ( fragmentIdentifier <- o_l, uri <- o_uri ),
+		o_l : OWL!LocalName ( name <- f.owner.name + '.' + f.name ),
+		o_uri : OWL!UniformResourceIdentifier ( name <- f.owner.name + '.' + f.name )
+}
+
+rule Attribute2DataTypeProperty extends StructuralFeature2Property {
+	from
+		f : KM3!Attribute (
+			f.type.oclIsTypeOf( KM3!DataType )
+		)
+	to
+		p : OWL!OWLDatatypeProperty ( )
+		
+	do {
+		
+		if ( ( f.upper = 1) and ( f.lower = 1) )
+			thisModule.FunctionalProperty( f );
+		
+		if ( f.upper = f.lower )  -- [n-n]
+			thisModule.addCardinalityRestriction( f );
+		else
+			if (( f.upper = 0-1 ) and ( f.lower >= 0 )) -- [*]
+				thisModule.addMinCardinalityRestriction( f );
+			else  { -- [m-n]
+				thisModule.addMinCardinalityRestriction( f );
+				thisModule.addMaxCardinalityRestriction( f );
+			}
+	}
+}
+
+rule Reference2ObjectProperty extends StructuralFeature2Property {
+	from
+		f : KM3!Reference 
+
+	to
+		p : OWL!OWLObjectProperty (
+			OWLInverseOf <- f.opposite,
+			subPropertyOf <- f.subsetOf
+		)
+	
+	do {
+		
+		if ( f.isSymmetric() )
+			thisModule.SymmetricProperty( f );
+		
+		if ( f.isInverseFunctional() )
+			thisModule.InverseFunctionalProperty( f );
+		
+		if ( ( f.upper = 1) and ( f.lower = 1) )
+				thisModule.FunctionalProperty( f );
+		
+		if ( f.upper = f.lower )  -- [n-n]
+				thisModule.addCardinalityRestriction( f );
+			else
+				if (( f.upper = 0-1 ) and ( f.lower >= 0 )) -- [*]
+					thisModule.addMinCardinalityRestriction( f );
+				else  {-- [m-n]
+					thisModule.addMinCardinalityRestriction( f );
+					thisModule.addMaxCardinalityRestriction( f );
+				}
+	}
+}
+
+rule EnumerationProperty2ObjectProperty {
+	from
+		a : KM3!Attribute
+		(
+			a.type.oclIsTypeOf(KM3!Enumeration)
+		)
+	to
+		d : OWL!OWLObjectProperty (
+			uriRef <- u,
+			domain <- a.owner,
+			range <- a.type
+		),
+		u : OWL!URIReference ( fragmentIdentifier <- l, uri <- uri ),
+		l : OWL!LocalName ( name <- a.owner.name + '.' + a.name ),
+		uri : OWL!UniformResourceIdentifier ( name <- a.owner.name + '.' + a.name )
+		
+	do {
+		
+		if ( ( a.upper = 1) and ( a.lower = 1) )
+				thisModule.FunctionalProperty( a );
+		
+		if ( a.upper = a.lower )  -- [n-n]
+				thisModule.addCardinalityRestriction( a );
+			else
+				if (( a.upper = 0-1 ) and ( a.lower >= 0 )) -- [*]
+					thisModule.addMinCardinalityRestriction( a );
+				else  {-- [m-n]
+					thisModule.addMinCardinalityRestriction( a );
+					thisModule.addMaxCardinalityRestriction( a );
+				}	
+	}
+}
+
+lazy rule FunctionalProperty {
+	from	
+		r : KM3!Reference
+	to
+		o : OWL!FunctionalProperty (
+				isDefinedBy <- r
+		)
+}
+
+lazy rule InverseFunctionalProperty {
+	from	
+		r : KM3!Reference
+	to
+		o : OWL!InverseFunctionalProperty (
+				isDefinedBy <- r
+		)
+}
+
+lazy rule SymmetricProperty {
+	from	
+		r : KM3!Reference
+	to
+		o : OWL!SymmetricProperty (
+				isDefinedBy <- r
+		)
+}
+
+rule addCardinalityRestriction( s : KM3!StructuralFeature ) {
+	to
+		c : OWL!CardinalityRestriction (
+			superClass <- s.owner,
+			OWLCardinality <- literal,
+			OWLOnProperty <- s
+		),
+		literal : OWL!TypedLiteral (
+			lexicalForm <- s.upper.toString(),
+			datatypeURI <- u
+		),
+		u : OWL!URIReference (
+			uri <- uri
+		),
+		uri : OWL!UniformResourceIdentifier ( name <- thisModule.primitiveTypeMap.get('Integer') )
+}
+
+rule addMaxCardinalityRestriction( s : KM3!StructuralFeature ) {
+	to
+		c : OWL!MaxCardinalityRestriction (
+			superClass <- s.owner,
+			OWLMaxCardinality <- literal,
+			OWLOnProperty <- s
+		),
+		literal : OWL!TypedLiteral (
+			lexicalForm <- s.upper.toString(),
+			datatypeURI <- u
+		),
+		u : OWL!URIReference (
+			uri <- uri
+		),
+		uri : OWL!UniformResourceIdentifier ( name <- thisModule.primitiveTypeMap.get('Integer') )
+}
+
+rule addMinCardinalityRestriction( s : KM3!StructuralFeature ) {
+	to
+		c : OWL!MinCardinalityRestriction (
+			superClass <- s.owner,
+			OWLMinCardinality <- literal,
+			OWLOnProperty <- s
+		),
+		literal : OWL!TypedLiteral (
+			lexicalForm <- s.lower.toString(),
+			datatypeURI <- u
+		),
+		u : OWL!URIReference (
+			uri <- uri
+		),
+		uri : OWL!UniformResourceIdentifier ( name <- thisModule.primitiveTypeMap.get('Integer') )
+}
+
+rule Enumeration2EnumeratedClass {
+	from
+		e : KM3!Enumeration
+	to
+		oe : OWL!EnumeratedClass (
+			OWLOneOf <- e.literals,
+			uriRef <- u,
+			label <- label
+		),
+		label : OWL!PlainLiteral ( lexicalForm <- e.name 	),
+		u : OWL!URIReference (	fragmentIdentifier <- l, uri <- uri ),
+		l : OWL!LocalName ( name <- e.name ),
+		uri : OWL!UniformResourceIdentifier ( name <- e.name )
+}
+
+rule EnumLiteral2Individual {
+	from
+		e : KM3!EnumLiteral
+	to
+		oe : OWL!Individual (
+			uriRef <- u
+		),
+		u : OWL!URIReference ( fragmentIdentifier <- l, uri <- uri ),
+		l : OWL!LocalName ( name <- e.name ),
+		uri : OWL!UniformResourceIdentifier ( name <- e.name )
+}

@@ -1,0 +1,290 @@
+-- @name		AssertionModification
+-- @version		1.0
+-- @domains		Catalogue of Model Transformations
+-- @authors		SIMON Eric(simon.eric3<at>gmail.com)
+-- @date		2006/08/09
+-- @description	This transformation strenghthens or weakens an assertion(respectively postcondition and precondition).
+-- @see http://www.dcs.kcl.ac.uk/staff/kcl/tcat.pdf   
+-- @see section 1.6, page 5
+-- @see author of article : K. Lano
+
+module AssertionModification; -- Module Template
+create OUT : UML2Target from IN : UML2, Lib : XML;
+
+
+-- @comment this helper returns the first attribute named "name"
+helper context XML!Element def : getAttr(name : String) : XML!Attribute =
+  self.children->
+    select (c|c.oclIsTypeOf(XML!Attribute))->
+      select(c|c.name = name)->first();
+
+-- @comment this helper returns the value of the first attribute named "name"
+helper context XML!Element def : getAttrVal(name : String) : String =
+  self.getAttr(name).value;
+
+-- @comment this helper returns the set of childs for a given type
+helper context XML!Element
+def : getChildren(type : OclType, name : String) : Sequence(XML!Node) =
+  self.children->
+    select(e|e.oclIsKindOf(type))->select(e|e.name = name);
+
+-- @comment this helper returns the new assertion contained by the library
+helper context UML2!Constraint def: searchInLib : String =
+	if self.owner.oclIsTypeOf(UML2!Class)
+	then self.ClassExistInLib()
+	else if self.owner.oclIsTypeOf(UML2!Association)
+		then self.AssociationExistInLib()
+		else if self.owner.oclIsTypeOf(UML2!Operation)
+			then self.OperationExistInLib()
+			else 'Erreur entry Type: either class or association or operation'
+			endif
+		endif
+	endif
+	;
+
+-- @comment this helper is called by the helper searchInLib for the constraint is on a class
+helper context UML2!Constraint def: ClassExistInLib() : String =
+	if XML!Element.allInstances()->select(c|c.name='class')->
+		select(c|c.getAttr('package').value = self.owner.package.name 
+			and c.getAttr('name').value = self.owner.name 
+			and c.getChildren(XML!Element, 'assertion')->
+				exists(const|const.getAttr('name') = self.name)
+		).first() <> OclUndefined
+	then	
+		XML!Element.allInstances()->select(c|c.name='class')->
+		select(c|c.getAttr('package').value = self.owner.package.name 
+			and c.getAttr('name').value = self.owner.name 
+			and c.getChildren(XML!Element, 'assertion')->
+				exists(const|const.getAttr('name') = self.name)
+		).first().getChildren(XML!Element, 'assertion')->
+		select(const|const.getAttr('name') = self.name).first().value
+	else 'noRule'
+	endif
+	;
+
+-- @comment this helper is called by the helper searchInLib for the constraint is on an association
+helper context UML2!Constraint def: AssociationExistInLib() : String =
+	if XML!Element.allInstances()->select(c|c.name='association')->
+		select(c|c.getAttr('package').value = self.owner.package.name 
+			and c.getAttr('name').value = self.owner.name 
+			and c.getChildren(XML!Element, 'assertion')->
+				exists(const|const.getAttr('name').value = self.name)
+		).first() <> OclUndefined
+	then
+		XML!Element.allInstances()->select(c|c.name='association')->
+		select(c|c.getAttr('package').value = self.owner.package.name 
+			and c.getAttr('name').value = self.owner.name 
+			and c.getChildren(XML!Element, 'assertion')->
+				exists(const|const.getAttr('name').value = self.name)
+		).first().getChildren(XML!Element, 'assertion')->
+		select(const|const.getAttr('name').value = self.name).first().getAttr('value').value
+	else 'noRule'
+	endif
+	;
+
+-- @comment this helper is called by the helper searchInLib for the constraint is on an operation
+helper context UML2!Constraint def: OperationExistInLib() : String =
+	if self.owner.precondition->includes(self)
+	then
+		if XML!Element.allInstances()->select(c|c.name='operation')->
+			select(c|c.getAttr('package').value = self.owner.owner.package.name
+				and c.getAttr('class').value = self.owner.owner.name
+				and c.getChildren(XML!Element, 'precondition')->
+			exists(const|const.getAttr('name').value = self.name)
+			).first() <> OclUndefined
+		then
+			XML!Element.allInstances()->select(c|c.name='operation')->
+			select(c|c.getAttr('package').value = self.owner.owner.package.name
+				and c.getAttr('class').value = self.owner.owner.name
+				and c.getChildren(XML!Element, 'precondition')->
+			exists(const|const.getAttr('name').value = self.name)
+			).first().getChildren(XML!Element, 'precondition')->
+			select(const|const.getAttr('name').value = self.name).first().getAttr('value').value
+		else 'noRule'
+		endif
+	else if self.owner.postcondition->includes(self)
+			then
+				if XML!Element.allInstances()->select(c|c.name='operation')->
+				select(c|c.getAttr('package').value = self.owner.owner.package.name
+					and c.getAttr('class').value = self.owner.owner.name
+					and c.getChildren(XML!Element, 'postcondition')->
+					exists(const|const.getAttr('name').value = self.name)
+				).first() <> OclUndefined
+				then XML!Element.allInstances()->select(c|c.name='operation')->
+					select(c|c.getAttr('package').value = self.owner.owner.package.name
+						and c.getAttr('class').value = self.owner.owner.name
+						and c.getChildren(XML!Element, 'postcondition')->
+						exists(const|const.getAttr('name').value = self.name)
+					).first().getChildren(XML!Element, 'postcondition')->
+					select(const|const.getAttr('name').value = self.name).first().getAttr('value').value
+				else 'noRule'
+				endif
+			else 'noRule'
+			endif	
+		endif
+	;
+		
+-- @begin Model
+rule Model {
+	from
+		inputM : UML2!Model
+	to
+		outputM : UML2Target!Model (
+			name <- inputM.name,
+			ownedMember <- inputM.ownedMember
+		)
+}
+-- @end Model
+		
+-- @begin DataType
+rule DataType {
+	from 
+		inputC : UML2!DataType
+	to
+		outputC : UML2Target!DataType (
+		name <- inputC.name
+		)
+}
+-- @end DataType
+
+-- @begin LiteralNull
+rule LiteralNull {
+	from 
+		inputLN : UML2!LiteralNull
+	to
+		outputLN : UML2Target!LiteralNull
+}
+-- @end LiteralNull
+
+-- @begin LiteralInteger
+rule LiteralInteger {
+	from 
+		inputLI : UML2!LiteralInteger
+	to
+		outputLI : UML2Target!LiteralInteger (
+			value <- inputLI.value	
+		)
+}
+-- @end LiteralInteger
+
+-- @begin LiteralUnlimitedNatural
+rule LiteralUnlimitedNatural {
+	from 
+		inputLUN : UML2!LiteralUnlimitedNatural
+	to
+		outputLUN : UML2Target!LiteralUnlimitedNatural (
+			value <- inputLUN.value	
+		)
+}
+-- @end LiteralUnlimitedNatural
+
+-- @begin LiteralString
+rule LiteralString {
+	from 
+		inputLS : UML2!LiteralString
+		(inputLS.owner.OperationExistInLib()='noRule')
+	to
+		outputLS : UML2Target!LiteralString (
+			value <- inputLS.value
+		)
+}
+-- @end LiteralString
+
+-- @begin Association
+rule Association {
+	from 
+		inputA : UML2!Association
+	to 
+		outputA : UML2Target!Association (
+			name <- inputA.name,
+			memberEnd <- inputA.memberEnd
+	)
+}
+-- @end Association
+
+-- @begin Property
+rule Property {
+	from 
+		inputP : UML2!Property
+	to
+		outputP : UML2Target!Property (
+			owningAssociation <- inputP.owningAssociation,
+			name <- inputP.name,
+			type <- inputP.type,
+			upperValue <- inputP.upperValue,
+			lowerValue <- inputP.lowerValue,
+			defaultValue <-inputP.defaultValue
+		)
+}
+-- @end Property
+
+-- @begin Constraint
+rule Constraint {
+	from 
+		inputC : UML2!Constraint
+	to
+		outputC : UML2Target!Constraint (
+			name <-	inputC.name,
+			namespace <- inputC.namespace,
+			specification <- if inputC.OperationExistInLib()='noRule'
+								then inputC.specification
+								else thisModule.newRule(inputC)
+								endif
+		)
+}
+-- @end Constraint
+
+-- @begin Class
+rule Class {
+	from 
+		inputC : UML2!Class
+	to 
+		outputC : UML2Target!Class (
+			name <- inputC.name,
+			ownedOperation <- inputC.ownedOperation,
+			nestedClassifier <-  inputC.nestedClassifier,
+			isActive <-  inputC.isActive,
+			ownedReception <-  inputC.ownedReception,
+			ownedAttribute <- inputC.ownedAttribute
+		)
+}
+-- @end Class
+
+-- @begin Operation
+rule Operation {
+	from 
+		inputO : UML2!Operation
+	to 
+		outputO : UML2Target!Operation (
+			name <- inputO.name,
+			class_ <- inputO.class_,
+			ownedRule <- inputO.ownedRule,
+			ownedParameter <- inputO.ownedParameter
+		)
+}
+-- @end Operation
+
+-- @begin Parameter
+rule Parameter {
+	from 
+		inputP : UML2!Parameter
+	to 
+		outputP : UML2Target!Parameter (
+			name <- inputP.name,
+			operation <- inputP.operation,
+			type <- inputP.type
+		)
+}
+-- @end Parameter
+
+-- @comment this lazy rule replace the oldest assertion by a new
+-- @begin newRule
+lazy rule newRule {
+	from
+		inputC : UML2!Constraint
+	to
+		outputLS : UML2Target!LiteralString (
+			value <- inputC.OperationExistInLib()	
+		)
+}
+-- @end newRule

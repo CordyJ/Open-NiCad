@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:qw="http://www.pq-verein.de/services/warranty" xmlns:msg="http://www.pq-verein.de/services/messages" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://www.pq-verein.de/services/warrantySOAP" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="qualification" targetNamespace="http://www.pq-verein.de/services/warrantySOAP">
+	<wsdl:types>
+		<xsd:schema targetNamespace="http://www.pq-verein.de/services/warrantySOAP">
+			<xsd:import namespace="http://www.pq-verein.de/services/messages" schemaLocation="http://www.pq-verein.de/wsdl/messagesCancel.xsd"/>
+		</xsd:schema>
+	</wsdl:types>
+	<wsdl:message name="CancelMessage">
+		<wsdl:part element="msg:store" name="cancel"/>
+	</wsdl:message>	
+	<wsdl:message name="StoreResponse">
+		<wsdl:part element="msg:storeResponse" name="storeResponse"/>
+	</wsdl:message>
+	<wsdl:portType name="QualificationPort">		
+		<wsdl:operation name="cancel">
+			<wsdl:input message="tns:CancelMessage"/>
+			<wsdl:output message="tns:StoreResponse" name="storeWarnings"/>
+			<wsdl:fault message="tns:StoreResponse" name="storeErrors"/>
+		</wsdl:operation>
+	</wsdl:portType>
+	<wsdl:binding name="QualificationWarrantySOAP" type="tns:QualificationPort">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<wsdl:operation name="cancel">
+			<wsdl:documentation>Uebermittlung eines validen Datensatzes mit Praequalifizierungs-Daten zum Streichen.</wsdl:documentation>
+			<soap:operation soapAction="http://www.pq-verein.de/services/cancel"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output name="storeWarnings">
+				<soap:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="storeErrors">
+				<soap:fault use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:service name="QualificationWarranty">
+		<wsdl:documentation>Webservice zur Uebermittlung/Validierung von Praequalifizierungs-Daten.
+Zur Verwendung der Methode 'store' ist ein valides Schema notwendig, die Methode 'validate' kann auch ohne ein valides Schema verwendet werden.</wsdl:documentation>
+		<wsdl:port binding="tns:QualificationWarrantySOAP" name="prequalification">
+			<soap:address location="http://www.pq-verein.de/services/cancel"/>
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>

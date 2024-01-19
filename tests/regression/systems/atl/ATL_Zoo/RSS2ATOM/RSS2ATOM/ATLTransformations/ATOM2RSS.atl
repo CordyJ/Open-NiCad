@@ -1,0 +1,71 @@
+-- ============================================================
+-- ATOM2RSS
+-- Created by : Youssef Srour (srour.youssef@gmail.com)
+-- Date: 23/06/2006
+-- Version: 1
+-- ============================================================
+
+
+module ATOM2RSS;
+create OUT : RSS from IN : ATOM;
+	
+--Rule ATOM to Channel
+--Creates a Channel from the input ATOM Element
+rule ATOM2Channel {
+	from 
+    	At : ATOM!ATOM
+	to
+   		out : RSS!Channel (
+   			
+	    	title <- At.title,
+	    	description <- At.subtitle,
+	    	copyright <- At.rights,
+	    	managingEditor <- At.authors.first().name,
+	    	generator <- At.generator,
+	    	lastBuildDate <- At.lastUpdate,
+	    	category <- At.categories -> first(),-- A ATOM have one or zero category 
+			webmaster <- At.authors.first().email,
+			pubDate <- At.entrie.first().published,
+			link <- At.links.first().hrefl.toString(),		
+			items <- At.entrie -> asSequence() ,-- A item have a sequence of entrie
+			image <- imag
+		),
+		
+		imag : RSS!Image(
+			
+			url <- At.logo
+		)
+}
+
+--Rule Entry to Item
+--Creates a Item from the Entry Element
+
+rule Entry2Item {
+	from 
+    	it : ATOM!Entry
+	to
+   		out : RSS!Item (
+   			
+	    	title <- it.title,
+	    	guid <- it.id,
+	    	pubDate <- it.published,
+	    	description <- it.content,
+	    	comments <- it.summary,
+			link <- it.links.first().hrefl    	
+	)
+}
+
+--Rule Category to Category
+--Creates a Category from the input Category Element
+
+rule Category2Category {
+	from 
+    	it : ATOM!Category
+	to
+   		out : RSS!Category(
+   			
+	    	domain <- it.scheme,
+			value <- it.label    	
+	)
+}
+

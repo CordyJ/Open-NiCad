@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- edited with XMLSPY v2004 rel. 4 U (http://www.xmlspy.com) by William A Rudick (Enablinx Corporation) -->
+<definitions xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:s0="urn:JurisLookup" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns="http://schemas.xmlsoap.org/wsdl/" targetNamespace="urn:JurisLookup" name="JurisLookup">
+	<types>
+		<s:schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:JurisLookup">
+			<s:complexType name="TLookUpResults">
+				<s:all>
+					<s:element name="intReturnCode" type="s:int"/>
+					<s:element name="strReturnShortDesc" type="s:string"/>
+					<s:element name="strConfirmationNum" type="s:string"/>
+					<s:element name="strEventTimeStamp" type="s:string"/>
+					<s:element name="FIPSRecordList" type="s0:TArrayofFIPSRecord"/>
+				</s:all>
+			</s:complexType>
+			<s:complexType name="TArrayofFIPSRecord">
+				<s:complexContent mixed="false">
+					<s:restriction base="soapenc:Array">
+						<s:attribute d7p1:arrayType="s0:TFIPSRecord[]" ref="soapenc:arrayType" xmlns:d7p1="http://schemas.xmlsoap.org/wsdl/"/>
+					</s:restriction>
+				</s:complexContent>
+			</s:complexType>
+			<s:complexType name="TFIPSRecord">
+				<s:all>
+					<s:element name="intState" type="s:int"/>
+					<s:element name="strJurisdictionType" type="s:string"/>
+					<s:element name="strCompositeSER" type="s:string"/>
+					<s:element name="intJurisdictionFIPS" type="s:int"/>
+					<s:element name="strGeneralTaxRateIntrastate" type="s:string"/>
+					<s:element name="strGeneralTaxRateInterstate" type="s:string"/>
+					<s:element name="strFoodDrugTaxRateIntrastate" type="s:string"/>
+					<s:element name="strFoodDrugTaxRateInterstate" type="s:string"/>
+				</s:all>
+			</s:complexType>
+		</s:schema>
+	</types>
+	<message name="GetFIPSBy9ZipOnly">
+		<part name="intZipCode" type="s:int"/>
+		<part name="intZipPlus" type="s:int"/>
+		<part name="dtPaymentDate" type="s:date"/>
+	</message>
+	<message name="GetFIPSBy9ZipOnlyResponse">
+		<part name="LookUpResults" type="s0:TLookUpResults"/>
+	</message>
+	<message name="GetFIPSBy5ZipOnly">
+		<part name="intZipCode" type="s:int"/>
+		<part name="dtPaymentDate" type="s:date"/>
+	</message>
+	<message name="GetFIPSBy5ZipOnlyResponse">
+		<part name="LookUpResults" type="s0:TLookUpResults"/>
+	</message>
+	<message name="GetFIPSByAddress">
+		<part name="intAddress" type="s:int"/>
+		<part name="strStreetPreDirection" type="s:string"/>
+		<part name="strStreetName" type="s:string"/>
+		<part name="strStreetSuffix" type="s:string"/>
+		<part name="strStreetPostDirection" type="s:string"/>
+		<part name="strCityName" type="s:string"/>
+		<part name="intZipCode" type="s:int"/>
+		<part name="intZipPlus" type="s:int"/>
+		<part name="dtPaymentDate" type="s:date"/>
+	</message>
+	<message name="GetFIPSByAddressResponse">
+		<part name="LookUpResults" type="s0:TLookUpResults"/>
+	</message>
+	<message name="GetFIPSByAddress2">
+		<part name="strAddress" type="s:string"/>
+		<part name="strCityName" type="s:string"/>
+		<part name="intZipCode" type="s:int"/>
+		<part name="intZipPlus" type="s:int"/>
+		<part name="dtPaymentDate" type="s:date"/>
+	</message>
+	<message name="GetFIPSByAddress2Response">
+		<part name="LookUpResults" type="s0:TLookUpResults"/>
+	</message>
+	<portType name="JurisdictionLookupPort">
+		<operation name="GetFIPSBy9ZipOnly">
+			<documentation>Returns a a dataset containing rate information for a 9 digit zip code.</documentation>
+			<input message="s0:GetFIPSBy9ZipOnly"/>
+			<output message="s0:GetFIPSBy9ZipOnlyResponse"/>
+		</operation>
+		<operation name="GetFIPSBy5ZipOnly">
+			<documentation>Returns a a dataset containing rate information for a 5 digit zip code.</documentation>
+			<input message="s0:GetFIPSBy5ZipOnly"/>
+			<output message="s0:GetFIPSBy5ZipOnlyResponse"/>
+		</operation>
+		<operation name="GetFIPSByAddress">
+			<documentation>Returns a a dataset containing rate information for an address.</documentation>
+			<input message="s0:GetFIPSByAddress"/>
+			<output message="s0:GetFIPSByAddressResponse"/>
+		</operation>
+		<operation name="GetFIPSByAddress2">
+			<documentation>Returns a a dataset containing rate information for an address.</documentation>
+			<input message="s0:GetFIPSByAddress2"/>
+			<output message="s0:GetFIPSByAddress2Response"/>
+		</operation>
+	</portType>
+	<binding name="JurisdictionLookupBinding" type="s0:JurisdictionLookupPort">
+		<soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="GetFIPSBy9ZipOnly">
+			<soap:operation soapAction=""/>
+			<input>
+				<soap:body use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:JurisLookup"/>
+			</input>
+			<output>
+				<soap:body use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:JurisLookup"/>
+			</output>
+		</operation>
+		<operation name="GetFIPSBy5ZipOnly">
+			<soap:operation soapAction=""/>
+			<input>
+				<soap:body use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:JurisLookup"/>
+			</input>
+			<output>
+				<soap:body use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:JurisLookup"/>
+			</output>
+		</operation>
+		<operation name="GetFIPSByAddress">
+			<soap:operation soapAction=""/>
+			<input>
+				<soap:body use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:JurisLookup"/>
+			</input>
+			<output>
+				<soap:body use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:JurisLookup"/>
+			</output>
+		</operation>
+		<operation name="GetFIPSByAddress2">
+			<soap:operation soapAction=""/>
+			<input>
+				<soap:body use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:JurisLookup"/>
+			</input>
+			<output>
+				<soap:body use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:JurisLookup"/>
+			</output>
+		</operation>
+	</binding>
+	<service name="JurisdictionLookupService">
+		<documentation>This web service receives an input address and returns a normalized address and associated geo coordinates.</documentation>
+		<port name="JurisdictionLookupPort" binding="s0:JurisdictionLookupBinding">
+			<soap:address location="http://www.taxwatch.biz/cgi-bin/Kansas/KansasSSTP_Cgi.exe/Soap/JurisdictionLookupPort"/>
+		</port>
+	</service>
+</definitions>

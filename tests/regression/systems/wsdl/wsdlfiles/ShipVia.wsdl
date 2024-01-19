@@ -1,0 +1,41 @@
+<definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:tns="urn:ws-xwebservices-com:XWebTD:v1:ShipVia" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:import0="urn:ws-xwebservices-com:XWebTD:v1:ShipVia:Messages" targetNamespace="urn:ws-xwebservices-com:XWebTD:v1:ShipVia" name="ShipVia" xmlns="http://schemas.xmlsoap.org/wsdl/">
+  <documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+  <types>
+    <xsd:schema>
+      <xsd:import schemaLocation="ShipVia.xsd" namespace="urn:ws-xwebservices-com:XWebTD:v1:ShipVia:Messages"/>
+    </xsd:schema>
+  </types>
+  <message name="shipViaIn">
+    <documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+    <part name="messagePart" element="import0:ShipViaRequest"/>
+  </message>
+  <message name="shipViaOut">
+    <documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+    <part name="messagePart" element="import0:ShipViaResponse"/>
+  </message>
+  <portType name="ShipViaInterface">
+    <documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+    <operation name="ShipVia">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+      <input message="tns:shipViaIn"/>
+      <output message="tns:shipViaOut"/>
+    </operation>
+  </portType>
+  <binding name="ShipVia" type="tns:ShipViaInterface">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+    <operation name="ShipVia">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebTD:v1:ShipVia:shipViaIn" style="document"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+    </operation>
+  </binding>
+  <service name="ShipViaPort">
+    <port name="ShipViaPort" binding="tns:ShipVia">
+      <soap:address location="https://ws.xwebservices.com/XWebTD/V1/ShipVia.asmx"/>
+    </port>
+  </service>
+</definitions>

@@ -1,0 +1,223 @@
+module PNML2XML;
+create OUT : XML from IN : PNML;
+
+-- The getRoot helper, is a constant helper. It seeks the root element of PNML model : the PNML document.
+-- This helper allows to link elements and their parents, thanks to a “resolveTemp” instruction.
+-- CONTEXT: n/a
+-- RETURN: PNML!PNMLDocument
+helper def: getRoot() : PNML!PNMLDocument =
+	PNML!PNMLDocument.allInstances()->asSequence()->first();
+
+
+-- The Root rule generates the XML Root element as well as a collection of attributes and elements and Text node from the input PNMLDocument element. The generated Root element is a “pnml” tag that has an “xmlns” Attribute and a “net” Element as children. 
+-- Value of the “xmlns” attribute is copied from the PNMLDocument. The “net” Element has an “id” and a “type” Attribute, a “name” sub-Element.The “id” attribute and the “type” attribute are also copied from the input element.
+-- Finally, the “name” Element contains a “text” Element, which itself contains a Text node whose value corresponds to the name of the input PNMLDocument element.
+rule Root {
+	from
+		n : PNML!PNMLDocument
+	to
+		e : XML!Root
+		(
+			name <- 'pnml',
+			-- value = name of the net contained by this document
+			value <- n.nets.first().name.labels.first().text,
+			children <- Sequence {document_name, document_xmlns, document_net}
+		),
+		document_name : XML!Element
+		(
+			name <- 'name',
+			parent <- n,
+			children <- document_text
+		),
+		document_text : XML!Element
+		(
+			name <- 'text',
+			parent <- document_name,
+			children <- document_xml_text
+		),
+		document_xml_text : XML!Text
+		(
+			value <- n.nets.first().name.labels.first().text,
+			parent <- document_text
+		),		
+		document_xmlns : XML!Attribute
+		(
+			name <- 'xmlns',
+			value <- n.xmlns.value,
+			parent <- n
+		),
+		document_net : XML!Element
+		(
+			name <-'net',
+			value <- n.nets.first().name.labels.first().text,
+			parent <- n,
+			children <- Sequence {net_name, net_id, net_type}
+		),
+		net_name : XML!Element
+		(
+			name <- 'name',
+			parent <- document_net,
+			children <- net_text
+		),
+		net_text : XML!Element
+		(
+			name <- 'text',
+			parent <- net_name,
+			children <- net_xml_text
+		),
+		net_xml_text : XML!Text
+		(
+			value <- n.nets.first().name.labels.first().text,
+			parent <- net_text
+		),
+		net_id : XML!Attribute
+		(
+			name <- 'id',
+			value <- n.nets.first().id,
+			parent <- document_net
+		),
+		net_type : XML!Attribute
+		(
+			name <-'type',
+			value <- n.nets.first().type.value,
+			parent <- document_net
+		)
+}
+
+-- The Place rule generates three XML Elements, one XML Attribute and one XML Text for each PNML Place input element.
+-- The first generated Element, “place”, is a “place” tag which accepts an “id” Attribute as well as a child “name” Element. The value of the “id” attribute corresponds to the one of the PNML Place.
+-- The generated “name” Element accepts a “text” Element as child. This last one has a child which is a Text node. Its value corresponds to the name of the input Place.
+rule Place {
+	from
+		n : PNML!NetContentElement
+		(
+			n.oclIsKindOf(PNML!Place)
+		)		
+	to
+		place : XML!Element
+		(
+			name <- 'place',
+			value <- n.name.labels.first().text,
+			parent <- thisModule.resolveTemp(thisModule.getRoot(), 'document_net'),
+			children <- Sequence{place_id, place_name}
+		),
+		place_id : XML!Attribute
+		(
+			name <- 'id',
+			value <- n.id,
+			parent <- n
+		),
+		place_name : XML!Element
+		(
+			name <- 'name',
+			parent <- n,
+			children <- place_text
+		),
+		place_text : XML!Element
+		(
+			name <- 'text',
+			parent <- place_name,
+			children <- place_xml_text
+		),
+		place_xml_text : XML!Text
+		(
+			value <- n.name.labels.first().text,
+			parent <- place_text
+		)
+
+}
+
+-- The Transition rule generates three XML Elements, one XML Attribute and one XML Text for each PNML Transition input element.
+-- The first generated Element, “transition”, is a “transition” tag which accepts an “id” Attribute as well as a child “name” Element. The value of the “id” attribute corresponds to the one of the PNML Transition. 
+-- The generated “name” Element accepts a “text” Element as child. This last one has a child which is a Text node. Its value corresponds to the name of the input Transition.
+rule Transition {
+	from
+		n : PNML!NetContentElement
+		(
+			n.oclIsKindOf(PNML!Transition)
+		)
+	to
+		transition : XML!Element
+		(
+			name <- 'transition',
+			value <- n.name.labels.first().text,
+			parent <- thisModule.resolveTemp(thisModule.getRoot(), 'document_net'),
+			children <- Sequence{transition_id, transition_name}
+		),
+		transition_id : XML!Attribute
+		(
+			name <- 'id',
+			value <- n.id,
+			parent <- n
+		),
+		transition_name : XML!Element
+		(
+			name <- 'name',
+			parent <- n,
+			children <- transition_text
+		),
+		transition_text : XML!Element
+		(
+			name <- 'text',
+			parent <- transition_name,
+			children <- transition_xml_text
+		),
+		transition_xml_text : XML!Text
+		(
+			value <- n.name.labels.first().text,
+			parent <- transition_text
+		)
+		
+}
+
+-- The Arc rule generates three XML Elements, three XML Attributes and one XML Text for each PNML Arc input element.
+-- The generated Element is an “arc” tag that has three Attribute children: “id”, “source” and “target”, as well as a child “name” Element. The value of the “id” attribute corresponds to the one of the PNML Arc. Values of the “source” and “target” attributes respectively correspond to the id of the source and the id of the target of the input Arc.
+-- The generated “name” Element accepts a “text” Element as child. This last one has a child which is a Text node. Its value corresponds to the name of the input Transition.
+rule Arc {
+	from
+		n : PNML!Arc
+	to
+		arc : XML!Element
+		(
+			name <- 'arc',
+			value <- n.name.labels.first().text,
+			parent <- thisModule.resolveTemp(thisModule.getRoot(), 'document_net'),
+			children <- Sequence {arc_name, arc_id, source, target}
+		),
+		arc_id : XML!Attribute
+		(
+			name <- 'id',
+			value <- n.id,
+			parent <- n
+		),
+		arc_name : XML!Element
+		(
+			name <- 'name',
+			parent <- n,
+			children <- arc_text
+		),
+		arc_text : XML!Element
+		(
+			name <- 'text',
+			parent <- arc_name,
+			children <- arc_xml_text
+		),
+		arc_xml_text : XML!Text
+		(
+			value <- n.name.labels.first().text,
+			parent <- arc_text
+		),
+		-- source and target attribute are initialised by the id of the element pointed
+		source : XML!Attribute
+		(
+			name <- 'source',
+			value <- n.source.id,
+			parent <- n
+		),
+		target : XML!Attribute
+		(
+			name <- 'target',
+			value <- n.target.id,
+			parent <- n
+		)
+}

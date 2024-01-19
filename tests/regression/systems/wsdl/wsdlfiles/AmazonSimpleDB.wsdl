@@ -1,0 +1,652 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions 
+	targetNamespace="http://sdb.amazonaws.com/doc/2007-11-07/" 
+	xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
+	xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+	xmlns:wsa="http://www.w3.org/2005/08/addressing" 
+	xmlns:tns="http://sdb.amazonaws.com/doc/2007-11-07/" >
+
+	<wsdl:types>
+		<xs:schema 
+			targetNamespace="http://sdb.amazonaws.com/doc/2007-11-07/" 
+			xmlns:xs="http://www.w3.org/2001/XMLSchema"
+			xmlns:tns="http://sdb.amazonaws.com/doc/2007-11-07/" 
+			elementFormDefault="qualified">
+
+			<!-- **************************** AmazonSimpleDB Types ******************************** -->
+
+			<xs:element name="ResponseMetadata">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="RequestId" type="xs:string"/>
+						<xs:element name="BoxUsage" type="xs:string" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:complexType name="Attribute">
+				<xs:sequence>
+					<xs:element name="Name" type="xs:string"/>
+					<xs:element name="Value" type="xs:string" minOccurs="0"/>
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name="ReplaceableAttribute">
+				<xs:sequence>
+					<xs:element name="Name" type="xs:string"/>
+					<xs:element name="Value" type="xs:string"/>
+					<xs:element name="Replace" type="xs:boolean" minOccurs="0" default="false"/>
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name="Item">
+				<xs:sequence>
+					<xs:element name="Name" type="xs:string"/>
+					<xs:element name="Attribute" type="tns:Attribute" minOccurs="0" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name="ReplaceableItem">
+				<xs:sequence>
+					<xs:element name="ItemName" type="xs:string"/>
+					<xs:element name="Attribute" type="tns:ReplaceableAttribute" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:complexType>
+
+			<!-- **************************** AmazonSimpleDB Interface *************************** -->
+			
+			<xs:element name="CreateDomain">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="DomainName" type="xs:string"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+
+			<xs:element name="CreateDomainResponse">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="tns:ResponseMetadata"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="ListDomains">
+				<xs:complexType>
+
+					<xs:sequence>
+						<xs:element name="MaxNumberOfDomains" type="xs:int" minOccurs="0"/>
+						<xs:element name="NextToken" type="xs:string" minOccurs="0"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="ListDomainsResponse">
+				<xs:complexType>
+					<xs:sequence>
+
+						<xs:element ref="tns:ListDomainsResult"/>
+						<xs:element ref="tns:ResponseMetadata"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="ListDomainsResult">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="DomainName" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+
+						<xs:element name="NextToken" type="xs:string" minOccurs="0"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+
+			<xs:element name="DomainMetadata">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="DomainName" type="xs:string"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="DomainMetadataResponse">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="tns:DomainMetadataResult"/>
+						<xs:element ref="tns:ResponseMetadata"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="DomainMetadataResult">
+				<xs:complexType>
+					<xs:sequence>
+			          <xs:element name="ItemCount" type="xs:string"/>
+			          <xs:element name="ItemNamesSizeBytes" type="xs:string"/>
+			          <xs:element name="AttributeNameCount" type="xs:string"/>
+			          <xs:element name="AttributeNamesSizeBytes" type="xs:string"/>
+			          <xs:element name="AttributeValueCount" type="xs:string"/>
+			          <xs:element name="AttributeValuesSizeBytes" type="xs:string"/>
+			          <xs:element name="Timestamp" type="xs:string"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+
+			<xs:element name="DeleteDomain">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="DomainName" type="xs:string"/>
+					</xs:sequence>
+
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="DeleteDomainResponse">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="tns:ResponseMetadata"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+
+			<xs:element name="PutAttributes">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="DomainName" type="xs:string"/>
+						<xs:element name="ItemName" type="xs:string"/>
+						<xs:element name="Attribute" type="tns:ReplaceableAttribute" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+
+			<xs:element name="PutAttributesResponse">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="tns:ResponseMetadata"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			
+			<xs:element name="BatchPutAttributes">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="DomainName" type="xs:string"/>
+						<xs:element name="Item" type="tns:ReplaceableItem" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+
+			<xs:element name="BatchPutAttributesResponse">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="tns:ResponseMetadata"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			
+			<xs:element name="GetAttributes">
+				<xs:complexType>
+
+					<xs:sequence>
+						<xs:element name="DomainName" type="xs:string"/>
+						<xs:element name="ItemName" type="xs:string"/>
+						<xs:element name="AttributeName" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+
+			<xs:element name="GetAttributesResponse">
+				<xs:complexType>
+					<xs:sequence>
+					<xs:element ref="tns:GetAttributesResult"/>
+					<xs:element ref="tns:ResponseMetadata"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+
+			<xs:element name="GetAttributesResult">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Attribute" type="tns:Attribute" minOccurs="0" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+
+			<xs:element name="DeleteAttributes">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="DomainName" type="xs:string"/>
+						<xs:element name="ItemName" type="xs:string"/>
+						<xs:element name="Attribute" type="tns:Attribute" minOccurs="0" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+
+			<xs:element name="DeleteAttributesResponse">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="tns:ResponseMetadata"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+
+			<xs:element name="Query">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="DomainName" type="xs:string"/>
+						<xs:element name="QueryExpression" type="xs:string" minOccurs="0"/>
+						<xs:element name="MaxNumberOfItems" type="xs:int" minOccurs="0"/>
+						<xs:element name="NextToken" type="xs:string" minOccurs="0"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="QueryResponse">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="tns:QueryResult"/>
+						<xs:element ref="tns:ResponseMetadata"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="QueryResult">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="ItemName" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+						<xs:element name="NextToken" type="xs:string" minOccurs="0"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			
+			<xs:element name="Select">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="SelectExpression" type="xs:string" minOccurs="0"/>
+						<xs:element name="NextToken" type="xs:string" minOccurs="0"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="SelectResponse">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="tns:SelectResult"/>
+						<xs:element ref="tns:ResponseMetadata"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="SelectResult">
+				<xs:complexType>
+					<xs:sequence>
+					    <xs:element name="Item" type="tns:Item" minOccurs="0" maxOccurs="unbounded"/>
+						<xs:element name="NextToken" type="xs:string" minOccurs="0"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			
+			<xs:element name="QueryWithAttributes">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="AttributeName" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+						<xs:element name="DomainName" type="xs:string"/>
+						<xs:element name="QueryExpression" type="xs:string" minOccurs="0"/>
+						<xs:element name="MaxNumberOfItems" type="xs:int" minOccurs="0"/>
+						<xs:element name="NextToken" type="xs:string" minOccurs="0"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="QueryWithAttributesResponse">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="tns:QueryWithAttributesResult"/>
+						<xs:element ref="tns:ResponseMetadata"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="QueryWithAttributesResult">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Item" type="tns:Item" minOccurs="0" maxOccurs="unbounded"/>
+						<xs:element name="NextToken" type="xs:string" minOccurs="0"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:schema>
+	</wsdl:types>
+
+	<!-- ******************************** Messages ********************************* -->
+
+	<wsdl:message name="CreateDomainRequestMsg">
+		<wsdl:part name="body" element="tns:CreateDomain"/>
+	</wsdl:message>
+	<wsdl:message name="CreateDomainResponseMsg">
+		<wsdl:part name="body" element="tns:CreateDomainResponse"/>
+	</wsdl:message>
+	<wsdl:message name="ListDomainsRequestMsg">
+		<wsdl:part name="body" element="tns:ListDomains"/>
+	</wsdl:message>
+	<wsdl:message name="ListDomainsResponseMsg">
+		<wsdl:part name="body" element="tns:ListDomainsResponse"/>
+	</wsdl:message>
+	<wsdl:message name="DomainMetadataRequestMsg">
+		<wsdl:part name="body" element="tns:DomainMetadata"/>
+	</wsdl:message>
+	<wsdl:message name="DomainMetadataResponseMsg">
+		<wsdl:part name="body" element="tns:DomainMetadataResponse"/>
+	</wsdl:message>
+	<wsdl:message name="DeleteDomainRequestMsg">
+		<wsdl:part name="body" element="tns:DeleteDomain"/>
+	</wsdl:message>
+	<wsdl:message name="DeleteDomainResponseMsg">
+		<wsdl:part name="body" element="tns:DeleteDomainResponse"/>
+	</wsdl:message>
+	<wsdl:message name="PutAttributesRequestMsg">
+		<wsdl:part name="body" element="tns:PutAttributes"/>
+	</wsdl:message>
+	<wsdl:message name="PutAttributesResponseMsg">
+		<wsdl:part name="body" element="tns:PutAttributesResponse"/>
+	</wsdl:message>
+	<wsdl:message name="BatchPutAttributesRequestMsg">
+		<wsdl:part name="body" element="tns:BatchPutAttributes"/>
+	</wsdl:message>
+	<wsdl:message name="BatchPutAttributesResponseMsg">
+		<wsdl:part name="body" element="tns:BatchPutAttributesResponse"/>
+	</wsdl:message>	
+	<wsdl:message name="GetAttributesRequestMsg">
+		<wsdl:part name="body" element="tns:GetAttributes"/>
+	</wsdl:message>
+	<wsdl:message name="GetAttributesResponseMsg">
+		<wsdl:part name="body" element="tns:GetAttributesResponse"/>
+	</wsdl:message>
+	<wsdl:message name="DeleteAttributesRequestMsg">
+		<wsdl:part name="body" element="tns:DeleteAttributes"/>
+	</wsdl:message>
+	<wsdl:message name="DeleteAttributesResponseMsg">
+		<wsdl:part name="body" element="tns:DeleteAttributesResponse"/>
+	</wsdl:message>
+	<wsdl:message name="QueryRequestMsg">
+		<wsdl:part name="body" element="tns:Query"/>
+	</wsdl:message>
+	<wsdl:message name="QueryResponseMsg">
+		<wsdl:part name="body" element="tns:QueryResponse"/>
+	</wsdl:message>
+	<wsdl:message name="SelectRequestMsg">
+		<wsdl:part name="body" element="tns:Select"/>
+	</wsdl:message>
+	<wsdl:message name="SelectResponseMsg">
+		<wsdl:part name="body" element="tns:SelectResponse"/>
+	</wsdl:message>
+	<wsdl:message name="QueryWithAttributesRequestMsg">
+		<wsdl:part name="body" element="tns:QueryWithAttributes"/>
+	</wsdl:message>
+	<wsdl:message name="QueryWithAttributesResponseMsg">
+		<wsdl:part name="body" element="tns:QueryWithAttributesResponse"/>
+	</wsdl:message>
+
+	<!-- ********************************* Ports *********************************** -->
+
+	<wsdl:portType name="AmazonSDBPortType">
+		<wsdl:operation name="CreateDomain">
+			<wsdl:documentation>
+				The CreateDomain operation creates a new domain. The domain name must be unique
+				among the domains associated with the Access Key ID provided in the request. The CreateDomain
+				operation may take 10 or more seconds to complete.
+                        </wsdl:documentation>
+
+			<wsdl:input message="tns:CreateDomainRequestMsg" wsa:Action="urn:CreateDomain"/>
+			<wsdl:output message="tns:CreateDomainResponseMsg" wsa:Action="urn:CreateDomain:Response"/>
+		</wsdl:operation>
+		<wsdl:operation name="ListDomains">
+			<wsdl:documentation>
+				The ListDomains operation lists all domains associated with the Access Key ID. It returns
+				domain names up to the limit set by MaxNumberOfDomains. A NextToken is returned if there are more
+				than MaxNumberOfDomains domains. Calling ListDomains successive times with the
+				NextToken returns up to MaxNumberOfDomains more domain names each time.
+                        </wsdl:documentation>
+			<wsdl:input message="tns:ListDomainsRequestMsg" wsa:Action="urn:ListDomains"/>
+			<wsdl:output message="tns:ListDomainsResponseMsg" wsa:Action="urn:ListDomains:Response"/>
+
+		</wsdl:operation> 
+		<wsdl:operation name="DomainMetadata">
+			<wsdl:documentation>
+				The DomainMetadata operation returns some domain metadata values, such as the
+                number of items, attribute names and attribute values along with their sizes.
+            </wsdl:documentation>
+			<wsdl:input message="tns:DomainMetadataRequestMsg" wsa:Action="urn:DomainMetadata"/>
+			<wsdl:output message="tns:DomainMetadataResponseMsg" wsa:Action="urn:DomainMetadata:Response"/>
+
+		</wsdl:operation> 
+		<wsdl:operation name="DeleteDomain">
+			<wsdl:documentation>
+				The DeleteDomain operation deletes a domain. Any items (and their attributes) in the domain
+				are deleted as well. The DeleteDomain operation may take 10 or more seconds to complete.
+                        </wsdl:documentation>
+			<wsdl:input message="tns:DeleteDomainRequestMsg" wsa:Action="urn:DeleteDomain"/>
+			<wsdl:output message="tns:DeleteDomainResponseMsg" wsa:Action="urn:DeleteDomain:Response"/>
+		</wsdl:operation>
+		<wsdl:operation name="PutAttributes">
+			<wsdl:documentation>
+
+				The PutAttributes operation creates or replaces attributes within an item. You specify new attributes
+				using a combination of the Attribute.X.Name and Attribute.X.Value parameters. You specify
+				the first attribute by the parameters Attribute.0.Name and Attribute.0.Value, the second
+				attribute by the parameters Attribute.1.Name and Attribute.1.Value, and so on.
+
+				Attributes are uniquely identified within an item by their name/value combination. For example, a single
+				item can have the attributes { "first_name", "first_value" } and { "first_name",
+				second_value" }. However, it cannot have two attribute instances where both the Attribute.X.Name and
+				Attribute.X.Value are the same.
+
+				Optionally, the requestor can supply the Replace parameter for each individual value. Setting this value
+				to true will cause the new attribute value to replace the existing attribute value(s). For example, if an
+				item has the attributes { 'a', '1' }, { 'b', '2'} and { 'b', '3' } and the requestor does a
+				PutAttributes of { 'b', '4' } with the Replace parameter set to true, the final attributes of the
+				item will be { 'a', '1' } and { 'b', '4' }, replacing the previous values of the 'b' attribute
+				with the new value.
+                        </wsdl:documentation>
+			<wsdl:input message="tns:PutAttributesRequestMsg" wsa:Action="urn:PutAttributes"/>
+			<wsdl:output message="tns:PutAttributesResponseMsg" wsa:Action="urn:PutAttributes:Response"/>
+		</wsdl:operation>
+		<wsdl:operation name="BatchPutAttributes">
+			<wsdl:documentation>
+
+				The BatchPutAttributes operation creates or replaces attributes within one or more items.
+				You specify the item name with the Item.X.ItemName parameter.
+				You specify new attributes using a combination of the Item.X.Attribute.Y.Name and Item.X.Attribute.Y.Value parameters.
+				You specify the first attribute for the first item by the parameters Item.0.Attribute.0.Name and Item.0.Attribute.0.Value,
+				the second attribute for the first item by the parameters Item.0.Attribute.1.Name and Item.0.Attribute.1.Value, and so on.
+
+				Attributes are uniquely identified within an item by their name/value combination. For example, a single
+				item can have the attributes { "first_name", "first_value" } and { "first_name",
+				second_value" }. However, it cannot have two attribute instances where both the Item.X.Attribute.Y.Name and
+				Item.X.Attribute.Y.Value are the same.
+
+				Optionally, the requestor can supply the Replace parameter for each individual value. Setting this value
+				to true will cause the new attribute value to replace the existing attribute value(s). For example, if an
+				item 'I' has the attributes { 'a', '1' }, { 'b', '2'} and { 'b', '3' } and the requestor does a
+				BacthPutAttributes of {'I', 'b', '4' } with the Replace parameter set to true, the final attributes of the
+				item will be { 'a', '1' } and { 'b', '4' }, replacing the previous values of the 'b' attribute
+				with the new value.
+
+			</wsdl:documentation>
+			<wsdl:input message="tns:BatchPutAttributesRequestMsg" wsa:Action="urn:BatchPutAttributes"/>
+			<wsdl:output message="tns:BatchPutAttributesResponseMsg" wsa:Action="urn:BatchPutAttributes:Response"/>
+		</wsdl:operation>		
+		<wsdl:operation name="GetAttributes">
+			<wsdl:documentation>
+				Returns all of the attributes associated with the item. Optionally, the attributes returned can be limited to
+				the specified AttributeName parameter.
+
+				If the item does not exist on the replica that was accessed for this operation, an empty attribute is
+				returned. The system does not return an error as it cannot guarantee the item does not exist on other
+				replicas.
+                        </wsdl:documentation>
+			<wsdl:input message="tns:GetAttributesRequestMsg" wsa:Action="urn:GetAttributes"/>
+
+			<wsdl:output message="tns:GetAttributesResponseMsg" wsa:Action="urn:GetAttributes:Response"/>
+		</wsdl:operation>
+
+		<wsdl:operation name="DeleteAttributes">
+			<wsdl:documentation>
+				Deletes one or more attributes associated with the item. If all attributes of an item are deleted, the item is
+				deleted.
+			</wsdl:documentation>
+			<wsdl:input message="tns:DeleteAttributesRequestMsg" wsa:Action="urn:DeleteAttributes"/>
+			<wsdl:output message="tns:DeleteAttributesResponseMsg" wsa:Action="urn:DeleteAttributes:Response"/>
+		</wsdl:operation>
+		
+		<wsdl:operation name="Query">
+			<wsdl:documentation>
+				The Query operation returns a set of ItemNames that match the query expression. Query operations that
+				run longer than 5 seconds will likely time-out and return a time-out error response.
+
+				A Query with no QueryExpression matches all items in the domain.
+                        </wsdl:documentation>
+			<wsdl:input message="tns:QueryRequestMsg" wsa:Action="urn:Query"/>
+			<wsdl:output message="tns:QueryResponseMsg" wsa:Action="urn:Query:Response"/>
+		</wsdl:operation>
+		
+		<wsdl:operation name="Select">
+			<wsdl:documentation>
+				The Select operation returns a set of item names and associate attributes that match the
+				query expression. Select operations that run longer than 5 seconds will likely time-out
+				and return a time-out error response.
+            </wsdl:documentation>
+			<wsdl:input message="tns:SelectRequestMsg" wsa:Action="urn:Select"/>
+			<wsdl:output message="tns:SelectResponseMsg" wsa:Action="urn:Select:Response"/>
+		</wsdl:operation>
+		
+		<wsdl:operation name="QueryWithAttributes">
+  			<wsdl:documentation>
+				The QueryWithAttributes operation returns a set of item names and associated attributes.
+				The query semantics of this operation are identical to the Query operation.
+			</wsdl:documentation>
+			<wsdl:input message="tns:QueryWithAttributesRequestMsg" wsa:Action="urn:QueryWithAttributes"/>
+			<wsdl:output message="tns:QueryWithAttributesResponseMsg" wsa:Action="urn:QueryWithAttributes:Response"/>
+		</wsdl:operation>
+		
+	</wsdl:portType>
+
+	<!-- ******************************** Bindings ********************************** -->
+
+	<wsdl:binding name="AmazonSDBBinding" type="tns:AmazonSDBPortType">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<wsdl:operation name="CreateDomain">
+			<soap:operation soapAction="CreateDomain"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="ListDomains">
+			<soap:operation soapAction="ListDomains"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="DomainMetadata">
+			<soap:operation soapAction="DomainMetadata"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="DeleteDomain">
+			<soap:operation soapAction="DeleteDomain"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="PutAttributes">
+			<soap:operation soapAction="PutAttributes"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="BatchPutAttributes">
+			<soap:operation soapAction="BatchPutAttributes"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetAttributes">
+			<soap:operation soapAction="GetAttributes"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="DeleteAttributes">
+			<soap:operation soapAction="DeleteAttributes"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="Query">
+			<soap:operation soapAction="Query"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="Select">
+			<soap:operation soapAction="Select"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="QueryWithAttributes">
+			<soap:operation soapAction="QueryWithAttributes"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding> 
+
+	<!-- ******************************** Service ********************************** -->
+
+	<wsdl:service name="AmazonSimpleDB">
+		<wsdl:documentation>
+			Amazon SimpleDB is a web service for running queries on structured
+			data in real time. This service works in close conjunction with Amazon 
+			Simple Storage Service (Amazon S3) and Amazon Elastic Compute Cloud 
+			(Amazon EC2), collectively providing the ability to store, process 
+			and query data sets in the cloud. These services are designed to make 
+			web-scale computing easier and more cost-effective for developers.
+
+			Traditionally, this type of functionality has been accomplished with 
+			a clustered relational database that requires a sizable upfront 
+			investment, brings more complexity than is typically needed, and often 
+			requires a DBA to maintain and administer. In contrast, Amazon SimpleDB 
+			is easy to use and provides the core functionality of a database - 
+			real-time lookup and simple querying of structured data without the 
+			operational complexity.  Amazon SimpleDB requires no schema, automatically 
+			indexes your data and provides a simple API for storage and access.  
+			This eliminates the administrative burden of data modeling, index 
+			maintenance, and performance tuning. Developers gain access to this 
+			functionality within Amazon's proven computing environment, are able 
+			to scale instantly, and pay only for what they use. 
+		</wsdl:documentation>
+		<wsdl:port name="AmazonSDBPortType" binding="tns:AmazonSDBBinding">
+			<soap:address location="http://sdb.amazonaws.com"/>
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>

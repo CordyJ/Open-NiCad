@@ -1,0 +1,169 @@
+-- @path XML=/XSLT2XQuery/XML/XML.ecore
+-- @path XQuery=/XSLT2XQuery/XQuery/XQuery.ecore
+-- @path XSLT=/XSLT2XQuery/XSLT/XSLT.ecore
+
+module XSLT2XQuery;
+create OUT : XQuery from IN : XSLT;
+
+rule P2P {
+  from
+  	xslt : XSLT!XSLTRootNode
+	-- this rule will be called for each XSLTRootNode
+  to
+  	out : XQuery!XQueryProgram (
+  	-- this rule will instanciate a XQueryProgram variable named out
+	-- which will represent a XQueryProgram element in the OUT.xmi file
+  	),
+	
+	flwor : XQuery!FLWOR (
+	-- the variable flwor is of the type FLWOR and
+	-- will be initialized with the following values:
+    	xQueryProgram <- out,
+		"for" <- "for", 
+		-- the attribute for of flwor refers to the variable for which is intialized below
+		return <- return
+		-- the attribute return of flwor refers to the variable return which is intialized below
+	),
+	"for" : XQuery!For (
+		var <- '$var',
+		-- the string value '$var' is attributed to for.var
+		expression <- forExpression
+	),
+	forExpression : XQuery!XPath (
+		value <- 'document(\"xmlFile.xml\")/*'
+	),
+	return : XQuery!Return (
+ 		expressions <- xslt.nodes->select(t | t.oclIsKindOf(XSLT!Template))->select(t | t.match = '/')->collect(t | t.nodes)->flatten()	
+	)  
+}
+
+rule Template2FLOWR {
+	from 
+		template : XSLT!Template (
+			template.match <> '/'
+		)
+	to
+		out : XQuery!FunctionDeclaration (
+			name <- 'fct' + template.match,
+    		expression <- Sequence {flwor},
+      		xQueryProgram <- XSLT!XSLTRootNode.allInstances()->asSequence()->first()
+		),
+
+		flwor : XQuery!FLWOR (
+  			"for" <- "for",
+    		return <- return
+		),
+
+		"for" : XQuery!For (
+    		expression <- forExpression,
+    		var <- '$var'
+		),
+
+		forExpression : XQuery!XPath (
+    		value <- '$paramVar'
+		),
+
+  		return : XQuery!Return (
+    		expressions <- template.nodes
+  		)
+}	
+
+rule If2FLOWR {
+	from 
+		"if": XSLT!If
+	to
+		out : XQuery!FLWOR (
+			"let" <- varlet,
+	    	where <- where,
+	    	return <- return
+	  	),
+
+		varlet : XQuery!Let (
+	    	expression <- letExpression,
+	    	var <- '$var'
+	  	),
+
+	  	letExpression : XQuery!XPath(
+    		value <- '$var'
+  		),
+
+  		where : XQuery!Where (
+    		expression <- whereExpression
+  		),
+
+ 		whereExpression : XQuery!BooleanExp (
+    		value <- '$var/' + "if".test
+  		),
+  
+		return : XQuery!Return (
+    		expressions <- "if".nodes
+ 		)
+}
+
+rule ApplyTemplate2FunctionCall {
+	from 
+		_applyTemplates : XSLT!ApplyTemplates
+	to
+		out : XQuery!FunctionCall (
+    	name <- 'fct' + _applyTemplates.select,
+    	parameters <- Sequence{ parameter }
+  	),
+
+	parameter : XQuery!XPath(
+    	value <- '$var/' + _applyTemplates.select
+  	)  
+}
+
+
+rule ValueOf2ReturnXPath {
+	from 
+    	_valueOf : XSLT!ValueOf
+	to
+   		out : XQuery!ReturnXPath (
+    	value <- '$var/' + _valueOf.select
+	)
+}
+
+rule ElementNode2ElementNode {
+	from 
+		elementNode : XSLT!ElementNode (
+    	(elementNode.name <> 'xsl:otherwise') and
+    	(elementNode.name <> 'xsl:when') and
+    	(elementNode.name <> 'xsl:choose') and
+    	(elementNode.name <> 'xsl:copy-of') and
+    	(elementNode.name <> 'xsl:sort') and
+    	(elementNode.name <> 'xsl:foreach') and
+    	(elementNode.name <> 'xsl:if') and
+    	(elementNode.name <> 'xsl:apply-templates') and
+    	(elementNode.name <> 'xsl:value-of') and
+    	(elementNode.name <> 'xsl:template') and
+    	(elementNode.name <> 'xsl:stylesheet') 
+  	) 
+  	to
+    	out : XQuery!ElementNode (
+      	name <- elementNode.name,
+      	nodes <- elementNode.nodes
+    )
+ }
+
+rule Attribute2Attribute {
+	from 
+  		attributeNode : XSLT!AttributeNode (
+    		(attributeNode.name <> 'xsl:otherwise') and
+    		(attributeNode.name <> 'xsl:when') and
+    		(attributeNode.name <> 'xsl:choose') and
+    		(attributeNode.name <> 'xsl:copy-of') and
+    		(attributeNode.name <> 'xsl:sort') and
+    		(attributeNode.name <> 'xsl:foreach') and
+    		(attributeNode.name <> 'xsl:if') and
+    		(attributeNode.name <> 'xsl:apply-templates') and
+    		(attributeNode.name <> 'xsl:value-of') and
+    		(attributeNode.name <> 'xsl:template') and
+    		(attributeNode.name <> 'xsl:stylesheet') 
+	) 
+	to
+   		out : XQuery!AttributeNode (
+     		name <- attributeNode.name,
+     		value <- attributeNode.value
+	)
+}

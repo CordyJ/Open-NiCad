@@ -1,0 +1,117 @@
+module Table2SpreadsheetMLSimplified; -- Module Template
+create OUT : SpreadsheetMLSimplified from IN : Table;
+
+
+-- This helper permits to determine whether a string contains a number value or not.
+-- The method used in this helper is not exactly correct because it considers as a number 
+-- a string that can be composed of several '.' characters. It should be improved in order 
+-- to solve this problem. However, the helper returns the right value in most cases. 
+-- CONTEXT: n/a
+-- RETURN: Boolean
+helper context Table!Cell def: isNumber(value : String, itIsFirstChar : Boolean) : Boolean =
+	if value <> ''
+	then
+		let char : String =  value.substring(1,1)
+		in
+			if( char = '.' or char = '0' or char = '1' or char = '2' or char = '3' or char = '4' 
+				or char = '5' or char = '6' or char = '7' or char = '8' or char = '9')
+			then
+				self.isNumber(value.substring(2,value.size()),false)
+			else
+				false
+			endif
+	else
+		if itIsFirstChar
+		then
+			false
+		else
+			true
+		endif
+	endif;
+
+
+
+-- Rule 'Table2ExcelTable'
+-- This rule generates the global structure of an Excel document 
+-- and creates the Excel table
+rule Table2ExcelTable {
+	from 
+		t : Table!Table
+
+	using {
+		tableRow : Sequence(Table!Cell) = t.rows->first().cells;		
+	}
+	
+	to 
+		wb : SpreadsheetMLSimplified!Workbook (
+			wb_worksheets <- Sequence{ws}
+		),
+		ws : SpreadsheetMLSimplified!Worksheet (
+			name <- 'Java source code Info',
+			ws_table <- et
+		),
+		et : SpreadsheetMLSimplified!Table (
+			t_rows <- Sequence{t.rows->collect(e | thisModule.resolveTemp(e, 'erow'))},
+			t_cols <- Sequence{col}
+		),
+		col : distinct SpreadsheetMLSimplified!Column foreach(cell in tableRow)(
+			width <- 150.0
+		)
+}
+
+
+-- Rule 'Row2ExcelRow'
+-- This rule generates the rows that will contain the cells 
+rule Row2ExcelRow {
+	from 
+		row : Table!Row
+	
+	to
+		erow : SpreadsheetMLSimplified!Row (
+			r_cells <- Sequence{ row.cells->collect(e | thisModule.resolveTemp(e, 'ecell'))}
+		)
+}
+
+
+-- Rule 'Cell2ExcelCell'
+-- This rule generates the cells that will contain the data
+rule Cell2ExcelCell {
+	from 
+		cell : Table!Cell
+		
+	using {
+		stringTypeOrNot : Sequence(String) = 
+			let ct : String = cell.content
+			in
+				if cell.isNumber(ct,true)
+				then
+					Sequence{}
+				else
+					Sequence{ct}
+				endif;
+		numberTypeOrNot : Sequence(Real) =
+			let ct : String = cell.content
+			in
+				if cell.isNumber(ct,true)
+				then
+					Sequence{ct.toReal()}
+				else
+					Sequence{}
+				endif;
+	}
+
+	to
+		ecell : SpreadsheetMLSimplified!Cell (
+			c_data <- edata
+		),
+		edata : SpreadsheetMLSimplified!Data (),
+		stringVal : distinct SpreadsheetMLSimplified!StringValue foreach(stringTypeVal in stringTypeOrNot) (
+			vt_data <- edata,
+			value <- stringTypeVal
+		),
+		numberVal : distinct SpreadsheetMLSimplified!NumberValue foreach(numberTypeVal in numberTypeOrNot) (
+			vt_data <- edata,
+			value <- numberTypeVal
+		)
+}
+

@@ -1,0 +1,529 @@
+% TXL basis grammar for ATL
+% Jim Cordy, Queen's University, February 2016
+% Copyright 2016 by Queen's University at Kingston
+
+% Adapted from the Eclipse ATL summary syntax
+% by  Massimo Tisi and Frédéric Jouault
+% https://wiki.eclipse.org/M2M/ATL/Syntax
+
+% This grammar is a work in progress - please report
+% any problems to cordy@cs.queensu.ca
+
+% v0.2	JRC  20 Feb 2016  Validated against entire ATL Zoo
+% v0.1	JRC  18 Feb 2016  Initial version
+
+#pragma -w 4096
+
+comments
+    --
+end comments
+
+compounds
+    <-  ->  >=  <=  <>  ::
+end compounds
+
+keys
+    % Constant keywords
+    true false
+    % Type keywords
+    Bag Set OrderedSet Sequence Tuple Integer Real Boolean String TupleType Map
+    % Language keywords 
+    'not and or xor implies module create from uses helper def context 'rule using 
+    derived to mapsTo distinct foreach in do if then else endif let library query 
+    for div refining entrypoint
+end keys
+
+define program
+    [unit]
+end define
+
+define unit
+    [module] | [library] | [query]
+end define
+
+define module
+    'module [identifier] '; [NL]
+    [NL] create [list oclModel+] [refining_or_from] [list oclModel+]  '; [NL] 
+    [libraryRef*] 
+    [moduleElement*]
+end define
+
+define refining_or_from
+    'refining | 'from
+end define
+
+define library
+    [NL] 'library [identifier] '; [NL] 
+    [libraryRef*] 
+    [helper*]
+end define
+
+define query
+    [NL] 'query [identifier] '= [oclExpressionBlock] '; [NL] 
+    [libraryRef*] 
+    [helper*]
+end define
+
+define libraryRef
+    'uses [identifier] '; [NL]
+end define
+
+define moduleElement
+    [helper] | [rule_]
+end define
+
+define helper
+    [NL] 'helper [oclFeatureDefinition] '; [NL]
+end define
+
+define oclFeatureDefinition
+    [oclContextDefinition ?] 'def ': [oclFeature]
+end define
+
+define oclContextDefinition
+    'context [oclType]
+end define
+
+define oclFeature
+    [operation] | [attribute]
+end define
+
+define operation
+    [identifier] '( [list parameter] ') ': [oclType] '= [NL] [oclExpressionBlock] 
+end define
+
+define parameter
+    [identifier] ': [oclType]
+end define
+
+define attribute
+    [identifier] ': [oclType] '= [NL] [oclExpressionBlock] 
+end define
+
+define rule_
+    [calledRule] | [matchedRule]
+end define
+
+define matchedRule
+    [lazyMatchedRule] | [matchedRule_abstractContents]
+end define
+
+define lazyMatchedRule
+    [NL] ['unique ?] 'lazy ['abstract ?] ['refining ?] 'rule [identifier] [extends_id?] '{ [NL][IN] 
+        [inPattern] 
+        [using_clause?] 
+        [outPattern?] 
+        [actionBlock?] [EX]
+    '} [NL]
+end define
+
+define extends_id
+    'extends [identifier]
+end define
+
+define using_clause
+    'using '{ [IN][NL] [ruleVariableDeclaration*] [EX] '} [NL]
+end define
+
+define ruleVariableDeclaration
+    [identifier] ': [oclType] '= [oclExpression] '; [NL]
+end define
+
+define calledRule
+    [NL] ['entrypoint ?] ['endpoint ?] 'rule [identifier] '( [list parameter] ') '{ [NL][IN]
+        [using_clause?] 
+	[outPattern?] 
+	[actionBlock?] [EX]
+    '} [NL]
+end define
+
+define inPattern
+    'from [IN][NL] [list inPatternElement+] [oclExpression_clause?] [EX][NL]
+end define
+
+define oclExpression_clause
+    '( [oclExpressionBlock] ')
+end define
+
+define inPatternElement
+    [simpleInPatternElement]
+end define
+
+define simpleInPatternElement
+    [identifier] ': [oclType] [in_ids?]
+end define
+
+define in_ids
+    'in [list id+]
+end define
+
+define outPattern
+    'to [IN][NL] [outPatternElements] [EX][NL]
+end define
+
+define outPatternElements
+    [outPatternElement] [comma_outPatternElement*]
+end define
+
+define comma_outPatternElement
+    ', [NL] [outPatternElement]
+end define
+
+define outPatternElement
+    [simpleOutPatternElement] | [forEachOutPatternElement]
+end define
+
+define simpleOutPatternElement
+    [identifier] ': [oclType] [in_id?] [mapsTo_id?] [binding_clause?]
+end define
+
+define in_id
+    'in [identifier]
+end define 
+
+define mapsTo_id
+    'mapsTo [identifier]
+end define
+
+define binding_clause
+    '( [IN][NL] [bindings?] [EX][NL] ')
+end define
+
+define bindings
+    [binding] [comma_binding*]
+end define
+
+define comma_binding
+    ', [NL] [binding]
+end define
+
+define forEachOutPatternElement
+    [identifier] ': 'distinct [oclType] 'foreach '( [iterator] 'in [oclExpression] ') [mapsTo_id?] [binding_clause?]
+end define
+
+define binding
+    [identifier] '<- [oclExpression]
+end define
+
+define actionBlock
+    'do '{ [statement*] '}
+end define
+
+define statement
+    [ifStat] | [expressionStat] | [bindingStat] | [forStat] | [compoundStat]
+end define
+
+define bindingStat
+    [oclExpression] '<- [oclExpression] '; [NL]
+end define
+
+define expressionStat
+    [oclExpressionBlock] '; [NL]
+end define
+
+define ifStat
+    'if '( [oclExpression] ') [statement] [else_statement?]
+end define
+
+define else_statement
+    'else [statement] 
+end define
+
+define forStat
+    'for '( [iterator] 'in [oclExpression] ') [compoundStat]
+end define
+
+define compoundStat
+    '{ [NL][IN] [statement*] [EX] '}
+end define
+
+define oclModel
+    [identifier] ': [identifier]
+end define
+
+define oclModelElement
+    [identifier] [SPOFF] '! [identifier] 
+	[coloncolon_identifier?]	% UML stereotype, observed
+	[SPON]
+end define
+
+define coloncolon_identifier
+    ':: [identifier]
+end define
+
+define oclExpressionBlock
+    [IN] [oclExpression] [EX]
+end define
+
+define oclExpression
+    [priority_5] [NL] %%%
+    | [letExp] [NL] %%%
+end define
+
+define iteratorExp
+    [identifier] '( [list iterator+] '| [oclExpression] ')
+end define
+
+define iterateExp
+    'iterate '( [list iterator+] '; [variableDeclaration] '| [oclExpression] ')
+end define
+
+define collectionOperationCallExp
+    [identifier] '( [list oclExpression] ')
+end define
+
+define operationCallExp
+    [identifier] '( [list oclExpression] ')
+end define
+
+define navigationOrAttributeCallExp
+    [identifier]
+end define
+
+define iterator
+    [identifier]
+end define
+
+define oclUndefinedExp
+    'OclUndefined
+end define
+
+define primitiveExp
+    [numericExp] | [booleanExp] | [stringExp]
+end define
+
+define numericExp
+    [integerExp] | [realExp]
+end define
+
+define booleanExp
+    'true | 'false
+end define
+
+define integerExp
+    [integernumber]
+end define
+
+define realExp
+    [number]
+end define
+
+define stringExp
+    [charlit] | [stringlit]
+end define
+
+define ifExp
+    [FL] 'if [oclExpression] 'then [NL] [oclExpressionBlock] [NL] 'else [NL] [oclExpressionBlock] [NL] 'endif
+end define
+
+define variableExp
+    [identifier]
+end define
+
+define superExp
+    'super
+end define
+
+define letExp
+    [letVariableDeclaration+] [oclExpressionBlock]
+end define
+
+define letVariableDeclaration
+    'let [variableDeclaration] 'in [NL] 
+end define
+
+define variableDeclaration
+    [identifier] ': [oclType] '= [oclExpressionBlock]
+end define
+
+define enumLiteralExp
+    	'# [identifier]
+    |	[identifier] ':: [identifier]	% obsolete OCL notation
+end define
+
+define collectionExp
+    [bagExp] | [setExp] | [orderedSetExp] | [sequenceExp]
+end define
+
+define bagExp
+    'Bag '{ [list oclExpression] '}
+end define
+
+define setExp
+    'Set '{ [list oclExpression] '}
+end define
+
+define orderedSetExp
+    'OrderedSet '{ [list oclExpression] '}
+end define
+
+define sequenceExp
+    'Sequence '{ [list oclExpression] '}
+end define
+
+define mapExp
+    'Map '{ [list mapElement] '}
+end define
+
+define mapElement
+    '( [oclExpression] ', [oclExpression] ')
+end define
+
+define tupleExp
+    'Tuple '{ [list tuplePart] '}
+end define
+
+define tuplePart
+    [identifier] [colon_oclType?] '= [oclExpression]
+end define
+
+define colon_oclType
+    ': [oclType]
+end define
+
+define oclType
+	[oclModelElement] | [oclAnyType] | [tupleType] | [mapType] 
+    |	[primitive] | [collectionType] | [oclType_abstractContents]
+end define
+
+define oclAnyType
+    [oclAnyType_abstractContents]
+end define
+
+define tupleType
+    'TupleType '( [list tupleTypeAttribute] ')
+end define
+
+define tupleTypeAttribute
+    [identifier] ': [oclType]
+end define
+
+define mapType
+    'Map '( [oclType] ', [oclType] ')
+end define
+
+define primitive
+    [numericType] | [booleanType] | [stringType]
+end define
+
+define numericType
+    [integerType] | [realType]
+end define
+
+define integerType
+    'Integer
+end define
+
+define realType
+    'Real
+end define
+
+define booleanType
+    'Boolean
+end define
+
+define stringType
+    'String
+end define
+
+define collectionType
+    [bagType] | [setType] | [orderedSetType] | [sequenceType] | [collectionType_abstractContents]
+end define
+
+define bagType
+    'Bag '( [oclType] ')
+end define
+
+define setType
+    'Set '( [oclType] ')
+end define
+
+define orderedSetType
+    'OrderedSet '( [oclType] ')
+end define
+
+define sequenceType
+    'Sequence '( [oclType] ')
+end define
+
+define priority_0
+    [primary_oclExpression] [primary_oclExpression_extension*]
+end define
+
+define primary_oclExpression_extension
+	'. [operationCallExp_or_navigationOrAttributCallExp]
+    |	'-> [iteratorExp_or_iterateExp_or_collectionOperationCallExp]
+end define
+
+define iteratorExp_or_iterateExp_or_collectionOperationCallExp
+    [iteratorExp] | [iterateExp] | [collectionOperationCallExp]
+end define
+
+define operationCallExp_or_navigationOrAttributCallExp
+    [operationCallExp] | [navigationOrAttributeCallExp] 
+end define
+
+define priority_1
+    'not [priority_0] | '- [priority_0] | [priority_0]
+end define
+
+define priority_2
+    [priority_1] [op_priority_1*]
+end define
+
+define op_priority_1
+    '* [priority_1] | '/ [priority_1] | 'div [priority_1] | 'mod [priority_1]
+end define
+
+define priority_3
+    [priority_2] [op_priority_2*]
+end define
+
+define op_priority_2
+    '+ [priority_2] | '- [priority_2]
+end define
+
+define priority_4
+    [priority_3] [op_priority_3*]
+end define
+
+define op_priority_3
+    '= [priority_3] | '> [priority_3] | '< [priority_3] | '>= [priority_3] | '<= [priority_3] | '<> [priority_3]
+end define
+
+define priority_5
+    [priority_4] [op_priority_4*]
+end define
+
+define op_priority_4
+    'and [priority_4] | 'or [priority_4] | 'xor [priority_4] | 'implies [priority_4]
+end define
+
+define matchedRule_abstractContents
+    [NL] ['nodefault ?] ['abstract ?] ['refining ?] 'rule [identifier] [extends_id?] '{ [IN][NL]
+	[inPattern] 
+	[using_clause?] 
+	[outPattern ?] 
+	[actionBlock ?] [EX]
+    '} [NL]
+end define
+
+define oclType_abstractContents
+    'OclType
+end define
+
+define oclAnyType_abstractContents
+    'OclAny
+end define
+
+define collectionType_abstractContents
+    'Collection '( [oclType] ')
+end define
+
+define primary_oclExpression
+    [variableExp] | [oclUndefinedExp] | [primitiveExp] | [ifExp] | [superExp] | [enumLiteralExp] | [collectionExp] | [mapExp] | [tupleExp] | [oclType] | '( [oclExpression] ')
+end define
+
+define identifier
+    [id] | [stringlit]
+end define

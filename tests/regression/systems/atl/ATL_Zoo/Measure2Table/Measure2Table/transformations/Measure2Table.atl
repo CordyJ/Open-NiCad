@@ -1,0 +1,132 @@
+--@atlcompiler	atl2006
+--@name			Measure2Table
+--@version		2.0
+--@domains		measurement data, metrics, generic table
+--@authors		Eric Vepa (evepa <at> sodius.com) for SODIUS (www.sodius.com)
+--@date			2007/08/28
+--@description	This transformation is used to represent measurement data from terminal models as a generic table representation.
+
+module Measure2Table; -- Module Template
+create OUT : Table from IN : Measure;
+
+uses MeasureHelpers;
+
+--@begin helper modelKind
+--@comments String values for model type of a measure set.
+helper def : modelKind : Map(String,String) =
+	Map {('KM3','KM3'),
+		('UML2','UML2')};
+--@end helper modelKind
+
+--@begin helper elementKind
+--@comments String values for element type of a measure set.
+helper def : elementKind : Map(String,String) =
+	Map {('metamodel','Metamodel'),
+		('model','Model'),
+		('package','Package'),
+		('interface','Interface'),
+		('class','Class')};
+--@end helper elementKind
+
+--@begin entrypoint rule Tables
+--@comments Creates tables from the collected measurement data.
+entrypoint rule Tables() {
+	using {
+		allMetamodelMeasuresSets : Sequence(Measure!MeasureSet) =
+			thisModule.allMeasureSets(#metamodel);
+		allModelMeasuresSets : Sequence(Measure!MeasureSet) =
+			thisModule.allMeasureSets(#model);
+		allPackageMeasuresSets : Sequence(Measure!MeasureSet) =
+			thisModule.allMeasureSets(#package);
+		allInterfaceMeasuresSets : Sequence(Measure!MeasureSet) =
+			thisModule.allMeasureSets(#interface);
+		allClassMeasuresSets : Sequence(Measure!MeasureSet) =
+			thisModule.allMeasureSets(#class);
+	}
+	do {
+		if (allMetamodelMeasuresSets->notEmpty()) {
+			thisModule.AllMeasureSet2Table(allMetamodelMeasuresSets);
+		}
+		if (allModelMeasuresSets->notEmpty()) {
+			thisModule.AllMeasureSet2Table(allModelMeasuresSets);
+		}
+		if (allPackageMeasuresSets->notEmpty()) {
+			thisModule.AllMeasureSet2Table(allPackageMeasuresSets);
+		}
+		if (allInterfaceMeasuresSets->notEmpty()) {
+			thisModule.AllMeasureSet2Table(allInterfaceMeasuresSets);
+		}
+		if (allClassMeasuresSets->notEmpty()) {
+			thisModule.AllMeasureSet2Table(allClassMeasuresSets);
+		}
+	}
+}
+--@end entrypoint rule Tables
+
+--@begin called rule AllMeasureSet2Table
+--@comments Creates a table for all measure sets for one kind of element.
+rule AllMeasureSet2Table(allMeasSet : Sequence(Measure!MeasureSet)) {
+	to
+		t : Table!Table (
+			rows <- thisModule.MeasureSet2HdrRow(allMeasSet->first()),
+			rows <- allMeasSet->
+				collect(ms|thisModule.MeasureSet2ValueRow(ms))
+		)
+}
+--@end called rule AllMeasureSet2Table
+
+--@begin called rule MeasureSet2HdrRow
+--@comments Creates a header row with the names of all metrics for this kind of element.
+rule MeasureSet2HdrRow(ms : Measure!MeasureSet) {
+	to
+		hdrRow : Table!Row (
+			cells <- thisModule.String2Cell(ms.getElementKind()),
+			cells <- ms.allMeasures->
+				collect(meas|thisModule.String2Cell(meas.metricName()))
+		)
+	do {
+		hdrRow;
+	}
+}
+--@end called rule MeasureSet2HdrRow
+
+--@begin called rule MeasureSet2ValueRow
+--@comments Creates a row with the values for simple measures of a measure set.
+rule MeasureSet2ValueRow(ms : Measure!MeasureSet) {
+	to
+		valueRow : Table!Row (
+			cells <- thisModule.String2Cell(ms.absoluteName()),
+			cells <- ms.allMeasures->
+				collect(meas|thisModule.String2Cell(meas.stringValue()))
+		)
+	do {
+		valueRow;
+	}
+}
+--@end called rule MeasureSet2ValueRow
+
+--@begin called rule Sequence2Row
+--@comments Creates a rows with the cells given.
+rule Sequence2Row(cells : Sequence(OclAny)) {
+	to
+		row : Table!Row (
+			cells <- cells
+		)
+	do {
+		row;
+	}
+}
+--@end called rule Sequence2Row
+
+--@begin called rule String2Cell
+--@comments Creates a cell with the content given.
+rule String2Cell(content : String) {
+	to
+		cell : Table!Cell (
+			content <- content
+		)
+	do {
+		cell;
+	}
+}
+--@end called rule String2Cell

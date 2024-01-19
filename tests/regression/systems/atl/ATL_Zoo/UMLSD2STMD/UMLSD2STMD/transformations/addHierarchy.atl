@@ -1,0 +1,161 @@
+-- title: UMLSD2STMD
+-- release: 0.1
+-- date: 18 oktober 2006
+
+-- author:      Bas Graaf
+--                      SWERL SoftWare Evolution Research Lab
+--                      Delft University of Technology
+--                      b.s.graaf@tudelft.nl
+
+module addHierarchy; -- Module Template
+create OUT : UML from IN : UML;
+
+helper def: allAttributes: Set(UML!Attribute) =
+	UML!Attribute->allInstances()
+;
+helper def: allStateMachines: Set(UML!StateMachine) =
+	UML!StateMachine->allInstances()
+;
+helper def: allSimpleStates: Set(UML!SimpleState) =
+	UML!SimpleState->allInstances()
+;
+helper def: equals(cs1:Set(UML!Constraint),cs2:Set(UML!Constraint)): Boolean =
+	cs1->includesAll(cs2) and cs2->includesAll(cs1)
+;
+helper context UML!Class def :stateVectorPartition: Sequence(UML!Attribute) =
+	self.feature->select(f|f.oclIsTypeOf(UML!Attribute))->select(a|a.visibility=#vk_public)
+;
+helper context UML!Constraint def: stateVariable: UML!Attribute =
+	thisModule.allAttributes->select(a|a.name=self.stateVariableName)->asSequence()->first()
+;
+helper context UML!Constraint def: stateVariableName: String =
+	self.body.body->substring(self.body.body.indexOf('.')+2,self.body.body.indexOf('='))
+;
+helper context UML!Constraint def: stateValue: String =
+	self.body.body->substring(self.body.body.indexOf('=')+2,self.body.body.size())
+;
+helper context UML!StateMachine def: leastSignificant(cseq:Set(UML!Constraint)): UML!Constraint =
+	let sap:Sequence(UML!Attribute) = self."context".stateVectorPartition in
+		sap->iterate(a;c:UML!Constraint=Sequence{}->first()|
+			if cseq->collect(c|c.stateVariable)->includes(a) then
+				cseq->select(c|c.stateVariable=a)->asSequence()->first()
+			else
+				c
+			endif)
+;
+helper context UML!StateMachine def: mostSignificant(cseq:Set(UML!Constraint)): UML!Constraint =
+	let sap:Sequence(UML!Attribute) = self."context".stateVectorPartition in
+		sap->iterate(a;c:UML!Constraint=Sequence{}->first()|
+			if cseq->collect(c|c.stateVariable)->includes(a) and c.oclIsUndefined() then
+				cseq->select(c|c.stateVariable=a)->asSequence()->first()
+			else
+				c
+			endif)
+;
+helper context UML!StateMachine def: compositeStateConstraintSeqsAt(cseq:Set(UML!Constraint)): Set(Set(UML!Constraint)) =
+	-- select all States that include all of cseq and collect their constraints,
+	-- collect those sequences without all constraints in cseq,
+	-- collect those sequences with all constraints related to the state attribute vector partition
+	-- select those sequence that are not empty, and collect the most significant constraints as a set
+	-- finally collect a sequence for every constraint consisting of cseq and that constraint
+	let sap:Sequence(UML!Attribute) = self."context".stateVectorPartition in
+		self.top.subvertex->select(s|s.constraint->includesAll(cseq))->collect(s|s.constraint)
+		->collect(cs|cs->select(c|cseq->excludes(c)))
+		->collect(cs|cs->select(e|sap->includes(e.stateVariable)))
+		->select(cs|cs->notEmpty())->collect(cs|self.mostSignificant(cs))->asSet()
+		->collect(c|cseq->including(c))
+		->select(cs|not thisModule.allSimpleStates->select(s|s.name='default')->exists(s|thisModule.equals(s.constraint,cs)))
+;
+helper context UML!StateMachine def: simpleStateStatesAt(cseq:Set(UML!Constraint)): Set(UML!SimpleState) =
+	let sap:Sequence(UML!Attribute) = self."context".stateVectorPartition in
+		self.top.subvertex->select(s|
+			thisModule.equals(s.constraint->select(c|sap->includes(c.stateVariable)),cseq))->select(s|s.name<>'default')
+			->union(thisModule.allSimpleStates->select(s|s.name='default')->select(s|s.constraint->includesAll(cseq) and s.constraint.size()=cseq.size()+1))
+;
+rule Model {
+	from m_in:UML!Model
+	to m_out:UML!Model (
+		name <- m_in.name,
+		ownedElement <- m_in.ownedElement->select(e|e.oclIsTypeOf(UML!StateMachine) or e.oclIsTypeOf(UML!CallEvent)))
+}
+rule StateMachine {
+	from sm_in:UML!StateMachine
+	to sm_out:UML!StateMachine(
+		name <- sm_in.name,
+		top <- sm_in.top,
+		transitions <- sm_in.transitions)
+}
+rule TopCompositeState {
+	from cs_in:UML!CompositeState
+	using {
+		sm:UML!StateMachine=thisModule.allStateMachines->select(sm|sm.top=cs_in)->asSequence()->first();
+	}
+	to cs_out:UML!CompositeState (
+		name <- cs_in.name,
+		subvertex <- sm.simpleStateStatesAt(Set{})
+		->union(sm.compositeStateConstraintSeqsAt(Set{})
+			->collect(cs|thisModule.CompositeState(sm,cs)))
+		->union(sm.top.subvertex->select(s|s.oclIsTypeOf(UML!Pseudostate))))
+}
+rule Pseudostate {
+	from s_in:UML!Pseudostate
+	to s_out:UML!Pseudostate
+}
+rule CompositeState{
+	from s_in:UML!SimpleState(
+		s_in.name = 'default')
+	using {
+		sm:UML!StateMachine=thisModule.allStateMachines->select(sm|sm.top.subvertex->includes(s_in))->asSequence()->first();
+	}	
+	to cs_out:UML!CompositeState(
+		name <- sm.leastSignificant(s_in.constraint).body.body,
+		subvertex <- sm.simpleStateStatesAt(s_in.constraint)
+			->union(sm.compositeStateConstraintSeqsAt(s_in.constraint)->collect(cs|thisModule.CompositeState(sm,cs))))		
+}
+rule SimpleState {
+	from s_in:UML!SimpleState(
+		s_in.name<>'default')
+	to s_out:UML!SimpleState(
+		name <- s_in.name,
+		constraint <- s_in.constraint)
+}
+rule Transition {
+	from t_in:UML!Transition
+	to t_out:UML!Transition(
+		source <- t_in.source,
+		target <- t_in.target,
+		trigger <- t_in.trigger,
+		effect <- t_in.effect)
+}
+rule CallAction {
+	from ca_in:UML!CallAction
+	to ca_out:UML!CallAction(
+		script <- ca_in.script)
+}
+rule ActionExpression {
+	from ae_in:UML!ActionExpression
+	to ae_out:UML!ActionExpression(
+		body <- ae_in.body)
+}
+rule CallEvent {
+	from ce_in:UML!CallEvent
+	to ce_out:UML!CallEvent(
+		name <- ce_in.name)
+}
+rule BooleanExpression {
+	from b_in:UML!BooleanExpression
+	to b_out:UML!BooleanExpression(
+		body <- b_in.body)
+}
+rule Constraint {
+	from c_in:UML!Constraint
+	to c_out:UML!Constraint(
+		body <- c_in.body)		
+}
+rule CompositeState (sm:UML!StateMachine, cseq:Set(UML!Constraint)) {
+	to cs:UML!CompositeState(
+		name <- sm.leastSignificant(cseq).body.body,
+		subvertex <- sm.simpleStateStatesAt(cseq)
+		->union(sm.compositeStateConstraintSeqsAt(cseq)->collect(cs|thisModule.CompositeState(sm,cs))))
+	do{cs;}
+}

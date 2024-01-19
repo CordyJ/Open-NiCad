@@ -1,0 +1,1054 @@
+<?xml version='1.0' encoding='utf-8'?>
+		<wsdl:definitions name='DirectFlight'
+		  targetNamespace='http://directflight.flightaware.com/soap/DirectFlight'
+		  xmlns='http://schemas.xmlsoap.org/wsdl/'
+		  xmlns:wsdl='http://schemas.xmlsoap.org/wsdl/'
+		  xmlns:http='http://schemas.xmlsoap.org/wsdl/http/'
+		  xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/'
+		  xmlns:s='http://www.w3.org/2001/XMLSchema'
+		  xmlns:xsd='http://www.w3.org/2001/XMLSchema'
+		  xmlns:FlightAwareDirectFlight='http://directflight.flightaware.com/soap/DirectFlight'
+
+		  xmlns:SOAP-ENC='http://schemas.xmlsoap.org/soap/encoding/'
+		  xmlns:SOAP-ENV='http://schemas.xmlsoap.org/soap/envelope/'
+		  xmlns:mime='http://schemas.xmlsoap.org/wsdl/mime/'>
+		  
+<wsdl:types>
+  <xs:schema 
+    xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+    targetNamespace="http://directflight.flightaware.com/soap/DirectFlight">
+
+	<!--added import namespaces so WSDL.exe (.NET) does not complain-->
+	<s:import namespace="http://schemas.xmlsoap.org/soap/encoding/" />
+	<s:import namespace="http://schemas.xmlsoap.org/wsdl/" />
+
+ 	
+
+<xs:complexType name="ArrayOfScheduledFlightStruct">
+	 <xs:complexContent mixed="false">
+		  <xs:restriction base="SOAP-ENC:Array">
+				<xs:attribute wsdl:arrayType="FlightAwareDirectFlight:ScheduledFlightStruct[]" ref="SOAP-ENC:arrayType"  />
+		  </xs:restriction>
+	 </xs:complexContent>
+</xs:complexType>
+
+					 	
+<xs:complexType name="DepartureStruct"> 
+  <xs:all> 
+						 
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="next_offset"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="FlightAwareDirectFlight:ArrayOfDepartureFlightStruct" nillable="true" name="departures"/> 	
+  </xs:all>
+</xs:complexType> 
+						 	
+
+<xs:complexType name="ArrayOfTrackStruct">
+	 <xs:complexContent mixed="false">
+		  <xs:restriction base="SOAP-ENC:Array">
+				<xs:attribute wsdl:arrayType="FlightAwareDirectFlight:TrackStruct[]" ref="SOAP-ENC:arrayType"  />
+		  </xs:restriction>
+	 </xs:complexContent>
+</xs:complexType>
+
+					 	
+<xs:complexType name="TafStruct"> 
+  <xs:all> 
+						 
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="airport"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="timeString"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="FlightAwareDirectFlight:ArrayOfString" nillable="true" name="forecast"/> 	
+  </xs:all>
+</xs:complexType> 
+						 	
+<xs:complexType name="FlightStruct"> 
+  <xs:all> 
+						 
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="ident"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="aircrafttype"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="filed_ete"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="filed_time"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="filed_departuretime"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="filed_airspeed_kts"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="filed_airspeed_mach"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="filed_altitude"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="route"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="actualdeparturetime"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="estimatedarrivaltime"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="actualarrivaltime"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="diverted"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="origin"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="destination"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="originName"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="originCity"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="destinationName"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="destinationCity"/> 	
+  </xs:all>
+</xs:complexType> 
+						 	
+<xs:complexType name="ScheduledFlightStruct"> 
+  <xs:all> 
+						 
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="ident"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="aircrafttype"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="filed_departuretime"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="estimatedarrivaltime"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="origin"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="destination"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="originName"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="originCity"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="destinationName"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="destinationCity"/> 	
+  </xs:all>
+</xs:complexType> 
+						 	
+<xs:complexType name="EnrouteStruct"> 
+  <xs:all> 
+						 
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="next_offset"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="FlightAwareDirectFlight:ArrayOfEnrouteFlightStruct" nillable="true" name="enroute"/> 	
+  </xs:all>
+</xs:complexType> 
+						 	
+
+<xs:complexType name="ArrayOfRoutesBetweenAirportsStruct">
+	 <xs:complexContent mixed="false">
+		  <xs:restriction base="SOAP-ENC:Array">
+				<xs:attribute wsdl:arrayType="FlightAwareDirectFlight:RoutesBetweenAirportsStruct[]" ref="SOAP-ENC:arrayType"  />
+		  </xs:restriction>
+	 </xs:complexContent>
+</xs:complexType>
+
+					 	
+<xs:complexType name="AirportInfoStruct"> 
+  <xs:all> 
+						 
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="name"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="location"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:float" nillable="true" name="longitude"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:float" nillable="true" name="latitude"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="timezone"/> 	
+  </xs:all>
+</xs:complexType> 
+						 	
+<xs:complexType name="TrackStruct"> 
+  <xs:all> 
+						 
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="timestamp"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:float" nillable="true" name="latitude"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:float" nillable="true" name="longitude"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="groundspeed"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="altitude"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="altitudeStatus"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="updateType"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="altitudeChange"/> 	
+  </xs:all>
+</xs:complexType> 
+						 	
+<xs:complexType name="ArrivalStruct"> 
+  <xs:all> 
+						 
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="next_offset"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="FlightAwareDirectFlight:ArrayOfArrivalFlightStruct" nillable="true" name="arrivals"/> 	
+  </xs:all>
+</xs:complexType> 
+						 	
+<xs:complexType name="ZipcodeInfoStruct"> 
+  <xs:all> 
+						 
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:float" nillable="true" name="latitude"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:float" nillable="true" name="longitude"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="city"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="state"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="county"/> 	
+  </xs:all>
+</xs:complexType> 
+						 	
+
+<xs:complexType name="ArrayOfEnrouteFlightStruct">
+	 <xs:complexContent mixed="false">
+		  <xs:restriction base="SOAP-ENC:Array">
+				<xs:attribute wsdl:arrayType="FlightAwareDirectFlight:EnrouteFlightStruct[]" ref="SOAP-ENC:arrayType"  />
+		  </xs:restriction>
+	 </xs:complexContent>
+</xs:complexType>
+
+					 	
+<xs:complexType name="AircraftSuffixDescriptionStruct"> 
+  <xs:all> 
+						 
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="description"/> 	
+  </xs:all>
+</xs:complexType> 
+						 	
+<xs:complexType name="RoutesBetweenAirportsStruct"> 
+  <xs:all> 
+						 
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="count"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="route"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="filedAltitude"/> 	
+  </xs:all>
+</xs:complexType> 
+						 	
+<xs:complexType name="MetarStruct"> 
+  <xs:all> 
+						 
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="name"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="timeString"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="reading"/> 	
+  </xs:all>
+</xs:complexType> 
+						 	
+<xs:complexType name="InFlightAircraftStruct"> 
+  <xs:all> 
+						 
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="faFlightID"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="ident"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="prefix"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="type"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="suffix"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="origin"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="destination"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="timeout"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="timestamp"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="departureTime"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="firstPositionTime"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="arrivalTime"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:float" nillable="true" name="longitude"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:float" nillable="true" name="latitude"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:float" nillable="true" name="lowLongitude"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:float" nillable="true" name="lowLatitude"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:float" nillable="true" name="highLongitude"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:float" nillable="true" name="highLatitude"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="groundspeed"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="altitude"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="heading"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="altitudeStatus"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="updateType"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="altitudeChange"/> 	
+  </xs:all>
+</xs:complexType> 
+						 	
+
+<xs:complexType name="ArrayOfFlightStruct">
+	 <xs:complexContent mixed="false">
+		  <xs:restriction base="SOAP-ENC:Array">
+				<xs:attribute wsdl:arrayType="FlightAwareDirectFlight:FlightStruct[]" ref="SOAP-ENC:arrayType"  />
+		  </xs:restriction>
+	 </xs:complexContent>
+</xs:complexType>
+
+					 	
+<xs:complexType name="EnrouteFlightStruct"> 
+  <xs:all> 
+						 
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="ident"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="aircrafttype"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="actualdeparturetime"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="estimatedarrivaltime"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="filed_departuretime"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="origin"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="destination"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="originName"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="originCity"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="destinationName"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="destinationCity"/> 	
+  </xs:all>
+</xs:complexType> 
+						 	
+<xs:complexType name="ScheduledStruct"> 
+  <xs:all> 
+						 
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="next_offset"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="FlightAwareDirectFlight:ArrayOfScheduledFlightStruct" nillable="true" name="scheduled"/> 	
+  </xs:all>
+</xs:complexType> 
+						 	
+<xs:complexType name="InFlightStruct"> 
+  <xs:all> 
+						 
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="next_offset"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="FlightAwareDirectFlight:ArrayOfInFlightAircraftStruct" nillable="true" name="aircraft"/> 	
+  </xs:all>
+</xs:complexType> 
+						 	
+<xs:complexType name="countAirportOperationsStruct"> 
+  <xs:all> 
+						 
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="enroute"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="departed"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="scheduled_departures"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="scheduled_arrivals"/> 	
+  </xs:all>
+</xs:complexType> 
+						 	
+
+<xs:complexType name="ArrayOfDepartureFlightStruct">
+	 <xs:complexContent mixed="false">
+		  <xs:restriction base="SOAP-ENC:Array">
+				<xs:attribute wsdl:arrayType="FlightAwareDirectFlight:DepartureFlightStruct[]" ref="SOAP-ENC:arrayType"  />
+		  </xs:restriction>
+	 </xs:complexContent>
+</xs:complexType>
+
+					 	
+
+<xs:complexType name="ArrayOfArrivalFlightStruct">
+	 <xs:complexContent mixed="false">
+		  <xs:restriction base="SOAP-ENC:Array">
+				<xs:attribute wsdl:arrayType="FlightAwareDirectFlight:ArrivalFlightStruct[]" ref="SOAP-ENC:arrayType"  />
+		  </xs:restriction>
+	 </xs:complexContent>
+</xs:complexType>
+
+					 	
+<xs:complexType name="TailOwnerStruct"> 
+  <xs:all> 
+						 
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="owner"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="location"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="location2"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="website"/> 	
+  </xs:all>
+</xs:complexType> 
+						 	
+
+<xs:complexType name="ArrayOfInFlightAircraftStruct">
+	 <xs:complexContent mixed="false">
+		  <xs:restriction base="SOAP-ENC:Array">
+				<xs:attribute wsdl:arrayType="FlightAwareDirectFlight:InFlightAircraftStruct[]" ref="SOAP-ENC:arrayType"  />
+		  </xs:restriction>
+	 </xs:complexContent>
+</xs:complexType>
+
+					 	
+
+<xs:complexType name="ArrayOfString">
+	 <xs:complexContent mixed="false">
+		  <xs:restriction base="SOAP-ENC:Array">
+				<xs:attribute wsdl:arrayType="xsd:string[]" ref="SOAP-ENC:arrayType"  />
+		  </xs:restriction>
+	 </xs:complexContent>
+</xs:complexType>
+
+					 	
+<xs:complexType name="DepartureFlightStruct"> 
+  <xs:all> 
+						 
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="ident"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="aircrafttype"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="actualdeparturetime"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="estimatedarrivaltime"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="actualarrivaltime"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="origin"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="destination"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="originName"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="originCity"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="destinationName"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="destinationCity"/> 	
+  </xs:all>
+</xs:complexType> 
+						 	
+<xs:complexType name="AircraftTypeStruct"> 
+  <xs:all> 
+						 
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="manufacturer"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="type"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="description"/> 	
+  </xs:all>
+</xs:complexType> 
+						 	
+<xs:complexType name="ArrivalFlightStruct"> 
+  <xs:all> 
+						 
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="ident"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="aircrafttype"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="actualdeparturetime"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="actualarrivaltime"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="origin"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="destination"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="originName"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="originCity"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="destinationName"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:string" nillable="true" name="destinationCity"/> 	
+  </xs:all>
+</xs:complexType> 
+						 	
+<xs:complexType name="FlightInfoStruct"> 
+  <xs:all> 
+						 
+    <xs:element minOccurs="0" maxOccurs="1" type="xsd:int" nillable="true" name="next_offset"/>
+    <xs:element minOccurs="0" maxOccurs="1" type="FlightAwareDirectFlight:ArrayOfFlightStruct" nillable="true" name="flights"/> 	
+  </xs:all>
+</xs:complexType> 
+						
+  </xs:schema>
+</wsdl:types>
+		<wsdl:message name='FlightInfoIn'><wsdl:part name='ident' type='xsd:string'/><wsdl:part name='howMany' type='xsd:int'/>
+			</wsdl:message>
+
+			<wsdl:message name='FlightInfoOut'>
+				<wsdl:part name='return' type='FlightAwareDirectFlight:FlightInfoStruct'/>
+			</wsdl:message>
+			<wsdl:message name='InFlightInfoIn'><wsdl:part name='ident' type='xsd:string'/>
+			</wsdl:message>
+
+			<wsdl:message name='InFlightInfoOut'>
+				<wsdl:part name='return' type='FlightAwareDirectFlight:InFlightAircraftStruct'/>
+			</wsdl:message>
+			<wsdl:message name='GetLastTrackIn'><wsdl:part name='ident' type='xsd:string'/>
+			</wsdl:message>
+
+			<wsdl:message name='GetLastTrackOut'>
+				<wsdl:part name='return' type='FlightAwareDirectFlight:ArrayOfTrackStruct'/>
+			</wsdl:message>
+			<wsdl:message name='SearchIn'><wsdl:part name='query' type='xsd:string'/><wsdl:part name='howMany' type='xsd:int'/><wsdl:part name='offset' type='xsd:int'/>
+			</wsdl:message>
+
+			<wsdl:message name='SearchOut'>
+				<wsdl:part name='return' type='FlightAwareDirectFlight:InFlightStruct'/>
+			</wsdl:message>
+			<wsdl:message name='SearchCountIn'><wsdl:part name='query' type='xsd:string'/>
+			</wsdl:message>
+
+			<wsdl:message name='SearchCountOut'>
+				<wsdl:part name='return' type='xsd:int'/>
+			</wsdl:message>
+			<wsdl:message name='ScheduledIn'><wsdl:part name='airport' type='xsd:string'/><wsdl:part name='howMany' type='xsd:int'/><wsdl:part name='filter' type='xsd:string'/><wsdl:part name='offset' type='xsd:int'/>
+			</wsdl:message>
+
+			<wsdl:message name='ScheduledOut'>
+				<wsdl:part name='return' type='FlightAwareDirectFlight:ScheduledStruct'/>
+			</wsdl:message>
+			<wsdl:message name='DepartedIn'><wsdl:part name='airport' type='xsd:string'/><wsdl:part name='howMany' type='xsd:int'/><wsdl:part name='filter' type='xsd:string'/><wsdl:part name='offset' type='xsd:int'/>
+			</wsdl:message>
+
+			<wsdl:message name='DepartedOut'>
+				<wsdl:part name='return' type='FlightAwareDirectFlight:DepartureStruct'/>
+			</wsdl:message>
+			<wsdl:message name='EnrouteIn'><wsdl:part name='airport' type='xsd:string'/><wsdl:part name='howMany' type='xsd:int'/><wsdl:part name='filter' type='xsd:string'/><wsdl:part name='offset' type='xsd:int'/>
+			</wsdl:message>
+
+			<wsdl:message name='EnrouteOut'>
+				<wsdl:part name='return' type='FlightAwareDirectFlight:EnrouteStruct'/>
+			</wsdl:message>
+			<wsdl:message name='FleetArrivedIn'><wsdl:part name='fleet' type='xsd:string'/><wsdl:part name='howMany' type='xsd:int'/><wsdl:part name='offset' type='xsd:int'/>
+			</wsdl:message>
+
+			<wsdl:message name='FleetArrivedOut'>
+				<wsdl:part name='return' type='FlightAwareDirectFlight:ArrivalStruct'/>
+			</wsdl:message>
+			<wsdl:message name='ArrivedIn'><wsdl:part name='airport' type='xsd:string'/><wsdl:part name='howMany' type='xsd:int'/><wsdl:part name='filter' type='xsd:string'/><wsdl:part name='offset' type='xsd:int'/>
+			</wsdl:message>
+
+			<wsdl:message name='ArrivedOut'>
+				<wsdl:part name='return' type='FlightAwareDirectFlight:ArrivalStruct'/>
+			</wsdl:message>
+			<wsdl:message name='AllAirportsIn'>
+			</wsdl:message>
+
+			<wsdl:message name='AllAirportsOut'>
+				<wsdl:part name='return' type='FlightAwareDirectFlight:ArrayOfString'/>
+			</wsdl:message>
+			<wsdl:message name='ZipcodeInfoIn'><wsdl:part name='zipcode' type='xsd:string'/>
+			</wsdl:message>
+
+			<wsdl:message name='ZipcodeInfoOut'>
+				<wsdl:part name='return' type='FlightAwareDirectFlight:ZipcodeInfoStruct'/>
+			</wsdl:message>
+			<wsdl:message name='AirportInfoIn'><wsdl:part name='airportCode' type='xsd:string'/>
+			</wsdl:message>
+
+			<wsdl:message name='AirportInfoOut'>
+				<wsdl:part name='return' type='FlightAwareDirectFlight:AirportInfoStruct'/>
+			</wsdl:message>
+			<wsdl:message name='TailOwnerIn'><wsdl:part name='ident' type='xsd:string'/>
+			</wsdl:message>
+
+			<wsdl:message name='TailOwnerOut'>
+				<wsdl:part name='return' type='FlightAwareDirectFlight:TailOwnerStruct'/>
+			</wsdl:message>
+			<wsdl:message name='RoutesBetweenAirportsIn'><wsdl:part name='origin' type='xsd:string'/><wsdl:part name='destination' type='xsd:string'/>
+			</wsdl:message>
+
+			<wsdl:message name='RoutesBetweenAirportsOut'>
+				<wsdl:part name='return' type='FlightAwareDirectFlight:ArrayOfRoutesBetweenAirportsStruct'/>
+			</wsdl:message>
+			<wsdl:message name='AircraftTypeIn'><wsdl:part name='type' type='xsd:string'/>
+			</wsdl:message>
+
+			<wsdl:message name='AircraftTypeOut'>
+				<wsdl:part name='return' type='FlightAwareDirectFlight:AircraftTypeStruct'/>
+			</wsdl:message>
+			<wsdl:message name='countAirportOperationsIn'><wsdl:part name='airport' type='xsd:string'/>
+			</wsdl:message>
+
+			<wsdl:message name='countAirportOperationsOut'>
+				<wsdl:part name='return' type='FlightAwareDirectFlight:countAirportOperationsStruct'/>
+			</wsdl:message>
+			<wsdl:message name='blockIdentCheckIn'><wsdl:part name='ident' type='xsd:string'/>
+			</wsdl:message>
+
+			<wsdl:message name='blockIdentCheckOut'>
+				<wsdl:part name='return' type='xsd:int'/>
+			</wsdl:message>
+			<wsdl:message name='METARIn'><wsdl:part name='airport' type='xsd:string'/>
+			</wsdl:message>
+
+			<wsdl:message name='METAROut'>
+				<wsdl:part name='return' type='xsd:string'/>
+			</wsdl:message>
+			<wsdl:message name='TAFIn'><wsdl:part name='airport' type='xsd:string'/>
+			</wsdl:message>
+
+			<wsdl:message name='TAFOut'>
+				<wsdl:part name='return' type='xsd:string'/>
+			</wsdl:message>
+			<wsdl:message name='NTAFIn'><wsdl:part name='airport' type='xsd:string'/>
+			</wsdl:message>
+
+			<wsdl:message name='NTAFOut'>
+				<wsdl:part name='return' type='FlightAwareDirectFlight:TafStruct'/>
+			</wsdl:message>
+			<wsdl:message name='LatLongsToDistanceIn'><wsdl:part name='lat1' type='xsd:float'/><wsdl:part name='lon1' type='xsd:float'/><wsdl:part name='lat2' type='xsd:float'/><wsdl:part name='lon2' type='xsd:float'/>
+			</wsdl:message>
+
+			<wsdl:message name='LatLongsToDistanceOut'>
+				<wsdl:part name='return' type='xsd:int'/>
+			</wsdl:message>
+			<wsdl:message name='LatLongsToHeadingIn'><wsdl:part name='lat1' type='xsd:float'/><wsdl:part name='lon1' type='xsd:float'/><wsdl:part name='lat2' type='xsd:float'/><wsdl:part name='lon2' type='xsd:float'/>
+			</wsdl:message>
+
+			<wsdl:message name='LatLongsToHeadingOut'>
+				<wsdl:part name='return' type='xsd:int'/>
+			</wsdl:message>
+			<wsdl:message name='MapFlight_BetaIn'><wsdl:part name='ident' type='xsd:string'/><wsdl:part name='mapHeight' type='xsd:int'/><wsdl:part name='mapWidth' type='xsd:int'/>
+			</wsdl:message>
+
+			<wsdl:message name='MapFlight_BetaOut'>
+				<wsdl:part name='return' type='xsd:string'/>
+			</wsdl:message>
+			<wsdl:portType name='DirectFlightSoap'>
+				<wsdl:operation name="FlightInfo">
+					<wsdl:documentation>&lt;p&gt;FlightInfo returns information about flights for a specific tail number (e.g., &lt;strong&gt;N12345&lt;/strong&gt;) or ICAO airline and flight 
+number (e.g., &lt;strong&gt;SWA2558&lt;/strong&gt;) and the maximum number of flights to be returned.  Flight information will be returned from newest to old
+est with the oldest not being more than 3-4 days in the past.&lt;/p&gt;
+&lt;p&gt;Times are in integer seconds-since-1970 (UNIX epoch) time, except for estimated time enroute, which is in hours and minutes.&lt;/p&gt;</wsdl:documentation>
+					
+					<wsdl:input message="FlightAwareDirectFlight:FlightInfoIn"/>
+					<wsdl:output message="FlightAwareDirectFlight:FlightInfoOut"/>
+				</wsdl:operation>
+				<wsdl:operation name="InFlightInfo">
+					<wsdl:documentation>InFlightInfo looks up a specific tail number (e.g., &lt;strong&gt;N12345&lt;/strong&gt;) or ICAO airline and flight number (e.g., &lt;strong&gt;SWA2558&lt;/strong&gt;)
+and returns current position/direction/speed information.  It is only useful for airborne flights.</wsdl:documentation>
+					
+					<wsdl:input message="FlightAwareDirectFlight:InFlightInfoIn"/>
+					<wsdl:output message="FlightAwareDirectFlight:InFlightInfoOut"/>
+				</wsdl:operation>
+				<wsdl:operation name="GetLastTrack">
+					<wsdl:documentation>&lt;p&gt;GetLastTrack looks up a flight by specific tail number (e.g., &lt;strong&gt;N12345&lt;/strong&gt;) or ICAO airline and flight number (e.g., &lt;strong&gt;SWA2558&lt;/strong&gt;).  It returns the track log from the current IFR flight or, if the aircraft is not airborne, the most recent IFR flight.  It returns an array of positions, with each including the timestamp, longitude, latitude groundspeed, altitude, altitudestatus, updatetype, and altitudechange.  Altitude is in hundreds of feet or Flight Level where appropriate, see http://flightaware.com/about/faq.rvt#flightLevel. Also included altitude status, update type, and altitude change
+&lt;p&gt;Altitude status is 'C' when the flight is more than 200 feet away from its ATC-assigned altitude.  (For example, the aircraft is transitioning to its assigned altitude.)  Altitude change is 'C' if the aircraft is climbing (compared to the previous position reported), 'D' for descending, and empty if it is level.  This happens for VFR flights with flight following, among other things.  Timestamp is integer seconds-since-1970.
+&lt;/p&gt;</wsdl:documentation>
+					
+					<wsdl:input message="FlightAwareDirectFlight:GetLastTrackIn"/>
+					<wsdl:output message="FlightAwareDirectFlight:GetLastTrackOut"/>
+				</wsdl:operation>
+				<wsdl:operation name="Search">
+					<wsdl:documentation>Search searches data on all airborne aircraft to find ones matching the search query.  Query parameters include a latitude/longitude box, aircraft ident with wildcards, type with wildcards, prefix, suffix, origin airport, destination airport, origin or destination airport, groundspeed, and altitude.  It takes search terms in a single string comprising &quot;-key value&quot; pairs and returns an array of flight structures.
+&lt;p&gt;
+Keys include:
+&lt;ul&gt;
+ &lt;li&gt;-prefix&lt;/li&gt;
+ &lt;li&gt;-type&lt;/li&gt;
+ &lt;li&gt;-suffix&lt;/li&gt;
+ &lt;li&gt;-idents&lt;/li&gt;
+ &lt;li&gt;-destination&lt;/li&gt;
+ &lt;li&gt;-origin
+ &lt;li&gt;-originOrDestination&lt;/li&gt;
+ &lt;li&gt;-aboveAltitude&lt;/li&gt;
+ &lt;li&gt;-belowAltitude&lt;/li&gt;
+ &lt;li&gt;-aboveGroundspeed&lt;/li&gt;
+ &lt;li&gt;-belowGroundspeed&lt;/li&gt;
+ &lt;li&gt;-latlong&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;
+ To search for all aircraft below ten-thousand feet with a groundspeed over 
+ 200 kts:
+ &lt;div class=&quot;indent&quot;&gt;
+     -belowAltitude 100 -aboveGroundspeed 200
+ &lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;
+To search for all in-air Boeing 777s:
+ &lt;div class=&quot;indent&quot;&gt;
+    -type B77*
+ &lt;/div&gt; 
+&lt;/p&gt;
+
+&lt;p&gt;
+To search for all aircraft heading to Los Angeles International Airport (LAX) that are &quot;heavy&quot; aircraft:
+ &lt;div class=&quot;indent&quot;&gt;
+    -destination LAX -prefix H
+ &lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;
+To search for all Continental Airlines flights in Boeing 737s
+ &lt;div class=&quot;indent&quot;&gt;
+    -idents COA* -type B73*
+ &lt;?div&gt;
+&lt;/p&gt;
+</wsdl:documentation>
+					
+					<wsdl:input message="FlightAwareDirectFlight:SearchIn"/>
+					<wsdl:output message="FlightAwareDirectFlight:SearchOut"/>
+				</wsdl:operation>
+				<wsdl:operation name="SearchCount">
+					<wsdl:documentation>SearchCount works like Search but returns a count of matching flights rather than information about each flight.
+</wsdl:documentation>
+					
+					<wsdl:input message="FlightAwareDirectFlight:SearchCountIn"/>
+					<wsdl:output message="FlightAwareDirectFlight:SearchCountOut"/>
+				</wsdl:operation>
+				<wsdl:operation name="Scheduled">
+					<wsdl:documentation>&lt;p&gt;Scheduled returns information about scheduled flights (technically, filed IFR flights) for a specified airport and a maximum number of flights to be returned.  Scheduled flights are returned from soonest to furthest in the future to depart.&lt;/p&gt;
+
+&lt;p&gt;
+ The &lt;strong&gt;airport&lt;/strong&gt; argument must be the ICAO airport ID (e.g., KLAX, KSFO, KIAH, KHOU, KJFK, KEWR, KORD, KATL, etc.
+&lt;/p&gt;
+
+&lt;p&gt;
+ The &lt;strong&gt;howMany&lt;/strong&gt; argument must be an integer value less than or equal to 15 and determines the number of results.
+&lt;/p&gt;
+
+&lt;p&gt;
+ The &lt;strong&gt;offset&lt;/strong&gt; argument must be an integer value of the offset row count you want the search to start at.  Most requests should be 0.
+&lt;/p&gt;
+
+&lt;p&gt;
+ The &lt;strong&gt;filter&lt;/strong&gt; argument can be &amp;quot;ga&amp;quot; or &amp;quot;airline&amp;quot; to only show GA or Airline traffic, respectively, or null/empty to show all traffic.
+&lt;/p&gt;
+
+&lt;p&gt;
+ The &lt;strong&gt;next_offset&lt;/strong&gt; value returned advises an application of the next offset to use (if more data is available).
+&lt;/p&gt;
+
+&lt;p&gt;Times returned are UNIX epoch (integer seconds since 1970) format.&lt;/p&gt;
+</wsdl:documentation>
+					
+					<wsdl:input message="FlightAwareDirectFlight:ScheduledIn"/>
+					<wsdl:output message="FlightAwareDirectFlight:ScheduledOut"/>
+				</wsdl:operation>
+				<wsdl:operation name="Departed">
+					<wsdl:documentation>&lt;p&gt;Departed returns information about already departed flights for a specified airport and maximum number of flights to be returned.  Departed flights are returned in order from most recently to least recently departed.&lt;/p&gt;
+
+&lt;p&gt;
+ The &lt;strong&gt;airport&lt;/strong&gt; argument must be the ICAO airport ID (e.g., KLAX, KSFO, KIAH, KHOU, KJFK, KEWR, KORD, KATL, etc.
+&lt;/p&gt;
+
+&lt;p&gt;
+ The &lt;strong&gt;howMany&lt;/strong&gt; argument must be an integer value less than or equal to 15 and determines the number of results.
+&lt;/p&gt;
+
+&lt;p&gt;
+ The &lt;strong&gt;offset&lt;/strong&gt; argument must be an integer value of the offset row count you want the search to start at.  Most requests should be 0.
+&lt;/p&gt;
+
+&lt;p&gt;
+ The &lt;strong&gt;filter&lt;/strong&gt; argument can be &amp;quot;ga&amp;quot; or &amp;quot;airline&amp;quot; to only show GA or Airline traffic, respectively, or null/empty to show all traffic.
+&lt;/p&gt;
+
+&lt;p&gt;
+ The &lt;strong&gt;next_offset&lt;/strong&gt; value returned advises an application of the next offset to use (if more data is available).
+&lt;/p&gt;</wsdl:documentation>
+					
+					<wsdl:input message="FlightAwareDirectFlight:DepartedIn"/>
+					<wsdl:output message="FlightAwareDirectFlight:DepartedOut"/>
+				</wsdl:operation>
+				<wsdl:operation name="Enroute">
+					<wsdl:documentation>&lt;p&gt;Enroute returns information about flights already in the air for the specified airport and maximum number of flights to be returned.  Enroute flights are returned from soonest estimated arrival to least soon estimated arrival.&lt;/p&gt;
+
+&lt;p&gt;
+ The &lt;strong&gt;airport&lt;/strong&gt; argument must be the ICAO airport ID (e.g., KLAX, KSFO, KIAH, KHOU, KJFK, KEWR, KORD, KATL, etc.
+&lt;/p&gt;
+
+&lt;p&gt;
+ The &lt;strong&gt;howMany&lt;/strong&gt; argument must be an integer value less than or equal to 15 and determines the number of results.
+&lt;/p&gt;
+
+&lt;p&gt;
+ The &lt;strong&gt;offset&lt;/strong&gt; argument must be an integer value of the offset row count you want the search to start at.  Most requests should be 0.
+&lt;/p&gt;
+
+&lt;p&gt;
+ The &lt;strong&gt;filter&lt;/strong&gt; argument can be &amp;quot;ga&amp;quot; or &amp;quot;airline&amp;quot; to only show GA or Airline traffic, respectively, or null/empty to show all traffic.
+&lt;/p&gt;
+
+&lt;p&gt;
+ The &lt;strong&gt;next_offset&lt;/strong&gt; value returned advises an application of the next offset to use (if more data is available).
+&lt;/p&gt;</wsdl:documentation>
+					
+					<wsdl:input message="FlightAwareDirectFlight:EnrouteIn"/>
+					<wsdl:output message="FlightAwareDirectFlight:EnrouteOut"/>
+				</wsdl:operation>
+				<wsdl:operation name="FleetArrived">
+					<wsdl:documentation>&lt;p&gt;
+ The &lt;strong&gt;fleet&lt;/strong&gt; argument must be an ICAO prefix (e.g., COA, DAL, UAL, OPT, etc.)
+&lt;/p&gt;
+         
+&lt;p&gt;
+ The &lt;strong&gt;howMany&lt;/strong&gt; argument must be an integer value less than or equal to 15 and determines the number of results.
+&lt;/p&gt;
+     
+&lt;p&gt;
+ The &lt;strong&gt;offset&lt;/strong&gt; argument must be an integer value of the offset row count you want the search to start at.  Most requests should be 0.
+&lt;/p&gt;
+
+&lt;p&gt;
+ The &lt;strong&gt;next_offset&lt;/strong&gt; value returned advises an application of the next offset to use (if more data is available).
+&lt;/p&gt;</wsdl:documentation>
+					
+					<wsdl:input message="FlightAwareDirectFlight:FleetArrivedIn"/>
+					<wsdl:output message="FlightAwareDirectFlight:FleetArrivedOut"/>
+				</wsdl:operation>
+				<wsdl:operation name="Arrived">
+					<wsdl:documentation>&lt;p&gt;Arrived returns information about flights that have recently arrived for the specified airport and maximum number of flights to be returned.  Flights are returned from most to least recent.&lt;/p&gt;
+&lt;p&gt;
+ The &lt;strong&gt;airport&lt;/strong&gt; argument must be the ICAO airport ID (e.g., KLAX, KSFO, KIAH, KHOU, KJFK, KEWR, KORD, KATL, etc.
+&lt;/p&gt;
+
+&lt;p&gt;
+ The &lt;strong&gt;howMany&lt;/strong&gt; argument must be an integer value less than or equal to 15 and determines the number of results.
+&lt;/p&gt;
+
+&lt;p&gt;
+ The &lt;strong&gt;offset&lt;/strong&gt; argument must be an integer value of the offset row count you want the search to start at.  Most requests should be 0.
+&lt;/p&gt;
+
+&lt;p&gt;
+ The &lt;strong&gt;filter&lt;/strong&gt; argument can be &amp;quot;ga&amp;quot; or &amp;quot;airline&amp;quot; to only show GA or Airline traffic, respectively, or null/empty to show all traffic.
+&lt;/p&gt;
+
+&lt;p&gt;
+ The &lt;strong&gt;next_offset&lt;/strong&gt; value returned advises an application of the next offset to use (if more data is available).
+&lt;/p&gt;</wsdl:documentation>
+					
+					<wsdl:input message="FlightAwareDirectFlight:ArrivedIn"/>
+					<wsdl:output message="FlightAwareDirectFlight:ArrivedOut"/>
+				</wsdl:operation>
+				<wsdl:operation name="AllAirports">
+					<wsdl:documentation>AllAirports returns the ICAO airport IDs of all known airports.</wsdl:documentation>
+					
+					<wsdl:input message="FlightAwareDirectFlight:AllAirportsIn"/>
+					<wsdl:output message="FlightAwareDirectFlight:AllAirportsOut"/>
+				</wsdl:operation>
+				<wsdl:operation name="ZipcodeInfo">
+					<wsdl:documentation>ZipcodeInfo returns information about a five-digit zipcode.  Of particular importance is latitude and longitude.</wsdl:documentation>
+					
+					<wsdl:input message="FlightAwareDirectFlight:ZipcodeInfoIn"/>
+					<wsdl:output message="FlightAwareDirectFlight:ZipcodeInfoOut"/>
+				</wsdl:operation>
+				<wsdl:operation name="AirportInfo">
+					<wsdl:documentation>AirportInfo returns information about an airport given an ICAO airport code such as KLAX, KSFO, KORD, KIAH, O07, etc.  Data returned includes name (Houston Intercontinental Airport), location (typically city and state), latitude and longitude.</wsdl:documentation>
+					
+					<wsdl:input message="FlightAwareDirectFlight:AirportInfoIn"/>
+					<wsdl:output message="FlightAwareDirectFlight:AirportInfoOut"/>
+				</wsdl:operation>
+				<wsdl:operation name="TailOwner">
+					<wsdl:documentation>TailOwner returns information about an the owner of an aircraft, given a flight number or N-number.  Data returned includes owner's name, location (typically city and state), and website, if any.</wsdl:documentation>
+					
+					<wsdl:input message="FlightAwareDirectFlight:TailOwnerIn"/>
+					<wsdl:output message="FlightAwareDirectFlight:TailOwnerOut"/>
+				</wsdl:operation>
+				<wsdl:operation name="RoutesBetweenAirports">
+					<wsdl:documentation>RoutesBetweenAirports returns information about assigned IFR routings between two airports.  For each known routing, the route, number of times that route has been assigned and the filed altitude are returned.</wsdl:documentation>
+					
+					<wsdl:input message="FlightAwareDirectFlight:RoutesBetweenAirportsIn"/>
+					<wsdl:output message="FlightAwareDirectFlight:RoutesBetweenAirportsOut"/>
+				</wsdl:operation>
+				<wsdl:operation name="AircraftType">
+					<wsdl:documentation>Given an aircraft type string such as GALX, AircraftType returns information about that type, comprising the manufacturer (for instance, &quot;IAI&quot;), type (for instance, &quot;Gulfstream G200&quot;), and description (like &quot;twin-jet&quot;).</wsdl:documentation>
+					
+					<wsdl:input message="FlightAwareDirectFlight:AircraftTypeIn"/>
+					<wsdl:output message="FlightAwareDirectFlight:AircraftTypeOut"/>
+				</wsdl:operation>
+				<wsdl:operation name="countAirportOperations">
+					<wsdl:documentation>Given an airport, returns integer values on the number of aircraft scheduled or actually en route or departing from the airport.  Scheduled arrival is a non-airborne flight that is scheduled to the airport in question.</wsdl:documentation>
+					
+					<wsdl:input message="FlightAwareDirectFlight:countAirportOperationsIn"/>
+					<wsdl:output message="FlightAwareDirectFlight:countAirportOperationsOut"/>
+				</wsdl:operation>
+				<wsdl:operation name="blockIdentCheck">
+					<wsdl:documentation>Given an aircraft identification, returns 1 if the aircraft is blocked from public tracking, 0 if it is not.</wsdl:documentation>
+					
+					<wsdl:input message="FlightAwareDirectFlight:blockIdentCheckIn"/>
+					<wsdl:output message="FlightAwareDirectFlight:blockIdentCheckOut"/>
+				</wsdl:operation>
+				<wsdl:operation name="METAR">
+					<wsdl:documentation>Given an airport, return the METAR weather info, if available.</wsdl:documentation>
+					
+					<wsdl:input message="FlightAwareDirectFlight:METARIn"/>
+					<wsdl:output message="FlightAwareDirectFlight:METAROut"/>
+				</wsdl:operation>
+				<wsdl:operation name="TAF">
+					<wsdl:documentation>Given an airport, return the terminal area forecast, if available.</wsdl:documentation>
+					
+					<wsdl:input message="FlightAwareDirectFlight:TAFIn"/>
+					<wsdl:output message="FlightAwareDirectFlight:TAFOut"/>
+				</wsdl:operation>
+				<wsdl:operation name="NTAF">
+					<wsdl:documentation>Given an airport, return the terminal area forecast, if available.</wsdl:documentation>
+					
+					<wsdl:input message="FlightAwareDirectFlight:NTAFIn"/>
+					<wsdl:output message="FlightAwareDirectFlight:NTAFOut"/>
+				</wsdl:operation>
+				<wsdl:operation name="LatLongsToDistance">
+					<wsdl:documentation>Given two latitudes and longitudes, lat1 lon1 lat2 and lon2, respectively, determine the great circle distance between those positions in miles.</wsdl:documentation>
+					
+					<wsdl:input message="FlightAwareDirectFlight:LatLongsToDistanceIn"/>
+					<wsdl:output message="FlightAwareDirectFlight:LatLongsToDistanceOut"/>
+				</wsdl:operation>
+				<wsdl:operation name="LatLongsToHeading">
+					<wsdl:documentation>Given two latitudes and longitudes, lat1 lon1 lat2 and lon2, respectively, calculate and return the initial compass heading (where 360 is North) from position one to position two. Quite accurate for relatively short distances but since it assumes the earth is a sphere rather than on irregular oblate sphereoid may be inaccurate for flights around a good chunk of the world, etc.</wsdl:documentation>
+					
+					<wsdl:input message="FlightAwareDirectFlight:LatLongsToHeadingIn"/>
+					<wsdl:output message="FlightAwareDirectFlight:LatLongsToHeadingOut"/>
+				</wsdl:operation>
+				<wsdl:operation name="MapFlight_Beta">
+					<wsdl:documentation>This function will return a base64 encoded GIF (with the height and width as specified in pixels) of the most recent
+	(past or current) flight of a specified ident.  This service is in beta.  Future versions will allow viewing of past
+	flights, configuring nexrad, and configuring zoom.</wsdl:documentation>
+					
+					<wsdl:input message="FlightAwareDirectFlight:MapFlight_BetaIn"/>
+					<wsdl:output message="FlightAwareDirectFlight:MapFlight_BetaOut"/>
+				</wsdl:operation></wsdl:portType>
+	 <wsdl:binding name='DirectFlightSoap' type='FlightAwareDirectFlight:DirectFlightSoap'>
+		<soap:binding style='rpc' transport='http://schemas.xmlsoap.org/soap/http'/>
+				<wsdl:operation name="FlightInfo">
+					<soap:operation soapAction='FlightAwareDirectFlight'/>
+							<wsdl:input>
+								<soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:input>
+							<wsdl:output>
+								  <soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:output>	
+				</wsdl:operation>
+				<wsdl:operation name="InFlightInfo">
+					<soap:operation soapAction='FlightAwareDirectFlight'/>
+							<wsdl:input>
+								<soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:input>
+							<wsdl:output>
+								  <soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:output>	
+				</wsdl:operation>
+				<wsdl:operation name="GetLastTrack">
+					<soap:operation soapAction='FlightAwareDirectFlight'/>
+							<wsdl:input>
+								<soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:input>
+							<wsdl:output>
+								  <soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:output>	
+				</wsdl:operation>
+				<wsdl:operation name="Search">
+					<soap:operation soapAction='FlightAwareDirectFlight'/>
+							<wsdl:input>
+								<soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:input>
+							<wsdl:output>
+								  <soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:output>	
+				</wsdl:operation>
+				<wsdl:operation name="SearchCount">
+					<soap:operation soapAction='FlightAwareDirectFlight'/>
+							<wsdl:input>
+								<soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:input>
+							<wsdl:output>
+								  <soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:output>	
+				</wsdl:operation>
+				<wsdl:operation name="Scheduled">
+					<soap:operation soapAction='FlightAwareDirectFlight'/>
+							<wsdl:input>
+								<soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:input>
+							<wsdl:output>
+								  <soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:output>	
+				</wsdl:operation>
+				<wsdl:operation name="Departed">
+					<soap:operation soapAction='FlightAwareDirectFlight'/>
+							<wsdl:input>
+								<soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:input>
+							<wsdl:output>
+								  <soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:output>	
+				</wsdl:operation>
+				<wsdl:operation name="Enroute">
+					<soap:operation soapAction='FlightAwareDirectFlight'/>
+							<wsdl:input>
+								<soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:input>
+							<wsdl:output>
+								  <soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:output>	
+				</wsdl:operation>
+				<wsdl:operation name="FleetArrived">
+					<soap:operation soapAction='FlightAwareDirectFlight'/>
+							<wsdl:input>
+								<soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:input>
+							<wsdl:output>
+								  <soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:output>	
+				</wsdl:operation>
+				<wsdl:operation name="Arrived">
+					<soap:operation soapAction='FlightAwareDirectFlight'/>
+							<wsdl:input>
+								<soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:input>
+							<wsdl:output>
+								  <soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:output>	
+				</wsdl:operation>
+				<wsdl:operation name="AllAirports">
+					<soap:operation soapAction='FlightAwareDirectFlight'/>
+							<wsdl:input>
+								<soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:input>
+							<wsdl:output>
+								  <soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:output>	
+				</wsdl:operation>
+				<wsdl:operation name="ZipcodeInfo">
+					<soap:operation soapAction='FlightAwareDirectFlight'/>
+							<wsdl:input>
+								<soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:input>
+							<wsdl:output>
+								  <soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:output>	
+				</wsdl:operation>
+				<wsdl:operation name="AirportInfo">
+					<soap:operation soapAction='FlightAwareDirectFlight'/>
+							<wsdl:input>
+								<soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:input>
+							<wsdl:output>
+								  <soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:output>	
+				</wsdl:operation>
+				<wsdl:operation name="TailOwner">
+					<soap:operation soapAction='FlightAwareDirectFlight'/>
+							<wsdl:input>
+								<soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:input>
+							<wsdl:output>
+								  <soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:output>	
+				</wsdl:operation>
+				<wsdl:operation name="RoutesBetweenAirports">
+					<soap:operation soapAction='FlightAwareDirectFlight'/>
+							<wsdl:input>
+								<soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:input>
+							<wsdl:output>
+								  <soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:output>	
+				</wsdl:operation>
+				<wsdl:operation name="AircraftType">
+					<soap:operation soapAction='FlightAwareDirectFlight'/>
+							<wsdl:input>
+								<soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:input>
+							<wsdl:output>
+								  <soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:output>	
+				</wsdl:operation>
+				<wsdl:operation name="countAirportOperations">
+					<soap:operation soapAction='FlightAwareDirectFlight'/>
+							<wsdl:input>
+								<soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:input>
+							<wsdl:output>
+								  <soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:output>	
+				</wsdl:operation>
+				<wsdl:operation name="blockIdentCheck">
+					<soap:operation soapAction='FlightAwareDirectFlight'/>
+							<wsdl:input>
+								<soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:input>
+							<wsdl:output>
+								  <soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:output>	
+				</wsdl:operation>
+				<wsdl:operation name="METAR">
+					<soap:operation soapAction='FlightAwareDirectFlight'/>
+							<wsdl:input>
+								<soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:input>
+							<wsdl:output>
+								  <soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:output>	
+				</wsdl:operation>
+				<wsdl:operation name="TAF">
+					<soap:operation soapAction='FlightAwareDirectFlight'/>
+							<wsdl:input>
+								<soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:input>
+							<wsdl:output>
+								  <soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:output>	
+				</wsdl:operation>
+				<wsdl:operation name="NTAF">
+					<soap:operation soapAction='FlightAwareDirectFlight'/>
+							<wsdl:input>
+								<soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:input>
+							<wsdl:output>
+								  <soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:output>	
+				</wsdl:operation>
+				<wsdl:operation name="LatLongsToDistance">
+					<soap:operation soapAction='FlightAwareDirectFlight'/>
+							<wsdl:input>
+								<soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:input>
+							<wsdl:output>
+								  <soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:output>	
+				</wsdl:operation>
+				<wsdl:operation name="LatLongsToHeading">
+					<soap:operation soapAction='FlightAwareDirectFlight'/>
+							<wsdl:input>
+								<soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:input>
+							<wsdl:output>
+								  <soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:output>	
+				</wsdl:operation>
+				<wsdl:operation name="MapFlight_Beta">
+					<soap:operation soapAction='FlightAwareDirectFlight'/>
+							<wsdl:input>
+								<soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:input>
+							<wsdl:output>
+								  <soap:body use='encoded' namespace='FlightAwareDirectFlight' encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/>
+							</wsdl:output>	
+				</wsdl:operation>
+				
+	 </wsdl:binding>
+	 <wsdl:service name='DirectFlight'>
+		  <wsdl:documentation>FlightAware DirectFlight Web Service</wsdl:documentation>
+		  <wsdl:port name='DirectFlightSoap' binding='FlightAwareDirectFlight:DirectFlightSoap'>
+				<soap:address location='http://directflight.flightaware.com:80/soap/DirectFlight/go'/>
+
+	</wsdl:port>
+	 </wsdl:service>
+	</wsdl:definitions>

@@ -1,0 +1,181 @@
+module METAH2ACME;
+create OUT : ACME from IN : METAH;
+
+
+--@begin METAHFile2ACMEFile
+--@comments METAHFile and ACMEFile are root element of ACME and METAH metamodel
+rule METAHFile2ACMEFile {
+	from
+		m : METAH!METAHFile 
+	to
+		a : ACME!ACMEFile (
+			entries <- m.entries
+		)
+	}
+--@end METAHFile2ACMEFile
+
+--@begin ProcessDeclaration2ComponentType
+rule ProcessDeclaration2ComponentType {
+	from
+		p : METAH!ProcessDeclaration
+	to
+		c: ACME!ComponentType (
+			name <- p.procDecName,
+			ports <- p.ports,
+			extend <- 'MH_Process'
+		)
+}
+--@end ProcessDeclaration2ComponentType
+
+
+--@begin Port2Port
+--@comments Transform a METAH port into an ACME port with two properties
+rule Port2Port {
+	from
+		p1 : METAH!Port 
+	to
+	 	p2 : ACME!Port (
+	 		name <- p1.portName,
+			property <- Sequence {port_type,port_subclass}
+	 	),
+		port_type : ACME!Property(
+			name <- 'MH_port_type',
+			val <- p1.portType
+		),
+		port_subclass : ACME!Property(
+			name <- 'MH_port_subclass',
+			val <- 'MH_'+p1.portCom
+		)
+}
+--@end Port2Port
+
+
+--@begin ProcessImplementation2ComponentType
+rule ProcessImplementation2ComponentType {
+	from
+		p1 : METAH!ProcessImplementation
+	to
+		p2 : ACME!ComponentType (
+			name <- p1.declaration+'_'+p1.procImpName,	
+			property <- p1.processAttributes,
+			extend <- p1.declaration
+	)
+}
+--@end ProcessImplementation2ComponentType
+
+--@begin ProcessAttribute2Property
+rule ProcessAttribute2Property {
+	from
+		a : METAH!ProcessAttribute
+	to
+		p : ACME!Property (
+			name <- 'MH_'+a.attName,
+			val <- a.attValue.toString().concat(' ').concat(a.attValueType)
+		)
+}
+--@end ProcessAttribute2Property
+
+--@begin MacroDeclaration2ComponentType
+rule MacroDeclaration2ComponentType {
+	from
+		m : METAH!MacroDeclaration
+	to
+		c : ACME!ComponentType (
+			name <- m.name,
+			ports <- m.ports,
+			extend <- 'MH_macro'
+		)
+}
+--@end MacroDeclaration2ComponentType
+
+--@begin MacroImplementation2ComponentType
+rule MacroImplementation2ComponentType {
+	from
+		m : METAH!MacroImplementation
+	to
+		c : ACME!ComponentType(
+			name <- m.macroImpName,
+			extend <- m.declaration,
+			representations <- Sequence {r}
+		), 
+		r : ACME!Representation (
+			systems <- Sequence {s}
+		),
+		s : ACME!System(
+			 name <- 'MH_little_System',
+			 componentDeclaration <- m.process,
+			 attachments <- m.connections
+		)
+}
+--@end MacroImplementation2ComponentType
+
+--@begin Process2Component
+rule Process2Component {
+	from 
+		p : METAH!Process
+	to
+		c : ACME!ComponentInstance (
+			name <- p.procName,
+			instanceOf <- p.declaration+'_'+p.implementation,
+			property <- period
+		),
+		period : ACME!Property (
+			name <- 'MH_Process_subclass',
+			val <-  'MH_'+p.periodic
+		)
+}
+--@end Process2Component
+
+--@begin Connection2Connector
+rule Connection2Connector {
+	from
+		c1 : METAH!Connection (
+			not((c1.compSrc.oclIsUndefined())or
+			(c1.compDest.oclIsUndefined()))
+		)
+	to
+		attach1 : ACME!Attachment (		
+			comp <- c1.compSrc,
+			port <- c1.portSrc,
+			con <- c1.compSrc+'_to_'+c1.compDest,
+			role <- 'MH_sink',
+			systemAttachment <- thisModule.resolveTemp(METAH!MacroImplementation.allInstances()->asSequence()->first(),'s')
+		),
+		attach2 : ACME!Attachment (		
+			comp <- c1.compDest,
+			port <- c1.portDest,
+			con <- c1.compSrc+'_to_'+c1.compDest,
+			role <- 'MH_source',
+			systemAttachment <- thisModule.resolveTemp(METAH!MacroImplementation.allInstances()->asSequence()->first(),'s')
+		),
+		c2 : ACME!Connector (
+			 name <- c1.compSrc+'_to_'+c1.compDest,
+			 roles <- Sequence {r1,r2},
+			 system <- thisModule.resolveTemp(METAH!MacroImplementation.allInstances()->asSequence()->first(),'s')
+		),
+		r1 : ACME!Role (
+			name <- 'MH_sink'	
+		),
+		r2 : ACME!Role (
+			name <- 'MH_source'	
+		)
+}
+--@end Connection2Connector
+
+--@begin Connection2Binding
+rule Connection2Binding {
+	from
+		b1 : METAH!Connection (
+			((b1.compSrc.oclIsUndefined())or(b1.compDest.oclIsUndefined()))
+		)
+	to
+		b2 : ACME!Binding (
+			compSrc <- b1.compSrc,
+			compDest <- b1.compDest,
+			portDest <- b1.portDest,
+			portSrc <- b1.portSrc,
+			systemBinding <- thisModule.resolveTemp(METAH!MacroImplementation.allInstances()->asSequence()->first(),'s')
+		)
+}
+--@end Connection2Binding
+

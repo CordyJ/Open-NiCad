@@ -1,0 +1,129 @@
+<?xml version="1.0"?>
+<definitions name="StateCountry"
+             targetNamespace="urn:StateCountry"
+             xmlns:typens="urn:StateCountry"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
+             xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+             xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+  <types>
+    <xsd:schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:StateCountry">
+       	    
+	  <!-- State Array List type -->
+      <xsd:complexType name="stateListArray">
+        <xsd:complexContent>
+          <xsd:restriction base="soapenc:Array">
+             <xsd:attribute ref="soapenc:arrayType" wsdl:arrayType="typens:stateListElement[]"/>
+          </xsd:restriction>
+        </xsd:complexContent>
+      </xsd:complexType>	  
+      
+      <xsd:complexType name="stateListElement">
+        <xsd:all>
+		  <xsd:element name="state" 	type="xsd:string"/>
+          <xsd:element name="stateABV" 	type="xsd:string"/>
+        </xsd:all>
+      </xsd:complexType>
+	  
+	  <!-- Country Array List type -->
+      <xsd:complexType name="countryListArray">
+        <xsd:complexContent>
+          <xsd:restriction base="soapenc:Array">
+             <xsd:attribute ref="soapenc:arrayType" wsdl:arrayType="typens:countryListElement[]"/>
+          </xsd:restriction>
+        </xsd:complexContent>
+      </xsd:complexType>	  
+      
+      <xsd:complexType name="stateListElement">
+        <xsd:all>
+		  <xsd:element name="numericalCode" type="xsd:int"/>
+          <xsd:element name="countryName" type="xsd:string"/>
+          <xsd:element name="ISOcode" type="xsd:string"/>	  
+        </xsd:all>
+      </xsd:complexType>	  
+	  
+    </xsd:schema>
+  </types> 
+
+
+
+  <!-- Get States -->
+  <message name="getStates">
+    <part name="username"       type="xsd:string"/>
+    <part name="password"       type="xsd:string"/>
+  </message>
+
+  <message name="getStatesResponse">
+    <part name="return"         type="typens:stateListArray"/>           
+  </message>
+  
+  
+  <!-- Get Countries -->
+  <message name="getCountries">
+    <part name="username"       type="xsd:string"/>
+    <part name="password"       type="xsd:string"/>
+  </message>
+
+  <message name="getCountriesResponse">
+    <part name="return"         type="typens:countryListArray"/>  
+  </message>
+  
+  
+  <portType name="StateCountryPort">
+
+    <operation name="getStates">
+      <input message="typens:getStates"/>
+      <output message="typens:getStatesResponse"/>
+    </operation>
+
+    <operation name="getCountries">
+      <input message="typens:getCountries"/>
+      <output message="typens:getCountriesResponse"/>
+    </operation>
+
+  </portType>
+
+
+  <binding name="StateCountryBinding" type="typens:StateCountryPort">
+    <soap:binding style="rpc"
+                  transport="http://schemas.xmlsoap.org/soap/http"/>
+
+    <operation name="getStates">
+      <soap:operation soapAction="urn:StateCountryAction"/>
+      <input>
+        <soap:body use="encoded"
+                   namespace="urn:StateCountry"
+                   encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </input>
+      <output>
+        <soap:body use="encoded"
+                   namespace="urn:StateCountry"
+                   encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </output>
+    </operation>
+
+    <operation name="getCountries">
+      <soap:operation soapAction="urn:StateCountryAction"/>
+      <input>
+        <soap:body use="encoded"
+                   namespace="urn:StateCountry"
+                   encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </input>
+      <output>
+        <soap:body use="encoded"
+                   namespace="urn:StateCountry"
+                   encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </output>
+    </operation>
+  </binding>
+
+  <!-- Endpoint for flash-db StateCountry service -->
+  <service name="StateCountryService">
+   <documentation>Returns State and Country listings for drop down boxes.</documentation>
+    <port name="StateCountryPort" binding="typens:StateCountryBinding">
+      <soap:address location="http://www.flash-db.com/services/ws/stateCountryList.php"/>
+    </port>
+  </service>
+</definitions>

@@ -1,0 +1,604 @@
+<?xml version="1.0" encoding="utf-8"?>
+<definitions xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:s0="http://RichSolutions.com/RichPayments/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" targetNamespace="http://RichSolutions.com/RichPayments/" xmlns="http://schemas.xmlsoap.org/wsdl/">
+  <types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://RichSolutions.com/RichPayments/">
+      <s:element name="ProcessCreditCard">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="UserName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="TransType" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="CardNum" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="ExpDate" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="MagData" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="NameOnCard" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Amount" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="InvNum" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="PNRef" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Zip" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Street" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="CVNum" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="ExtData" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ProcessCreditCardResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ProcessCreditCardResult" type="s0:Response" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="Response">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="GetCVResult" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="GetCVResultTXT" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="GetGetOrigResult" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="GetCommercialCard" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="WorkingKey" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="KeyPointer" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ExtData" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Result" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="RespMSG" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Message1" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Message2" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="AuthCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="PNRef" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="HostCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="HostURL" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ReceiptURL" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="GetAVSResult" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="GetAVSResultTXT" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="GetStreetMatchTXT" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Message" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="GetZipMatchTXT" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="ProcessDebitCard">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="UserName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="TransType" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="CardNum" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="ExpDate" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="MagData" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="NameOnCard" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Amount" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="InvNum" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="PNRef" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Pin" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="RegisterNum" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="SureChargeAmt" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="CashBackAmt" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="ExtData" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ProcessDebitCardResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ProcessDebitCardResult" type="s0:Response" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ProcessEBTCard">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="UserName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="TransType" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="CardNum" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="ExpDate" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="MagData" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="NameOnCard" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Amount" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="InvNum" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="PNRef" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Pin" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="RegisterNum" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="SureChargeAmt" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="CashBackAmt" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="ExtData" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ProcessEBTCardResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ProcessEBTCardResult" type="s0:Response" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ProcessCheck">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="UserName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="TransType" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="CheckNum" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="TransitNum" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="AccountNum" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Amount" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="MICR" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="NameOnCheck" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="DL" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="SS" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="DOB" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="StateCode" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="CheckType" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="ExtData" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ProcessCheckResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ProcessCheckResult" type="s0:Response" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetInfo">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="UserName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="TransType" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetInfoResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetInfoResult" type="s0:Response" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="Response" nillable="true" type="s0:Response" />
+    </s:schema>
+  </types>
+  <message name="ProcessCreditCardSoapIn">
+    <part name="parameters" element="s0:ProcessCreditCard" />
+  </message>
+  <message name="ProcessCreditCardSoapOut">
+    <part name="parameters" element="s0:ProcessCreditCardResponse" />
+  </message>
+  <message name="ProcessDebitCardSoapIn">
+    <part name="parameters" element="s0:ProcessDebitCard" />
+  </message>
+  <message name="ProcessDebitCardSoapOut">
+    <part name="parameters" element="s0:ProcessDebitCardResponse" />
+  </message>
+  <message name="ProcessEBTCardSoapIn">
+    <part name="parameters" element="s0:ProcessEBTCard" />
+  </message>
+  <message name="ProcessEBTCardSoapOut">
+    <part name="parameters" element="s0:ProcessEBTCardResponse" />
+  </message>
+  <message name="ProcessCheckSoapIn">
+    <part name="parameters" element="s0:ProcessCheck" />
+  </message>
+  <message name="ProcessCheckSoapOut">
+    <part name="parameters" element="s0:ProcessCheckResponse" />
+  </message>
+  <message name="GetInfoSoapIn">
+    <part name="parameters" element="s0:GetInfo" />
+  </message>
+  <message name="GetInfoSoapOut">
+    <part name="parameters" element="s0:GetInfoResponse" />
+  </message>
+  <message name="ProcessCreditCardHttpGetIn">
+    <part name="UserName" type="s:string" />
+    <part name="Password" type="s:string" />
+    <part name="TransType" type="s:string" />
+    <part name="CardNum" type="s:string" />
+    <part name="ExpDate" type="s:string" />
+    <part name="MagData" type="s:string" />
+    <part name="NameOnCard" type="s:string" />
+    <part name="Amount" type="s:string" />
+    <part name="InvNum" type="s:string" />
+    <part name="PNRef" type="s:string" />
+    <part name="Zip" type="s:string" />
+    <part name="Street" type="s:string" />
+    <part name="CVNum" type="s:string" />
+    <part name="ExtData" type="s:string" />
+  </message>
+  <message name="ProcessCreditCardHttpGetOut">
+    <part name="Body" element="s0:Response" />
+  </message>
+  <message name="ProcessDebitCardHttpGetIn">
+    <part name="UserName" type="s:string" />
+    <part name="Password" type="s:string" />
+    <part name="TransType" type="s:string" />
+    <part name="CardNum" type="s:string" />
+    <part name="ExpDate" type="s:string" />
+    <part name="MagData" type="s:string" />
+    <part name="NameOnCard" type="s:string" />
+    <part name="Amount" type="s:string" />
+    <part name="InvNum" type="s:string" />
+    <part name="PNRef" type="s:string" />
+    <part name="Pin" type="s:string" />
+    <part name="RegisterNum" type="s:string" />
+    <part name="SureChargeAmt" type="s:string" />
+    <part name="CashBackAmt" type="s:string" />
+    <part name="ExtData" type="s:string" />
+  </message>
+  <message name="ProcessDebitCardHttpGetOut">
+    <part name="Body" element="s0:Response" />
+  </message>
+  <message name="ProcessEBTCardHttpGetIn">
+    <part name="UserName" type="s:string" />
+    <part name="Password" type="s:string" />
+    <part name="TransType" type="s:string" />
+    <part name="CardNum" type="s:string" />
+    <part name="ExpDate" type="s:string" />
+    <part name="MagData" type="s:string" />
+    <part name="NameOnCard" type="s:string" />
+    <part name="Amount" type="s:string" />
+    <part name="InvNum" type="s:string" />
+    <part name="PNRef" type="s:string" />
+    <part name="Pin" type="s:string" />
+    <part name="RegisterNum" type="s:string" />
+    <part name="SureChargeAmt" type="s:string" />
+    <part name="CashBackAmt" type="s:string" />
+    <part name="ExtData" type="s:string" />
+  </message>
+  <message name="ProcessEBTCardHttpGetOut">
+    <part name="Body" element="s0:Response" />
+  </message>
+  <message name="ProcessCheckHttpGetIn">
+    <part name="UserName" type="s:string" />
+    <part name="Password" type="s:string" />
+    <part name="TransType" type="s:string" />
+    <part name="CheckNum" type="s:string" />
+    <part name="TransitNum" type="s:string" />
+    <part name="AccountNum" type="s:string" />
+    <part name="Amount" type="s:string" />
+    <part name="MICR" type="s:string" />
+    <part name="NameOnCheck" type="s:string" />
+    <part name="DL" type="s:string" />
+    <part name="SS" type="s:string" />
+    <part name="DOB" type="s:string" />
+    <part name="StateCode" type="s:string" />
+    <part name="CheckType" type="s:string" />
+    <part name="ExtData" type="s:string" />
+  </message>
+  <message name="ProcessCheckHttpGetOut">
+    <part name="Body" element="s0:Response" />
+  </message>
+  <message name="GetInfoHttpGetIn">
+    <part name="UserName" type="s:string" />
+    <part name="Password" type="s:string" />
+    <part name="TransType" type="s:string" />
+  </message>
+  <message name="GetInfoHttpGetOut">
+    <part name="Body" element="s0:Response" />
+  </message>
+  <message name="ProcessCreditCardHttpPostIn">
+    <part name="UserName" type="s:string" />
+    <part name="Password" type="s:string" />
+    <part name="TransType" type="s:string" />
+    <part name="CardNum" type="s:string" />
+    <part name="ExpDate" type="s:string" />
+    <part name="MagData" type="s:string" />
+    <part name="NameOnCard" type="s:string" />
+    <part name="Amount" type="s:string" />
+    <part name="InvNum" type="s:string" />
+    <part name="PNRef" type="s:string" />
+    <part name="Zip" type="s:string" />
+    <part name="Street" type="s:string" />
+    <part name="CVNum" type="s:string" />
+    <part name="ExtData" type="s:string" />
+  </message>
+  <message name="ProcessCreditCardHttpPostOut">
+    <part name="Body" element="s0:Response" />
+  </message>
+  <message name="ProcessDebitCardHttpPostIn">
+    <part name="UserName" type="s:string" />
+    <part name="Password" type="s:string" />
+    <part name="TransType" type="s:string" />
+    <part name="CardNum" type="s:string" />
+    <part name="ExpDate" type="s:string" />
+    <part name="MagData" type="s:string" />
+    <part name="NameOnCard" type="s:string" />
+    <part name="Amount" type="s:string" />
+    <part name="InvNum" type="s:string" />
+    <part name="PNRef" type="s:string" />
+    <part name="Pin" type="s:string" />
+    <part name="RegisterNum" type="s:string" />
+    <part name="SureChargeAmt" type="s:string" />
+    <part name="CashBackAmt" type="s:string" />
+    <part name="ExtData" type="s:string" />
+  </message>
+  <message name="ProcessDebitCardHttpPostOut">
+    <part name="Body" element="s0:Response" />
+  </message>
+  <message name="ProcessEBTCardHttpPostIn">
+    <part name="UserName" type="s:string" />
+    <part name="Password" type="s:string" />
+    <part name="TransType" type="s:string" />
+    <part name="CardNum" type="s:string" />
+    <part name="ExpDate" type="s:string" />
+    <part name="MagData" type="s:string" />
+    <part name="NameOnCard" type="s:string" />
+    <part name="Amount" type="s:string" />
+    <part name="InvNum" type="s:string" />
+    <part name="PNRef" type="s:string" />
+    <part name="Pin" type="s:string" />
+    <part name="RegisterNum" type="s:string" />
+    <part name="SureChargeAmt" type="s:string" />
+    <part name="CashBackAmt" type="s:string" />
+    <part name="ExtData" type="s:string" />
+  </message>
+  <message name="ProcessEBTCardHttpPostOut">
+    <part name="Body" element="s0:Response" />
+  </message>
+  <message name="ProcessCheckHttpPostIn">
+    <part name="UserName" type="s:string" />
+    <part name="Password" type="s:string" />
+    <part name="TransType" type="s:string" />
+    <part name="CheckNum" type="s:string" />
+    <part name="TransitNum" type="s:string" />
+    <part name="AccountNum" type="s:string" />
+    <part name="Amount" type="s:string" />
+    <part name="MICR" type="s:string" />
+    <part name="NameOnCheck" type="s:string" />
+    <part name="DL" type="s:string" />
+    <part name="SS" type="s:string" />
+    <part name="DOB" type="s:string" />
+    <part name="StateCode" type="s:string" />
+    <part name="CheckType" type="s:string" />
+    <part name="ExtData" type="s:string" />
+  </message>
+  <message name="ProcessCheckHttpPostOut">
+    <part name="Body" element="s0:Response" />
+  </message>
+  <message name="GetInfoHttpPostIn">
+    <part name="UserName" type="s:string" />
+    <part name="Password" type="s:string" />
+    <part name="TransType" type="s:string" />
+  </message>
+  <message name="GetInfoHttpPostOut">
+    <part name="Body" element="s0:Response" />
+  </message>
+  <portType name="RichPaymentsSoap">
+    <operation name="ProcessCreditCard">
+      <documentation>Process ePayment Credit Card Transaction. Valid input values are: UserName &amp; Password - Assigned by RichSolutions, TransType - Auth | Sale | Return | Void | Force | Capture | RepeatSale | CaptureAll, CardNum - Payment Card Number, ExpDate - Payment Card Expiration Date in MMYY format, MagData - Payment Card Track II Mag-Stripe Data, NameOnCard - Cardholders Name, Amount - Amount in DDDDD.CC format, InvNum - Invoice Tracking Number, PNRef - Reference Number Assigned by RichSolutions, Zip - CardHolder's billing ZipCode used with AVS,  Street - CardHolder's billing Street Address used with AVS,  CVNum - CardHolder's Card Verification Number used with CV Check, ExtData - Extended Data in XML, Valid Values are: AuthCode - Original Authorization Code, CustCode - Customer Code used with Commercial Cards, TipAmt - Tip Amount TaxAmt - Tax Amount used with Commercial Cards, SequenceNum - Sequence Number used with Recurring Transactions, SequenceCount - Sequene Count used with Recurring Transactions, ServerID - Server ID, Timeout - Timeout Value in Seconds (default=40), TrainingMode - Training Mode T or F, Force - Force Duplicates T or F, RegisterNum - Register Number</documentation>
+      <input message="s0:ProcessCreditCardSoapIn" />
+      <output message="s0:ProcessCreditCardSoapOut" />
+    </operation>
+    <operation name="ProcessDebitCard">
+      <documentation>Process ePayment Debit Card Transactions. Valid input values are: UserName &amp; Password - Assigned by RichSolutions, TransType - Auth | Sale | Return | Force | Capture |  CaptureAll, CardNum - Payment Card Number, ExpDate - Payment Card Expiration Date in MMYY format, MagData - Payment Card Track II Mag-Stripe Data, NameOnCard - Cardholders Name, Amount - Amount in DDDDD.CC format, Pin - Pin Block Returned by Pin-Pad, RegisterNum - Register Number Pin-Pad is Connected, SureChargeAmt - Sure Charge Amount in DDDDD.CC format, CashBackAmt - Cash Back Amount in DDDDD.CC format, ExtData - Extended Data in XML, Valid Values are: Timeout - Timeout Value in Seconds (default=40), TrainingMode - Training Mode T or F, KeySerialNumber - Key Serial Number for DUKPT</documentation>
+      <input message="s0:ProcessDebitCardSoapIn" />
+      <output message="s0:ProcessDebitCardSoapOut" />
+    </operation>
+    <operation name="ProcessEBTCard">
+      <documentation>Process ePayment EBT Card Transactions. Valid input values are: UserName &amp; Password - Assigned by RichSolutions, TransType - FoodStampSale | FoodStampReturn | CashBenefitSale | Capture | CaptureAll, CardNum - Payment Card Number, ExpDate - Payment Card Expiration Date in MMYY format, MagData - Payment Card Track II Mag-Stripe Data, NameOnCard - Cardholders Name, Amount - Amount in DDDDD.CC format, Pin - Pin Returned by Pin-Pad, RegisterNum - Register Number Pin-Pad is Connected, SureChargeAmt - Sure Charge Amount in DDDDD.CC format, CashBackAmt - Cash Back Amount in DDDDD.CC format, ExtData - Extended Data in XML, Valid Values are: Timeout - Timeout Value in Seconds (default=40), TrainingMode - Training Mode T or F, KeySerialNumber - Key Serial Number for DUKPT</documentation>
+      <input message="s0:ProcessEBTCardSoapIn" />
+      <output message="s0:ProcessEBTCardSoapOut" />
+    </operation>
+    <operation name="ProcessCheck">
+      <documentation>Process ePayment Check Transactions. Valid input values are: UserName &amp; Password - Assigned by RichSolutions, TransType - Auth | Sale | Return | Force | Void | Capture | CaptureAll, CheckNum - Check Number, TransitNum - Transit NUmber AccountNum - AccountNumber, Amount - Amount in DDDDD.CC format, MICR - MICR, NameOnCheck - NameOnCheck, DL - Drivers License, SS - Social Security, StateCode - State Code, CheckType - CheckType (Personal | Corporate | Government), ExtData - Extended Data in XML, Valid Values are: Timeout - Timeout Value in Seconds (default=40), PNRef - Reference Number Assigned by RichSolutions, Phone - Phone Number, EMail - E-Mail Address, RawMICR - Check RawMICR Data, InvNum - Invoice Number, TrainingMode - Training Mode T or F</documentation>
+      <input message="s0:ProcessCheckSoapIn" />
+      <output message="s0:ProcessCheckSoapOut" />
+    </operation>
+    <operation name="GetInfo">
+      <documentation>Retrieves information from the Web Service. Valid input values are: UserName &amp; Password - Assigned by RichSolutions, TransType - Setup | BatchInquiry | StatusCheck  </documentation>
+      <input message="s0:GetInfoSoapIn" />
+      <output message="s0:GetInfoSoapOut" />
+    </operation>
+  </portType>
+  <portType name="RichPaymentsHttpGet">
+    <operation name="ProcessCreditCard">
+      <documentation>Process ePayment Credit Card Transaction. Valid input values are: UserName &amp; Password - Assigned by RichSolutions, TransType - Auth | Sale | Return | Void | Force | Capture | RepeatSale | CaptureAll, CardNum - Payment Card Number, ExpDate - Payment Card Expiration Date in MMYY format, MagData - Payment Card Track II Mag-Stripe Data, NameOnCard - Cardholders Name, Amount - Amount in DDDDD.CC format, InvNum - Invoice Tracking Number, PNRef - Reference Number Assigned by RichSolutions, Zip - CardHolder's billing ZipCode used with AVS,  Street - CardHolder's billing Street Address used with AVS,  CVNum - CardHolder's Card Verification Number used with CV Check, ExtData - Extended Data in XML, Valid Values are: AuthCode - Original Authorization Code, CustCode - Customer Code used with Commercial Cards, TipAmt - Tip Amount TaxAmt - Tax Amount used with Commercial Cards, SequenceNum - Sequence Number used with Recurring Transactions, SequenceCount - Sequene Count used with Recurring Transactions, ServerID - Server ID, Timeout - Timeout Value in Seconds (default=40), TrainingMode - Training Mode T or F, Force - Force Duplicates T or F, RegisterNum - Register Number</documentation>
+      <input message="s0:ProcessCreditCardHttpGetIn" />
+      <output message="s0:ProcessCreditCardHttpGetOut" />
+    </operation>
+    <operation name="ProcessDebitCard">
+      <documentation>Process ePayment Debit Card Transactions. Valid input values are: UserName &amp; Password - Assigned by RichSolutions, TransType - Auth | Sale | Return | Force | Capture |  CaptureAll, CardNum - Payment Card Number, ExpDate - Payment Card Expiration Date in MMYY format, MagData - Payment Card Track II Mag-Stripe Data, NameOnCard - Cardholders Name, Amount - Amount in DDDDD.CC format, Pin - Pin Block Returned by Pin-Pad, RegisterNum - Register Number Pin-Pad is Connected, SureChargeAmt - Sure Charge Amount in DDDDD.CC format, CashBackAmt - Cash Back Amount in DDDDD.CC format, ExtData - Extended Data in XML, Valid Values are: Timeout - Timeout Value in Seconds (default=40), TrainingMode - Training Mode T or F, KeySerialNumber - Key Serial Number for DUKPT</documentation>
+      <input message="s0:ProcessDebitCardHttpGetIn" />
+      <output message="s0:ProcessDebitCardHttpGetOut" />
+    </operation>
+    <operation name="ProcessEBTCard">
+      <documentation>Process ePayment EBT Card Transactions. Valid input values are: UserName &amp; Password - Assigned by RichSolutions, TransType - FoodStampSale | FoodStampReturn | CashBenefitSale | Capture | CaptureAll, CardNum - Payment Card Number, ExpDate - Payment Card Expiration Date in MMYY format, MagData - Payment Card Track II Mag-Stripe Data, NameOnCard - Cardholders Name, Amount - Amount in DDDDD.CC format, Pin - Pin Returned by Pin-Pad, RegisterNum - Register Number Pin-Pad is Connected, SureChargeAmt - Sure Charge Amount in DDDDD.CC format, CashBackAmt - Cash Back Amount in DDDDD.CC format, ExtData - Extended Data in XML, Valid Values are: Timeout - Timeout Value in Seconds (default=40), TrainingMode - Training Mode T or F, KeySerialNumber - Key Serial Number for DUKPT</documentation>
+      <input message="s0:ProcessEBTCardHttpGetIn" />
+      <output message="s0:ProcessEBTCardHttpGetOut" />
+    </operation>
+    <operation name="ProcessCheck">
+      <documentation>Process ePayment Check Transactions. Valid input values are: UserName &amp; Password - Assigned by RichSolutions, TransType - Auth | Sale | Return | Force | Void | Capture | CaptureAll, CheckNum - Check Number, TransitNum - Transit NUmber AccountNum - AccountNumber, Amount - Amount in DDDDD.CC format, MICR - MICR, NameOnCheck - NameOnCheck, DL - Drivers License, SS - Social Security, StateCode - State Code, CheckType - CheckType (Personal | Corporate | Government), ExtData - Extended Data in XML, Valid Values are: Timeout - Timeout Value in Seconds (default=40), PNRef - Reference Number Assigned by RichSolutions, Phone - Phone Number, EMail - E-Mail Address, RawMICR - Check RawMICR Data, InvNum - Invoice Number, TrainingMode - Training Mode T or F</documentation>
+      <input message="s0:ProcessCheckHttpGetIn" />
+      <output message="s0:ProcessCheckHttpGetOut" />
+    </operation>
+    <operation name="GetInfo">
+      <documentation>Retrieves information from the Web Service. Valid input values are: UserName &amp; Password - Assigned by RichSolutions, TransType - Setup | BatchInquiry | StatusCheck  </documentation>
+      <input message="s0:GetInfoHttpGetIn" />
+      <output message="s0:GetInfoHttpGetOut" />
+    </operation>
+  </portType>
+  <portType name="RichPaymentsHttpPost">
+    <operation name="ProcessCreditCard">
+      <documentation>Process ePayment Credit Card Transaction. Valid input values are: UserName &amp; Password - Assigned by RichSolutions, TransType - Auth | Sale | Return | Void | Force | Capture | RepeatSale | CaptureAll, CardNum - Payment Card Number, ExpDate - Payment Card Expiration Date in MMYY format, MagData - Payment Card Track II Mag-Stripe Data, NameOnCard - Cardholders Name, Amount - Amount in DDDDD.CC format, InvNum - Invoice Tracking Number, PNRef - Reference Number Assigned by RichSolutions, Zip - CardHolder's billing ZipCode used with AVS,  Street - CardHolder's billing Street Address used with AVS,  CVNum - CardHolder's Card Verification Number used with CV Check, ExtData - Extended Data in XML, Valid Values are: AuthCode - Original Authorization Code, CustCode - Customer Code used with Commercial Cards, TipAmt - Tip Amount TaxAmt - Tax Amount used with Commercial Cards, SequenceNum - Sequence Number used with Recurring Transactions, SequenceCount - Sequene Count used with Recurring Transactions, ServerID - Server ID, Timeout - Timeout Value in Seconds (default=40), TrainingMode - Training Mode T or F, Force - Force Duplicates T or F, RegisterNum - Register Number</documentation>
+      <input message="s0:ProcessCreditCardHttpPostIn" />
+      <output message="s0:ProcessCreditCardHttpPostOut" />
+    </operation>
+    <operation name="ProcessDebitCard">
+      <documentation>Process ePayment Debit Card Transactions. Valid input values are: UserName &amp; Password - Assigned by RichSolutions, TransType - Auth | Sale | Return | Force | Capture |  CaptureAll, CardNum - Payment Card Number, ExpDate - Payment Card Expiration Date in MMYY format, MagData - Payment Card Track II Mag-Stripe Data, NameOnCard - Cardholders Name, Amount - Amount in DDDDD.CC format, Pin - Pin Block Returned by Pin-Pad, RegisterNum - Register Number Pin-Pad is Connected, SureChargeAmt - Sure Charge Amount in DDDDD.CC format, CashBackAmt - Cash Back Amount in DDDDD.CC format, ExtData - Extended Data in XML, Valid Values are: Timeout - Timeout Value in Seconds (default=40), TrainingMode - Training Mode T or F, KeySerialNumber - Key Serial Number for DUKPT</documentation>
+      <input message="s0:ProcessDebitCardHttpPostIn" />
+      <output message="s0:ProcessDebitCardHttpPostOut" />
+    </operation>
+    <operation name="ProcessEBTCard">
+      <documentation>Process ePayment EBT Card Transactions. Valid input values are: UserName &amp; Password - Assigned by RichSolutions, TransType - FoodStampSale | FoodStampReturn | CashBenefitSale | Capture | CaptureAll, CardNum - Payment Card Number, ExpDate - Payment Card Expiration Date in MMYY format, MagData - Payment Card Track II Mag-Stripe Data, NameOnCard - Cardholders Name, Amount - Amount in DDDDD.CC format, Pin - Pin Returned by Pin-Pad, RegisterNum - Register Number Pin-Pad is Connected, SureChargeAmt - Sure Charge Amount in DDDDD.CC format, CashBackAmt - Cash Back Amount in DDDDD.CC format, ExtData - Extended Data in XML, Valid Values are: Timeout - Timeout Value in Seconds (default=40), TrainingMode - Training Mode T or F, KeySerialNumber - Key Serial Number for DUKPT</documentation>
+      <input message="s0:ProcessEBTCardHttpPostIn" />
+      <output message="s0:ProcessEBTCardHttpPostOut" />
+    </operation>
+    <operation name="ProcessCheck">
+      <documentation>Process ePayment Check Transactions. Valid input values are: UserName &amp; Password - Assigned by RichSolutions, TransType - Auth | Sale | Return | Force | Void | Capture | CaptureAll, CheckNum - Check Number, TransitNum - Transit NUmber AccountNum - AccountNumber, Amount - Amount in DDDDD.CC format, MICR - MICR, NameOnCheck - NameOnCheck, DL - Drivers License, SS - Social Security, StateCode - State Code, CheckType - CheckType (Personal | Corporate | Government), ExtData - Extended Data in XML, Valid Values are: Timeout - Timeout Value in Seconds (default=40), PNRef - Reference Number Assigned by RichSolutions, Phone - Phone Number, EMail - E-Mail Address, RawMICR - Check RawMICR Data, InvNum - Invoice Number, TrainingMode - Training Mode T or F</documentation>
+      <input message="s0:ProcessCheckHttpPostIn" />
+      <output message="s0:ProcessCheckHttpPostOut" />
+    </operation>
+    <operation name="GetInfo">
+      <documentation>Retrieves information from the Web Service. Valid input values are: UserName &amp; Password - Assigned by RichSolutions, TransType - Setup | BatchInquiry | StatusCheck  </documentation>
+      <input message="s0:GetInfoHttpPostIn" />
+      <output message="s0:GetInfoHttpPostOut" />
+    </operation>
+  </portType>
+  <binding name="RichPaymentsSoap" type="s0:RichPaymentsSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document" />
+    <operation name="ProcessCreditCard">
+      <soap:operation soapAction="http://RichSolutions.com/RichPayments/ProcessCreditCard" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="ProcessDebitCard">
+      <soap:operation soapAction="http://RichSolutions.com/RichPayments/ProcessDebitCard" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="ProcessEBTCard">
+      <soap:operation soapAction="http://RichSolutions.com/RichPayments/ProcessEBTCard" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="ProcessCheck">
+      <soap:operation soapAction="http://RichSolutions.com/RichPayments/ProcessCheck" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="GetInfo">
+      <soap:operation soapAction="http://RichSolutions.com/RichPayments/GetInfo" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+  </binding>
+  <binding name="RichPaymentsHttpGet" type="s0:RichPaymentsHttpGet">
+    <http:binding verb="GET" />
+    <operation name="ProcessCreditCard">
+      <http:operation location="/ProcessCreditCard" />
+      <input>
+        <http:urlEncoded />
+      </input>
+      <output>
+        <mime:mimeXml part="Body" />
+      </output>
+    </operation>
+    <operation name="ProcessDebitCard">
+      <http:operation location="/ProcessDebitCard" />
+      <input>
+        <http:urlEncoded />
+      </input>
+      <output>
+        <mime:mimeXml part="Body" />
+      </output>
+    </operation>
+    <operation name="ProcessEBTCard">
+      <http:operation location="/ProcessEBTCard" />
+      <input>
+        <http:urlEncoded />
+      </input>
+      <output>
+        <mime:mimeXml part="Body" />
+      </output>
+    </operation>
+    <operation name="ProcessCheck">
+      <http:operation location="/ProcessCheck" />
+      <input>
+        <http:urlEncoded />
+      </input>
+      <output>
+        <mime:mimeXml part="Body" />
+      </output>
+    </operation>
+    <operation name="GetInfo">
+      <http:operation location="/GetInfo" />
+      <input>
+        <http:urlEncoded />
+      </input>
+      <output>
+        <mime:mimeXml part="Body" />
+      </output>
+    </operation>
+  </binding>
+  <binding name="RichPaymentsHttpPost" type="s0:RichPaymentsHttpPost">
+    <http:binding verb="POST" />
+    <operation name="ProcessCreditCard">
+      <http:operation location="/ProcessCreditCard" />
+      <input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </input>
+      <output>
+        <mime:mimeXml part="Body" />
+      </output>
+    </operation>
+    <operation name="ProcessDebitCard">
+      <http:operation location="/ProcessDebitCard" />
+      <input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </input>
+      <output>
+        <mime:mimeXml part="Body" />
+      </output>
+    </operation>
+    <operation name="ProcessEBTCard">
+      <http:operation location="/ProcessEBTCard" />
+      <input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </input>
+      <output>
+        <mime:mimeXml part="Body" />
+      </output>
+    </operation>
+    <operation name="ProcessCheck">
+      <http:operation location="/ProcessCheck" />
+      <input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </input>
+      <output>
+        <mime:mimeXml part="Body" />
+      </output>
+    </operation>
+    <operation name="GetInfo">
+      <http:operation location="/GetInfo" />
+      <input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </input>
+      <output>
+        <mime:mimeXml part="Body" />
+      </output>
+    </operation>
+  </binding>
+  <service name="RichPayments">
+    <documentation>RichPayments.NET - ePayment Web Service by RichSolutions, Inc.
+20428 NE 66th Ct.
+Redmond, WA 98053
+(425) 836-4251</documentation>
+    <port name="RichPaymentsSoap" binding="s0:RichPaymentsSoap">
+      <soap:address location="https://www.richsolutions.com/richpayments/richpay.asmx" />
+    </port>
+    <port name="RichPaymentsHttpGet" binding="s0:RichPaymentsHttpGet">
+      <http:address location="https://www.richsolutions.com/richpayments/richpay.asmx" />
+    </port>
+    <port name="RichPaymentsHttpPost" binding="s0:RichPaymentsHttpPost">
+      <http:address location="https://www.richsolutions.com/richpayments/richpay.asmx" />
+    </port>
+  </service>
+</definitions>

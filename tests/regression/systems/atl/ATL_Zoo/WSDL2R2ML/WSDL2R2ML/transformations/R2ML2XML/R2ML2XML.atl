@@ -1,0 +1,1473 @@
+--@atlcompiler atl2006
+
+--------------------------------------------------------------------------------
+-- Transforms an R2ML metamodel to XML metamodel.
+-- Created as part of M.Sc. theses at GOOD OLD AI Research Group
+-- Author: Milan Milanovic (milan@milanovic.org), Marko Ribaric (marko.ribaric@gmail.com)
+-- Works for R2ML v0.5-beta
+--------------------------------------------------------------------------------
+-- Version: 2.0 (General, Integrity & Derivation rule elements) - 6.11.2006.
+-- Version: 2.1 (Reaction rule elements) - 7.3.2007
+--
+-- TODO: 
+--	1) Add support for Production rules
+--------------------------------------------------------------------------------
+
+module R2ML2XML; -- Module Template
+create OUT : XML from IN : R2ML;
+
+-------------------------------------------------------------------------------
+-- HELPERS --------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- HELPER: isNegated
+-- Checks if Atom is negated. If property is not defined then it is false.
+-- CONTEXT:	R2ML!Atom
+-- OUT:		Boolean
+helper context R2ML!Atom def: isNegated() : Boolean = 
+	if self.isNegated.oclIsUndefined() then
+		false
+	else self.isNegated
+	endif;
+
+-------------------------------------------------------------------------------
+-- RULES ----------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- Rule 'RuleBase'
+-- Create XML Root element (r2ml:RuleBase) from the R2ML RuleBase element 
+rule RuleBase {
+	from i : R2ML!RuleBase (
+		i.oclIsTypeOf(R2ML!RuleBase)
+		)
+	to o : XML!Root (
+			name <- 'r2ml:RuleBase',
+			children <- Sequence { ex, schema, r2ml, r2mlv, xsi, i.rules, i.vocabularies
+								 }
+		),
+	ex : XML!Attribute (
+			name <- 'xmlns:ex',
+			value <- 'http://www.bookingservice.com/schema'
+		),
+	schema : XML!Attribute (
+			name <- 'xsi:schemaLocation',
+			value <- 'http://www.rewerse.net/I1/2006/R2ML http://oxygen.informatik.tu-cottbus.de/R2ML/0.4/R2ML.xsd'
+		),
+	r2ml : XML!Attribute (
+			name <- 'xmlns:r2ml',
+			value <- 'http://www.rewerse.net/I1/2006/R2ML'
+		),
+	r2mlv : XML!Attribute (
+			name <- 'xmlns:r2mlv',
+			value <- 'http://www.rewerse.net/I1/2006/R2MLV'
+		),
+	xsi : XML!Attribute (
+			name <- 'xmlns:xsi',
+			value <- 'http://www.w3.org/2001/XMLSchema-instance'
+		)
+}
+
+-- Rule 'DerivationRuleSet'
+-- Create XML element (r2ml:DerivationRuleSet) from the R2ML DerivationRuleSet element 
+rule DerivationRuleSet {
+	from i : R2ML!DerivationRuleSet (
+			i.oclIsTypeOf(R2ML!DerivationRuleSet)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:DerivationRuleSet',
+			children <- i.rules
+		)
+}
+
+-- Rule 'IntegrityRuleSet'
+-- Create XML element (r2ml:IntegrityRuleSet) from the R2ML IntegrityRuleSet element 
+rule IntegrityRuleSet {
+	from i : R2ML!IntegrityRuleSet (
+			i.oclIsTypeOf(R2ML!IntegrityRuleSet)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:IntegrityRuleSet',
+			children <- i.rules
+		)
+}
+
+-- Rule 'ReactionRuleSet'
+-- Create XML element (r2ml:ReactionRuleSet) from the R2ML ReactionRuleSet element 
+rule ReactionRuleSet {
+	from i : R2ML!ReactionRuleSet (
+			i.oclIsTypeOf(R2ML!ReactionRuleSet)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:ReactionRuleSet',
+			children <- Sequence { ruleSetID, i.rules }
+		),
+	ruleSetID : XML!Attribute (
+			name <- 'r2ml:ruleSetID',
+			value <- i.ruleSetID
+		)
+}
+
+-- Rule 'ProductionRuleSet'
+-- Create XML element (r2ml:ProductionRuleSet) from the R2ML ProductionRuleSet element 
+rule ProductionRuleSet {
+	from i : R2ML!ProductionRuleSet (
+			i.oclIsTypeOf(R2ML!ProductionRuleSet)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:ProductionRuleSet',
+			children <- i.rules
+		)
+}
+
+-- Rule 'AlethicIntegrityRule'
+-- Create XML element (r2ml:AlethicIntegrityRule) from the R2ML AlethicIntegrityRule element 
+rule AlethicIntegrityRule { 
+	from i : R2ML!AlethicIntegrityRule (
+			i.oclIsTypeOf(R2ML!AlethicIntegrityRule)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:AlethicIntegrityRule',
+			children <- Sequence { if not i.ruleID.oclIsUndefined() then
+									thisModule.RuleId(i)
+									else OclUndefined
+									endif,
+									constraint
+								}
+		),
+	constraint : XML!Element (
+			name <- 'r2ml:constraint',
+			children <- Sequence { i.constraint }
+		)
+}
+
+-- Rule 'RuleId'
+-- Create XML attribute (r2ml:ruleID) from the R2ML Rule element 
+lazy rule RuleId {
+	from i : R2ML!Rule
+	to o : XML!Attribute (
+			name <- 'r2ml:ruleID',
+			value <- i.ruleID
+		)
+}
+
+-- Rule 'DeonticIntegrityRule'
+-- Create XML element (r2ml:DeonticIntegrityRule) from the R2ML DeonticIntegrityRule element 
+rule DeonticIntegrityRule { 
+	from i : R2ML!DeonticIntegrityRule (
+			i.oclIsTypeOf(R2ML!DeonticIntegrityRule)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:DeonticIntegrityRule',
+			children <- Sequence { if not i.ruleID.oclIsUndefined() then
+									thisModule.RuleId(i)
+									else OclUndefined
+									endif,
+									constraint 
+								 }
+		),
+	constraint : XML!Element (
+			name <- 'r2ml:constraint',
+			children <- Sequence { i.constraint }
+		)
+}
+
+-- Rule 'UniversallyQuantifiedFormula'
+-- Create XML element (r2ml:UniversallyQuantifiedFormula) from the R2ML UniversallyQuantifiedFormula element 
+rule UniversallyQuantifiedFormula {
+	from i : R2ML!UniversallyQuantifiedFormula (
+			i.oclIsTypeOf(R2ML!UniversallyQuantifiedFormula)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:UniversallyQuantifiedFormula',
+			children <- Sequence {
+							i.variables->asSequence()->select(c | c.oclIsTypeOf(R2ML!ObjectVariable))->collect(e | thisModule.ObjectVariable(e)),
+							i.variables->asSequence()->select(c | c.oclIsTypeOf(R2ML!DataVariable))->collect(e | thisModule.DataVariable(e)),
+							i.formula
+						}
+		)
+}
+
+-- Rule 'ExistentiallyQuantifiedFormula'
+-- Create XML element (r2ml:ExistentiallyQuantifiedFormula) from the R2ML ExistentiallyQuantifiedFormula element 
+rule ExistentiallyQuantifiedFormula {
+	from i : R2ML!ExistentiallyQuantifiedFormula (
+			i.oclIsTypeOf(R2ML!ExistentiallyQuantifiedFormula)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:ExistentiallyQuantifiedFormula',
+			children <- Sequence {
+							i.variables->asSequence()->select(c | c.oclIsTypeOf(R2ML!ObjectVariable))->collect(e | thisModule.ObjectVariable(e)),
+							i.variables->asSequence()->select(c | c.oclIsTypeOf(R2ML!DataVariable))->collect(e | thisModule.DataVariable(e)),
+							i.formula
+						}
+		)
+}
+
+-- Lazy rule 'ClassRule'
+-- Create XML attribute (r2ml:classID) from the R2ML Class element 
+lazy rule ClassRule {
+	from i : R2ML!Class 
+	to o : XML!Attribute (
+			name <- 'r2ml:classID',
+			value <- i.name
+		)
+}
+
+-- Lazy rule 'ObjectVariable'
+-- Create XML element (r2ml:ObjectVariable) from the R2ML ObjectVariable element 
+lazy rule ObjectVariable {
+	from i : R2ML!ObjectVariable
+	to o : XML!Element (
+		name <- 'r2ml:ObjectVariable',
+		children <- Sequence { attrName, if not i.classRef.oclIsUndefined() then
+											thisModule.ClassRule(i.classRef)
+										 else OclUndefined
+										 endif
+							 }
+		),
+	attrName : XML!Attribute (
+			name <- 'r2ml:name',
+			value <- i.name
+		)
+} 
+
+-- Lazy rule 'DataVariable'
+-- Create XML element (r2ml:DataVariable) from the R2ML DataVariable element 
+lazy rule DataVariable {
+	from i : R2ML!DataVariable
+	to o : XML!Element (
+		name <- 'r2ml:DataVariable',
+		children <- Sequence { attrName, if not i.datatypeRef.oclIsUndefined() then
+											thisModule.Datatype(i.datatypeRef)
+										 else OclUndefined
+										 endif,
+										 if not i.typeCategory.oclIsUndefined() then
+										 	thisModule.TypeCategory(i)
+										 else OclUndefined
+										 endif
+							 }
+		),
+	attrName : XML!Attribute (
+			name <- 'r2ml:name',
+			value <- i.name
+		)
+}
+
+-- Lazy rule 'GenericVariable'
+-- Create XML element (r2ml:GenericVariable) from the R2ML GenericVariable element 
+lazy rule GenericVariable {
+	from i : R2ML!GenericVariable
+	to o : XML!Element (
+			name <- 'r2ml:GenericVariable',
+			children <- Sequence { attrName, if not i.typeRef.oclIsUndefined() then
+												thisModule.Datatype(i.typeRef)
+										 	 else OclUndefined
+										 	 endif 
+								 }
+		),
+	attrName : XML!Attribute (
+			name <- 'r2ml:name',
+			value <- i.name
+		)
+}
+
+-- Lazy rule 'Datatype'
+-- Create XML attribute (r2ml:datatypeID) from the R2ML Datatype element 
+lazy rule Datatype {
+	from i : R2ML!Datatype
+	to o : XML!Attribute (
+			name <- 'r2ml:datatypeID',
+			value <- i.name
+		)
+}
+
+-- Rule 'Implication'
+-- Create XML element (r2ml:Implication) from the R2ML Implication element 
+rule Implication {
+	from i : R2ML!Implication (
+			i.oclIsTypeOf(R2ML!Implication)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:Implication',
+			children <- Sequence { ant, con }
+		),
+		ant : XML!Element (
+			name <- 'r2ml:antecedent',
+			children <- i.antecedent
+		),
+		con : XML!Element (
+			name <- 'r2ml:consequent',
+			children <- i.consequent
+		)
+}
+
+-- Rule 'Conjuction'
+-- Create XML element (r2ml:Conjuction) from the R2ML Conjuction element 
+rule Conjuction {
+	from i : R2ML!Conjuction (
+			i.oclIsTypeOf(R2ML!Conjuction)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:Conjunction',
+			children <- i.formulas
+		)
+}
+
+-- Rule 'Disjunction'
+-- Create XML element (r2ml:Disjunction) from the R2ML Disjunction element 
+rule Disjunction {
+	from i : R2ML!Disjunction (
+			i.oclIsTypeOf(R2ML!Disjunction)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:Disjunction',
+			children <- i.formulas
+		)
+}
+
+-- Rule 'NegationAsFailure'
+-- Create XML element (r2ml:NegationAsFailure) from the R2ML NegationAsFailure element 
+rule NegationAsFailure {
+	from i : R2ML!NegationAsFailure (
+			i.oclIsTypeOf(R2ML!NegationAsFailure)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:NegationAsFailure',
+			children <- Sequence { i.formula }
+		)
+}
+
+-- Rule 'StrongNegation'
+-- Create XML element (r2ml:StrongNegation) from the R2ML StrongNegation element 
+rule StrongNegation {
+	from i : R2ML!StrongNegation (
+			i.oclIsTypeOf(R2ML!StrongNegation)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:StrongNegation',
+			children <- Sequence { i.formula }
+		)
+}
+
+-- Rule 'EqualityAtom'
+-- Create XML element (r2ml:EqualityAtom) from the R2ML EqualityAtom element 
+rule EqualityAtom {
+	from i : R2ML!EqualityAtom (
+			i.oclIsTypeOf(R2ML!EqualityAtom)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:EqualityAtom',
+			children <- Sequence { i.terms->select(c | c.oclIsTypeOf(R2ML!ObjectVariable))->collect(e | thisModule.ObjectVariable(e)),
+								   i.terms->select(c | not c.oclIsTypeOf(R2ML!ObjectVariable))
+								 }
+		)
+}
+
+-- Rule 'InequalityAtom'
+-- Create XML element (r2ml:InequalityAtom) from the R2ML InequalityAtom element 
+rule InequalityAtom {
+	from i : R2ML!InequalityAtom (
+			i.oclIsTypeOf(R2ML!InequalityAtom)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:InequalityAtom',
+			children <- Sequence { i.terms->select(c | c.oclIsTypeOf(R2ML!ObjectVariable))->collect(e | thisModule.ObjectVariable(e)),
+								   i.terms->select(c | not c.oclIsTypeOf(R2ML!ObjectVariable))
+								 }
+		)
+}
+
+-- Rule 'DerivationRule'
+-- Create XML element (r2ml:DerivationRule) from the R2ML DerivationRule element 
+rule DerivationRule { 
+	from i : R2ML!DerivationRule (
+			i.oclIsTypeOf(R2ML!DerivationRule)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:DerivationRule',
+			children <- Sequence { if not i.ruleID.oclIsUndefined() then
+									thisModule.RuleId(i)
+									else OclUndefined
+									endif,
+									conditions, 
+									conclusions 
+								 }
+		),
+		conditions : XML!Element (
+				name <- 'r2ml:conditions',
+				children <- i.conditions
+			),
+		conclusions : XML!Element (
+				name <- 'r2ml:conclusion',
+				children <- i.conclusions->asSequence()->collect(c | c.atoms)->flatten()->asSequence() -- collect LiteralConjuctions
+			)
+}
+
+-- Rule 'AtomIsNegated'
+-- Create XML attribute (r2ml:isNegated) from the R2ML Atom element 
+lazy rule AtomIsNegated {
+	from i : R2ML!Atom
+	to o : XML!Attribute ( 
+			name <- 'r2ml:isNegated',
+			value <- 'true'
+		)
+}
+
+-- Rule 'DataClassificationAtom'
+-- Create XML element (r2ml:DataClassificationAtom) from the R2ML DataClassificationAtom element 
+rule DataClassificationAtom {
+	from i : R2ML!DataClassificationAtom (
+			i.oclIsTypeOf(R2ML!DataClassificationAtom)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:DataClassificationAtom',
+			children <- Sequence { if i.isNegated() then    	  -- for isNegated attribute
+									 thisModule.AtomIsNegated(i)
+								   else OclUndefined
+								   endif,
+								   thisModule.Datatype(i.type),      -- for classID attribute
+								   thisModule.DataVariable(i.term)  -- for term 
+								}
+		)
+}
+
+-- Rule 'QFConjunction'
+-- Create XML element (r2ml:qf.Conjuction) from the R2ML QFConjunction element 
+rule QFConjunction {
+	from i : R2ML!QFConjunction (
+			i.oclIsTypeOf(R2ML!QFConjunction)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:qf.Conjuction',
+			children <- i.formulas
+		)
+}
+
+-- Rule 'QFDisjunction'
+-- Create XML element (r2ml:qf.Disjunction) from the R2ML QFDisjunction element 
+rule QFDisjunction {
+	from i : R2ML!QFDisjunction (
+			i.oclIsTypeOf(R2ML!QFDisjunction)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:qf.Disjunction',
+			children <- i.formulas
+		)
+}
+
+-- Rule 'QFNegationAsFailure'
+-- Create XML element (r2ml:qf.NegationAsFailure) from the R2ML QFNegationAsFailure element 
+rule QFNegationAsFailure {
+	from i : R2ML!QFNegationAsFailure (
+			i.oclIsTypeOf(R2ML!QFNegationAsFailure)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:qf.NegationAsFailure',
+			children <- Sequence { i.formula }
+		)
+}
+
+-- Rule 'QFStrongNegation'
+-- Create XML element (r2ml:qf.StrongNegation) from the R2ML QFStrongNegation element 
+rule QFStrongNegation {
+	from i : R2ML!QFStrongNegation (
+			i.oclIsTypeOf(R2ML!QFStrongNegation)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:qf.StrongNegation',
+			children <- Sequence { i.formula }
+		)
+}
+
+-- Rule 'DatatypePredicateAtom'
+-- Create XML element (r2ml:DatatypePredicateAtom) from the R2ML DatatypePredicateAtom element 
+rule DatatypePredicateAtom {
+	from i : R2ML!DatatypePredicateAtom (
+			i.oclIsTypeOf(R2ML!DatatypePredicateAtom)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:DatatypePredicateAtom',
+			children <- Sequence { if i.isNegated() then    	  -- for isNegated attribute
+									 thisModule.AtomIsNegated(i)
+								   else OclUndefined
+								   endif,
+								   attr, 
+								   dataArgs }
+		),
+		attr : XML!Attribute (
+				name <- 'r2ml:datatypePredicateID',
+				value <- i.predicate.name
+			),
+		dataArgs : XML!Element (
+				name <- 'r2ml:dataArguments',
+				children <- Sequence { i.dataArguments->asSequence()->select(c | c.oclIsTypeOf(R2ML!DataVariable))->collect(c | thisModule.DataVariable(c)),
+									   i.dataArguments->asSequence()->select(c | not c.oclIsTypeOf(R2ML!DataVariable))
+									 }
+			)
+}
+
+-- Rule 'TypeCategory'
+-- Create XML attribute (r2ml:typeCategory) for R2ML Term element 
+lazy rule TypeCategory {
+	from i : R2ML!Term
+	to o : XML!Attribute (
+		name <- 'r2ml:typeCategory',
+		value <- if i.typeCategory = #individual then
+					 'individual'
+				 else if i.typeCategory = #set then
+						  'set'
+					  else if i.typeCategory = #orderedSet then
+								 'order'
+						   else if i.typeCategory = #bag then
+									'bag'
+							    else if i.typeCategory = #sequence then
+										  'sequence'
+									 else OclUndefined
+								     endif
+								endif
+						   endif
+					  endif
+				 endif			
+		)
+}
+			
+-- Rule 'DataOperationTermArgs'
+-- Create XML element (r2ml:arguments) for R2ML DataOperationTerm element 
+lazy rule DataOperationTermArgs {
+	from i : R2ML!DataOperationTerm
+	to o : XML!Element (
+			name <- 'r2ml:arguments',
+			children <- Sequence { i.arguments->asSequence()->select(c | c.oclIsTypeOf(R2ML!ObjectVariable))->collect(c | thisModule.ObjectVariable(c)),
+								   i.arguments->asSequence()->select(c | c.oclIsTypeOf(R2ML!DataVariable))->collect(c | thisModule.DataVariable(c)),
+								   i.arguments->asSequence()->select(c | not c.oclIsTypeOf(R2ML!ObjectVariable) and not c.oclIsTypeOf(R2ML!DataVariable))
+								 }
+		)
+}
+
+-- Rule 'TypedLiteral'
+-- Create XML element (r2ml:TypedLiteral) from the R2ML TypedLiteral element 
+rule TypedLiteral {
+	from i : R2ML!TypedLiteral (
+			i.oclIsTypeOf(R2ML!TypedLiteral)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:TypedLiteral',
+			children <- Sequence { type, value }
+		),
+	type : XML!Attribute (
+			name <- 'r2ml:datatypeID',
+			value <- i.type.name
+		),
+	value : XML!Attribute (
+			name <- 'r2ml:lexicalValue',
+			value <- i.lexicalValue
+		)
+}
+
+-- Rule 'PlainLiteral'
+-- Create XML element (r2ml:PlainLiteral) from the R2ML PlainLiteral element
+rule PlainLiteral {
+	from i : R2ML!PlainLiteral (
+			i.oclIsTypeOf(R2ML!PlainLiteral)
+		)
+	to o : XML!Element (
+			name <- Sequence { if not i.languageTag.oclIsUndefined() then 
+								thisModule.PlainLiteralLanguageTag(i)
+							   else OclUndefined
+							   endif, 
+							   value
+							}
+		),
+	value : XML!Attribute (
+			name <- 'r2ml:lexicalValue',
+			value <- i.lexicalValue
+		)
+}
+		
+-- Rule 'PlainLiteralLanguageTag'
+-- Create XML attribute (r2ml:languageTag) for R2ML PlainLiteral element
+lazy rule PlainLiteralLanguageTag {
+	from i : R2ML!PlainLiteral
+	to o : XML!Attribute (
+			name <- 'r2ml:languageTag',
+			value <- i.languageTag
+		)
+}
+
+-- Rule 'AttributeFunctionTerm'
+-- Create XML element (r2ml:AttributeFunctionTerm) from the R2ML AttributeFunctionTerm element
+rule AttributeFunctionTerm {
+	from i : R2ML!AttributeFunctionTerm (
+			i.oclIsTypeOf(R2ML!AttributeFunctionTerm)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:AttributeFunctionTerm',
+			children <- Sequence { attr,  contextArg, 
+								   if not i.typeCategory.oclIsUndefined() then
+										thisModule.TypeCategory(i)
+								   else OclUndefined
+								   endif 
+								  }
+		),
+	attr : XML!Attribute (
+			name <- 'r2ml:attributeID',
+			value <- i.attribute.name
+		),
+	contextArg : XML!Element (
+			name <- 'r2ml:contextArgument',
+			children <- Sequence { if i.contextArgument.oclIsTypeOf(R2ML!ObjectVariable) then 
+									thisModule.ObjectVariable(i.contextArgument)
+								   else i.contextArgument
+								   endif
+								 }
+		)
+}
+
+-- Rule 'AssociationAtom'
+-- Create XML element (r2ml:AssociationAtom) from the R2ML AssociationAtom element
+rule AssociationAtom {
+	from i : R2ML!AssociationAtom (
+			i.oclIsTypeOf(R2ML!AssociationAtom)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:AssociationAtom',
+			children <- Sequence { if i.isNegated() then    	  -- for isNegated attribute
+										thisModule.AtomIsNegated(i)
+								   else OclUndefined
+								   endif,
+								   assocPred,
+								   objArgs,
+								   if i.dataArguments->size() > 0 then
+								   		thisModule.AssociationAtomDataArgs(i)
+								   else OclUndefined
+								   endif
+								   }
+		),
+	assocPred : XML!Attribute (
+			name <- 'r2ml:associationPredicateID',
+			value <- i.associationPredicate.name
+		),
+	objArgs : XML!Element (
+			name <- 'r2ml:objectArguments',
+			children <- Sequence { i.objectArguments->asSequence()->select(c | c.oclIsTypeOf(R2ML!ObjectVariable))->collect(c | thisModule.ObjectVariable(c)),
+								   i.objectArguments->asSequence()->select(c | not c.oclIsTypeOf(R2ML!ObjectVariable))
+								 }
+		)
+}
+
+-- Rule 'AssociationAtomDataArgs'
+-- Create XML element (r2ml:dataArguments) for R2ML AssociationAtom element
+lazy rule AssociationAtomDataArgs {
+	from i : R2ML!AssociationAtom
+	to o : XML!Element (
+			name <- 'r2ml:dataArguments',
+			children <- Sequence { i.dataArguments->asSequence()->select(c | c.oclIsTypeOf(R2ML!DataVariable))->collect(c | thisModule.DataVariable(c)),
+								   i.dataArguments->asSequence()->select(c | not c.oclIsTypeOf(R2ML!DataVariable))
+								 }
+		)
+}
+
+-- Rule 'ReferencePropertyFunctionTerm'
+-- Create XML element (r2ml:ReferencePropertyFunctionTerm) from the R2ML ReferencePropertyFunctionTerm element
+rule ReferencePropertyFunctionTerm {
+	from i : R2ML!ReferencePropertyFunctionTerm (
+			i.oclIsTypeOf(R2ML!ReferencePropertyFunctionTerm)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:ReferencePropertyFunctionTerm',
+			children <- Sequence { refProp, contextArg, 
+								   if not i.typeCategory.oclIsUndefined() then
+									thisModule.TypeCategory(i)
+								   else OclUndefined
+								   endif 
+								  }
+		),
+	refProp : XML!Attribute (
+			name <- 'r2ml:referencePropertyID',
+			value <- i.referencePropertyRef.name
+		),
+	contextArg : XML!Element (
+			name <- 'r2ml:contextArgument',
+			children <- Sequence { if i.contextArgument.oclIsTypeOf(R2ML!ObjectVariable) then
+									thisModule.ObjectVariable(i.contextArgument)
+								   else i.contextArgument
+								   endif
+								 }
+		)
+}
+
+-- Rule 'AttributionAtom'
+-- Create XML element (r2ml:AttributionAtom) from the R2ML AttributionAtom element
+rule AttributionAtom {
+	from i : R2ML!AttributionAtom (
+			i.oclIsTypeOf(R2ML!AttributionAtom)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:AttributionAtom',
+			children <- Sequence { attr, 
+   							   	   if i.isNegated() then    	  -- for isNegated attribute
+								      thisModule.AtomIsNegated(i)
+								   else OclUndefined
+								   endif,
+								   subject,
+								   dataValue
+								 }
+		),
+	attr : XML!Attribute (
+			name <- 'r2ml:attributeID',
+			value <- i.attribute.name
+		),
+	subject : XML!Element (
+			name <- 'r2ml:subject',
+			children <- Sequence { if i.subject.oclIsTypeOf(R2ML!ObjectVariable) then
+										thisModule.ObjectVariable(i.subject)
+								   else i.subject
+								   endif
+								 }
+		),
+	dataValue : XML!Element (
+			name <- 'r2ml:dataValue',
+			children <- Sequence { if i.dataValue.oclIsTypeOf(R2ML!DataVariable) then
+										thisModule.DataVariable(i.dataValue)
+								   else i.dataValue
+					 			   endif
+								 }
+		)
+}
+
+-- Rule 'ReferencePropertyAtom'
+-- Create XML element (r2ml:ReferencePropertyAtom) from the R2ML ReferencePropertyAtom element
+rule ReferencePropertyAtom {
+	from i : R2ML!ReferencePropertyAtom (
+			i.oclIsTypeOf(R2ML!ReferencePropertyAtom)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:ReferencePropertyAtom',
+			children <- Sequence { if i.isNegated() then    	  -- for isNegated attribute
+								   	thisModule.AtomIsNegated(i)
+								   else OclUndefined
+								   endif,
+								   refProp,
+								   subject,
+								   object
+								  }
+		),
+	refProp : XML!Attribute (
+			name <- 'r2ml:referencePropertyID',
+			value <- i.referenceProperty.name
+		),
+	subject : XML!Element (
+			name <- 'r2ml:subject',
+			children <- Sequence { if i.subject.oclIsTypeOf(R2ML!ObjectVariable) then
+									thisModule.ObjectVariable(i.subject)
+								   else i.subject
+								   endif
+								}
+		),
+	object : XML!Element (
+			name <- 'r2ml:object',
+			children <- Sequence { if i.object.oclIsTypeOf(R2ML!ObjectVariable) then
+									thisModule.ObjectVariable(i.object)
+								   else i.object
+								   endif
+								}
+		)
+}
+
+-- Rule 'GenericAtom'
+-- Create XML element (r2ml:GenericAtom) from the R2ML GenericAtom element
+rule GenericAtom {
+	from i : R2ML!GenericAtom (
+			i.oclIsTypeOf(R2ML!GenericAtom)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:GenericAtom',
+			children <- Sequence { predicate, args }
+		),
+	predicate : XML!Attribute (
+			name <- 'r2ml:predicateID',
+			value <- i.predicate.name
+		),
+	args : XML!Element (
+			name <- 'r2ml:arguments',
+			children <- Sequence { i.arguments->asSequence()->select(c | c.oclIsTypeOf(R2ML!GenericVariable))->collect(c | thisModule.GenericVariable(c)),
+								   i.arguments->asSequence()->select(c | c.oclIsTypeOf(R2ML!ObjectVariable))->collect(c | thisModule.ObjectVariable(c)),
+								   i.arguments->asSequence()->select(c | c.oclIsTypeOf(R2ML!DataVariable))->collect(c | thisModule.DataVariable(c)),
+								   i.arguments->asSequence()->select(c | not c.oclIsKindOf(R2ML!Variable))
+								 }
+		)
+}
+
+-- Rule 'PredicateType'
+-- Create XML attribute (r2ml:predicateType) for R2ML GenericAtom element
+lazy rule PredicateType {
+	from i : R2ML!GenericPredicate
+	to o : XML!Attribute (
+			name <- 'r2ml:predicateType',
+			value <- if i.predicateTypeID = #ObjectClassificationPredicate then
+						'ObjectClassificationPredicate'
+						else if i.predicateTypeID = #AttributionPredicate then
+							  'AttributionPredicate'
+							 else if i.predicateTypeID = #AssociationPredicate then
+								   'AssociationPredicate'
+								  else if i.predicateTypeID = #ReferencePropertyPredicate then
+									    'ReferencePropertyPredicate'
+									   else if i.predicateTypeID = #EqualityPredicate then
+										     'EqualityPredicate'
+										    else if i.predicateTypeID = #InequalityPredicate then
+											      'InequalityPredicate'
+											     else if i.predicateTypeID = #DatatypePredicate then
+												       'DatatypePredicate'
+												      else if i.predicateTypeID = #DataClassificationPredicate then
+														    'DataClassificationPredicate'
+													       else OclUndefined
+													       endif
+												      endif
+												 endif
+											endif 
+										endif
+								   endif
+							 endif 
+						endif
+		)
+}
+
+-- Rule 'GenericFunctionTerm'
+-- Create XML element (r2ml:GenericFunctionTerm) from the R2ML GenericFunctionTerm element
+rule GenericFunctionTerm {
+	from i : R2ML!GenericFunctionTerm (
+			i.oclIsTypeOf(R2ML!GenericFunctionTerm)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:GenericFunctionTerm',
+			children <- Sequence { attr, args }
+		),
+	attr : XML!Attribute (
+			name <- 'r2ml:genericFunctionID',
+			value <- i.functor.name
+		),
+	args : XML!Element ( 
+			name <- 'r2ml:arguments',
+			children <- Sequence { i.arguments->asSequence()->select(c | c.oclIsTypeOf(R2ML!GenericVariable))->collect(c | thisModule.GenericVariable(c)),
+								   i.arguments->asSequence()->select(c | not c.oclIsTypeOf(R2ML!GenericVariable)),
+								   if not i.typeCategory.oclIsUndefined() then
+									thisModule.TypeCategory(i)
+								   else OclUndefined
+								   endif 
+								 }
+		)
+}
+
+-- Rule 'DatatypeFunctionTerm'
+-- Create XML element (r2ml:DatatypeFunctionTerm) from the R2ML DatatypeFunctionTerm element
+rule DatatypeFunctionTerm {
+	from i : R2ML!DatatypeFunctionTerm (
+			i.oclIsTypeOf(R2ML!DatatypeFunctionTerm)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:DatatypeFunctionTerm',
+			children <- Sequence { attr, args }
+		),
+	attr : XML!Attribute (
+			name <- 'datatypeFunctionID',
+			value <- i.function.name
+		),
+	args : XML!Element (
+			name <- 'r2ml:dataArguments',
+			children <- Sequence { i.dataArguments->asSequence()->select(c | c.oclIsTypeOf(R2ML!DataVariable))->collect(c | thisModule.DataVariable(c)),
+								   i.dataArguments->asSequence()->select(c | not c.oclIsTypeOf(R2ML!DataVariable)),
+								   if not i.typeCategory.oclIsUndefined() then
+									thisModule.TypeCategory(i)
+								   else OclUndefined
+								   endif 
+								 }						
+		)
+}
+
+-- Rule 'ObjectName'
+-- Create XML element (r2ml:ObjectName) from the R2ML ObjectName element
+rule ObjectName {
+	from i : R2ML!ObjectName (
+			i.oclIsTypeOf(R2ML!ObjectName)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:ObjectName',
+			children <- Sequence { attr, if not i.classRef.oclIsUndefined() then 
+											thisModule.ClassRule(i.classRef)
+										 else OclUndefined
+										 endif,
+										 if not i.typeCategory.oclIsUndefined() then
+											thisModule.TypeCategory(i)
+								  		 else OclUndefined
+								   		 endif
+								 }
+		),
+	attr : XML!Attribute (
+			name <- 'r2ml:objectID',
+			value <- i.name
+		)
+}
+
+-- Rule 'ObjectDescriptionAtom'
+-- Create XML element (r2ml:ObjectDescriptionAtom) from the R2ML ObjectDescriptionAtom element
+rule ObjectDescriptionAtom {
+	from i : R2ML!ObjectDescriptionAtom (
+			i.oclIsTypeOf(R2ML!ObjectDescriptionAtom)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:ObjectDescriptionAtom',
+			children <- Sequence { class, if not i.baseType.oclIsUndefined then 
+											thisModule.ClassRule(i.baseType)
+										  else OclUndefined 
+										  endif,
+								   subject,
+								   i.slots,
+								   objects
+			}
+		),
+	class : XML!Attribute (
+			name <- 'r2ml:classID',
+			value <- i.type.name
+		),
+	subject : XML!Element (
+			name <- 'r2ml:subject',
+			children <- Sequence { if i.subject.oclIsTypeOf(R2ML!ObjectVariable) then 
+									thisModule.ObjectVariable(i.subject)
+								   else i.subject
+								   endif
+								 }
+		),
+	objects : XML!Element (
+			name <- 'r2ml:objects',
+			children <- i.objects
+		)
+}
+
+-- Rule 'ObjectSlot'
+-- Create XML element (r2ml:ObjectSlot) from the R2ML ObjectSlot element
+rule ObjectSlot {
+	from i : R2ML!ObjectSlot (
+			i.oclIsTypeOf(R2ML!ObjectSlot)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:ObjectSlot',
+			children <- Sequence { attr, object }
+		),
+	attr : XML!Attribute (
+			name <- 'r2ml:referencePropertyID',
+			value <- i.referenceProperty.name
+		),
+	object : XML!Element (
+			name <- 'r2ml:object',
+			children <- Sequence { if i.object.oclIsTypeOf(R2ML!ObjectVariable) then 
+									thisModule.ObjectVariable(i.object)
+								   else i.object
+								   endif
+								 }
+		)
+}
+
+-- Rule 'DataSlot'
+-- Create XML element (r2ml:DataSlot) from the R2ML DataSlot element
+rule DataSlot {
+	from i : R2ML!DataSlot (
+			i.oclIsTypeOf(R2ML!DataSlot)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:DataSlot',
+			children <- Sequence { attr, value }
+		),
+	attr : XML!Attribute (
+			name <- 'r2ml:attributeID',
+			value <- i.attribute.name
+		),
+	value : XML!Element (
+			name <- 'r2ml:value',
+			children <- Sequence { if i.value.oclIsTypeOf(R2ML!DataVariable) then 
+									thisModule.DataVariable(i.value)
+								   else i.value
+								   endif
+								 }
+		)
+}
+
+-- Rule 'AtLeastQuantifiedFormula'
+-- Create XML element (r2ml:AtLeastQuantifiedFormula) from the R2ML AtLeastQuantifiedFormula element 
+rule AtLeastQuantifiedFormula {
+	from i : R2ML!AtLeastQuantifiedFormula (
+			i.oclIsTypeOf(R2ML!AtLeastQuantifiedFormula)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:AtLeastQuantifiedFormula',
+			children <- Sequence {
+							attr,
+							i.variables->asSequence()->select(c | c.oclIsTypeOf(R2ML!ObjectVariable))->collect(e | thisModule.ObjectVariable(e)),
+							i.variables->asSequence()->select(c | c.oclIsTypeOf(R2ML!DataVariable))->collect(e | thisModule.DataVariable(e)),
+							i.formula
+						}
+  		  ),
+		attr : XML!Attribute (
+			name <- 'r2ml:minCardinality',
+			value <- i.minCardinality.toString()
+		)
+}
+
+-- Rule 'AtMostQuantifiedFormula'
+-- Create XML element (r2ml:AtMostQuantifiedFormula) from the R2ML AtMostQuantifiedFormula element 
+rule AtMostQuantifiedFormula {
+	from i : R2ML!AtMostQuantifiedFormula (
+			i.oclIsTypeOf(R2ML!AtMostQuantifiedFormula)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:AtMostQuantifiedFormula',
+			children <- Sequence {
+							attr,
+							i.variables->asSequence()->select(c | c.oclIsTypeOf(R2ML!ObjectVariable))->collect(e | thisModule.ObjectVariable(e)),
+							i.variables->asSequence()->select(c | c.oclIsTypeOf(R2ML!DataVariable))->collect(e | thisModule.DataVariable(e)),
+							i.formula
+						}
+  		  ),
+		attr : XML!Attribute (
+			name <- 'r2ml:maxCardinality',
+			value <- i.maxCardinality.toString()
+		)
+}
+
+-- Rule 'AtLeastAndAtMostQuantifiedFormula'
+-- Create XML element (r2ml:AtLeastAndAtMostQuantifiedFormula) from the R2ML AtLeastAndAtMostQuantifiedFormula element.
+rule AtLeastAndAtMostQuantifiedFormula {
+	from i : R2ML!AtLeastAndAtMostQuantifiedFormula (
+			i.oclIsTypeOf(R2ML!AtLeastAndAtMostQuantifiedFormula)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:AtLeastAndAtMostQuantifiedFormula',
+			children <- Sequence {
+							attrMax, attrMin,
+							i.variables->asSequence()->select(c | c.oclIsTypeOf(R2ML!ObjectVariable))->collect(e | thisModule.ObjectVariable(e)),
+							i.variables->asSequence()->select(c | c.oclIsTypeOf(R2ML!DataVariable))->collect(e | thisModule.DataVariable(e)),
+							i.formula
+						}
+  		  ),
+		attrMax : XML!Attribute (
+			name <- 'r2ml:maxCardinality',
+			value <- i.maxCardinality.toString()
+		),
+		attrMin : XML!Attribute (
+			name <- 'r2ml:minCardinality',
+			value <- i.minCardinality.toString()
+		)
+}
+
+-- Rule 'ObjectOperationTerm'
+-- Create XML element (r2ml:ObjectOperationTerm) from the R2ML ObjectOperationTerm element.
+rule ObjectOperationTerm {
+	from i : R2ML!ObjectOperationTerm (
+			i.oclIsTypeOf(R2ML!ObjectOperationTerm)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:ObjectOperationTerm',
+			children <- Sequence { operation, contextArg, 
+					
+													-- TODO: ObjectOperationTermArgs ?
+													if i.arguments->size() > 0 then
+															i.arguments
+														  else OclUndefined
+														  endif
+								  }
+		),
+	operation : XML!Attribute (
+			name <- 'r2ml:operationID',
+			value <- i.operation.name
+		),
+	contextArg : XML!Element (
+			name <- 'r2ml:contextArgument',
+			children <- Sequence { if i.contextArgument.oclIsTypeOf(R2ML!ObjectVariable) then
+									thisModule.ObjectVariable(i.contextArgument)
+								   else i.contextArgument
+								   endif
+								 }
+		)
+}
+
+
+-- Rule 'DataOperationTerm'
+-- Create XML element (r2ml:DataOperationTerm) from the R2ML DataOperationTerm element 
+rule DataOperationTerm {
+	from i : R2ML!DataOperationTerm (
+			i.oclIsTypeOf(R2ML!DataOperationTerm)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:DataOperationTerm',
+			children <- Sequence { attr, if i.arguments->size() > 0 then
+											thisModule.DataOperationTermArgs(i)
+											else OclUndefined
+											endif, 
+											contArg,
+										 if not i.typeCategory.oclIsUndefined() then
+										 	thisModule.TypeCategory(i)
+										 else OclUndefined
+										 endif
+								 }
+		),
+	attr : XML!Attribute (
+			name <- 'r2ml:operationID',
+			value <- i.dataOperationRef.name
+		),
+	contArg : XML!Element (
+			name <- 'r2ml:contextArgument',
+			children <- Sequence { if i.contextArgument.oclIsTypeOf(R2ML!ObjectVariable) then
+									thisModule.ObjectVariable(i.contextArgument)
+								   else i.contextArgument	
+								   endif
+								 }
+		)
+}
+
+
+-------------------------------------------------------------------------------
+-- VOCABULARY -------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- Rule 'Vocabulary'
+-- Create XML element (r2mlv:Vocabulary) from the R2ML PlainLiteral element
+rule Vocabulary {
+	from i : R2ML!Vocabulary (
+			i.oclIsTypeOf(R2ML!Vocabulary)
+		)
+	to o : XML!Element (
+			name <- 'r2mlv:Vocabulary',
+			children <- Sequence { i.entries }
+		)
+}
+
+-- Rule 'ClassR'
+-- Create XML element (r2mlv:Class) from the R2ML Class element
+rule ClassR {
+	from i : R2ML!Class (
+			i.oclIsTypeOf(R2ML!Class)
+		)
+	to o : XML!Element (
+			name <- 'r2mlv:Class',
+			children <- Sequence { cID, i.attributes, i.referencePropertyRef
+		 						 }
+		),
+		cID : XML!Attribute (
+			name <- 'r2mlv:ID',
+			value <- i.name
+		)		
+}
+
+-- Rule 'MessageType'
+-- Create XML element (r2mlv:MessageType) from the R2ML MessageType element
+rule MessageType {
+	from i : R2ML!MessageType (
+			i.oclIsTypeOf(R2ML!MessageType)
+		)
+	to o : XML!Element (
+			name <- 'r2mlv:MessageType',
+			children <- Sequence { cID, i.attributes, i.referencePropertyRef }
+		),
+		cID : XML!Attribute (
+			name <- 'r2mlv:ID',
+			value <- i.name
+		)		
+}
+
+-- Rule 'FaultMessageType'
+-- Create XML element (r2mlv:FaultMessageType) from the R2ML FaultMessageType element
+rule FaultMessageType {
+	from i : R2ML!FaultMessageType (
+			i.oclIsTypeOf(R2ML!FaultMessageType)
+		)
+	to o : XML!Element (
+			name <- 'r2mlv:FaultMessageType',
+			children <- Sequence { cID, i.attributes }
+		),
+		cID : XML!Attribute (
+			name <- 'r2mlv:ID',
+			value <- i.name
+		)		
+}
+ 
+-- Rule 'AssociationPredicate'
+-- Create XML element (r2mlv:AssociationPredicate) from the R2ML AssociationPredicate element
+rule AssociationPredicate {
+	from i : R2ML!AssociationPredicate (
+			i.oclIsTypeOf(R2ML!AssociationPredicate)
+		)
+	to o : XML!Element (
+			name <- 'r2mlv:AssociationPredicate',
+			children <- Sequence { cID , args }
+		),
+		cID : XML!Attribute (
+			name <- 'r2mlv:associationPredicateID',
+			value <- i.name
+		),
+		args : XML!Element (
+			name <- 'r2mlv:argumentsType',
+			children <- Sequence { 
+				i.arguments->asSequence()->select(c | c.oclIsTypeOf(R2ML!Class))->collect(e | thisModule.ClassAssoc(e)),
+				i.arguments->asSequence()->select(c | c.oclIsTypeOf(R2ML!MessageType))->collect(e | thisModule.MessageTypeAssoc(e))
+								 }
+		)
+}
+
+lazy rule ClassAssoc {
+	from i : R2ML!Class (
+			i.oclIsTypeOf(R2ML!Class)
+		)
+	to o : XML!Element (
+			name <- 'r2mlv:Class',
+			children <- Sequence { cID }
+		),
+		cID : XML!Attribute (
+			name <- 'r2mlv:ID',
+			value <- i.name
+		)		
+}
+
+lazy rule MessageTypeAssoc {
+	from i : R2ML!MessageType (
+			i.oclIsTypeOf(R2ML!MessageType)
+		)
+	to o : XML!Element (
+			name <- 'r2mlv:MessageType',
+			children <- Sequence { cID }
+		),
+		cID : XML!Attribute (
+			name <- 'r2mlv:ID',
+			value <- i.name
+		)		
+}
+
+
+-- Rule 'AttributeVoc'
+-- Create XML element (Attribute) from the R2ML Attribute element
+rule AttributeVoc {
+	from i : R2ML!Attribute (
+			i.oclIsTypeOf(R2ML!Attribute)
+		)
+	to o : XML!Element (
+			name <- 'r2mlv:Attribute',
+			children <- Sequence { cID , range }
+		),
+		cID : XML!Attribute (
+			name <- 'r2mlv:ID',
+			value <- i.name
+		),
+		range : XML!Element (
+			name <- 'r2mlv:range',
+			children <- Sequence { i.range->asSequence()->select(c | c.oclIsTypeOf(R2ML!Datatype))->collect(e | thisModule.DatatypeVoc(e)) }
+		)
+} 
+
+-- Rule 'ReferencePropertyVoc'
+-- Create XML element (ReferenceProperty) from the R2ML ReferenceProperty element
+rule ReferencePropertyVoc {
+	from i : R2ML!ReferenceProperty (
+			i.oclIsTypeOf(R2ML!ReferenceProperty)
+		)
+	to o : XML!Element (
+			name <- 'r2mlv:ReferenceProperty',
+			children <- Sequence { cID , range }
+		),
+		cID : XML!Attribute (
+			name <- 'r2mlv:ID',
+			value <- i.name
+		),
+		range : XML!Element (
+			name <- 'r2mlv:range',
+			children <- Sequence { i.range->asSequence()->select(c | c.oclIsTypeOf(R2ML!Class))->collect(e | thisModule.ClassAssoc(e)) }
+		)
+} 
+
+-- Lazy rule 'DatatypeVoc'
+-- Create XML attribute (r2ml:datatypeID) from the R2ML Datatype element 
+lazy rule DatatypeVoc {
+	from i : R2ML!Datatype
+	to o : XML!Element (
+			name <- 'r2mlv:Datatype',
+			children <- Sequence {dtID }
+		),
+		dtID : XML!Attribute (
+			name <- 'r2mlv:ID',
+			value <- i.name
+		)
+}
+
+
+-------------------------------------------------------------------------------
+-- REACTION RULES -------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- Rule 'ReactionRule'
+-- Create XML element (r2ml:ReactionRule) from the R2ML ReactionRule element 
+rule ReactionRule { 
+	from i : R2ML!ReactionRule (
+			i.oclIsTypeOf(R2ML!ReactionRule)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:ReactionRule',
+			children <- Sequence { if not i.ruleID.oclIsUndefined() then
+										thisModule.RuleId(i)
+									else OclUndefined
+									endif,
+									triggeringEvent,
+									conditions, 
+									producedAction,
+									 if not i.postconditon.oclIsUndefined() then
+										postconditon
+									else OclUndefined
+									endif,
+									groupID
+								 }
+		),
+		triggeringEvent : XML!Element (
+				name <- 'r2ml:triggeringEvent',
+				children <- thisModule.MessageEventExpression(i.triggeringEvent)
+			),
+		conditions : XML!Element (
+				name <- 'r2ml:conditions',
+				children <- i.conditions
+			),
+		producedAction : XML!Element (
+				name <- 'r2ml:producedAction',
+				children <- thisModule.MessageEventExpression(i.producedAction)
+			),
+		postconditon : XML!Element (
+				name <- 'r2ml:postconditon',
+				children <- i.postconditon
+			),
+		groupID : XML!Attribute (
+			name <- 'r2ml:groupID',
+			value <- i.groupID
+		)			
+}
+
+-- Rule 'MessageEventExpression'
+-- Create XML element (r2ml:MessageEventExpression) from the R2ML MessageEventExpression element.
+lazy rule MessageEventExpression {
+	from i : R2ML!MessageEventExpression (
+			i.oclIsTypeOf(R2ML!MessageEventExpression)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:MessageEventExpression',
+			children <- Sequence {  if not i.type.oclIsUndefined() then
+										type
+										--thisModule.MeeType(i)	
+									else OclUndefined
+									endif,
+									if not i.startDateTime.oclIsUndefined() then
+										startTime
+										--thisModule.MeeStartTime(i)
+									else OclUndefined
+									endif,
+									if not i.duration.oclIsUndefined() then
+										duration
+										--thisModule.MeeDuration(i)
+									else OclUndefined
+									endif,
+									if not i.sender.oclIsUndefined() then
+										sender
+										--thisModule.MeeSender(i)
+									else OclUndefined
+									endif,
+									if not i.objectVariable.oclIsUndefined() then
+										thisModule.ObjectVariable(i.objectVariable)
+									else OclUndefined
+									endif,
+									if not i.slot.oclIsUndefined() then
+										i.slot
+									else OclUndefined
+									endif									
+						}
+  		  ),
+		type : XML!Attribute (
+			name <- 'r2ml:eventType',
+			value <- i.type.name
+		),
+		startTime : XML!Attribute (
+			name <- 'r2ml:startTime',
+			value <- i.startDateTime
+		),
+		duration : XML!Attribute (
+			name <- 'r2ml:duration',
+			value <- i.duration
+		),
+		sender : XML!Attribute (
+			name <- 'r2ml:sender',
+			value <- i.sender
+		)
+}
+
+---- Rule 'MeeType'
+---- Create XML attribute (r2ml:eventType) for R2ML MessageEventExpression element
+--lazy rule MeeType {
+--	from i : R2ML!MessageEventExpression
+--	to o : XML!Attribute (
+--			name <- 'r2ml:eventType',
+--			value <- i.type.name
+--		)
+--}
+--
+---- Rule 'MeeStartTime'
+---- Create XML attribute (r2ml:startTime) for R2ML MessageEventExpression element
+--lazy rule MeeStartTime {
+--	from i : R2ML!MessageEventExpression
+--	to o : XML!Attribute (
+--			name <- 'r2ml:startTime',
+--			value <- i.startDateTime
+--		)
+--}
+--
+---- Rule 'MeeDuration'
+---- Create XML attribute (r2ml:duration) for R2ML MessageEventExpression element
+--lazy rule MeeDuration {
+--	from i : R2ML!MessageEventExpression
+--	to o : XML!Attribute (
+--			name <- 'r2ml:duration',
+--			value <- i.duration
+--		)
+--}
+--
+---- Rule 'MeeSender'
+---- Create XML attribute (r2ml:sender) for R2ML MessageEventExpression element
+--lazy rule MeeSender {
+--	from i : R2ML!MessageEventExpression
+--	to o : XML!Attribute (
+--			name <- 'r2ml:sender',
+--			value <- i.sender
+--		)
+--}
+
+-- Rule 'ObjectClassificationAtom'
+-- Create XML element (r2ml:ObjectClassificationAtom) from the R2ML ObjectClassificationAtom element 
+rule ObjectClassificationAtom {
+	from i : R2ML!ObjectClassificationAtom (
+			i.oclIsTypeOf(R2ML!ObjectClassificationAtom)
+		)
+	to o : XML!Element (
+			name <- 'r2ml:ObjectClassificationAtom',
+			children <- Sequence { if i.isNegated() then    	  -- for isNegated attribute
+									 thisModule.AtomIsNegated(i)
+								   else OclUndefined
+								   endif,
+								   if i.type.oclIsTypeOf(R2ML!Class) then
+								  	 	thisModule.ClassRule(i.type)
+								   else if 	i.type.oclIsTypeOf(R2ML!MessageType)then
+											mtOca
+								   		else OclUndefined
+								   		endif
+								   endif,
+								   thisModule.ObjectVariable(i.term)  -- for term 
+								}
+		),
+		mtOca : XML!Attribute (
+			name <- 'r2ml:classID',
+			value <- if i.type.oclIsTypeOf(R2ML!MessageType)then
+				   		i.type.name
+			   		else OclUndefined
+			   		endif
+		)
+}
+

@@ -1,0 +1,264 @@
+<definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:tns="urn:ws-xwebservices-com:XWeb1003:1003:v2" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:import0="urn:ws-xwebservices-com:XWeb1003:1003:v2:Messages" targetNamespace="urn:ws-xwebservices-com:XWeb1003:1003:v2" name="XWeb1003" xmlns="http://schemas.xmlsoap.org/wsdl/">
+  <types>
+    <xsd:schema>
+      <xsd:import schemaLocation="XWeb1003.xsd" namespace="urn:ws-xwebservices-com:XWeb1003:1003:v2:Messages" />
+    </xsd:schema>
+  </types>
+  <message name="loadApplicationIn">
+    <part name="messagePart" element="import0:LoadApplicationRequest" />
+  </message>
+  <message name="loadApplicationOut">
+    <part name="messagePart" element="import0:LoadApplicationResponse" />
+  </message>
+  <message name="loadApplicationsIn">
+    <part name="messagePart" element="import0:LoadApplicationsRequest" />
+  </message>
+  <message name="loadApplicationsOut">
+    <part name="messagePart" element="import0:LoadApplicationsResponse" />
+  </message>
+  <message name="loadApplicationsPagedIn">
+    <part name="messagePart" element="import0:LoadApplicationsPagedRequest" />
+  </message>
+  <message name="loadApplicationsPagedOut">
+    <part name="messagePart" element="import0:LoadApplicationsPagedResponse" />
+  </message>
+  <message name="loadApplicationsByDateRangeIn">
+    <part name="messagePart" element="import0:LoadApplicationsByDateRangeRequest" />
+  </message>
+  <message name="loadApplicationsByDateRangeOut">
+    <part name="messagePart" element="import0:LoadApplicationsByDateRangeResponse" />
+  </message>
+  <message name="loadApplicationsByDateRangePagedIn">
+    <part name="messagePart" element="import0:LoadApplicationsByDateRangePagedRequest" />
+  </message>
+  <message name="loadApplicationsByDateRangePagedOut">
+    <part name="messagePart" element="import0:LoadApplicationsByDateRangePagedResponse" />
+  </message>
+  <message name="loadApplicationsByRepIn">
+    <part name="messagePart" element="import0:LoadApplicationsByRepRequest" />
+  </message>
+  <message name="loadApplicationsByRepOut">
+    <part name="messagePart" element="import0:LoadApplicationsByRepResponse" />
+  </message>
+  <message name="loadApplicationsByRepPagedIn">
+    <part name="messagePart" element="import0:LoadApplicationsByRepPagedRequest" />
+  </message>
+  <message name="loadApplicationsByRepPagedOut">
+    <part name="messagePart" element="import0:LoadApplicationsByRepPagedResponse" />
+  </message>
+  <message name="loadApplicationsByRepAndDateRangeIn">
+    <part name="messagePart" element="import0:LoadApplicationsByRepAndDateRangeRequest" />
+  </message>
+  <message name="loadApplicationsByRepAndDateRangeOut">
+    <part name="messagePart" element="import0:LoadApplicationsByRepAndDateRangeResponse" />
+  </message>
+  <message name="loadApplicationsByRepAndDateRangePagedIn">
+    <part name="messagePart" element="import0:LoadApplicationsByRepAndDateRangePagedRequest" />
+  </message>
+  <message name="loadApplicationsByRepAndDateRangePagedOut">
+    <part name="messagePart" element="import0:LoadApplicationsByRepAndDateRangePagedResponse" />
+  </message>
+  <message name="addApplicationIn">
+    <part name="messagePart" element="import0:AddApplicationRequest" />
+  </message>
+  <message name="addApplicationOut">
+    <part name="messagePart" element="import0:AddApplicationResponse" />
+  </message>
+  <message name="updateApplicationIn">
+    <part name="messagePart" element="import0:UpdateApplicationRequest" />
+  </message>
+  <message name="updateApplicationOut">
+    <part name="messagePart" element="import0:UpdateApplicationResponse" />
+  </message>
+  <message name="deleteApplicationIn">
+    <part name="messagePart" element="import0:DeleteApplicationRequest" />
+  </message>
+  <message name="deleteApplicationOut">
+    <part name="messagePart" element="import0:DeleteApplicationResponse" />
+  </message>
+  <message name="processApplicationIn">
+    <part name="messagePart" element="import0:ProcessApplicationRequest" />
+  </message>
+  <message name="processApplicationOut">
+    <part name="messagePart" element="import0:ProcessApplicationResponse" />
+  </message>
+  <portType name="XWeb1003Interface">
+    <operation name="LoadApplication">
+      <input message="tns:loadApplicationIn" />
+      <output message="tns:loadApplicationOut" />
+    </operation>
+    <operation name="LoadApplications">
+      <input message="tns:loadApplicationsIn" />
+      <output message="tns:loadApplicationsOut" />
+    </operation>
+    <operation name="LoadApplicationsPaged">
+      <input message="tns:loadApplicationsPagedIn" />
+      <output message="tns:loadApplicationsPagedOut" />
+    </operation>
+    <operation name="LoadApplicationsByDateRange">
+      <input message="tns:loadApplicationsByDateRangeIn" />
+      <output message="tns:loadApplicationsByDateRangeOut" />
+    </operation>
+    <operation name="LoadApplicationsByDateRangePaged">
+      <input message="tns:loadApplicationsByDateRangePagedIn" />
+      <output message="tns:loadApplicationsByDateRangePagedOut" />
+    </operation>
+    <operation name="LoadApplicationsByRep">
+      <input message="tns:loadApplicationsByRepIn" />
+      <output message="tns:loadApplicationsByRepOut" />
+    </operation>
+    <operation name="LoadApplicationsByRepPaged">
+      <input message="tns:loadApplicationsByRepPagedIn" />
+      <output message="tns:loadApplicationsByRepPagedOut" />
+    </operation>
+    <operation name="LoadApplicationsByRepAndDateRange">
+      <input message="tns:loadApplicationsByRepAndDateRangeIn" />
+      <output message="tns:loadApplicationsByRepAndDateRangeOut" />
+    </operation>
+    <operation name="LoadApplicationsByRepAndDateRangePaged">
+      <input message="tns:loadApplicationsByRepAndDateRangePagedIn" />
+      <output message="tns:loadApplicationsByRepAndDateRangePagedOut" />
+    </operation>
+    <operation name="AddApplication">
+      <input message="tns:addApplicationIn" />
+      <output message="tns:addApplicationOut" />
+    </operation>
+    <operation name="UpdateApplication">
+      <input message="tns:updateApplicationIn" />
+      <output message="tns:updateApplicationOut" />
+    </operation>
+    <operation name="DeleteApplication">
+      <input message="tns:deleteApplicationIn" />
+      <output message="tns:deleteApplicationOut" />
+    </operation>
+    <operation name="ProcessApplication">
+      <input message="tns:processApplicationIn" />
+      <output message="tns:processApplicationOut" />
+    </operation>
+  </portType>
+  <binding name="XWeb1003" type="tns:XWeb1003Interface">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document" />
+    <operation name="LoadApplication">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWeb1003:1003:v2:loadApplicationIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="LoadApplications">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWeb1003:1003:v2:loadApplicationsIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="LoadApplicationsPaged">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWeb1003:1003:v2:loadApplicationsPagedIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="LoadApplicationsByDateRange">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWeb1003:1003:v2:loadApplicationsByDateRangeIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="LoadApplicationsByDateRangePaged">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWeb1003:1003:v2:loadApplicationsByDateRangePagedIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="LoadApplicationsByRep">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWeb1003:1003:v2:loadApplicationsByRepIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="LoadApplicationsByRepPaged">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWeb1003:1003:v2:loadApplicationsByRepPagedIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="LoadApplicationsByRepAndDateRange">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWeb1003:1003:v2:loadApplicationsByRepAndDateRangeIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="LoadApplicationsByRepAndDateRangePaged">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWeb1003:1003:v2:loadApplicationsByRepAndDateRangePagedIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="AddApplication">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWeb1003:1003:v2:addApplicationIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="UpdateApplication">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWeb1003:1003:v2:updateApplicationIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="DeleteApplication">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWeb1003:1003:v2:deleteApplicationIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="ProcessApplication">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWeb1003:1003:v2:processApplicationIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+  </binding>
+  <service name="XWeb1003Port">
+    <port name="XWeb1003Port" binding="tns:XWeb1003">
+      <soap:address location="https://ws.xwebservices.com/XWeb1003/V2/XWeb1003.asmx" />
+    </port>
+  </service>
+</definitions>

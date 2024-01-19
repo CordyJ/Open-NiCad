@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://opendap.co-ops.nos.noaa.gov/axis/webservices/datums/wsdl" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://opendap.co-ops.nos.noaa.gov/axis/webservices/datums/wsdl" xmlns:intf="http://opendap.co-ops.nos.noaa.gov/axis/webservices/datums/wsdl" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<!--WSDL created by Apache Axis version: 1.4
+Built on Apr 22, 2006 (06:55:48 PDT)-->
+ <wsdl:types>
+  <schema elementFormDefault="qualified" targetNamespace="http://opendap.co-ops.nos.noaa.gov/axis/webservices/datums/wsdl" xmlns="http://www.w3.org/2001/XMLSchema">
+   <element name="Parameters">
+    <complexType>
+     <sequence>
+      <element name="stationId" type="xsd:string"/>
+      <element name="epoch" type="xsd:string"/>
+      <element name="unit" type="xsd:int"/>
+     </sequence>
+    </complexType>
+   </element>
+   <complexType name="datums">
+    <sequence>
+     <element name="MHHW" type="xsd:double"/>
+     <element name="MHW" type="xsd:double"/>
+     <element name="DTL" type="xsd:double"/>
+     <element name="MTL" type="xsd:double"/>
+     <element name="MSL" type="xsd:double"/>
+     <element name="MLW" type="xsd:double"/>
+     <element name="MLLW" type="xsd:double"/>
+     <element name="GT" type="xsd:double"/>
+     <element name="MN" type="xsd:double"/>
+     <element name="DHQ" type="xsd:double"/>
+     <element name="DLQ" type="xsd:double"/>
+     <element name="HWI" type="xsd:double"/>
+     <element name="LWI" type="xsd:double"/>
+     <element name="NAVD" type="xsd:double"/>
+    </sequence>
+   </complexType>
+   <complexType name="MinMaxWL">
+    <sequence>
+     <element name="maxWaterLevel" type="xsd:double"/>
+     <element name="maxDateTime" type="xsd:string"/>
+     <element name="minWaterLevel" type="xsd:double"/>
+     <element name="minDateTime" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <element name="DatumsData">
+    <complexType>
+     <sequence>
+      <element name="datums" type="impl:datums"/>
+      <element name="MinMaxWL" nillable="true" type="impl:MinMaxWL"/>
+     </sequence>
+    </complexType>
+   </element>
+  </schema>
+ </wsdl:types>
+
+   <wsdl:message name="getDatumsResponse">
+
+      <wsdl:part element="impl:DatumsData" name="DatumsData"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getDatumsRequest">
+
+      <wsdl:part element="impl:Parameters" name="Parameters"/>
+
+   </wsdl:message>
+
+   <wsdl:portType name="DatumsPortType">
+
+      <wsdl:operation name="getDatums" parameterOrder="Parameters">
+
+         <wsdl:input message="impl:getDatumsRequest" name="getDatumsRequest"/>
+
+         <wsdl:output message="impl:getDatumsResponse" name="getDatumsResponse"/>
+
+      </wsdl:operation>
+
+   </wsdl:portType>
+
+   <wsdl:binding name="DatumsSoapBinding" type="impl:DatumsPortType">
+
+      <wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+      <wsdl:operation name="getDatums">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getDatumsRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getDatumsResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+   </wsdl:binding>
+
+   <wsdl:service name="DatumsService">
+
+      <wsdl:port binding="impl:DatumsSoapBinding" name="Datums">
+
+         <wsdlsoap:address location="http://opendap.co-ops.nos.noaa.gov/axis/services/Datums"/>
+
+      </wsdl:port>
+
+   </wsdl:service>
+
+</wsdl:definitions>

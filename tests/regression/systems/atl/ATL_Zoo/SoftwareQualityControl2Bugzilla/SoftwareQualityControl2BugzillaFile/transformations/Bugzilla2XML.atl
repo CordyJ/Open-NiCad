@@ -1,0 +1,505 @@
+module Bugzilla2XML; -- Module Template
+create OUT : XML from IN : Bugzilla;
+
+
+-- This helper permits to obtain the string associated
+-- to an ErrorType value.
+-- CONTEXT: n/a
+-- RETURN: String
+helper def: getStringErrorValue(ev : Bugzilla!ErrorType) :  String =
+	let sev : String = ev.toString()
+	in
+		sev.substring(4,sev.size());
+
+-- This helper permits to obtain the string associated
+-- to a StatusType value for a bug.
+-- CONTEXT: n/a
+-- RETURN: String
+helper def: getStringBugStatusValue(sv : Bugzilla!StatusType) :  String =
+	let ssv : String = sv.toString()
+	in
+		ssv.substring(4,ssv.size());
+	
+-- This helper permits to obtain the string associated
+-- to a ResolutionType value for a bug.
+-- CONTEXT: n/a
+-- RETURN: String
+helper def: getStringResolutionValue(rv : Bugzilla!ResolutionType) :  String =
+	let srv : String = rv.toString()
+	in
+		srv.substring(4,srv.size());
+
+-- This helper permits to obtain the string associated
+-- to a PriorityType value for a bug.
+-- CONTEXT: n/a
+-- RETURN: String
+helper def: getStringPriorityValue(pv : Bugzilla!PriorityType) :  String =
+	let spv : String = pv.toString()
+	in
+		spv.substring(4,spv.size());
+
+-- This helper permits to obtain the string associated
+-- to a ReportedPlatformType value for a bug.
+-- CONTEXT: n/a
+-- RETURN: String
+helper def: getStringRepPlatformValue(rp : Bugzilla!ReportedPlatformType) :  String =
+	let srp : String = rp.toString()
+	in
+		srp.substring(5,srp.size());
+
+-- This helper permits to obtain the string associated
+-- to a SeverityType value for a bug.
+-- CONTEXT: n/a
+-- RETURN: String
+helper def: getStringSeverityValue(sv : Bugzilla!SeverityType) :  String =
+	let ssv : String = sv.toString()
+	in
+		ssv.substring(4,ssv.size());
+
+-- This helper permits to obtain the string associated
+-- to an OperatingSystemType value for a bug.
+-- CONTEXT: n/a
+-- RETURN: String
+helper def: getStringOperatingSystemValue(osv : Bugzilla!OperatingSystemType) :  String =
+	let sosv : String = osv.toString()
+	in
+		sosv.substring(5,sosv.size());
+
+
+
+-- Rule 'BugzillaRoot2Root'
+-- This rule generates the root of the XML model
+-- from the "BugzillaRoot" element
+rule  BugzillaRoot2Root {
+	from
+		br : Bugzilla!BugzillaRoot
+	using {
+		exporterOrNot : Sequence(String) =
+			let exp : String = br.exporter
+			in
+				if exp.oclIsUndefined()
+				then
+					Sequence{}
+				else
+					Sequence{exp}
+				endif;
+	}
+	to
+		xr : XML!Root (
+			name <- 'bugzilla',
+			children <- Sequence{v,u,m,e,
+								br.bugs->collect(e | thisModule.resolveTemp(e, 'xb'))
+								}
+		),
+		v : XML!Attribute (
+			name <- 'version',
+			value <- br.version
+		),
+		u : XML!Attribute (
+			name <- 'urlbase',
+			value <- br.urlbase
+		),
+		m : XML!Attribute (
+			name <- 'maintainer',
+			value <- br.maintainer
+		),
+		e : distinct XML!Attribute foreach(exporterVal in exporterOrNot) (
+			name <- 'exporter',
+			value <- exporterVal
+		)
+}
+
+
+-- Rule 'Bug2Bug'
+-- This rule generates the XML bugs' tags 
+-- from the "Bug"s element
+rule  Bug2Bug {
+	from
+		b : Bugzilla!Bug
+	using {
+		errorOrNot : Sequence(Bugzilla!ErrorType) =
+			let err : Bugzilla!ErrorType = b.error
+			in
+				if err = #et_null
+				then
+					Sequence{}
+				else
+					Sequence{err}
+				endif;
+		resolutionOrNot : Sequence(Bugzilla!ResolutionType) =
+			let resol : Bugzilla!ResolutionType = b.resolution
+			in
+				if resol = #rt_null
+				then
+					Sequence{}
+				else
+					Sequence{resol}
+				endif;
+		targetMilestoneOrNot : Sequence(String) =
+			let tm : String = b.target_milestone
+			in
+				if tm.oclIsUndefined()
+				then
+					Sequence{}
+				else
+					Sequence{tm}
+				endif;
+		qaContactOrNot : Sequence(String) =
+			let qac : String = b.qa_contact
+			in
+				if qac.oclIsUndefined()
+				then
+					Sequence{}
+				else
+					Sequence{qac}
+				endif;
+		statusWhiteboardOrNot : Sequence(String) =
+			let sw : String = b.status_whiteboard
+			in
+				if sw.oclIsUndefined()
+				then
+					Sequence{}
+				else
+					Sequence{sw}
+				endif;
+		bugFileLocOrNot : Sequence(String) =
+			let bfl : String = b.bug_file_loc
+			in
+				if bfl.oclIsUndefined()
+				then
+					Sequence{}
+				else
+					Sequence{bfl}
+				endif;
+		shortDescOrNot : Sequence(String) =
+			let sd : String = b.short_desc
+			in
+				if sd.oclIsUndefined()
+				then
+					Sequence{}
+				else
+					Sequence{sd}
+				endif;
+	}
+	to
+		xb : XML!Element (
+			name <- 'bug',
+			children <- Sequence{er,bi,ex,ub,bs,res,p,pri,v,rp,at,dts,c,rep,tarMl,bsvy,cts,qac,sw,os,bfl,sd,
+								b.keywords->collect(e | thisModule.resolveTemp(e, 'k')),
+								b.dependson->collect(e | thisModule.resolveTemp(e, 'd')),
+								b.blocks->collect(e | thisModule.resolveTemp(e, 'b')),
+								b.cc->collect(e | thisModule.resolveTemp(e, 'c')),
+								Sequence{b.long_desc}->collect(e | thisModule.resolveTemp(e, 'ld'))->first(),
+								b.attachment->collect(e | thisModule.resolveTemp(e, 'a'))
+								}
+		),
+		er : distinct XML!Attribute foreach(errorVal in errorOrNot) (
+			name <- 'error',
+			value <- thisModule.getStringErrorValue(errorVal)
+		),
+		bi : XML!Element (
+			name <- 'bug_id',
+			children <- Sequence{biv}
+		),
+		biv : XML!Text (
+			value <- b.bug_id
+		),
+		ex : XML!Element (
+			name <- 'exporter',
+			children <- Sequence{exv}
+		),
+		exv : XML!Text (
+			value <- b.exporter
+		),
+		ub : XML!Element (
+			name <- 'urlbase',
+			children <- Sequence{ubv}
+		),
+		ubv : XML!Text (
+			value <- b.urlbase
+		),
+		bs : XML!Element (
+			name <- 'bug_status',
+			children <- Sequence{bsv}
+		),
+		bsv : XML!Text (
+			value <- thisModule.getStringBugStatusValue(b.bug_status)
+		),
+		res : distinct XML!Element foreach(resolutionVal in resolutionOrNot) (
+			name <- 'resolution',
+			children <- Sequence{resv}
+		),
+		resv : distinct XML!Text foreach(resolutionVal in resolutionOrNot) (
+			value <- thisModule.getStringResolutionValue(resolutionVal)
+		),
+		p : XML!Element (
+			name <- 'product',
+			children <- Sequence{pv}
+		),
+		pv : XML!Text (
+			value <- b.product
+		),
+		pri : XML!Element (
+			name <- 'priority',
+			children <- Sequence{priv}
+		),
+		priv : XML!Text (
+			value <- thisModule.getStringPriorityValue(b.priority)
+		),
+		v : XML!Element (
+			name <- 'version',
+			children <- Sequence{vv}
+		),
+		vv : XML!Text (
+			value <- b.version	
+		),
+		rp : XML!Element (
+			name <- 'rep_platform',
+			children <- Sequence{rpv}
+		),
+		rpv : XML!Text (
+			value <- thisModule.getStringRepPlatformValue(b.rep_platform)	
+		),
+		at : XML!Element (
+			name <- 'assigned_to',
+			children <- Sequence{atv}
+		),
+		atv : XML!Text (
+			value <- b.assigned_to	
+		),
+		dts : XML!Element (
+			name <- 'delta_ts',
+			children <- Sequence{dtsv}
+		),
+		dtsv : XML!Text (
+			value <- b.delta_ts	
+		),
+		c : XML!Element (
+			name <- 'component',
+			children <- Sequence{cv}
+		),
+		cv : XML!Text (
+			value <- b.component	
+		),
+		rep : XML!Element (
+			name <- 'reporter',
+			children <- Sequence{repv}
+		),
+		repv : XML!Text (
+			value <- b.reporter	
+		),
+		tarMl : distinct XML!Element foreach(targetMilestoneVal in targetMilestoneOrNot) (
+			name <- 'target_milestone',
+			children <- Sequence{tarMlv}
+		),
+		tarMlv : distinct XML!Text foreach(targetMilestoneVal in targetMilestoneOrNot) (
+			value <- targetMilestoneVal
+		),
+		bsvy : XML!Element (
+			name <- 'bug_severity',
+			children <- Sequence{bsvv}
+		),
+		bsvv : XML!Text (
+			value <- thisModule.getStringSeverityValue(b.bug_severity)
+		),
+		cts : XML!Element (
+			name <- 'creation_ts',
+			children <- Sequence{ctsv}
+		),
+		ctsv : XML!Text (
+			value <- b.creation_ts	
+		),
+		qac : distinct XML!Element foreach(qaContactVal in qaContactOrNot) (
+			name <- 'qa_contact',
+			children <- Sequence{qacv}
+		),
+		qacv : distinct XML!Text foreach(qaContactVal in qaContactOrNot) (
+			value <- qaContactVal
+		),
+		sw : distinct XML!Element foreach(statusWhiteboardVal in statusWhiteboardOrNot) (
+			name <- 'status_whiteboard',
+			children <- Sequence{swv}
+		),
+		swv : distinct XML!Text foreach(statusWhiteboardVal in statusWhiteboardOrNot) (
+			value <- statusWhiteboardVal
+		),
+		os : XML!Element (
+			name <- 'op_sys',
+			children <- Sequence{osv}  
+		),
+		osv : XML!Text (
+			value <- thisModule.getStringOperatingSystemValue(b.op_sys)	
+		),
+		bfl : distinct XML!Element foreach(bugFileLocVal in bugFileLocOrNot) (
+			name <- 'bug_file_loc',
+			children <- Sequence{bflv}  
+		),
+		bflv : distinct XML!Text foreach(bugFileLocVal in bugFileLocOrNot) (
+			value <- bugFileLocVal	
+		),
+		sd : distinct XML!Element foreach(shortDescVal in shortDescOrNot) (
+			name <- 'short_desc',
+			children <- Sequence{sdv} 
+		),
+		sdv : distinct XML!Text foreach(shortDescVal in shortDescOrNot) (
+			value <- shortDescVal	
+		)
+}
+
+
+-- Rule 'Keywords2Keywords'
+-- This rule generates the "keywords" XML element
+-- from the "Keywords" element
+rule  Keywords2Keywords {
+	from
+		bk : Bugzilla!Keywords
+	
+	to
+		k : XML!Element (
+			name <- 'keywords',
+			children <- Sequence{kv}	
+		),
+		kv : XML!Text (
+			value <- bk.value	
+		)
+}
+
+
+-- Rule 'Dependson2Dependson'
+-- This rule generates the "dependson" XML element
+-- from the "Dependson" element
+rule  Dependson2Dependson {
+	from
+		bdo : Bugzilla!Dependson
+	
+	to
+		d : XML!Element (
+			name <- 'dependson',
+			children <- Sequence{dv}	
+		),
+		dv : XML!Text (
+			value <- bdo.value
+		)
+}
+
+
+-- Rule 'Blocks2Blocks'
+-- This rule generates the "blocks" XML element
+-- from the "Blocks" element
+rule  Blocks2Blocks {
+	from
+		bb : Bugzilla!Blocks
+	
+	to
+		b : XML!Element (
+			name <- 'blocks',
+			children <- Sequence{bv}
+		),
+		bv : XML!Text (
+			value <- bb.value
+		)
+}
+
+
+-- Rule 'Cc2Cc'
+-- This rule generates the "cc" XML element
+-- from the "Cc" element
+rule  Cc2Cc {
+	from
+		bc : Bugzilla!Cc
+	
+	to
+		c : XML!Element (
+			name <- 'cc',
+			children <- Sequence{cv}	
+		),
+		cv : XML!Text (
+			value <- bc.value
+		)
+}
+
+
+-- Rule 'LongDesc2LongDesc'
+-- This rule generates the "long_desc" XML element
+-- from the "LongDesc" element
+rule  LongDesc2LongDesc {
+	from
+		bld : Bugzilla!LongDesc
+	
+	to
+		ld : XML!Element (
+			name <- 'long_desc',
+			children <- Sequence{w,bw,t}	
+		),
+		w : XML!Element (
+			name <- 'who',
+			children <- Sequence{wv}
+		),
+		wv : XML!Text (
+			value <- bld.who
+		),
+		bw : XML!Element (
+			name <- 'bug_when',
+			children <- Sequence{bwv} 
+		),
+		bwv : XML!Text (
+			value <- bld.bug_when
+		),
+		t : XML!Element (
+			name <- 'thetext',
+			children <- Sequence{tv} 
+		),
+		tv : XML!Text (
+			value <- bld.thetext
+		)
+}
+
+
+-- Rule 'Attachment2Attachment'
+-- This rule generates the "attachment" XML element
+-- from the "Attachment" element
+rule Attachment2Attachment {
+	from
+		ba : Bugzilla!Attachment
+	
+	to
+		a : XML!Element (
+			name <- 'attachment',
+			children <- Sequence{i,de,dc,t,da}	
+		),
+		i : XML!Element (
+			name <- 'id',
+			children <- Sequence{iv}
+		),
+		iv : XML!Text (
+			value <- ba.id
+		),
+		de : XML!Element (
+			name <- 'date',
+			children <- Sequence{dev} 
+		),
+		dev : XML!Text (
+			value <- ba.date
+		),
+		dc : XML!Element (
+			name <- 'desc',
+			children <- Sequence{dcv} 
+		),
+		dcv : XML!Text (
+			value <- ba.desc
+		),
+		t : XML!Element (
+			name <- 'type',
+			children <- Sequence{tv} 
+		),
+		tv : XML!Text (
+			value <- ba.type
+		),
+		da : XML!Element (
+			name <- 'data',
+			children <- Sequence{dav}
+		),
+		dav : XML!Text (
+			value <- ba.data
+		)
+}

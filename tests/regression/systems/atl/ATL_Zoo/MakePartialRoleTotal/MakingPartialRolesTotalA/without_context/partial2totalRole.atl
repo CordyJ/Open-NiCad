@@ -1,0 +1,109 @@
+-- @name	 Making partial role total (a)
+-- @version		1.0
+-- @domains		Catalogue of Model Transformations
+-- @authors		Baudry Julien (jul.baudry<at>gmail.com)
+-- @date		2006/08/02
+-- @description	The purpose of this transformation is to making a patial role total
+-- @see http://www.dcs.kcl.ac.uk/staff/kcl/tcat.pdf   
+-- @see section 2.14, page 23
+-- @see author of article : K. Lano
+
+module Replace; -- Module Template
+create OUT : KM3target from IN : KM3;
+
+--@begin rule Metamodel
+rule Metamodel {
+	from
+		inputMm:KM3!Metamodel
+	to
+		outputMm:KM3target!Metamodel (
+			location <- inputMm.location,
+			contents <- inputMm.contents
+		)
+}
+--@end rule Metamodel
+
+--@begin rule Package
+rule Package {
+	from
+		inputPkg:KM3!Package
+	to
+		outputPkg:KM3target!Package (
+			name <- inputPkg.name,
+			contents <- inputPkg.contents
+		)
+}
+--@end rule Package
+
+--@begin ClassWithPartialOrder
+rule ClassWithPartialOrder {
+	from
+		inputClass:KM3!Class (
+			not(inputClass.structuralFeatures->select(r|(r.upper=1)and(r.lower=0))->isEmpty())	
+		)
+		
+	to
+		outputClass:KM3target!Class (
+			name <- inputClass.name,
+			isAbstract <- inputClass.isAbstract,
+			structuralFeatures <- inputClass.structuralFeatures,
+			supertypes <- inputClass.supertypes
+		),
+		totalOrderClass : KM3target!Class (
+			name <- inputClass.name+'TotalOrder',
+			isAbstract <- true,
+			package <- inputClass.package,
+			supertypes <- inputClass.structuralFeatures->iterate(a;acc:Sequence(KM3!Class)=Sequence{}|
+																	acc->including(a.opposite.owner))	
+		)
+}
+--@end ClassWithPartialOrder
+
+--@begin ClassWithoutPartialOrder
+rule ClassWithoutPartialOrder {
+	from
+		inputClass:KM3!Class (
+			inputClass.structuralFeatures->select(r|(r.upper=1)and(r.lower=0))->isEmpty()
+		)
+		
+	to
+		outputClass:KM3target!Class (
+			name <- inputClass.name,
+			isAbstract <- inputClass.isAbstract,
+			structuralFeatures <- inputClass.structuralFeatures,
+			supertypes <- inputClass.supertypes
+		)
+}
+--@end ClassWithoutPartialOrder
+
+--@begin reference partial order
+rule referencePartialOrder {
+	from 
+		inputRef : KM3!Reference (
+			inputRef.upper = 1 and inputRef.lower = 0
+		)
+	to
+		outputRef : KM3target!Reference (
+			name <- inputRef.opposite.owner.name+'TotalOrder',
+			isOrdered <- inputRef.isOrdered,
+			isUnique <- inputRef.isUnique,
+			location <- inputRef.location,
+			lower <- 1,
+			upper <- 1,
+			type <- KM3target!Class.allInstances()->select(a|a.name=inputRef.owner.name+'TotalOrder')->asSequence()->first(),
+			owner <- inputRef.owner,
+			opposite <- inputRef.opposite
+		),
+		outputOppositeRef : KM3target!Reference (
+			name <- inputRef.opposite.owner.name+'OppositeTotalOrder',
+			isOrdered <- inputRef.opposite.isOrdered,
+			isUnique <- inputRef.opposite.isUnique,
+			location <- inputRef.opposite.location,
+			lower <- 1,
+			upper <- 1,
+			type <- inputRef.opposite.type,
+			owner <- KM3target!Class.allInstances()->select(a|a.name=inputRef.owner.name+'TotalOrder')->asSequence()->first(),
+			opposite <- outputRef
+		)
+}
+--@end reference partial order

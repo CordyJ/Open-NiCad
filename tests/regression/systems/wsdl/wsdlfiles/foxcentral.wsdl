@@ -1,0 +1,809 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://www.west-wind.com/foxcentral" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" targetNamespace="http://www.west-wind.com/foxcentral" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Foxcentral News Service - News of the Visual FoxPro community.</wsdl:documentation>
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://www.west-wind.com/foxcentral">
+      <s:element name="GetNewsItems">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="Days" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="Provider" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="Type" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetNewsItemsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetNewsItemsResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetItems">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="LastOn" type="s:dateTime" />
+            <s:element minOccurs="1" maxOccurs="1" name="TimeZone" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="Provider" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="Type" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetItemsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetItemsResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AddItem">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="Subject" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Content" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Link" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="Date" type="s:dateTime" />
+            <s:element minOccurs="1" maxOccurs="1" name="ProviderPk" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AddItemResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="AddItemResult" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SaveItemEx">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="XmlNewsItem" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SaveItemExResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="SaveItemExResult" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetItemEx">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="Pk" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetItemExResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetItemExResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteItem">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="ItemPk" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteItemResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="DeleteItemResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetProviders">
+        <s:complexType />
+      </s:element>
+      <s:element name="GetProvidersResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetProvidersResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetProviderEx">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="ProviderPk" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetProviderExResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetProviderExResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SaveProviderEx">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="lcXML" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SaveProviderExResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="SaveProviderExResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetTypes">
+        <s:complexType />
+      </s:element>
+      <s:element name="GetTypesResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetTypesResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetResources">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="Type" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="Provider" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetResourcesResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetResourcesResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetResourcesWithFilter">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="Type" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="Provider" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="FromDate" type="s:dateTime" />
+            <s:element minOccurs="1" maxOccurs="1" name="ToDate" type="s:dateTime" />
+            <s:element minOccurs="0" maxOccurs="1" name="Keywords" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetResourcesWithFilterResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetResourcesWithFilterResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SaveResourceEx">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="XMLResourceItem" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SaveResourceExResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="SaveResourceExResult" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetArticles">
+        <s:complexType />
+      </s:element>
+      <s:element name="GetArticlesResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetArticlesResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetArticlesEx">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="ProviderPk" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="Date" type="s:dateTime" />
+            <s:element minOccurs="0" maxOccurs="1" name="KeyWord" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetArticlesExResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetArticlesExResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetArticleEx">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="Pk" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetArticleExResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetArticleExResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AddArticle">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="Subject" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Content" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Link" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="Submitted" type="s:dateTime" />
+            <s:element minOccurs="0" maxOccurs="1" name="Author" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Keywords" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="ProviderPk" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AddArticleResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="AddArticleResult" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SaveArticleEx">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="XmlArticle" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SaveArticleExResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="SaveArticleExResult" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="GetNewsItemsSoapIn">
+    <wsdl:part name="parameters" element="tns:GetNewsItems" />
+  </wsdl:message>
+  <wsdl:message name="GetNewsItemsSoapOut">
+    <wsdl:part name="parameters" element="tns:GetNewsItemsResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetItemsSoapIn">
+    <wsdl:part name="parameters" element="tns:GetItems" />
+  </wsdl:message>
+  <wsdl:message name="GetItemsSoapOut">
+    <wsdl:part name="parameters" element="tns:GetItemsResponse" />
+  </wsdl:message>
+  <wsdl:message name="AddItemSoapIn">
+    <wsdl:part name="parameters" element="tns:AddItem" />
+  </wsdl:message>
+  <wsdl:message name="AddItemSoapOut">
+    <wsdl:part name="parameters" element="tns:AddItemResponse" />
+  </wsdl:message>
+  <wsdl:message name="SaveItemExSoapIn">
+    <wsdl:part name="parameters" element="tns:SaveItemEx" />
+  </wsdl:message>
+  <wsdl:message name="SaveItemExSoapOut">
+    <wsdl:part name="parameters" element="tns:SaveItemExResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetItemExSoapIn">
+    <wsdl:part name="parameters" element="tns:GetItemEx" />
+  </wsdl:message>
+  <wsdl:message name="GetItemExSoapOut">
+    <wsdl:part name="parameters" element="tns:GetItemExResponse" />
+  </wsdl:message>
+  <wsdl:message name="DeleteItemSoapIn">
+    <wsdl:part name="parameters" element="tns:DeleteItem" />
+  </wsdl:message>
+  <wsdl:message name="DeleteItemSoapOut">
+    <wsdl:part name="parameters" element="tns:DeleteItemResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetProvidersSoapIn">
+    <wsdl:part name="parameters" element="tns:GetProviders" />
+  </wsdl:message>
+  <wsdl:message name="GetProvidersSoapOut">
+    <wsdl:part name="parameters" element="tns:GetProvidersResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetProviderExSoapIn">
+    <wsdl:part name="parameters" element="tns:GetProviderEx" />
+  </wsdl:message>
+  <wsdl:message name="GetProviderExSoapOut">
+    <wsdl:part name="parameters" element="tns:GetProviderExResponse" />
+  </wsdl:message>
+  <wsdl:message name="SaveProviderExSoapIn">
+    <wsdl:part name="parameters" element="tns:SaveProviderEx" />
+  </wsdl:message>
+  <wsdl:message name="SaveProviderExSoapOut">
+    <wsdl:part name="parameters" element="tns:SaveProviderExResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetTypesSoapIn">
+    <wsdl:part name="parameters" element="tns:GetTypes" />
+  </wsdl:message>
+  <wsdl:message name="GetTypesSoapOut">
+    <wsdl:part name="parameters" element="tns:GetTypesResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetResourcesSoapIn">
+    <wsdl:part name="parameters" element="tns:GetResources" />
+  </wsdl:message>
+  <wsdl:message name="GetResourcesSoapOut">
+    <wsdl:part name="parameters" element="tns:GetResourcesResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetResourcesWithFilterSoapIn">
+    <wsdl:part name="parameters" element="tns:GetResourcesWithFilter" />
+  </wsdl:message>
+  <wsdl:message name="GetResourcesWithFilterSoapOut">
+    <wsdl:part name="parameters" element="tns:GetResourcesWithFilterResponse" />
+  </wsdl:message>
+  <wsdl:message name="SaveResourceExSoapIn">
+    <wsdl:part name="parameters" element="tns:SaveResourceEx" />
+  </wsdl:message>
+  <wsdl:message name="SaveResourceExSoapOut">
+    <wsdl:part name="parameters" element="tns:SaveResourceExResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetArticlesSoapIn">
+    <wsdl:part name="parameters" element="tns:GetArticles" />
+  </wsdl:message>
+  <wsdl:message name="GetArticlesSoapOut">
+    <wsdl:part name="parameters" element="tns:GetArticlesResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetArticlesExSoapIn">
+    <wsdl:part name="parameters" element="tns:GetArticlesEx" />
+  </wsdl:message>
+  <wsdl:message name="GetArticlesExSoapOut">
+    <wsdl:part name="parameters" element="tns:GetArticlesExResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetArticleExSoapIn">
+    <wsdl:part name="parameters" element="tns:GetArticleEx" />
+  </wsdl:message>
+  <wsdl:message name="GetArticleExSoapOut">
+    <wsdl:part name="parameters" element="tns:GetArticleExResponse" />
+  </wsdl:message>
+  <wsdl:message name="AddArticleSoapIn">
+    <wsdl:part name="parameters" element="tns:AddArticle" />
+  </wsdl:message>
+  <wsdl:message name="AddArticleSoapOut">
+    <wsdl:part name="parameters" element="tns:AddArticleResponse" />
+  </wsdl:message>
+  <wsdl:message name="SaveArticleExSoapIn">
+    <wsdl:part name="parameters" element="tns:SaveArticleEx" />
+  </wsdl:message>
+  <wsdl:message name="SaveArticleExSoapOut">
+    <wsdl:part name="parameters" element="tns:SaveArticleExResponse" />
+  </wsdl:message>
+  <wsdl:portType name="FoxCentralSoap">
+    <wsdl:operation name="GetNewsItems">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Retrieves all the current news for the last number of days specified</wsdl:documentation>
+      <wsdl:input message="tns:GetNewsItemsSoapIn" />
+      <wsdl:output message="tns:GetNewsItemsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetItems">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Retrieves all the current news from a given date forward</wsdl:documentation>
+      <wsdl:input message="tns:GetItemsSoapIn" />
+      <wsdl:output message="tns:GetItemsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="AddItem">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Add a News Item to the FoxCentral news table.</wsdl:documentation>
+      <wsdl:input message="tns:AddItemSoapIn" />
+      <wsdl:output message="tns:AddItemSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SaveItemEx">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Saves a new or existing item based on an XML input string (object presentation).</wsdl:documentation>
+      <wsdl:input message="tns:SaveItemExSoapIn" />
+      <wsdl:output message="tns:SaveItemExSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetItemEx">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Returns a news item as an object string.</wsdl:documentation>
+      <wsdl:input message="tns:GetItemExSoapIn" />
+      <wsdl:output message="tns:GetItemExSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteItem">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Deletes an individual News item. Only provider can delete this item.</wsdl:documentation>
+      <wsdl:input message="tns:DeleteItemSoapIn" />
+      <wsdl:output message="tns:DeleteItemSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetProviders">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Returns an alphabetically sorted list of FoxCentral providers</wsdl:documentation>
+      <wsdl:input message="tns:GetProvidersSoapIn" />
+      <wsdl:output message="tns:GetProvidersSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetProviderEx">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Retrieves an individual Provider entry as an XML string object.</wsdl:documentation>
+      <wsdl:input message="tns:GetProviderExSoapIn" />
+      <wsdl:output message="tns:GetProviderExSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SaveProviderEx">
+      <wsdl:input message="tns:SaveProviderExSoapIn" />
+      <wsdl:output message="tns:SaveProviderExSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetTypes">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Returns a list of the news types available</wsdl:documentation>
+      <wsdl:input message="tns:GetTypesSoapIn" />
+      <wsdl:output message="tns:GetTypesSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetResources">
+      <wsdl:input message="tns:GetResourcesSoapIn" />
+      <wsdl:output message="tns:GetResourcesSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetResourcesWithFilter">
+      <wsdl:input message="tns:GetResourcesWithFilterSoapIn" />
+      <wsdl:output message="tns:GetResourcesWithFilterSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SaveResourceEx">
+      <wsdl:input message="tns:SaveResourceExSoapIn" />
+      <wsdl:output message="tns:SaveResourceExSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetArticles">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Retrieves a string based XmlToCursor list of articles to the client.</wsdl:documentation>
+      <wsdl:input message="tns:GetArticlesSoapIn" />
+      <wsdl:output message="tns:GetArticlesSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetArticlesEx">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Retrieves a filltered list of articles in XmlCursor style string.</wsdl:documentation>
+      <wsdl:input message="tns:GetArticlesExSoapIn" />
+      <wsdl:output message="tns:GetArticlesExSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetArticleEx">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Returns an article as an object XML string.</wsdl:documentation>
+      <wsdl:input message="tns:GetArticleExSoapIn" />
+      <wsdl:output message="tns:GetArticleExSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="AddArticle">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Allows adding of an article into the resource archive</wsdl:documentation>
+      <wsdl:input message="tns:AddArticleSoapIn" />
+      <wsdl:output message="tns:AddArticleSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SaveArticleEx">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Saves or updates an article passed in as an object string.</wsdl:documentation>
+      <wsdl:input message="tns:SaveArticleExSoapIn" />
+      <wsdl:output message="tns:SaveArticleExSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="FoxCentralSoap" type="tns:FoxCentralSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GetNewsItems">
+      <soap:operation soapAction="http://www.west-wind.com/foxcentral/GetNewsItems" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetItems">
+      <soap:operation soapAction="http://www.west-wind.com/foxcentral/GetItems" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddItem">
+      <soap:operation soapAction="http://www.west-wind.com/foxcentral/AddItem" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SaveItemEx">
+      <soap:operation soapAction="http://www.west-wind.com/foxcentral/SaveItemEx" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetItemEx">
+      <soap:operation soapAction="http://www.west-wind.com/foxcentral/GetItemEx" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteItem">
+      <soap:operation soapAction="http://www.west-wind.com/foxcentral/DeleteItem" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetProviders">
+      <soap:operation soapAction="http://www.west-wind.com/foxcentral/GetProviders" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetProviderEx">
+      <soap:operation soapAction="http://www.west-wind.com/foxcentral/GetProviderEx" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SaveProviderEx">
+      <soap:operation soapAction="http://www.west-wind.com/foxcentral/SaveProviderEx" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetTypes">
+      <soap:operation soapAction="http://www.west-wind.com/foxcentral/GetTypes" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetResources">
+      <soap:operation soapAction="http://www.west-wind.com/foxcentral/GetResources" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetResourcesWithFilter">
+      <soap:operation soapAction="http://www.west-wind.com/foxcentral/GetResourcesWithFilter" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SaveResourceEx">
+      <soap:operation soapAction="http://www.west-wind.com/foxcentral/SaveResourceEx" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetArticles">
+      <soap:operation soapAction="http://www.west-wind.com/foxcentral/GetArticles" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetArticlesEx">
+      <soap:operation soapAction="http://www.west-wind.com/foxcentral/GetArticlesEx" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetArticleEx">
+      <soap:operation soapAction="http://www.west-wind.com/foxcentral/GetArticleEx" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddArticle">
+      <soap:operation soapAction="http://www.west-wind.com/foxcentral/AddArticle" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SaveArticleEx">
+      <soap:operation soapAction="http://www.west-wind.com/foxcentral/SaveArticleEx" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="FoxCentralSoap12" type="tns:FoxCentralSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GetNewsItems">
+      <soap12:operation soapAction="http://www.west-wind.com/foxcentral/GetNewsItems" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetItems">
+      <soap12:operation soapAction="http://www.west-wind.com/foxcentral/GetItems" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddItem">
+      <soap12:operation soapAction="http://www.west-wind.com/foxcentral/AddItem" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SaveItemEx">
+      <soap12:operation soapAction="http://www.west-wind.com/foxcentral/SaveItemEx" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetItemEx">
+      <soap12:operation soapAction="http://www.west-wind.com/foxcentral/GetItemEx" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteItem">
+      <soap12:operation soapAction="http://www.west-wind.com/foxcentral/DeleteItem" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetProviders">
+      <soap12:operation soapAction="http://www.west-wind.com/foxcentral/GetProviders" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetProviderEx">
+      <soap12:operation soapAction="http://www.west-wind.com/foxcentral/GetProviderEx" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SaveProviderEx">
+      <soap12:operation soapAction="http://www.west-wind.com/foxcentral/SaveProviderEx" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetTypes">
+      <soap12:operation soapAction="http://www.west-wind.com/foxcentral/GetTypes" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetResources">
+      <soap12:operation soapAction="http://www.west-wind.com/foxcentral/GetResources" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetResourcesWithFilter">
+      <soap12:operation soapAction="http://www.west-wind.com/foxcentral/GetResourcesWithFilter" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SaveResourceEx">
+      <soap12:operation soapAction="http://www.west-wind.com/foxcentral/SaveResourceEx" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetArticles">
+      <soap12:operation soapAction="http://www.west-wind.com/foxcentral/GetArticles" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetArticlesEx">
+      <soap12:operation soapAction="http://www.west-wind.com/foxcentral/GetArticlesEx" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetArticleEx">
+      <soap12:operation soapAction="http://www.west-wind.com/foxcentral/GetArticleEx" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddArticle">
+      <soap12:operation soapAction="http://www.west-wind.com/foxcentral/AddArticle" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SaveArticleEx">
+      <soap12:operation soapAction="http://www.west-wind.com/foxcentral/SaveArticleEx" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="FoxCentral">
+    <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Foxcentral News Service - News of the Visual FoxPro community.</wsdl:documentation>
+    <wsdl:port name="FoxCentralSoap" binding="tns:FoxCentralSoap">
+      <soap:address location="http://www.foxcentral.net/foxcentral.asmx" />
+    </wsdl:port>
+    <wsdl:port name="FoxCentralSoap12" binding="tns:FoxCentralSoap12">
+      <soap12:address location="http://www.foxcentral.net/foxcentral.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

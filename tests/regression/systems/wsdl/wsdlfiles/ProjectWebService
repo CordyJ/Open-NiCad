@@ -1,0 +1,580 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions name="ProjectWebService" targetNamespace="http://edu.mit.broad.chembank.shared.mda.webservices.service" xmlns:impl="http://edu.mit.broad.chembank.shared.mda.webservices.service" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+
+    <!-- WSDL Types -->
+
+     <wsdl:types>
+
+          <xsd:schema elementFormDefault="qualified" targetNamespace="http://edu.mit.broad.chembank.shared.mda.webservices.service" xmlns="http://www.w3.org/2001/XMLSchema">
+
+               <xsd:element name="getAll">
+
+                    <xsd:annotation>
+
+                         <xsd:documentation>
+
+                        Returns all projects and assays within each project.
+                         </xsd:documentation>
+
+                    </xsd:annotation>
+
+                    <xsd:complexType/>
+
+               </xsd:element>
+
+               <xsd:element name="getAllResponse">
+
+                    <xsd:complexType>
+
+                         <xsd:sequence>
+
+                              <xsd:element name="getAllReturn" type="impl:ArrayOfProject"/>
+
+                         </xsd:sequence>
+
+                    </xsd:complexType>
+
+               </xsd:element>
+
+               <xsd:element name="getAllFault1" nillable="true" type="impl:WebServiceException"/>
+
+               <xsd:complexType name="WebServiceException">
+
+                    <xsd:annotation>
+
+                         <xsd:documentation>
+
+                        
+                         </xsd:documentation>
+
+                    </xsd:annotation>
+
+               </xsd:complexType>
+
+               <xsd:complexType name="ArrayOfAssay">
+
+                    <xsd:sequence>
+
+                         <xsd:element form="qualified" maxOccurs="unbounded" minOccurs="0" name="assay" type="impl:Assay"/>
+
+                    </xsd:sequence>
+
+               </xsd:complexType>
+
+               <xsd:complexType name="Assay">
+
+                    <xsd:annotation>
+
+                         <xsd:documentation>
+
+                        
+                         </xsd:documentation>
+
+                    </xsd:annotation>
+
+                    <xsd:sequence>
+
+                         <xsd:element name="name" nillable="false" type="xsd:string">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                         <xsd:element name="type" nillable="false" type="xsd:string">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                         <xsd:element name="description" nillable="false" type="xsd:string">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                         <xsd:element name="plates" nillable="true" type="impl:ArrayOfPlate">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                    </xsd:sequence>
+
+               </xsd:complexType>
+
+               <xsd:complexType name="Molecule">
+
+                    <xsd:annotation>
+
+                         <xsd:documentation>
+
+                        
+                         </xsd:documentation>
+
+                    </xsd:annotation>
+
+                    <xsd:sequence>
+
+                         <xsd:element name="chembankId" nillable="false" type="xsd:string">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                         <xsd:element name="smiles" nillable="false" type="xsd:string">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                         <xsd:element name="inchi" nillable="false" type="xsd:string">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                    </xsd:sequence>
+
+               </xsd:complexType>
+
+               <xsd:complexType name="ArrayOfPlate">
+
+                    <xsd:sequence>
+
+                         <xsd:element form="qualified" maxOccurs="unbounded" minOccurs="0" name="plate" type="impl:Plate"/>
+
+                    </xsd:sequence>
+
+               </xsd:complexType>
+
+               <xsd:complexType name="Plate">
+
+                    <xsd:annotation>
+
+                         <xsd:documentation>
+
+                        
+                         </xsd:documentation>
+
+                    </xsd:annotation>
+
+                    <xsd:sequence>
+
+                         <xsd:element name="name" nillable="false" type="xsd:string">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                         <xsd:element name="replicate" nillable="false" type="xsd:string">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                         <xsd:element name="wells" nillable="true" type="impl:ArrayOfWell">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                    </xsd:sequence>
+
+               </xsd:complexType>
+
+               <xsd:complexType name="Project">
+
+                    <xsd:annotation>
+
+                         <xsd:documentation>
+
+                        
+                         </xsd:documentation>
+
+                    </xsd:annotation>
+
+                    <xsd:sequence>
+
+                         <xsd:element name="name" nillable="false" type="xsd:string">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                         <xsd:element name="motivation" nillable="false" type="xsd:string">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                         <xsd:element name="description" nillable="false" type="xsd:string">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                         <xsd:element name="assays" nillable="true" type="impl:ArrayOfAssay">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                    </xsd:sequence>
+
+               </xsd:complexType>
+
+               <xsd:complexType name="ArrayOfProject">
+
+                    <xsd:sequence>
+
+                         <xsd:element form="qualified" maxOccurs="unbounded" minOccurs="0" name="project" type="impl:Project"/>
+
+                    </xsd:sequence>
+
+               </xsd:complexType>
+
+               <xsd:complexType name="ArrayOfWell">
+
+                    <xsd:sequence>
+
+                         <xsd:element form="qualified" maxOccurs="unbounded" minOccurs="0" name="well" type="impl:Well"/>
+
+                    </xsd:sequence>
+
+               </xsd:complexType>
+
+               <xsd:complexType name="Well">
+
+                    <xsd:annotation>
+
+                         <xsd:documentation>
+
+                        
+                         </xsd:documentation>
+
+                    </xsd:annotation>
+
+                    <xsd:sequence>
+
+                         <xsd:element name="position" nillable="false" type="xsd:string">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                         <xsd:element name="type" nillable="false" type="xsd:string">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                         <xsd:element name="rawValue" nillable="false" type="xsd:double">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                         <xsd:element name="bsubValue" nillable="false" type="xsd:double">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                         <xsd:element name="zscoreValue" nillable="false" type="xsd:double">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                         <xsd:element name="compositezValue" nillable="false" type="xsd:double">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                         <xsd:element name="reproducibilityValue" nillable="false" type="xsd:double">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                         <xsd:element name="standardHit" nillable="false" type="xsd:boolean">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                         <xsd:element name="molecule" nillable="true" type="impl:Molecule">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                    </xsd:sequence>
+
+               </xsd:complexType>
+
+          </xsd:schema>
+
+     </wsdl:types>
+
+
+    <!-- Messages -->
+
+     <wsdl:message name="getAll1Request">
+
+          <wsdl:part element="impl:getAll" name="parameters"/>
+
+     </wsdl:message>
+
+     <wsdl:message name="getAll1Response">
+
+          <wsdl:part element="impl:getAllResponse" name="parameters"/>
+
+     </wsdl:message>
+
+     <wsdl:message name="getAll1Fault1">
+
+          <wsdl:part element="impl:getAllFault1" name="fault"/>
+
+     </wsdl:message>
+
+
+    <!-- Port Type -->
+
+     <wsdl:portType name="ProjectWebService">
+
+          <wsdl:operation name="getAll">
+
+
+               <wsdl:documentation>
+
+                Returns all projects and assays within each project.
+               </wsdl:documentation>
+
+               <wsdl:input message="impl:getAll1Request" name="getAll1Request"/>
+
+               <wsdl:output message="impl:getAll1Response" name="getAll1Response"/>
+
+
+               <wsdl:fault message="impl:getAll1Fault1" name="getAll1Fault1"/>
+
+          </wsdl:operation>
+
+     </wsdl:portType>
+
+
+    <!-- WSDL Binding -->
+
+     <wsdl:binding name="ProjectWebServiceSoapBinding" type="impl:ProjectWebService">
+
+          <wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+          <wsdl:operation name="getAll">
+
+               <wsdlsoap:operation soapAction="getAll" style="document"/>
+
+               <wsdl:input name="getAll1Request">
+
+                    <wsdlsoap:body use="literal"/>
+
+               </wsdl:input>
+
+               <wsdl:output name="getAll1Response">
+
+                    <wsdlsoap:body use="literal"/>
+
+               </wsdl:output>
+
+               <wsdl:fault name="getAll1Fault1">
+
+                    <wsdlsoap:fault name="getAll1Fault1" use="literal"/>
+
+               </wsdl:fault>
+
+         </wsdl:operation>
+
+     </wsdl:binding>
+
+
+    <!-- Service Definition -->
+
+     <wsdl:service name="ProjectWebService">
+
+          <wsdl:documentation>
+
+            
+          </wsdl:documentation>
+
+          <wsdl:port binding="impl:ProjectWebServiceSoapBinding" name="ProjectWebService">
+
+               <wsdlsoap:address location="http://chembank.broad.harvard.edu/webservices/ProjectWebService"/>
+
+          </wsdl:port>
+
+     </wsdl:service>
+
+
+</wsdl:definitions>

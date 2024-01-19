@@ -1,0 +1,39 @@
+THANKS
+------
+
+Phil Thompson for providing PyQt and QScintilla and pushing me into this business
+some years ago.
+
+Andrew Bushnell of Fluent Inc. for contributing the multithreading debugger
+and a bunch of fixes to enhance the platform independance.
+
+Phil Dawes for providing the Bicycle Repair Man refactoring tool and for giving
+permission to bundle it with eric3 and eric4.
+
+Henk Spaay
+Gordon Tyler
+Hans-Peter Jansen
+Ralf Ahlbrink
+Stefan Jaensch
+Martin v. Löwis
+Thorsten Kohnhorst
+Torsten Marek
+Maciek Fijalkowski
+for providing patches to improve eric3/4.
+
+Alexander Darovsky and Mikhail Terekhov for providing Russian translations.
+Julien Vienne for providing French translations.
+Zdeněk Böhm for providing Czech translations.
+Jaime Seuma for providing Spanish translations.
+Serdar Koçdaş for providing Turkish translations.
+Xia WeiPeng for providing Chinese translations.
+Gianluca for providing Italian translations.
+
+Shane Richards for Crystal Icons.
+
+The Kumula Team for the splash screen.
+
+And all the people who reported bugs and made suggestions.
+
+Thanks,
+Detlev

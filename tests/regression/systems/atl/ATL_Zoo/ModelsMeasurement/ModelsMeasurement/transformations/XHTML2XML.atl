@@ -1,0 +1,993 @@
+--@atlcompiler	atl2006
+--@name			XHTML2XML
+--@version		2.0
+--@domains		XHTML, Table
+--@authors		Eric Vepa (evepa <at> sodius.com) for SODIUS (www.sodius.com)
+--@date			2007/08/14
+--@description	XHTML extractor for a subset of the XHTML metamodel (table representation).
+--@see			<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+
+module XHTML2XML; -- Module Template
+create OUT : XML from IN : XHTML;
+
+rule inlines(inlines : Sequence(XHTML!Inline)) {
+    using {
+        seq : Sequence(XML!Node) = Sequence{};      
+    }
+    do {
+        for (inline in inlines) {            
+            if (inline.oclIsKindOf(XHTML!CDATA))
+                seq <- seq->append(thisModule.Text(inline.value));
+            else if (inline.oclIsKindOf(XHTML!PCDATA))
+                seq <- seq->union(thisModule.inlines(inline.inlines));
+            else
+                seq <- seq->append(inline);
+        }
+        seq;
+    }
+}
+
+-- -------------------------------------------------------------------------
+-- Document Structure ------------------------------------------------------
+-- -------------------------------------------------------------------------
+
+rule HTML {
+	from
+		html : XHTML!HTML
+	to
+		xml : XML!Root (
+			name <- 'html',
+			children <- html.head,
+			children <- html.body
+		)
+	do {
+        -- Local attributes and references
+        if (not html.id.oclIsUndefined()) xml.children <- thisModule.Attribute('id', html.id.value);
+        xml.children <- thisModule.Attribute('xmlns', 'http://www.w3.org/1999/xhtml');
+--        xml.children <- thisModule.Attribute('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance');
+--        xml.children <- thisModule.Attribute('xsi:schemaLocation', 'http://www.w3.org/MarkUp/SCHEMA/xhtml11.xsd');
+    	-- Inherited from Internationalization super-class
+		if (not html."xmllang".oclIsUndefined()) xml.children <- thisModule.Attribute('xml:lang', html.xmllang.value);
+		if (not (html.dir = #ltr)) xml.children <- thisModule.Attribute('dir', html.dir);
+	}
+}
+
+-- -------------------------------------------------------------------------
+-- Document Head -----------------------------------------------------------
+-- -------------------------------------------------------------------------
+
+rule HEAD {
+    from
+        html : XHTML!HEAD
+    to
+        xml : XML!Element (
+            name <- 'head',
+            children <- html.title,
+            children <- html.bases,
+            children <- html.headMiscs
+        )
+    do {
+        -- Local attributes and references
+        if (not html.id.oclIsUndefined()) xml.children <- thisModule.Attribute('id', html.id.value);
+        if (not html.profile.oclIsUndefined()) xml.children <- thisModule.Attribute('profile', html.profile.value);
+        -- Inherited from Internationalization super-class
+        if (not html."xmllang".oclIsUndefined()) xml.children <- thisModule.Attribute('xml:lang', html.xmllang.value);
+        if (not (html.dir = #ltr)) xml.children <- thisModule.Attribute('dir', html.dir);
+    }
+}
+
+rule TITLE {
+    from
+        html : XHTML!TITLE
+    to
+        xml : XML!Element (
+            name <- 'title',
+            children <- thisModule.inlines(html.pcdata.inlines)
+        )
+    do {
+        -- Local attributes and references
+        if (not html.id.oclIsUndefined()) xml.children <- thisModule.Attribute('id', html.id.value);
+        -- Inherited from Internationalization super-class
+        if (not html."xmllang".oclIsUndefined()) xml.children <- thisModule.Attribute('xml:lang', html.xmllang.value);
+        if (not (html.dir = #ltr)) xml.children <- thisModule.Attribute('dir', html.dir);
+    }
+}
+
+rule META {
+    from
+        html : XHTML!META
+    to
+        xml : XML!Element (
+            name <- 'meta'
+        )
+    do {
+        -- Local attributes and references
+        if (not html.id.oclIsUndefined()) xml.children <- thisModule.Attribute('id', html.id.value);
+        if (not html.httpequiv.oclIsUndefined()) xml.children <- thisModule.Attribute('http-equiv', html.httpequiv.value);
+        if (not html.name.oclIsUndefined()) xml.children <- thisModule.Attribute('name', html.name.value);
+        if (not html.content.oclIsUndefined()) xml.children <- thisModule.Attribute('content', html.content.value);
+        if (not html.scheme.oclIsUndefined()) xml.children <- thisModule.Attribute('scheme', html.scheme.value);
+        -- Inherited from Internationalization super-class
+        if (not html."xmllang".oclIsUndefined()) xml.children <- thisModule.Attribute('xml:lang', html.xmllang.value);
+        if (not (html.dir = #ltr)) xml.children <- thisModule.Attribute('dir', html.dir);
+    }
+}
+
+rule LINK {
+    from
+        html : XHTML!LINK
+    to
+        xml : XML!Element (
+            name <- 'link'
+        )
+    do {
+        -- Inherited from CoreAttrs super-super-class
+        if (not html.id.oclIsUndefined()) xml.children <- thisModule.Attribute('id', html.id.value);
+        if (not html.class.oclIsUndefined()) xml.children <- thisModule.Attribute('class', html.class.value);
+        if (not html.style.oclIsUndefined()) xml.children <- thisModule.Attribute('style', html.style.value);
+        if (not html.title.oclIsUndefined()) xml.children <- thisModule.Attribute('title', html.title.value);
+        -- Inherited from Internationalization super-super-class
+        if (not html."xmllang".oclIsUndefined()) xml.children <- thisModule.Attribute('xml:lang', html.xmllang.value);
+        if (not (html.dir = #ltr)) xml.children <- thisModule.Attribute('dir', html.dir);
+        -- Local attributes and references
+        if (not html.charset.oclIsUndefined()) xml.children <- thisModule.Attribute('charset', html.charset.value);
+        if (not html.href.oclIsUndefined()) xml.children <- thisModule.Attribute('href', html.href.value);
+        if (not html.hreflang.oclIsUndefined()) xml.children <- thisModule.Attribute('hreflang', html.hreflang.value);
+        if (not html.type.oclIsUndefined()) xml.children <- thisModule.Attribute('type', html.type.value);
+        if (not html.rel.oclIsUndefined()) xml.children <- thisModule.Attribute('rel', html.rel.value);
+        if (not html.rev.oclIsUndefined()) xml.children <- thisModule.Attribute('rev', html.rev.value);
+        if (not html.media.oclIsUndefined()) xml.children <- thisModule.Attribute('media', html.media.value);
+        -- Inherited from Events super-super-class
+        if (not html.onclick.oclIsUndefined()) xml.children <- thisModule.Attribute('onclick', html.onclick.value);
+        if (not html.ondblclick.oclIsUndefined()) xml.children <- thisModule.Attribute('ondblclick', html.ondblclick.value);
+        if (not html.onmousedown.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousedown', html.onmousedown.value);
+        if (not html.onmouseup.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseup', html.onmouseup.value);
+        if (not html.onmousemove.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousemove', html.onmousemove.value);
+        if (not html.onmouseout.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseout', html.onmouseout.value);
+        if (not html.onkeypress.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeypress', html.onkeypress.value);
+        if (not html.onkeydown.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeydown', html.onkeydown.value);
+        if (not html.onkeyup.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeyup', html.onkeyup.value);
+    }
+}
+
+rule STYLE {
+    from
+        html : XHTML!STYLE
+    to
+        xml : XML!Element (
+            name <- 'style',
+            children <- thisModule.inlines(html.pcdata.inlines)
+        )
+    do {
+        -- Local attributes and references
+        if (not html.id.oclIsUndefined()) xml.children <- thisModule.Attribute('id', html.id.value);
+        xml.children <- thisModule.Attribute('type', html.type.value);
+        if (not html.media.oclIsUndefined()) xml.children <- thisModule.Attribute('media', html.media.value);
+        if (not html.title.oclIsUndefined()) xml.children <- thisModule.Attribute('title', html.title.value);
+        -- Inherited from Internationalization super-class
+        if (not html."xmllang".oclIsUndefined()) xml.children <- thisModule.Attribute('xml:lang', html.xmllang.value);
+        if (not (html.dir = #ltr)) xml.children <- thisModule.Attribute('dir', html.dir);
+    }
+}
+
+rule SCRIPT {
+    from
+        html : XHTML!SCRIPT
+    to
+        xml : XML!Element (
+            name <- 'script',
+            children <- if (not html.pcdata.oclIsUndefined())
+			                 then thisModule.inlines(html.pcdata.inlines)
+							 else thisModule.Text('')
+			             endif
+        )
+    do {
+        -- Local attributes and references
+        if (not html.id.oclIsUndefined()) xml.children <- thisModule.Attribute('id', html.id.value);
+        if (not html.charset.oclIsUndefined()) xml.children <- thisModule.Attribute('charset', html.charset.value);
+        xml.children <- thisModule.Attribute('type', html.type.value);
+        if (not html.src.oclIsUndefined()) xml.children <- thisModule.Attribute('src', html.src.value);
+        if (not html.defer.oclIsUndefined()) xml.children <- thisModule.Attribute('defer', html.defer.value);
+    }
+}
+
+rule NOSCRIPT {
+    from
+        html : XHTML!NOSCRIPT
+    to
+        xml : XML!Element (
+            name <- 'noscript',
+            children <- thisModule.inlines(html.blocks)
+        )
+    do {
+        -- Inherited from CoreAttrs super-super-class
+        if (not html.id.oclIsUndefined()) xml.children <- thisModule.Attribute('id', html.id.value);
+        if (not html.class.oclIsUndefined()) xml.children <- thisModule.Attribute('class', html.class.value);
+        if (not html.style.oclIsUndefined()) xml.children <- thisModule.Attribute('style', html.style.value);
+        if (not html.title.oclIsUndefined()) xml.children <- thisModule.Attribute('title', html.title.value);
+        -- Inherited from Internationalization super-super-class
+        if (not html."xmllang".oclIsUndefined()) xml.children <- thisModule.Attribute('xml:lang', html.xmllang.value);
+        if (not (html.dir = #ltr)) xml.children <- thisModule.Attribute('dir', html.dir);
+        -- Inherited from Events super-super-class
+        if (not html.onclick.oclIsUndefined()) xml.children <- thisModule.Attribute('onclick', html.onclick.value);
+        if (not html.ondblclick.oclIsUndefined()) xml.children <- thisModule.Attribute('ondblclick', html.ondblclick.value);
+        if (not html.onmousedown.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousedown', html.onmousedown.value);
+        if (not html.onmouseup.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseup', html.onmouseup.value);
+        if (not html.onmousemove.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousemove', html.onmousemove.value);
+        if (not html.onmouseout.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseout', html.onmouseout.value);
+        if (not html.onkeypress.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeypress', html.onkeypress.value);
+        if (not html.onkeydown.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeydown', html.onkeydown.value);
+        if (not html.onkeyup.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeyup', html.onkeyup.value);
+    }
+}
+
+-- -------------------------------------------------------------------------
+-- Document Body -----------------------------------------------------------
+-- -------------------------------------------------------------------------
+
+rule BODY {
+    from
+        html : XHTML!BODY
+    to
+        xml : XML!Element (
+            name <- 'body',
+            children <- thisModule.inlines(html.blocks)
+        )
+    do {
+        -- Inherited from CoreAttrs super-super-class
+        if (not html.id.oclIsUndefined()) xml.children <- thisModule.Attribute('id', html.id.value);
+        if (not html.class.oclIsUndefined()) xml.children <- thisModule.Attribute('class', html.class.value);
+        if (not html.style.oclIsUndefined()) xml.children <- thisModule.Attribute('style', html.style.value);
+        if (not html.title.oclIsUndefined()) xml.children <- thisModule.Attribute('title', html.title.value);
+        -- Inherited from Internationalization super-super-class
+        if (not html."xmllang".oclIsUndefined()) xml.children <- thisModule.Attribute('xml:lang', html.xmllang.value);
+        if (not (html.dir = #ltr)) xml.children <- thisModule.Attribute('dir', html.dir);
+        -- Local attributes and references
+        if (not html.onload.oclIsUndefined()) xml.children <- thisModule.Attribute('onload', html.onload.value);
+        if (not html.onunload.oclIsUndefined()) xml.children <- thisModule.Attribute('onunload', html.onunload.value);
+        -- Inherited from Events super-super-class
+        if (not html.onclick.oclIsUndefined()) xml.children <- thisModule.Attribute('onclick', html.onclick.value);
+        if (not html.ondblclick.oclIsUndefined()) xml.children <- thisModule.Attribute('ondblclick', html.ondblclick.value);
+        if (not html.onmousedown.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousedown', html.onmousedown.value);
+        if (not html.onmouseup.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseup', html.onmouseup.value);
+        if (not html.onmousemove.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousemove', html.onmousemove.value);
+        if (not html.onmouseout.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseout', html.onmouseout.value);
+        if (not html.onkeypress.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeypress', html.onkeypress.value);
+        if (not html.onkeydown.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeydown', html.onkeydown.value);
+        if (not html.onkeyup.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeyup', html.onkeyup.value);
+    }
+}
+
+rule DIV {
+    from
+        html : XHTML!DIV
+    to
+        xml : XML!Element (
+            name <- 'div',
+            children <- thisModule.inlines(html.flows)
+        )
+    do {
+        -- Inherited from CoreAttrs super-super-class
+        if (not html.id.oclIsUndefined()) xml.children <- thisModule.Attribute('id', html.id.value);
+        if (not html.class.oclIsUndefined()) xml.children <- thisModule.Attribute('class', html.class.value);
+        if (not html.style.oclIsUndefined()) xml.children <- thisModule.Attribute('style', html.style.value);
+        if (not html.title.oclIsUndefined()) xml.children <- thisModule.Attribute('title', html.title.value);
+        -- Inherited from Internationalization super-super-class
+        if (not html."xmllang".oclIsUndefined()) xml.children <- thisModule.Attribute('xml:lang', html.xmllang.value);
+        if (not (html.dir = #ltr)) xml.children <- thisModule.Attribute('dir', html.dir);
+        -- Inherited from Events super-super-class
+        if (not html.onclick.oclIsUndefined()) xml.children <- thisModule.Attribute('onclick', html.onclick.value);
+        if (not html.ondblclick.oclIsUndefined()) xml.children <- thisModule.Attribute('ondblclick', html.ondblclick.value);
+        if (not html.onmousedown.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousedown', html.onmousedown.value);
+        if (not html.onmouseup.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseup', html.onmouseup.value);
+        if (not html.onmousemove.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousemove', html.onmousemove.value);
+        if (not html.onmouseout.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseout', html.onmouseout.value);
+        if (not html.onkeypress.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeypress', html.onkeypress.value);
+        if (not html.onkeydown.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeydown', html.onkeydown.value);
+        if (not html.onkeyup.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeyup', html.onkeyup.value);
+    }
+}
+
+-- -------------------------------------------------------------------------
+-- Paragraphs --------------------------------------------------------------
+-- -------------------------------------------------------------------------
+
+rule P {
+    from
+        html : XHTML!P
+    to
+        xml : XML!Element (
+            name <- 'p',
+            children <- thisModule.inlines(html.inlines)
+        )
+    do {
+        -- Inherited from CoreAttrs super-super-class
+        if (not html.id.oclIsUndefined()) xml.children <- thisModule.Attribute('id', html.id.value);
+        if (not html.class.oclIsUndefined()) xml.children <- thisModule.Attribute('class', html.class.value);
+        if (not html.style.oclIsUndefined()) xml.children <- thisModule.Attribute('style', html.style.value);
+        if (not html.title.oclIsUndefined()) xml.children <- thisModule.Attribute('title', html.title.value);
+        -- Inherited from Internationalization super-super-class
+        if (not html."xmllang".oclIsUndefined()) xml.children <- thisModule.Attribute('xml:lang', html.xmllang.value);
+        if (not (html.dir = #ltr)) xml.children <- thisModule.Attribute('dir', html.dir);
+        -- Inherited from Events super-super-class
+        if (not html.onclick.oclIsUndefined()) xml.children <- thisModule.Attribute('onclick', html.onclick.value);
+        if (not html.ondblclick.oclIsUndefined()) xml.children <- thisModule.Attribute('ondblclick', html.ondblclick.value);
+        if (not html.onmousedown.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousedown', html.onmousedown.value);
+        if (not html.onmouseup.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseup', html.onmouseup.value);
+        if (not html.onmousemove.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousemove', html.onmousemove.value);
+        if (not html.onmouseout.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseout', html.onmouseout.value);
+        if (not html.onkeypress.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeypress', html.onkeypress.value);
+        if (not html.onkeydown.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeydown', html.onkeydown.value);
+        if (not html.onkeyup.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeyup', html.onkeyup.value);
+    }
+}
+
+-- -------------------------------------------------------------------------
+-- Lists -------------------------------------------------------------------
+-- -------------------------------------------------------------------------
+
+-- UL or OL
+rule AbstractList {
+    from
+        html : XHTML!AbstractList
+    to
+        xml : XML!Element (
+            name <- if (html.oclIsKindOf(XHTML!UL))
+                       then 'ul'
+                       else 'ol'
+                    endif,
+			children <- html.lis
+        )
+    do {
+        -- Inherited from CoreAttrs super-super-class
+        if (not html.id.oclIsUndefined()) xml.children <- thisModule.Attribute('id', html.id.value);
+        if (not html.class.oclIsUndefined()) xml.children <- thisModule.Attribute('class', html.class.value);
+        if (not html.style.oclIsUndefined()) xml.children <- thisModule.Attribute('style', html.style.value);
+        if (not html.title.oclIsUndefined()) xml.children <- thisModule.Attribute('title', html.title.value);
+        -- Inherited from Internationalization super-super-class
+        if (not html."xmllang".oclIsUndefined()) xml.children <- thisModule.Attribute('xml:lang', html.xmllang.value);
+        if (not (html.dir = #ltr)) xml.children <- thisModule.Attribute('dir', html.dir);
+        -- Inherited from Events super-super-class
+        if (not html.onclick.oclIsUndefined()) xml.children <- thisModule.Attribute('onclick', html.onclick.value);
+        if (not html.ondblclick.oclIsUndefined()) xml.children <- thisModule.Attribute('ondblclick', html.ondblclick.value);
+        if (not html.onmousedown.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousedown', html.onmousedown.value);
+        if (not html.onmouseup.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseup', html.onmouseup.value);
+        if (not html.onmousemove.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousemove', html.onmousemove.value);
+        if (not html.onmouseout.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseout', html.onmouseout.value);
+        if (not html.onkeypress.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeypress', html.onkeypress.value);
+        if (not html.onkeydown.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeydown', html.onkeydown.value);
+        if (not html.onkeyup.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeyup', html.onkeyup.value);
+    }
+}
+
+rule LI {
+    from
+        html : XHTML!LI
+    to
+        xml : XML!Element (
+            name <- 'li',
+            children <- thisModule.inlines(html.flows)
+        )
+    do {
+        -- Inherited from CoreAttrs super-super-class
+        if (not html.id.oclIsUndefined()) xml.children <- thisModule.Attribute('id', html.id.value);
+        if (not html.class.oclIsUndefined()) xml.children <- thisModule.Attribute('class', html.class.value);
+        if (not html.style.oclIsUndefined()) xml.children <- thisModule.Attribute('style', html.style.value);
+        if (not html.title.oclIsUndefined()) xml.children <- thisModule.Attribute('title', html.title.value);
+        -- Inherited from Internationalization super-super-class
+        if (not html."xmllang".oclIsUndefined()) xml.children <- thisModule.Attribute('xml:lang', html.xmllang.value);
+        if (not (html.dir = #ltr)) xml.children <- thisModule.Attribute('dir', html.dir);
+        -- Inherited from Events super-super-class
+        if (not html.onclick.oclIsUndefined()) xml.children <- thisModule.Attribute('onclick', html.onclick.value);
+        if (not html.ondblclick.oclIsUndefined()) xml.children <- thisModule.Attribute('ondblclick', html.ondblclick.value);
+        if (not html.onmousedown.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousedown', html.onmousedown.value);
+        if (not html.onmouseup.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseup', html.onmouseup.value);
+        if (not html.onmousemove.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousemove', html.onmousemove.value);
+        if (not html.onmouseout.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseout', html.onmouseout.value);
+        if (not html.onkeypress.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeypress', html.onkeypress.value);
+        if (not html.onkeydown.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeydown', html.onkeydown.value);
+        if (not html.onkeyup.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeyup', html.onkeyup.value);
+    }
+}
+
+-- -------------------------------------------------------------------------
+-- Horizontal Rule --------------------------------------------------
+-- -------------------------------------------------------------------------
+
+rule HR {
+    from
+        html : XHTML!HR
+    to
+        xml : XML!Element (
+            name <- 'hr'
+        )
+    do {
+        -- Inherited from CoreAttrs super-super-class
+        if (not html.id.oclIsUndefined()) xml.children <- thisModule.Attribute('id', html.id.value);
+        if (not html.class.oclIsUndefined()) xml.children <- thisModule.Attribute('class', html.class.value);
+        if (not html.style.oclIsUndefined()) xml.children <- thisModule.Attribute('style', html.style.value);
+        if (not html.title.oclIsUndefined()) xml.children <- thisModule.Attribute('title', html.title.value);
+        -- Inherited from Internationalization super-super-class
+        if (not html."xmllang".oclIsUndefined()) xml.children <- thisModule.Attribute('xml:lang', html.xmllang.value);
+        if (not (html.dir = #ltr)) xml.children <- thisModule.Attribute('dir', html.dir);
+        -- Inherited from Events super-super-class
+        if (not html.onclick.oclIsUndefined()) xml.children <- thisModule.Attribute('onclick', html.onclick.value);
+        if (not html.ondblclick.oclIsUndefined()) xml.children <- thisModule.Attribute('ondblclick', html.ondblclick.value);
+        if (not html.onmousedown.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousedown', html.onmousedown.value);
+        if (not html.onmouseup.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseup', html.onmouseup.value);
+        if (not html.onmousemove.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousemove', html.onmousemove.value);
+        if (not html.onmouseout.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseout', html.onmouseout.value);
+        if (not html.onkeypress.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeypress', html.onkeypress.value);
+        if (not html.onkeydown.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeydown', html.onkeydown.value);
+        if (not html.onkeyup.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeyup', html.onkeyup.value);
+    }
+}
+
+-- -------------------------------------------------------------------------
+-- Preformatted Text -------------------------------------------------------
+-- -------------------------------------------------------------------------
+
+rule PRE {
+    from
+        html : XHTML!PRE
+    to
+        xml : XML!Element (
+            name <- 'pre',
+			children <- thisModule.inlines(html.preContents)
+        )
+    do {
+        -- Inherited from CoreAttrs super-super-class
+        if (not html.id.oclIsUndefined()) xml.children <- thisModule.Attribute('id', html.id.value);
+        if (not html.class.oclIsUndefined()) xml.children <- thisModule.Attribute('class', html.class.value);
+        if (not html.style.oclIsUndefined()) xml.children <- thisModule.Attribute('style', html.style.value);
+        if (not html.title.oclIsUndefined()) xml.children <- thisModule.Attribute('title', html.title.value);
+        -- Inherited from Internationalization super-super-class
+        if (not html."xmllang".oclIsUndefined()) xml.children <- thisModule.Attribute('xml:lang', html.xmllang.value);
+        if (not (html.dir = #ltr)) xml.children <- thisModule.Attribute('dir', html.dir);
+        -- Inherited from Events super-super-class
+        if (not html.onclick.oclIsUndefined()) xml.children <- thisModule.Attribute('onclick', html.onclick.value);
+        if (not html.ondblclick.oclIsUndefined()) xml.children <- thisModule.Attribute('ondblclick', html.ondblclick.value);
+        if (not html.onmousedown.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousedown', html.onmousedown.value);
+        if (not html.onmouseup.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseup', html.onmouseup.value);
+        if (not html.onmousemove.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousemove', html.onmousemove.value);
+        if (not html.onmouseout.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseout', html.onmouseout.value);
+        if (not html.onkeypress.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeypress', html.onkeypress.value);
+        if (not html.onkeydown.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeydown', html.onkeydown.value);
+        if (not html.onkeyup.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeyup', html.onkeyup.value);
+    }
+}
+
+-- -------------------------------------------------------------------------
+-- The Anchor Element ------------------------------------------------------
+-- -------------------------------------------------------------------------
+
+rule A {
+    from
+        html : XHTML!A
+    to
+        xml : XML!Element (
+            name <- 'a',
+            children <- thisModule.inlines(html.aContents)
+        )
+    do {
+        -- Inherited from CoreAttrs super-super-class
+        if (not html.id.oclIsUndefined()) xml.children <- thisModule.Attribute('id', html.id.value);
+        if (not html.class.oclIsUndefined()) xml.children <- thisModule.Attribute('class', html.class.value);
+        if (not html.style.oclIsUndefined()) xml.children <- thisModule.Attribute('style', html.style.value);
+        if (not html.title.oclIsUndefined()) xml.children <- thisModule.Attribute('title', html.title.value);
+        -- Inherited from Internationalization super-super-class
+        if (not html."xmllang".oclIsUndefined()) xml.children <- thisModule.Attribute('xml:lang', html.xmllang.value);
+        if (not (html.dir = #ltr)) xml.children <- thisModule.Attribute('dir', html.dir);
+        -- Local attributes and references
+        if (not html.charset.oclIsUndefined()) xml.children <- thisModule.Attribute('charset', html.charset.value);
+        if (not html.type.oclIsUndefined()) xml.children <- thisModule.Attribute('type', html.type.value);
+        if (not html.href.oclIsUndefined()) xml.children <- thisModule.Attribute('href', html.href.value);
+        if (not html.hreflang.oclIsUndefined()) xml.children <- thisModule.Attribute('hreflang', html.hreflang.value);
+        if (not html.rel.oclIsUndefined()) xml.children <- thisModule.Attribute('rel', html.rel.value);
+        if (not html.rev.oclIsUndefined()) xml.children <- thisModule.Attribute('rev', html.rev.value);
+        if (not (html.shape = #rect)) xml.children <- thisModule.Attribute('shape', html.shape);
+        if (not html.coords.oclIsUndefined()) xml.children <- thisModule.Attribute('coords', html.coords.value);
+        -- Inherited from Events super-super-class
+        if (not html.onclick.oclIsUndefined()) xml.children <- thisModule.Attribute('onclick', html.onclick.value);
+        if (not html.ondblclick.oclIsUndefined()) xml.children <- thisModule.Attribute('ondblclick', html.ondblclick.value);
+        if (not html.onmousedown.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousedown', html.onmousedown.value);
+        if (not html.onmouseup.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseup', html.onmouseup.value);
+        if (not html.onmousemove.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousemove', html.onmousemove.value);
+        if (not html.onmouseout.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseout', html.onmouseout.value);
+        if (not html.onkeypress.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeypress', html.onkeypress.value);
+        if (not html.onkeydown.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeydown', html.onkeydown.value);
+        if (not html.onkeyup.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeyup', html.onkeyup.value);
+        -- Inherited from Focus super-class
+        if (not html.accesskey.oclIsUndefined()) xml.children <- thisModule.Attribute('accesskey', html.accesskey.value);
+        if (not html.tabindex.oclIsUndefined()) xml.children <- thisModule.Attribute('tabindex', html.tabindex.value);
+        if (not html.onfocus.oclIsUndefined()) xml.children <- thisModule.Attribute('onfocus', html.onfocus.value);
+        if (not html.onblur.oclIsUndefined()) xml.children <- thisModule.Attribute('onblur', html.onblur.value);
+    }
+}
+
+-- -------------------------------------------------------------------------
+-- Inline Elements ---------------------------------------------------------
+-- -------------------------------------------------------------------------
+
+rule BR {
+    from
+        html : XHTML!BR
+    to
+        xml : XML!Element (
+            name <- 'br'
+        )
+    do {
+        -- Inherited from CoreAttrs super-super-class
+        if (not html.id.oclIsUndefined()) xml.children <- thisModule.Attribute('id', html.id.value);
+        if (not html.class.oclIsUndefined()) xml.children <- thisModule.Attribute('class', html.class.value);
+        if (not html.style.oclIsUndefined()) xml.children <- thisModule.Attribute('style', html.style.value);
+        if (not html.title.oclIsUndefined()) xml.children <- thisModule.Attribute('title', html.title.value);
+    }
+}
+
+-- STRONG or ACRONYM
+rule Phrase {
+    from
+        html : XHTML!Phrase
+    to
+        xml : XML!Element (
+            name <- if (html.oclIsKindOf(XHTML!STRONG))
+		            	then 'strong'
+		            	else 'acronym'
+					endif,
+            children <- thisModule.inlines(html.inlines)
+        )
+    do {
+        -- Inherited from CoreAttrs super-super-class
+        if (not html.id.oclIsUndefined()) xml.children <- thisModule.Attribute('id', html.id.value);
+        if (not html.class.oclIsUndefined()) xml.children <- thisModule.Attribute('class', html.class.value);
+        if (not html.style.oclIsUndefined()) xml.children <- thisModule.Attribute('style', html.style.value);
+        if (not html.title.oclIsUndefined()) xml.children <- thisModule.Attribute('title', html.title.value);
+        -- Inherited from Internationalization super-super-class
+        if (not html."xmllang".oclIsUndefined()) xml.children <- thisModule.Attribute('xml:lang', html.xmllang.value);
+        if (not (html.dir = #ltr)) xml.children <- thisModule.Attribute('dir', html.dir);
+        -- Inherited from Events super-super-class
+        if (not html.onclick.oclIsUndefined()) xml.children <- thisModule.Attribute('onclick', html.onclick.value);
+        if (not html.ondblclick.oclIsUndefined()) xml.children <- thisModule.Attribute('ondblclick', html.ondblclick.value);
+        if (not html.onmousedown.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousedown', html.onmousedown.value);
+        if (not html.onmouseup.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseup', html.onmouseup.value);
+        if (not html.onmousemove.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousemove', html.onmousemove.value);
+        if (not html.onmouseout.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseout', html.onmouseout.value);
+        if (not html.onkeypress.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeypress', html.onkeypress.value);
+        if (not html.onkeydown.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeydown', html.onkeydown.value);
+        if (not html.onkeyup.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeyup', html.onkeyup.value);
+    }
+}
+
+-- I
+rule Fontstyle {
+    from
+        html : XHTML!Fontstyle
+    to
+        xml : XML!Element (
+            name <- 'i',
+            children <- thisModule.inlines(html.inlines)
+        )
+    do {
+        -- Inherited from CoreAttrs super-super-class
+        if (not html.id.oclIsUndefined()) xml.children <- thisModule.Attribute('id', html.id.value);
+        if (not html.class.oclIsUndefined()) xml.children <- thisModule.Attribute('class', html.class.value);
+        if (not html.style.oclIsUndefined()) xml.children <- thisModule.Attribute('style', html.style.value);
+        if (not html.title.oclIsUndefined()) xml.children <- thisModule.Attribute('title', html.title.value);
+        -- Inherited from Internationalization super-super-class
+        if (not html."xmllang".oclIsUndefined()) xml.children <- thisModule.Attribute('xml:lang', html.xmllang.value);
+        if (not (html.dir = #ltr)) xml.children <- thisModule.Attribute('dir', html.dir);
+        -- Inherited from Events super-super-class
+        if (not html.onclick.oclIsUndefined()) xml.children <- thisModule.Attribute('onclick', html.onclick.value);
+        if (not html.ondblclick.oclIsUndefined()) xml.children <- thisModule.Attribute('ondblclick', html.ondblclick.value);
+        if (not html.onmousedown.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousedown', html.onmousedown.value);
+        if (not html.onmouseup.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseup', html.onmouseup.value);
+        if (not html.onmousemove.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousemove', html.onmousemove.value);
+        if (not html.onmouseout.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseout', html.onmouseout.value);
+        if (not html.onkeypress.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeypress', html.onkeypress.value);
+        if (not html.onkeydown.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeydown', html.onkeydown.value);
+        if (not html.onkeyup.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeyup', html.onkeyup.value);
+    }
+}
+
+-- -------------------------------------------------------------------------
+-- Images ------------------------------------------------------------------
+-- -------------------------------------------------------------------------
+
+rule IMG {
+    from
+        html : XHTML!IMG
+    to
+        xml : XML!Element (
+            name <- 'img'
+        )
+    do {
+        -- Inherited from CoreAttrs super-super-class
+        if (not html.id.oclIsUndefined()) xml.children <- thisModule.Attribute('id', html.id.value);
+        if (not html.class.oclIsUndefined()) xml.children <- thisModule.Attribute('class', html.class.value);
+        if (not html.style.oclIsUndefined()) xml.children <- thisModule.Attribute('style', html.style.value);
+        if (not html.title.oclIsUndefined()) xml.children <- thisModule.Attribute('title', html.title.value);
+        -- Inherited from Internationalization super-super-class
+        if (not html."xmllang".oclIsUndefined()) xml.children <- thisModule.Attribute('xml:lang', html.xmllang.value);
+        if (not (html.dir = #ltr)) xml.children <- thisModule.Attribute('dir', html.dir);
+        -- Local attributes and references
+        xml.children <- thisModule.Attribute('src', html.src.value); 
+        xml.children <- thisModule.Attribute('alt', html.alt.value); 
+        if (not html.longdesc.oclIsUndefined()) xml.children <- thisModule.Attribute('longdesc', html.longdesc.value); 
+        if (not html.height.oclIsUndefined()) xml.children <- thisModule.Attribute('height', html.height.value); 
+        if (not html.width.oclIsUndefined()) xml.children <- thisModule.Attribute('width', html.width.value); 
+        if (not html.usemap.oclIsUndefined()) xml.children <- thisModule.Attribute('usemap', html.usemap.value);
+        if (html.ismap) xml.children <- thisModule.Attribute('ismap', 'ismap');
+        -- Inherited from Events super-super-class
+        if (not html.onclick.oclIsUndefined()) xml.children <- thisModule.Attribute('onclick', html.onclick.value);
+        if (not html.ondblclick.oclIsUndefined()) xml.children <- thisModule.Attribute('ondblclick', html.ondblclick.value);
+        if (not html.onmousedown.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousedown', html.onmousedown.value);
+        if (not html.onmouseup.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseup', html.onmouseup.value);
+        if (not html.onmousemove.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousemove', html.onmousemove.value);
+        if (not html.onmouseout.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseout', html.onmouseout.value);
+        if (not html.onkeypress.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeypress', html.onkeypress.value);
+        if (not html.onkeydown.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeydown', html.onkeydown.value);
+        if (not html.onkeyup.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeyup', html.onkeyup.value);
+    }
+}
+
+-- -------------------------------------------------------------------------
+-- Forms -------------------------------------------------------------------
+-- -------------------------------------------------------------------------
+
+rule INPUT {
+    from
+        html : XHTML!INPUT
+    to
+        xml : XML!Element (
+            name <- 'input'
+        )
+    do {
+        -- Inherited from CoreAttrs super-super-class
+        if (not html.id.oclIsUndefined()) xml.children <- thisModule.Attribute('id', html.id.value);
+        if (not html.class.oclIsUndefined()) xml.children <- thisModule.Attribute('class', html.class.value);
+        if (not html.style.oclIsUndefined()) xml.children <- thisModule.Attribute('style', html.style.value);
+        if (not html.title.oclIsUndefined()) xml.children <- thisModule.Attribute('title', html.title.value);
+        -- Inherited from Internationalization super-super-class
+        if (not html."xmllang".oclIsUndefined()) xml.children <- thisModule.Attribute('xml:lang', html.xmllang.value);
+        if (not (html.dir = #ltr)) xml.children <- thisModule.Attribute('dir', html.dir);
+        -- Local attributes and references
+		if (not (html.type = #text)) xml.children <- thisModule.Attribute('type', html.type);
+        if (not html.name.oclIsUndefined()) xml.children <- thisModule.Attribute('name', html.name.value);
+        if (not html.value.oclIsUndefined()) xml.children <- thisModule.Attribute('value', html.value.value);
+        if (html.checked) xml.children <- thisModule.Attribute('checked', 'checked');
+        if (html.disabled) xml.children <- thisModule.Attribute('disabled', 'disabled');
+        if (html.readonly) xml.children <- thisModule.Attribute('readonly', 'readonly');
+        if (not html.size.oclIsUndefined()) xml.children <- thisModule.Attribute('size', html.size.value);
+        if (not html.maxlength.oclIsUndefined()) xml.children <- thisModule.Attribute('maxlength', html.maxlength.value);
+        if (not html.src.oclIsUndefined()) xml.children <- thisModule.Attribute('src', html.src.value);
+        if (not html.alt.oclIsUndefined()) xml.children <- thisModule.Attribute('alt', html.alt.value);
+        if (not html.usemap.oclIsUndefined()) xml.children <- thisModule.Attribute('usemap', html.usemap.value);
+        if (not html.onselect.oclIsUndefined()) xml.children <- thisModule.Attribute('onselect', html.onselect.value);
+        if (not html.onchange.oclIsUndefined()) xml.children <- thisModule.Attribute('onchange', html.onchange.value);
+        if (not html.accept.oclIsUndefined()) xml.children <- thisModule.Attribute('accept', html.accept.value);
+        -- Inherited from Events super-super-class
+        if (not html.onclick.oclIsUndefined()) xml.children <- thisModule.Attribute('onclick', html.onclick.value);
+        if (not html.ondblclick.oclIsUndefined()) xml.children <- thisModule.Attribute('ondblclick', html.ondblclick.value);
+        if (not html.onmousedown.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousedown', html.onmousedown.value);
+        if (not html.onmouseup.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseup', html.onmouseup.value);
+        if (not html.onmousemove.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousemove', html.onmousemove.value);
+        if (not html.onmouseout.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseout', html.onmouseout.value);
+        if (not html.onkeypress.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeypress', html.onkeypress.value);
+        if (not html.onkeydown.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeydown', html.onkeydown.value);
+        if (not html.onkeyup.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeyup', html.onkeyup.value);
+        -- Inherited from Focus super-class
+        if (not html.accesskey.oclIsUndefined()) xml.children <- thisModule.Attribute('accesskey', html.accesskey.value);
+        if (not html.tabindex.oclIsUndefined()) xml.children <- thisModule.Attribute('tabindex', html.tabindex.value);
+        if (not html.onfocus.oclIsUndefined()) xml.children <- thisModule.Attribute('onfocus', html.onfocus.value);
+        if (not html.onblur.oclIsUndefined()) xml.children <- thisModule.Attribute('onblur', html.onblur.value);
+    }
+}
+
+rule FIELDSET {
+    from
+        html : XHTML!FIELDSET
+    to
+        xml : XML!Element (
+            name <- 'fieldset',
+			children <- html.fieldsetElements
+        )
+    do {
+        -- Inherited from CoreAttrs super-super-class
+        if (not html.id.oclIsUndefined()) xml.children <- thisModule.Attribute('id', html.id.value);
+        if (not html.class.oclIsUndefined()) xml.children <- thisModule.Attribute('class', html.class.value);
+        if (not html.style.oclIsUndefined()) xml.children <- thisModule.Attribute('style', html.style.value);
+        if (not html.title.oclIsUndefined()) xml.children <- thisModule.Attribute('title', html.title.value);
+        -- Inherited from Internationalization super-super-class
+        if (not html."xmllang".oclIsUndefined()) xml.children <- thisModule.Attribute('xml:lang', html.xmllang.value);
+        if (not (html.dir = #ltr)) xml.children <- thisModule.Attribute('dir', html.dir);
+        -- Inherited from Events super-super-class
+        if (not html.onclick.oclIsUndefined()) xml.children <- thisModule.Attribute('onclick', html.onclick.value);
+        if (not html.ondblclick.oclIsUndefined()) xml.children <- thisModule.Attribute('ondblclick', html.ondblclick.value);
+        if (not html.onmousedown.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousedown', html.onmousedown.value);
+        if (not html.onmouseup.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseup', html.onmouseup.value);
+        if (not html.onmousemove.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousemove', html.onmousemove.value);
+        if (not html.onmouseout.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseout', html.onmouseout.value);
+        if (not html.onkeypress.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeypress', html.onkeypress.value);
+        if (not html.onkeydown.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeydown', html.onkeydown.value);
+        if (not html.onkeyup.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeyup', html.onkeyup.value);
+    }
+}
+
+rule LEGEND {
+    from
+        html : XHTML!LEGEND
+    to
+        xml : XML!Element (
+            name <- 'legend',
+            children <- thisModule.inlines(html.inlines)
+        )
+    do {
+        -- Inherited from CoreAttrs super-super-class
+        if (not html.id.oclIsUndefined()) xml.children <- thisModule.Attribute('id', html.id.value);
+        if (not html.class.oclIsUndefined()) xml.children <- thisModule.Attribute('class', html.class.value);
+        if (not html.style.oclIsUndefined()) xml.children <- thisModule.Attribute('style', html.style.value);
+        if (not html.title.oclIsUndefined()) xml.children <- thisModule.Attribute('title', html.title.value);
+        -- Inherited from Internationalization super-super-class
+        if (not html."xmllang".oclIsUndefined()) xml.children <- thisModule.Attribute('xml:lang', html.xmllang.value);
+        if (not (html.dir = #ltr)) xml.children <- thisModule.Attribute('dir', html.dir);
+        -- Local attributes and references
+        if (not html.accesskey.oclIsUndefined()) xml.children <- thisModule.Attribute('accesskey', html.accesskey.value);
+        -- Inherited from Events super-super-class
+        if (not html.onclick.oclIsUndefined()) xml.children <- thisModule.Attribute('onclick', html.onclick.value);
+        if (not html.ondblclick.oclIsUndefined()) xml.children <- thisModule.Attribute('ondblclick', html.ondblclick.value);
+        if (not html.onmousedown.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousedown', html.onmousedown.value);
+        if (not html.onmouseup.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseup', html.onmouseup.value);
+        if (not html.onmousemove.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousemove', html.onmousemove.value);
+        if (not html.onmouseout.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseout', html.onmouseout.value);
+        if (not html.onkeypress.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeypress', html.onkeypress.value);
+        if (not html.onkeydown.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeydown', html.onkeydown.value);
+        if (not html.onkeyup.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeyup', html.onkeyup.value);
+    }
+}
+
+-- -------------------------------------------------------------------------
+-- Tables ------------------------------------------------------------------
+-- -------------------------------------------------------------------------
+
+rule TABLE {
+    from
+        html : XHTML!TABLE
+    to
+        xml : XML!Element (
+            name <- 'table',
+            children <- html.caption,
+            children <- html.colElements,
+            children <- html.thead,
+            children <- html.tfoot,
+            children <- html.tableElements
+        )
+    do {
+        -- Inherited from CoreAttrs super-super-class
+        if (not html.id.oclIsUndefined()) xml.children <- thisModule.Attribute('id', html.id.value);
+        if (not html.class.oclIsUndefined()) xml.children <- thisModule.Attribute('class', html.class.value);
+        if (not html.style.oclIsUndefined()) xml.children <- thisModule.Attribute('style', html.style.value);
+        if (not html.title.oclIsUndefined()) xml.children <- thisModule.Attribute('title', html.title.value);
+        -- Inherited from Internationalization super-super-class
+        if (not html."xmllang".oclIsUndefined()) xml.children <- thisModule.Attribute('xml:lang', html.xmllang.value);
+        if (not (html.dir = #ltr)) xml.children <- thisModule.Attribute('dir', html.dir);
+        -- Local attributes and references
+        if (not html.summary.oclIsUndefined()) xml.children <- thisModule.Attribute('summary', html.summary.value); 
+        if (not html.width.oclIsUndefined()) xml.children <- thisModule.Attribute('width', html.width.value); 
+        if (not html.border.oclIsUndefined()) xml.children <- thisModule.Attribute('border', html.border.value); 
+        if (not (html.frame = #void)) xml.children <- thisModule.Attribute('frame', html.frame); 
+        if (not (html.rules = #none)) xml.children <- thisModule.Attribute('rules', html.rules); 
+        if (not html.cellspacing.oclIsUndefined()) xml.children <- thisModule.Attribute('cellspacing', html.cellspacing.value); 
+        if (not html.cellpadding.oclIsUndefined()) xml.children <- thisModule.Attribute('cellpadding', html.cellpadding.value); 
+        -- Inherited from Events super-super-class
+        if (not html.onclick.oclIsUndefined()) xml.children <- thisModule.Attribute('onclick', html.onclick.value);
+        if (not html.ondblclick.oclIsUndefined()) xml.children <- thisModule.Attribute('ondblclick', html.ondblclick.value);
+        if (not html.onmousedown.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousedown', html.onmousedown.value);
+        if (not html.onmouseup.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseup', html.onmouseup.value);
+        if (not html.onmousemove.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousemove', html.onmousemove.value);
+        if (not html.onmouseout.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseout', html.onmouseout.value);
+        if (not html.onkeypress.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeypress', html.onkeypress.value);
+        if (not html.onkeydown.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeydown', html.onkeydown.value);
+        if (not html.onkeyup.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeyup', html.onkeyup.value);
+    }
+}
+
+rule CAPTION {
+    from
+        html : XHTML!CAPTION
+    to
+        xml : XML!Element (
+            name <- 'caption',
+            children <- thisModule.inlines(html.inlines)
+        )
+    do {
+        -- Inherited from CoreAttrs super-super-class
+        if (not html.id.oclIsUndefined()) xml.children <- thisModule.Attribute('id', html.id.value);
+        if (not html.class.oclIsUndefined()) xml.children <- thisModule.Attribute('class', html.class.value);
+        if (not html.style.oclIsUndefined()) xml.children <- thisModule.Attribute('style', html.style.value);
+        if (not html.title.oclIsUndefined()) xml.children <- thisModule.Attribute('title', html.title.value);
+        -- Inherited from Internationalization super-super-class
+        if (not html."xmllang".oclIsUndefined()) xml.children <- thisModule.Attribute('xml:lang', html.xmllang.value);
+        if (not (html.dir = #ltr)) xml.children <- thisModule.Attribute('dir', html.dir);
+        -- Inherited from Events super-super-class
+        if (not html.onclick.oclIsUndefined()) xml.children <- thisModule.Attribute('onclick', html.onclick.value);
+        if (not html.ondblclick.oclIsUndefined()) xml.children <- thisModule.Attribute('ondblclick', html.ondblclick.value);
+        if (not html.onmousedown.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousedown', html.onmousedown.value);
+        if (not html.onmouseup.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseup', html.onmouseup.value);
+        if (not html.onmousemove.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousemove', html.onmousemove.value);
+        if (not html.onmouseout.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseout', html.onmouseout.value);
+        if (not html.onkeypress.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeypress', html.onkeypress.value);
+        if (not html.onkeydown.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeydown', html.onkeydown.value);
+        if (not html.onkeyup.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeyup', html.onkeyup.value);
+    }
+}
+
+-- THEAD, TFOOT or TBODY
+rule TElement {
+    from
+        html : XHTML!TElement
+    to
+        xml : XML!Element (
+            name <- if (html.oclIsKindOf(XHTML!TBODY))
+            	       then 'tbody'
+					   else if (html.oclIsKindOf(XHTML!TFOOT))
+		                       then 'tfoot'
+		                       else 'thead'
+		                    endif
+					endif,
+            children <- html.trs
+        )
+    do {
+        -- Inherited from CoreAttrs super-super-class
+        if (not html.id.oclIsUndefined()) xml.children <- thisModule.Attribute('id', html.id.value);
+        if (not html.class.oclIsUndefined()) xml.children <- thisModule.Attribute('class', html.class.value);
+        if (not html.style.oclIsUndefined()) xml.children <- thisModule.Attribute('style', html.style.value);
+        if (not html.title.oclIsUndefined()) xml.children <- thisModule.Attribute('title', html.title.value);
+        -- Inherited from Internationalization super-super-class
+        if (not html."xmllang".oclIsUndefined()) xml.children <- thisModule.Attribute('xml:lang', html.xmllang.value);
+        if (not (html.dir = #ltr)) xml.children <- thisModule.Attribute('dir', html.dir);
+        -- Inherited from CellHAlign super-class
+        if (not (html.align = #left)) xml.children <- thisModule.Attribute('align', html.align);
+        if (not html.charoff.oclIsUndefined()) xml.children <- thisModule.Attribute('charoff', html.charoff.value);
+        if (not html.onkeyup.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeyup', html.onkeyup.value);
+        -- Inherited from CellVAlign super-class
+        if (not (html.valign = #top)) xml.children <- thisModule.Attribute('valign', html.valign);
+        -- Inherited from Events super-super-class
+        if (not html.onclick.oclIsUndefined()) xml.children <- thisModule.Attribute('onclick', html.onclick.value);
+        if (not html.ondblclick.oclIsUndefined()) xml.children <- thisModule.Attribute('ondblclick', html.ondblclick.value);
+        if (not html.onmousedown.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousedown', html.onmousedown.value);
+        if (not html.onmouseup.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseup', html.onmouseup.value);
+        if (not html.onmousemove.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousemove', html.onmousemove.value);
+        if (not html.onmouseout.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseout', html.onmouseout.value);
+        if (not html.onkeypress.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeypress', html.onkeypress.value);
+        if (not html.onkeydown.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeydown', html.onkeydown.value);
+        if (not html.onkeyup.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeyup', html.onkeyup.value);
+    }
+}
+
+rule TR {
+    from
+        html : XHTML!TR
+    to
+        xml : XML!Element (
+            name <- 'tr',
+            children <- html.trElements
+        )
+    do {
+        -- Inherited from CoreAttrs super-super-class
+        if (not html.id.oclIsUndefined()) xml.children <- thisModule.Attribute('id', html.id.value);
+        if (not html.class.oclIsUndefined()) xml.children <- thisModule.Attribute('class', html.class.value);
+        if (not html.style.oclIsUndefined()) xml.children <- thisModule.Attribute('style', html.style.value);
+        if (not html.title.oclIsUndefined()) xml.children <- thisModule.Attribute('title', html.title.value);
+        -- Inherited from Internationalization super-super-class
+        if (not html."xmllang".oclIsUndefined()) xml.children <- thisModule.Attribute('xml:lang', html.xmllang.value);
+        if (not (html.dir = #ltr)) xml.children <- thisModule.Attribute('dir', html.dir);
+        -- Inherited from CellHAlign super-class
+        if (not (html.align = #left)) xml.children <- thisModule.Attribute('align', html.align);
+        if (not html.charoff.oclIsUndefined()) xml.children <- thisModule.Attribute('charoff', html.charoff.value);
+        if (not html.onkeyup.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeyup', html.onkeyup.value);
+        -- Inherited from CellVAlign super-class
+        if (not (html.valign = #top)) xml.children <- thisModule.Attribute('valign', html.valign);
+        -- Inherited from Events super-super-class
+        if (not html.onclick.oclIsUndefined()) xml.children <- thisModule.Attribute('onclick', html.onclick.value);
+        if (not html.ondblclick.oclIsUndefined()) xml.children <- thisModule.Attribute('ondblclick', html.ondblclick.value);
+        if (not html.onmousedown.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousedown', html.onmousedown.value);
+        if (not html.onmouseup.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseup', html.onmouseup.value);
+        if (not html.onmousemove.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousemove', html.onmousemove.value);
+        if (not html.onmouseout.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseout', html.onmouseout.value);
+        if (not html.onkeypress.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeypress', html.onkeypress.value);
+        if (not html.onkeydown.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeydown', html.onkeydown.value);
+        if (not html.onkeyup.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeyup', html.onkeyup.value);
+    }
+}
+
+-- TD or TH
+rule TRElement {
+    from
+        html : XHTML!TRElement
+    to
+        xml : XML!Element (
+            name <- if (html.oclIsKindOf(XHTML!TD))
+                       then 'td'
+                       else 'th'
+                    endif,
+            children <- thisModule.inlines(html.flows)
+        )
+    do {
+        -- Inherited from CoreAttrs super-super-class
+        if (not html.id.oclIsUndefined()) xml.children <- thisModule.Attribute('id', html.id.value);
+        if (not html.class.oclIsUndefined()) xml.children <- thisModule.Attribute('class', html.class.value);
+        if (not html.style.oclIsUndefined()) xml.children <- thisModule.Attribute('style', html.style.value);
+        if (not html.title.oclIsUndefined()) xml.children <- thisModule.Attribute('title', html.title.value);
+        -- Inherited from Internationalization super-super-class
+        if (not html."xmllang".oclIsUndefined()) xml.children <- thisModule.Attribute('xml:lang', html.xmllang.value);
+        if (not (html.dir = #ltr)) xml.children <- thisModule.Attribute('dir', html.dir);
+        -- Local attributes and references
+        if (not html.abbr.oclIsUndefined()) xml.children <- thisModule.Attribute('abbr', html.abbr.value);
+        if (not html.headers.oclIsUndefined()) xml.children <- thisModule.Attribute('headers', html.headers.value);
+        if (not (html.scope = #none)) xml.children <- thisModule.Attribute('scope', html.scope);
+        if (not html.rowspan.oclIsUndefined()) xml.children <- thisModule.Attribute('rowspan', html.rowspan.value);
+        if (not html.colspan.oclIsUndefined()) xml.children <- thisModule.Attribute('colspan', html.colspan.value);
+        -- Inherited from CellHAlign super-class        if (not (html.align = #left)) xml.children <- thisModule.Attribute('align', html.align);
+        if (not html.charoff.oclIsUndefined()) xml.children <- thisModule.Attribute('charoff', html.charoff.value);
+        if (not html.onkeyup.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeyup', html.onkeyup.value);
+        -- Inherited from CellVAlign super-class
+        if (not (html.valign = #top)) xml.children <- thisModule.Attribute('valign', html.valign);
+        -- Inherited from Events super-super-class
+        if (not html.onclick.oclIsUndefined()) xml.children <- thisModule.Attribute('onclick', html.onclick.value);
+        if (not html.ondblclick.oclIsUndefined()) xml.children <- thisModule.Attribute('ondblclick', html.ondblclick.value);
+        if (not html.onmousedown.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousedown', html.onmousedown.value);
+        if (not html.onmouseup.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseup', html.onmouseup.value);
+        if (not html.onmousemove.oclIsUndefined()) xml.children <- thisModule.Attribute('onmousemove', html.onmousemove.value);
+        if (not html.onmouseout.oclIsUndefined()) xml.children <- thisModule.Attribute('onmouseout', html.onmouseout.value);
+        if (not html.onkeypress.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeypress', html.onkeypress.value);
+        if (not html.onkeydown.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeydown', html.onkeydown.value);
+        if (not html.onkeyup.oclIsUndefined()) xml.children <- thisModule.Attribute('onkeyup', html.onkeyup.value);
+    }
+}
+
+-- -------------------------------------------------------------------------
+-- XML Attribute and Text --------------------------------------------------
+-- -------------------------------------------------------------------------
+
+--@begin called rule Attribute
+rule Attribute(attrName : String, attrValue : String) {
+	to
+		attr : XML!Attribute (
+			name <- attrName,
+			value <- attrValue
+		)
+	do {
+		attr;
+	}
+}	
+--@end called rule Attribute
+
+--@begin called rule Attribute
+rule Attribute(attrName : String, attrValue : Integer) {
+	to
+		attr : XML!Attribute (
+			name <- attrName,
+			value <- attrValue.toString()
+		)
+	do {
+		attr;
+	}
+}	
+--@end called rule Attribute
+
+--@begin called rule Text
+rule Text(value : String) {
+	to
+		text : XML!Text (
+			value <-
+				if not value.oclIsUndefined()
+					then value
+					else ''
+				endif
+		)
+	do {
+		text;
+	}
+}	
+--@end called rule Text

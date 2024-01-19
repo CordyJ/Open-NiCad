@@ -1,0 +1,211 @@
+-- @name		Disaggregation
+-- @version		1.0
+-- @domains		Catalogue of Model Transformations
+-- @authors		SIMON Eric(simon.eric3<at>gmail.com)
+-- @date		2006/07/27
+-- @description	This transformation strenghthens or weakens an assertion(respectively postcondition and precondition).
+-- @see http://www.dcs.kcl.ac.uk/staff/kcl/tcat.pdf   
+-- @see section 2.8, page 23
+-- @see author of article : K. Lano
+
+module Disaggregation; -- Module Template
+create OUT : KM3 from IN : KM3;
+
+-- @comment this helper returns the metadata "commentsBefore" of name : <name>
+helper context KM3!Attribute def: getMetadata(name : String) : String =
+	let comment : String = self.commentsBefore->select(e | e.startsWith('-- @' + name + ' '))->first() in
+	if comment.oclIsUndefined() then
+		OclUndefined
+	else
+		comment.substring(6 + name.size(), comment.size())
+	endif;
+
+-- @comment this helper returns the class set of the metadatas
+helper context KM3!Class def : getClass : Set(String) =
+	KM3!Attribute->allInstances()->select(c|c.commentsBefore->notEmpty())->iterate(a; acc : Set(String) = Set{}| acc->including(a.getMetadata('label')))
+	;
+--@begin rule Metamodel
+rule Metamodel {
+	from
+		inputMm:KM3!Metamodel
+	to
+		outputMm:KM3!Metamodel (
+			location <- inputMm.location,
+			contents <- inputMm.contents
+		)
+}
+-- @end rule Metamodel
+
+-- @begin rule Package
+rule Package {
+	from
+		inputPkg:KM3!Package
+	to
+		outputPkg:KM3!Package (
+			name <- inputPkg.name,
+			contents <- inputPkg.contents
+		)
+}
+-- @end rule Package
+
+-- @begin rule DataType
+rule DataType {
+	from
+		inputData:KM3!DataType
+	to
+		outputData:KM3!DataType(
+			name <- inputData.name,
+			location <- inputData.location
+		)
+}
+-- @end rule DataType
+
+-- @begin rule Enumeration 
+rule Enumeration {
+	from
+		inputEnum:KM3!Enumeration
+	to
+		outputEnum:KM3!Enumeration (
+			name <- inputEnum.name,
+			location <- inputEnum.location,
+			package <- inputEnum.package,
+			literals <- inputEnum.literals
+		)
+}
+-- @end rule Enumeration 
+
+
+--@begin rule EnumLiteral
+rule EnumLiteral {
+	from
+		inputL:KM3!EnumLiteral
+	to
+		outputL:KM3!EnumLiteral (
+			name <- inputL.name,
+			location <- inputL.location,
+			enum  <- inputL.enum,
+			package <- inputL.package
+		)
+}
+--@end rule EnumLiteral
+
+-- @begin rule Class
+rule Class {
+	from
+		inputC:KM3!Class
+		(not (inputC.structuralFeatures->select(r|r.oclIsTypeOf(KM3!Attribute))->exists(a|a.commentsBefore->notEmpty())))
+	to
+		outputC:KM3!Class (
+			isAbstract <- inputC.isAbstract,
+			supertypes <- inputC.supertypes,
+			name <- inputC.name,
+			location <- inputC.location,
+			package <- inputC.package,
+			structuralFeatures <- inputC.structuralFeatures
+		)
+}
+-- @end rule Class
+
+-- @begin rule Attribute
+rule Attribute {
+	from
+		inputAttr : KM3!Attribute
+	to
+		outputAttr : KM3!Attribute (
+			package <- inputAttr.package,
+			name <- inputAttr.name,
+			lower <- inputAttr.lower,
+			upper <- inputAttr.upper,
+			isOrdered <- inputAttr.isOrdered,
+			isUnique <- inputAttr.isUnique,
+			owner <- inputAttr.owner,
+			type <- inputAttr.type
+		)
+}
+-- @end rule Attribute
+
+-- @begin rule Reference
+rule Reference {
+	from
+		inputRef : KM3!Reference
+			
+	to
+		outputRef : KM3!Reference (
+			package <- inputRef.package,
+			name <- inputRef.name,
+			lower <- inputRef.lower,
+			upper <- inputRef.upper,
+			isOrdered <- inputRef.isOrdered,
+			isUnique <- inputRef.isUnique,
+			owner <- inputRef.owner,
+			type <- inputRef.type,
+			isContainer <- inputRef.isContainer,
+			opposite <- inputRef.opposite
+		)
+}
+-- @end rule Attribute
+
+-- @begin rule Disaggregation
+rule Disaggregation {
+	from
+		inputC : KM3!Class
+		(inputC.structuralFeatures->select(r|r.oclIsTypeOf(KM3!Attribute))->exists(a|a.commentsBefore->notEmpty()))
+	using {
+		subClasses : Set(String) = inputC.getClass;		
+		}
+	to
+		outputPrimaryClass : KM3!Class (	
+			isAbstract <- inputC.isAbstract,
+			supertypes <- inputC.supertypes,
+			name <- inputC.name,
+			location <- inputC.location,
+			package <- inputC.package,
+			structuralFeatures <- inputC.structuralFeatures->select(a| not a.oclIsTypeOf(KM3!Attribute)),
+			structuralFeatures <- inputC.structuralFeatures->select(a| a.oclIsTypeOf(KM3!Attribute))->select(a|a.commentsBefore->oclIsUndefined()),
+			structuralFeatures <- subClasses->iterate(a; acc : Sequence(KM3!Reference)=Sequence{}| acc->append(thisModule.composition(inputC,a)))			
+		)
+}
+-- @end rule Disaggregation
+
+-- @comment this lazy rule creates a auxiliarie class and this link with the root element for each element in the metadata.
+-- @begin rule composition
+lazy rule composition{
+	from
+		inputC : KM3!Class,
+		Name : String
+		
+	to
+		outputRef1 : KM3!Reference (
+			package <- inputC.package,
+			name <- 'ref1'+Name,
+			lower <- 1,
+			upper <- 1,
+			isOrdered <- false,
+			isUnique <- false,
+			owner <- inputC,
+			type <- subClass,
+			isContainer <- true,
+			opposite <- outputRef2
+		),
+		subClass : KM3!Class (
+			isAbstract <- false,
+			name <- Name,
+			location <- inputC.location,
+			package <- inputC.package,
+			structuralFeatures <- inputC.structuralFeatures->select(a| a.oclIsTypeOf(KM3!Attribute))->select(a|a.commentsBefore->notEmpty() and a.getMetadata('label') = Name)
+		),
+		
+		outputRef2 : KM3!Reference (
+			package <- inputC.package,
+			name <- 'ref'+inputC.name,
+			lower <- 1,
+			upper <- 1,
+			isOrdered <- false,
+			isUnique <- false,
+			owner <- subClass,
+			type <- inputC,
+			isContainer <- false,
+			opposite <- outputRef1
+		)
+}
+-- @end rule composition

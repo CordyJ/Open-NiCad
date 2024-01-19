@@ -1,0 +1,117 @@
+-- @atlcompiler atl2006
+library MDLHelpers; -- Library Template
+
+helper context MDL!Property def : getAllObjects : Sequence(MDL!Object)=
+	self.value.value.elements;
+
+helper context MDL!Object def : getValue( propertyName: String) : String =
+	let _property : MDL!Property = self.properties->any(e|e.name=propertyName)in
+		if(	_property.oclIsUndefined()) 
+		then
+			OclUndefined
+		else if(_property.value.oclIsKindOf(MDL!IdVal))
+		then
+			_property.value.id.toString()
+		else if(_property.value.oclIsKindOf(MDL!ElementVal)and _property.value.value.oclIsKindOf(MDL!ValueElement))
+		then
+			_property.value.value.value.value
+		else
+			_property.value.value
+		endif endif endif;
+
+helper context MDL!Object def : getProperty(propertyName: String) : MDL!Property =
+	self.properties->any(e | e.name=propertyName);
+
+helper context MDL!Object def : getOwnedElements(input : String) : Sequence(MDL!Object)=
+let _property : MDL!Property=self.getProperty(input)in
+	if(_property.oclIsUndefined())
+	then
+		Sequence{}
+	else
+		_property.getAllObjects
+	endif;
+
+helper context MDL!Object def: getTypeValueByName(input : String) : OclAny =
+	let _type : String = self.getValue(input) in
+	if(_type.oclIsUndefined())
+	then
+		OclUndefined
+	else
+	let _primitiveType : OclAny = thisModule.primitiveType2OutVar.get(_type) in
+	if(_primitiveType.oclIsUndefined())
+	then				
+		self.getObjectById(self.getValue('quidu'))
+	else
+		thisModule.resolveTemp(thisModule.root, _primitiveType)
+	endif endif;
+	
+helper context MDL!Object def : getObjectById(id : String) : MDL!Object =
+	thisModule.quid2Object->get(id);
+
+helper context MDL!Object def : isNavigable() : Boolean =
+	let _isNavigable: Boolean= self.getValue('is_navigable') in
+	if(_isNavigable.oclIsUndefined() or _isNavigable='false')
+	then
+		false
+	else
+		true
+	endif;
+
+helper context MDL!Object def : getAssociationEnds() : Sequence(MDL!Object)=
+	MDL!Object.allInstancesFrom('IN')->select(e|e.type='Association')
+	->iterate(e; acc:Sequence(MDL!Object)=Sequence{}|
+	--if(e.type='Association')
+	--then
+	let _role : MDL!Object = e.getOwnedElements('roles')->any(e1|e1.getValue('quidu')=self.getValue('quid')
+			and e1.isNavigable()) in
+		if(_role.oclIsUndefined())
+		then
+			acc
+		else
+			acc->append(_role.getOppositeRole())
+		endif
+	--else
+	--	acc
+	);
+
+helper context MDL!Object def : getOppositeRole() : MDL!Object=
+	thisModule.getOwnerObject(self)->getOwnedElements('roles')->any(e|e<>self);
+
+helper def : getOwnerObject(input : OclAny) : OclAny =
+	let _return : OclAny = input.refImmediateComposite() in
+	if(_return.oclIsTypeOf(MDL!Object) or _return.oclIsUndefined())
+	then
+		_return
+	else
+		thisModule.getOwnerObject(_return)
+	endif;
+helper context MDL!Object def : isStereotypeApplied(stereotype : String) : Boolean=
+	let _element:MDL!Object = self.getObjectById(self.getValue('quidu')) in
+	if(_element.oclIsUndefined())
+		then false
+		else
+			let _stereotype : String = _element.getValue('stereotype')in
+			if(_stereotype=stereotype)
+			then
+				true
+			else 
+				false
+			endif
+		endif;
+helper context MDL!Object def : hasOwnerView(viewID : String) : Boolean=
+	let _element:MDL!Object = thisModule.getOwnerObject(self) in
+	if(_element.oclIsUndefined())
+		then false
+		else
+			let _id : String = _element.getValue('quid')in
+			if(_id=viewID)
+			then
+				true
+			else 
+				false
+			endif
+		endif;	
+helper context MDL!Object def : getOwnedNodes(input : String) : Sequence(MDL!Object)=
+	self.getOwnedElements('items')->select(e|e.type<>'InheritView');
+helper context MDL!Object def : getOwnedEdges(input : String) : Sequence(MDL!Object)=
+	self.getOwnedElements('items')->select(e|e.type='InheritView');

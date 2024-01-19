@@ -1,0 +1,1083 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions targetNamespace="http://echo.nasa.gov/echo/v9"
+  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+  xmlns:autopop="http://echo.nasa.gov/echoforms/autopopulate/v9"
+  xmlns:datainfo="http://echo.nasa.gov/catalog/datasetinfo/v9"
+  xmlns:forms="http://echo.nasa.gov/echoforms/v9"
+  xmlns:echo="http://echo.nasa.gov/echo/v9"
+  xmlns:echofaults="http://echo.nasa.gov/echo/v9/faults"
+  xmlns:echotypes="http://echo.nasa.gov/echo/v9/types"
+  xmlns:fulfill="http://echo.nasa.gov/order/fulfillment/v9"
+  xmlns="http://schemas.xmlsoap.org/wsdl/">
+  <documentation>
+    Provides access to user related functionality such as locating and
+    updating users. The user service can be used by providers to find
+    users and grant or revoke access to the provider role.
+  </documentation>
+  <types>
+    <xs:schema elementFormDefault="qualified"
+      xmlns:xs="http://www.w3.org/2001/XMLSchema"
+      targetNamespace="http://echo.nasa.gov/echo/v9">
+      <xs:import schemaLocation="EchoExceptions.xsd"
+        namespace="http://echo.nasa.gov/echo/v9/faults" />
+      <xs:include schemaLocation="UserServiceMessages.xsd" />
+    </xs:schema>
+  </types>
+  <message name="CreateUser">
+    <part name="parameters" element="echo:CreateUser" />
+  </message>
+  <message name="CreateUserResponse">
+    <part name="parameters" element="echo:CreateUserResponse" />
+  </message>
+  <message name="SetUserPassword">
+    <part name="parameters" element="echo:SetUserPassword" />
+  </message>
+  <message name="SetUserPasswordResponse">
+    <part name="parameters" element="echo:SetUserPasswordResponse" />
+  </message>
+  <message name="RecallUserId">
+    <part name="parameters" element="echo:RecallUserId" />
+  </message>
+  <message name="RecallUserIdResponse">
+    <part name="parameters" element="echo:RecallUserIdResponse" />
+  </message>
+  <message name="ResetUserPassword">
+    <part name="parameters" element="echo:ResetUserPassword" />
+  </message>
+  <message name="ResetUserPasswordResponse">
+    <part name="parameters" element="echo:ResetUserPasswordResponse" />
+  </message>
+  <message name="CreateAuthenticator">
+    <part name="parameters" element="echo:CreateAuthenticator" />
+  </message>
+  <message name="CreateAuthenticatorResponse">
+    <part name="parameters" element="echo:CreateAuthenticatorResponse" />
+  </message>
+  <message name="RemoveAuthenticators">
+    <part name="parameters" element="echo:RemoveAuthenticators" />
+  </message>
+  <message name="RemoveAuthenticatorsResponse">
+    <part name="parameters" element="echo:RemoveAuthenticatorsResponse" />
+  </message>
+  <message name="UpdateAuthenticators">
+    <part name="parameters" element="echo:UpdateAuthenticators" />
+  </message>
+  <message name="UpdateAuthenticatorsResponse">
+    <part name="parameters" element="echo:UpdateAuthenticatorsResponse" />
+  </message>
+  <message name="GetAuthenticatorNames">
+    <part name="parameters" element="echo:GetAuthenticatorNames" />
+  </message>
+  <message name="GetAuthenticatorNamesResponse">
+    <part name="parameters"
+      element="echo:GetAuthenticatorNamesResponse" />
+  </message>
+  <message name="GetAuthenticators">
+    <part name="parameters" element="echo:GetAuthenticators" />
+  </message>
+  <message name="GetAuthenticatorsResponse">
+    <part name="parameters" element="echo:GetAuthenticatorsResponse" />
+  </message>
+  <message name="UpdateUsers">
+    <part name="parameters" element="echo:UpdateUsers" />
+  </message>
+  <message name="UpdateUsersResponse">
+    <part name="parameters" element="echo:UpdateUsersResponse" />
+  </message>
+  <message name="GetUserNamesByUserId">
+    <part name="parameters" element="echo:GetUserNamesByUserId" />
+  </message>
+  <message name="GetUserNamesByUserIdResponse">
+    <part name="parameters" element="echo:GetUserNamesByUserIdResponse" />
+  </message>
+  <message name="GetUsers">
+    <part name="parameters" element="echo:GetUsers" />
+  </message>
+  <message name="GetUsersResponse">
+    <part name="parameters" element="echo:GetUsersResponse" />
+  </message>
+  <message name="GetUserNames">
+    <part name="parameters" element="echo:GetUserNames" />
+  </message>
+  <message name="GetUserNamesResponse">
+    <part name="parameters" element="echo:GetUserNamesResponse" />
+  </message>
+  <message name="GetCurrentUser">
+    <part name="parameters" element="echo:GetCurrentUser" />
+  </message>
+  <message name="GetCurrentUserResponse">
+    <part name="parameters" element="echo:GetCurrentUserResponse" />
+  </message>
+  <message name="GetUserNamesByOrganizationAndFirstAndLastName">
+    <part name="parameters"
+      element="echo:GetUserNamesByOrganizationAndFirstAndLastName" />
+  </message>
+  <message
+    name="GetUserNamesByOrganizationAndFirstAndLastNameResponse">
+    <part name="parameters"
+      element="echo:GetUserNamesByOrganizationAndFirstAndLastNameResponse" />
+  </message>
+  <message name="RemoveUsers">
+    <part name="parameters" element="echo:RemoveUsers" />
+  </message>
+  <message name="RemoveUsersResponse">
+    <part name="parameters" element="echo:RemoveUsersResponse" />
+  </message>
+  <message name="GrantAccess">
+    <part name="parameters" element="echo:GrantAccess" />
+  </message>
+  <message name="GrantAccessResponse">
+    <part name="parameters" element="echo:GrantAccessResponse" />
+  </message>
+  <message name="RevokeAccess">
+    <part name="parameters" element="echo:RevokeAccess" />
+  </message>
+  <message name="RevokeAccessResponse">
+    <part name="parameters" element="echo:RevokeAccessResponse" />
+  </message>
+  <message name="GetUserNamesByRole">
+    <part name="parameters" element="echo:GetUserNamesByRole" />
+  </message>
+  <message name="GetUserNamesByRoleResponse">
+    <part name="parameters" element="echo:GetUserNamesByRoleResponse" />
+  </message>
+  <message name="GetUserPreferences">
+    <part name="parameters" element="echo:GetUserPreferences" />
+  </message>
+  <message name="GetUserPreferencesResponse">
+    <part name="parameters" element="echo:GetUserPreferencesResponse" />
+  </message>
+  <message name="SetUserPreferences">
+    <part name="parameters" element="echo:SetUserPreferences" />
+  </message>
+  <message name="SetUserPreferencesResponse">
+    <part name="parameters" element="echo:SetUserPreferencesResponse" />
+  </message>
+  <message name="RemoveUserPreferences">
+    <part name="parameters" element="echo:RemoveUserPreferences" />
+  </message>
+  <message name="RemoveUserPreferencesResponse">
+    <part name="parameters"
+      element="echo:RemoveUserPreferencesResponse" />
+  </message>
+  <message name="InternalFault">
+    <part name="parameters" element="echofaults:InternalFault" />
+  </message>
+  <message name="AuthorizationFault">
+    <part name="parameters" element="echofaults:AuthorizationFault" />
+  </message>
+  <message name="DuplicateIdFault">
+    <part name="parameters" element="echofaults:DuplicateIdFault" />
+  </message>
+  <message name="DataSizeLimitFault">
+    <part name="parameters" element="echofaults:DataSizeLimitFault" />
+  </message>
+  <message name="InvalidArgumentFault">
+    <part name="parameters" element="echofaults:InvalidArgumentFault" />
+  </message>
+  <message name="InvalidStateFault">
+    <part name="parameters" element="echofaults:InvalidStateFault" />
+  </message>
+  <message name="ItemNotFoundFault">
+    <part name="parameters" element="echofaults:ItemNotFoundFault" />
+  </message>
+  <message name="ParseFault">
+    <part name="parameters" element="echofaults:ParseFault" />
+  </message>
+  <message name="RemovalFault">
+    <part name="parameters" element="echofaults:RemovalFault" />
+  </message>
+  <message name="UnsupportedFeatureFault">
+    <part name="parameters"
+      element="echofaults:UnsupportedFeatureFault" />
+  </message>
+  <message name="ValidationFault">
+    <part name="parameters" element="echofaults:ValidationFault" />
+  </message>
+  <message name="InvalidURLFault">
+    <part name="parameters" element="echofaults:InvalidURLFault" />
+  </message>
+  <portType name="UserServicePort">
+    <operation name="CreateUser">
+      <documentation>
+        <p xmlns="">
+          Creates a new user in the ECHO system. The user account will
+          be available for immediate use.
+        </p>
+        <p xmlns="">
+          Some restrictions are enforced when creating a new user:
+          <ul>
+            <li>The user ID must be less than 30 characters.</li>
+            <li>The user ID must be unique.</li>
+            <li>
+              The user domain and region cannot be set to unspecified.
+            </li>
+            <li>
+              The password must between 10 and 40 characters
+              (inclusive).
+            </li>
+            <li>
+              The password must contain at least 3 different character
+              types: uppercase, lowercase, digits, or special
+              characters.
+            </li>
+          </ul>
+        </p>
+      </documentation>
+      <input message="echo:CreateUser" />
+      <output message="echo:CreateUserResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+      <fault name="DuplicateIdFault" message="echo:DuplicateIdFault" />
+    </operation>
+    <operation name="SetUserPassword">
+      <documentation>
+        This message allows a user to change password. The old password
+        is required for regular user for security reasons, however, it
+        is not required for administrator.
+      </documentation>
+      <input message="echo:SetUserPassword" />
+      <output message="echo:SetUserPasswordResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+    </operation>
+    <operation name="RecallUserId">
+      <documentation>
+        Allows a user to recall his or her username using the e-mail
+        address which user registered with ECHO. The usernames will be
+        sent to the email address this user specified. ECHO does not
+        throw an exception when this method is called with an invalid or
+        unknown email address. As a best practice clients should display
+        the submitted email address to the user after invoking this
+        operation. This operation is available to registered users and
+        guests.
+      </documentation>
+      <input message="echo:RecallUserId" />
+      <output message="echo:RecallUserIdResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+    </operation>
+    <operation name="ResetUserPassword">
+      <documentation>
+        Allows a user to reset his or her password. The new random
+        password will be sent to the email address this user specified.
+        ECHO does not throw an exception when this method is called with
+        an invalid or unknown email address. As a best practice clients
+        should display the submitted email address to the user after
+        invoking this operation. This operation is available to
+        registered users and guests.
+      </documentation>
+      <input message="echo:ResetUserPassword" />
+      <output message="echo:ResetUserPasswordResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+    </operation>
+    <operation name="CreateAuthenticator">
+      <documentation>
+        Allows a user to create an authenticator used when ordering data
+        from a provider. A provider may create authenticator definitions
+        for authentication information that is required when ordering.
+        If a provider requires an authenticator (credentials) from the
+        user, the user must create one and set it on the order before
+        submitting it.
+      </documentation>
+      <input message="echo:CreateAuthenticator" />
+      <output message="echo:CreateAuthenticatorResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+      <fault name="DuplicateIdFault" message="echo:DuplicateIdFault" />
+      <fault name="ValidationFault" message="echo:ValidationFault" />
+    </operation>
+    <operation name="RemoveAuthenticators">
+      <documentation>
+        Removes one or more previously defined authenticators from the
+        current user.
+      </documentation>
+      <input message="echo:RemoveAuthenticators" />
+      <output message="echo:RemoveAuthenticatorsResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+    </operation>
+    <operation name="UpdateAuthenticators">
+      <documentation>
+        Updates an authenticator definition in ECHO. If the
+        authenticator does not already exist, an error is raised. The
+        owner guid can not be changed in an authenticator.
+      </documentation>
+      <input message="echo:UpdateAuthenticators" />
+      <output message="echo:UpdateAuthenticatorsResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+      <fault name="ValidationFault" message="echo:ValidationFault" />
+    </operation>
+    <operation name="GetAuthenticatorNames">
+      <documentation>
+        Returns the names and guids of all the authenticators defined
+        for the given provider for the current user.
+      </documentation>
+      <input message="echo:GetAuthenticatorNames" />
+      <output message="echo:GetAuthenticatorNamesResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+    </operation>
+    <operation name="GetAuthenticators">
+      <documentation>
+        Returns the authenticators for the given authenticator Guids.
+      </documentation>
+      <input message="echo:GetAuthenticators" />
+      <output message="echo:GetAuthenticatorsResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+    </operation>
+    <operation name="UpdateUsers">
+      <documentation>
+        <p xmlns="">
+          Update persisted user&apos;s information including first name,
+          last name, email address, domain, region, and/or organization
+          name. User domain and region cannot be set to unspecified.
+        </p>
+        <p xmlns="">
+          The user roles will be ignored in this operation. They can
+          only be updated by granting or revoking access. The user name
+          field will be ignored during update.
+        </p>
+      </documentation>
+      <input message="echo:UpdateUsers" />
+      <output message="echo:UpdateUsersResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+    </operation>
+    <operation name="GetUserNamesByUserId">
+      <documentation>
+        Returns the user IDs and Guids for users based on user IDs.
+      </documentation>
+      <input message="echo:GetUserNamesByUserId" />
+      <output message="echo:GetUserNamesByUserIdResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+    </operation>
+    <operation name="GetUsers">
+      <documentation>
+        <p xmlns="">
+          <em>
+            This operation requires Provider or Administrator access.
+          </em>
+          <br />
+          Returns the user information for the given user Guids. Only an
+          administrator or a provider may present user information for
+          other users. Administrators have access to all the user
+          information. Providers can only retrieve user id, organization
+          name, first name, last name, user domain, and user region.
+        </p>
+      </documentation>
+      <input message="echo:GetUsers" />
+      <output message="echo:GetUsersResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+    </operation>
+    <operation name="GetUserNames">
+      <documentation>
+        Returns the user ID and guids for users based on the given
+        guids. This operation requires a registered user.
+      </documentation>
+      <input message="echo:GetUserNames" />
+      <output message="echo:GetUserNamesResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+    </operation>
+    <operation name="GetCurrentUser">
+      <documentation>
+        Returns the user information for the current user. Only
+        registered users (not guests) can get their user information. If
+        an administrator is acting as another user, the information for
+        the act as user will be returned.
+      </documentation>
+      <input message="echo:GetCurrentUser" />
+      <output message="echo:GetCurrentUserResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+    </operation>
+    <operation name="GetUserNamesByOrganizationAndFirstAndLastName">
+      <documentation>
+        <em>
+          This operation requires Provider or Administrator access.
+        </em>
+        <br />
+        Returns the user ID and guid for users based on the given
+        fields. All the users in the system are searched.
+      </documentation>
+      <input
+        message="echo:GetUserNamesByOrganizationAndFirstAndLastName" />
+      <output
+        message="echo:GetUserNamesByOrganizationAndFirstAndLastNameResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+    </operation>
+    <operation name="RemoveUsers">
+      <documentation>
+        <em>This operation requires Administrator access.</em>
+        <br />
+        Removes the users with the given user guids.
+      </documentation>
+      <input message="echo:RemoveUsers" />
+      <output message="echo:RemoveUsersResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+    </operation>
+    <operation name="GrantAccess">
+      <documentation>
+        <em>
+          This operation requires Provider or Administrator access.
+        </em>
+        <br />
+        Grants access to the given users. An administrator may grant any
+        access, but a provider may only grant access to its own provider
+        role.
+      </documentation>
+      <input message="echo:GrantAccess" />
+      <output message="echo:GrantAccessResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+    </operation>
+    <operation name="RevokeAccess">
+      <documentation>
+        <em>
+          This operation requires Provider or Administrator access.
+        </em>
+        <br />
+        Revokes access to the given users. An administrator may revoke
+        any access, but a provider may only revoke access to its own
+        provider role.
+      </documentation>
+      <input message="echo:RevokeAccess" />
+      <output message="echo:RevokeAccessResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+    </operation>
+    <operation name="GetUserNamesByRole">
+      <documentation>
+        <em>
+          This operation requires Provider or Administrator access.
+        </em>
+        <br />
+        Returns the user IDs and guids for users with the given role.
+        The caller must either be an Administrator or a provider
+        requesting a username for someone with the same provider role.
+      </documentation>
+      <input message="echo:GetUserNamesByRole" />
+      <output message="echo:GetUserNamesByRoleResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+    </operation>
+    <operation name="GetUserPreferences">
+      <documentation>
+        Returns the user preferences for the current user. If the user
+        does not have user preferences established, this method will
+        return null.
+      </documentation>
+      <input message="echo:GetUserPreferences" />
+      <output message="echo:GetUserPreferencesResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+    </operation>
+    <operation name="SetUserPreferences">
+      <documentation>
+        <p xmlns="">
+          Sets the user preferences for the given user. If the user
+          already has preferences established, this operation will
+          replace those preferences.
+        </p>
+        <p xmlns="">
+          If the user does not have preferences established yet, the
+          preferences given will be set as the active preferences.
+        </p>
+      </documentation>
+      <input message="echo:SetUserPreferences" />
+      <output message="echo:SetUserPreferencesResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+    </operation>
+    <operation name="RemoveUserPreferences">
+      <documentation>
+        Removes the user preferences for the current user. If no
+        preferences have been established, this operation will throw an
+        exception.
+      </documentation>
+      <input message="echo:RemoveUserPreferences" />
+      <output message="echo:RemoveUserPreferencesResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+    </operation>
+  </portType>
+  <binding name="UserServicePort" type="echo:UserServicePort">
+    <soap:binding style="document"
+      transport="http://schemas.xmlsoap.org/soap/http" />
+    <operation name="CreateUser">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+      <fault name="DuplicateIdFault">
+        <soap:fault name="DuplicateIdFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="SetUserPassword">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="RecallUserId">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="ResetUserPassword">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="CreateAuthenticator">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+      <fault name="DuplicateIdFault">
+        <soap:fault name="DuplicateIdFault" use="literal" />
+      </fault>
+      <fault name="ValidationFault">
+        <soap:fault name="ValidationFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="RemoveAuthenticators">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="UpdateAuthenticators">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+      <fault name="ValidationFault">
+        <soap:fault name="ValidationFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="GetAuthenticatorNames">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="GetAuthenticators">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="UpdateUsers">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="GetUserNamesByUserId">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="GetUsers">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="GetUserNames">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="GetCurrentUser">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="GetUserNamesByOrganizationAndFirstAndLastName">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="RemoveUsers">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="GrantAccess">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="RevokeAccess">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="GetUserNamesByRole">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="GetUserPreferences">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="SetUserPreferences">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="RemoveUserPreferences">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+    </operation>
+  </binding>
+  <service name="UserService">
+    <port name="UserServicePort" binding="echo:UserServicePort">
+      <soap:address location="https://api.echo.nasa.gov:443/echo-v9/UserServicePortImpl" />
+    </port>
+  </service>
+</definitions>

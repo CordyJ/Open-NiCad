@@ -1,0 +1,107 @@
+module SoftwareQualityControl2Bugzilla; -- Module Template
+create OUT : Bugzilla from IN : SoftwareQualityControl;
+
+
+-- This helper permits to convert the status value of a bug 
+-- in a right Bugzilla status type value. 
+-- CONTEXT: n/a
+-- RETURN: Bugzilla!StatusType
+helper def: convertStatus(bs : SoftwareQualityControl!BugStatusType) :  Bugzilla!StatusType =
+	if bs = #bst_open
+	then
+		#st_new
+	else
+		if bs = #bst_closed
+		then
+			#st_closed
+		else
+			if bs = #bst_skipped
+			then
+				#st_unconfirmed
+			else
+				#st_new
+			endif
+		endif
+	endif;
+
+
+
+-- Rule 'BugTracking2BugzillaRoot'
+-- This rule generates the root of the Bugzilla output model
+-- if a BugTracking element exists in the input model
+rule  BugTracking2BugzillaRoot {
+	from
+		bt : SoftwareQualityControl!BugTracking
+	
+	to
+		br : Bugzilla!BugzillaRoot (
+			version <- '',
+			urlbase <- '',
+			maintainer <- '',
+			--exporter <- '',
+			bugs <- bt.bugs->collect(e | thisModule.resolveTemp(e, 'bb'))
+		)
+}
+
+
+-- Rule 'Bug2Bug'
+-- This rule generates a bug in Bugzilla for each
+-- bug reported in the BugTracking element.
+rule  Bug2Bug {
+	from
+		bbt : SoftwareQualityControl!Bug
+	
+	to
+		bb : Bugzilla!Bug (
+			--error <- Bugzilla!ErrorType,
+			bug_id <- bbt.number.toString(),
+			exporter <- '',
+			urlbase <- '',
+			bug_status <- thisModule.convertStatus(bbt.status),
+			--resolution <- Bugzilla!ResolutionType,
+			product <- '',
+			priority <- #pt_P1,
+			version <- bbt.componentVersion,
+			rep_platform <- #rpt_all,
+			assigned_to <- let v : String = bbt.responsible in
+							if v.oclIsUndefined()
+							then	bbt.b_bugTracking.ct_control.responsible
+							else	v
+							endif,
+			delta_ts <- let v : String = bbt.closeDate in
+							if v.oclIsUndefined()
+							then	''
+							else	v
+							endif,
+			component<- bbt.b_bugTracking.ct_control.component,
+			reporter <- bbt.originator,
+			target_milestone <- String,
+			bug_severity <- #st_normal,
+			creation_ts <- bbt.openDate,
+			qa_contact <- bbt.b_bugTracking.ct_control.responsible,
+			--status_whiteboard <- '',
+			op_sys <- #ost_all, -- #"ost_Windows XP"
+			bug_file_loc <- String,
+			short_desc <- bbt.description,
+			keywords <- Sequence{},
+			dependson <- Sequence{},
+			blocks <- Sequence{},
+			cc <- Sequence{},
+			long_desc <- commentsAndAnswers,
+			attachment <- Sequence{} 
+		),
+		commentsAndAnswers : Bugzilla!LongDesc (
+			who <- bbt.originator,
+			bug_when <- bbt.openDate,
+			thetext <- let v : String = bbt.commentsAnswers in
+						if v.oclIsUndefined()
+						then	''
+						else	v
+						endif
+		)
+}
+
+
+
+
+

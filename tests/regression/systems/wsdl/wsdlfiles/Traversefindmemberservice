@@ -1,0 +1,499 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="Traversefindmemberservice" targetNamespace="http://webservices.traverse/wsdl" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:typens="Traversefindmemberservice" xmlns:types="http://webservices.traverse" xmlns:wsdlns="http://webservices.traverse/wsdl" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+  <types>
+    <xsd:schema targetNamespace="http://webservices.traverse" xmlns="http://www.w3.org/2001/XMLSchema">
+      <xsd:element name="Lms807sNameSearch">
+      <xsd:complexType>
+         <xsd:choice>
+
+          <xsd:element name="request">
+           <xsd:complexType>
+            <xsd:sequence>
+             <xsd:element name="ImportFilterDsgnNameSearch">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element minOccurs="0" name="LastName">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="30"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="FirstName">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="25"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="FkCountryCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="2"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="PostalCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="10"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="FkMemberAccountIdentifier">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="16"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ImportFilterAddressFields">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element minOccurs="0" name="CityName">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="30"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="StateProvinceName">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="20"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ImportPhoneticIefSupplied">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element minOccurs="0" name="Flag">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="1"/>
+                   <xsd:enumeration value="Y"/>
+                   <xsd:enumeration value="N"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ImportPreviousDsgnNameSearch">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element minOccurs="0" name="LastName">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="30"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="FirstName">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="25"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="PostalCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="10"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="FkMemberAccountIdentifier">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="16"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ImportFutureUseAtmSupplied">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element minOccurs="0" name="GenericText">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="254"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+            </xsd:sequence>
+
+            <xsd:attribute name="command" type="xsd:string"/>
+            <xsd:attribute name="clientId" type="xsd:string"/>
+            <xsd:attribute name="clientPassword" type="xsd:string"/>
+            <xsd:attribute name="nextLocation" type="xsd:string"/>
+            <xsd:attribute name="exitState" type="xsd:integer"/>
+            <xsd:attribute name="dialect" type="xsd:string"/>
+            <xsd:attribute name="comCfg" type="xsd:string"/>
+            <xsd:attribute name="serverLocation" type="xsd:string"/>
+            <xsd:attribute name="servletPath" type="xsd:string"/>
+            <xsd:attribute name="fileEncoding" type="xsd:string"/>
+            <xsd:attribute name="tracing" type="xsd:boolean"/>
+
+           </xsd:complexType>
+          </xsd:element>
+
+          <xsd:element name="response">
+           <xsd:complexType>
+            <xsd:sequence>
+             <xsd:element name="ExportFilterDsgnNameSearch">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element name="LastName">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="30"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="FirstName">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="25"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="FkCountryCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="2"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="PostalCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="10"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="FkMemberAccountIdentifier">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="16"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ExportFilterAddressFields">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element name="CityName">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="30"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="StateProvinceName">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="20"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ExportPhoneticIefSupplied">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element name="Flag">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="1"/>
+                   <xsd:enumeration value="Y"/>
+                   <xsd:enumeration value="N"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ExportPreviousDsgnNameSearch">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element name="LastName">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="30"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="FirstName">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="25"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="PostalCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="10"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="FkMemberAccountIdentifier">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="16"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="GroupExport">
+              <xsd:complexType>
+               <xsd:sequence>
+                <xsd:element maxOccurs="50" minOccurs="0" name="row">
+                 <xsd:complexType>
+                  <xsd:sequence>
+                   <xsd:element name="RepeatExportDsgnNameSearch">
+                    <xsd:complexType>
+                     <xsd:sequence>
+
+                      <xsd:element name="LastName">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                         <xsd:maxLength value="30"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                      <xsd:element name="FirstName">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                         <xsd:maxLength value="25"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                      <xsd:element name="StreetAddressLine1Text">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                         <xsd:maxLength value="50"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                      <xsd:element name="PostalCode">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                         <xsd:maxLength value="10"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                      <xsd:element name="FkCountryCode">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                         <xsd:maxLength value="2"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                      <xsd:element name="FkMemberAccountIdentifier">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                         <xsd:maxLength value="16"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                      <xsd:element name="FkProgramIdentifier">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                         <xsd:maxLength value="3"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                     </xsd:sequence>
+                    </xsd:complexType>
+                   </xsd:element>
+                   <xsd:element name="RepeatExportAddressFields">
+                    <xsd:complexType>
+                     <xsd:sequence>
+
+                      <xsd:element name="CityName">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                         <xsd:maxLength value="30"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                      <xsd:element name="StateProvinceName">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                         <xsd:maxLength value="20"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                     </xsd:sequence>
+                    </xsd:complexType>
+                   </xsd:element>
+                  </xsd:sequence>
+                 </xsd:complexType>
+                </xsd:element>
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ExportFutureUseAtmSupplied">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element name="GenericText">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="254"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ExportRowIefSupplied">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element name="Count">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:integer">
+                   <xsd:totalDigits value="9"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+            </xsd:sequence>
+
+            <xsd:attribute name="command" type="xsd:string"/>
+            <xsd:attribute name="exitState" type="xsd:integer"/>
+            <xsd:attribute name="exitStateType">
+             <xsd:simpleType>
+              <xsd:restriction base="xsd:string">
+               <xsd:enumeration value="OK"/>
+               <xsd:enumeration value="Informational"/>
+               <xsd:enumeration value="Warning"/>
+               <xsd:enumeration value="Error"/>
+              </xsd:restriction>
+             </xsd:simpleType>
+            </xsd:attribute>
+            <xsd:attribute name="exitStateMsg" type="xsd:string"/>
+
+           </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="error">
+           <xsd:complexType>
+            <xsd:sequence>
+             <xsd:element minOccurs="0" name="number" type="xsd:string"/>
+             <xsd:element minOccurs="0" name="type" type="xsd:string"/>
+             <xsd:element minOccurs="0" name="description" type="xsd:string"/>
+             <xsd:element minOccurs="0" name="trace" type="xsd:string"/>
+            </xsd:sequence>
+           </xsd:complexType>
+          </xsd:element>
+         </xsd:choice>
+      </xsd:complexType>
+      </xsd:element>
+    </xsd:schema>
+  </types>
+
+  <message name="Lms807sNameSearchIn">
+    <part element="types:Lms807sNameSearch" name="Lms807sNameSearch"/>
+  </message>
+  <message name="Lms807sNameSearchOut">
+    <part element="types:Lms807sNameSearch" name="Lms807sNameSearch"/>
+  </message>
+
+
+  <portType name="TraversefindmemberservicePort">
+    <operation name="Lms807sNameSearch">
+      <input message="wsdlns:Lms807sNameSearchIn"/>
+      <output message="wsdlns:Lms807sNameSearchOut"/>
+    </operation>
+
+  </portType>
+
+  <binding name="TraversefindmemberserviceBinding" type="wsdlns:TraversefindmemberservicePort">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="Lms807sNameSearch">
+      <soap:operation soapAction="Traversefindmemberservice"/>
+      <input>
+        <soap:body namespace="https://emergo2.sabre.com/traverseWS/services/Traversefindmemberservice" use="literal"/>
+      </input>
+      <output>
+        <soap:body namespace="https://emergo2.sabre.com/traverseWS/services/Traversefindmemberservice" use="literal"/>
+      </output>
+    </operation>
+  </binding>
+
+  <service name="Traversefindmemberservice">
+    <documentation>
+Traverse Find Member Service
+    </documentation>
+    <port binding="wsdlns:TraversefindmemberserviceBinding" name="TraversefindmemberservicePort">
+      <soap:address location="https://emergo2.sabre.com/traverseWS/services/Traversefindmemberservice"/>
+    </port>
+  </service>
+</definitions>

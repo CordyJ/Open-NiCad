@@ -1,0 +1,15 @@
+module Copy;
+create OUT : MM from IN : MM;
+
+rule CopyTest {
+  from
+    s : MM!Test
+    (
+      s.oclIsTypeOf(MM!Test)
+    )
+  to
+    t : MM!Test (
+      name <- s.name,
+      description <- s.description
+    )
+}

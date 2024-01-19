@@ -1,0 +1,433 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://bibiwsserv.techfak.uni-bielefeld.de/RNAforester/axis/RNAforesterPort" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://bibiwsserv.techfak.uni-bielefeld.de/RNAforester/axis/RNAforesterPort" xmlns:intf="http://bibiwsserv.techfak.uni-bielefeld.de/RNAforester/axis/RNAforesterPort" xmlns:rna="http://hobit.sourceforge.net/xsds/20060201/rnastructML" xmlns:rsa="http://hobit.sourceforge.net/xsds/20060515/rnastructAlignmentML" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tns1="http://schemas.bioservices.net/2005/biotypes" xmlns:tns2="http://hobit.sourceforge.net/xsds/20060403/hobitTypes" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<!--WSDL created by Apache Axis version: 1.3
+Built on Jan 29, 2007 (01:45:51 MET)-->
+ <wsdl:types>
+  <schema targetNamespace="http://bibiwsserv.techfak.uni-bielefeld.de/RNAforester/axis/RNAforesterPort" xmlns="http://www.w3.org/2001/XMLSchema">
+   <import namespace="http://hobit.sourceforge.net/xsds/20060515/rnastructAlignmentML"/>
+   <import namespace="http://xml.apache.org/xml-soap"/>
+   <import namespace="http://hobit.sourceforge.net/xsds/20060201/rnastructML"/>
+   <import namespace="http://hobit.sourceforge.net/xsds/20060403/hobitTypes"/>
+   <import namespace="http://schemas.bioservices.net/2005/biotypes"/>
+   <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+   <complexType name="ArrayOf_xs_anyType">
+    <complexContent>
+     <restriction base="soapenc:Array">
+      <attribute ref="soapenc:arrayType" wsdl:arrayType="xs:anyType[]"/>
+     </restriction>
+    </complexContent>
+   </complexType>
+   <complexType name="RNAforesterException">
+    <sequence/>
+   </complexType>
+   <complexType name="ArrayOf_apachesoap_DataHandler">
+    <complexContent>
+     <restriction base="soapenc:Array">
+      <attribute ref="soapenc:arrayType" wsdl:arrayType="apachesoap:DataHandler[]"/>
+     </restriction>
+    </complexContent>
+   </complexType>
+  </schema>
+ </wsdl:types>
+
+   <wsdl:import location="http://bibiwsserv.techfak.uni-bielefeld.de/xsd/net/sourceforge/hobit/20060201/rnastructML.xsd" namespace="http://hobit.sourceforge.net/xsds/20060201/rnastructML"/>
+
+   <wsdl:import location="http://bibiwsserv.techfak.uni-bielefeld.de/xsd/net/sourceforge/hobit/20060515/rnastructAlignmentML.xsd" namespace="http://hobit.sourceforge.net/xsds/20060515/rnastructAlignmentML"/>
+
+   <wsdl:message name="response_origResponse">
+
+      <wsdl:part name="response_origReturn" type="soapenc:string"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getXMLResultResponse">
+
+      <wsdl:part name="getXMLResultReturn" type="xsd:string"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getPSFilesResponse">
+
+      <wsdl:part name="getPSFilesReturn" type="impl:ArrayOf_apachesoap_DataHandler"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getPSFilesRequest">
+
+      <wsdl:part name="id" type="xsd:string"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="request_origRequest">
+
+      <wsdl:part name="email" type="soapenc:string"/>
+
+      <wsdl:part name="array_params" type="impl:ArrayOf_xs_anyType"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="requestRequest">
+
+      <wsdl:part name="array_params" type="impl:ArrayOf_xs_anyType"/>
+
+      <wsdl:part element="rna:rnastructML" name="inDoc" type="apachesoap:Document"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getDotFileRequest">
+
+      <wsdl:part name="id" type="xsd:string"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getVersionsRequest">
+
+   </wsdl:message>
+
+   <wsdl:message name="getVersionsResponse">
+
+      <wsdl:part name="getVersionsReturn" type="apachesoap:Document"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getXMLResultRequest">
+
+      <wsdl:part name="id" type="xsd:string"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="requestResponse">
+
+      <wsdl:part name="requestReturn" type="xsd:string"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="responseResponse">
+
+      <wsdl:part element="rsa:rnastructAlignmentML" name="responseReturn" type="apachesoap:Document"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="response_origRequest">
+
+      <wsdl:part name="id" type="soapenc:string"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="RNAforesterException">
+
+      <wsdl:part name="fault" type="impl:RNAforesterException"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="responseRequest">
+
+      <wsdl:part name="id" type="xsd:string"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getDotFileResponse">
+
+      <wsdl:part name="getDotFileReturn" type="xsd:string"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="request_origResponse">
+
+      <wsdl:part name="request_origReturn" type="soapenc:string"/>
+
+   </wsdl:message>
+
+   <wsdl:portType name="RNAforesterImplementation">
+
+      <wsdl:operation name="request" parameterOrder="array_params inDoc">
+
+         <wsdl:input message="impl:requestRequest" name="requestRequest"/>
+
+         <wsdl:output message="impl:requestResponse" name="requestResponse"/>
+
+         <wsdl:fault message="impl:RNAforesterException" name="RNAforesterException"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="response" parameterOrder="id">
+
+         <wsdl:input message="impl:responseRequest" name="responseRequest"/>
+
+         <wsdl:output message="impl:responseResponse" name="responseResponse"/>
+
+         <wsdl:fault message="impl:RNAforesterException" name="RNAforesterException"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getPSFiles" parameterOrder="id">
+
+         <wsdl:input message="impl:getPSFilesRequest" name="getPSFilesRequest"/>
+
+         <wsdl:output message="impl:getPSFilesResponse" name="getPSFilesResponse"/>
+
+         <wsdl:fault message="impl:RNAforesterException" name="RNAforesterException"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getDotFile" parameterOrder="id">
+
+         <wsdl:input message="impl:getDotFileRequest" name="getDotFileRequest"/>
+
+         <wsdl:output message="impl:getDotFileResponse" name="getDotFileResponse"/>
+
+         <wsdl:fault message="impl:RNAforesterException" name="RNAforesterException"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getXMLResult" parameterOrder="id">
+
+         <wsdl:input message="impl:getXMLResultRequest" name="getXMLResultRequest"/>
+
+         <wsdl:output message="impl:getXMLResultResponse" name="getXMLResultResponse"/>
+
+         <wsdl:fault message="impl:RNAforesterException" name="RNAforesterException"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getVersions">
+
+         <wsdl:input message="impl:getVersionsRequest" name="getVersionsRequest"/>
+
+         <wsdl:output message="impl:getVersionsResponse" name="getVersionsResponse"/>
+
+         <wsdl:fault message="impl:RNAforesterException" name="RNAforesterException"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="request_orig" parameterOrder="email array_params">
+
+         <wsdl:input message="impl:request_origRequest" name="request_origRequest"/>
+
+         <wsdl:output message="impl:request_origResponse" name="request_origResponse"/>
+
+         <wsdl:fault message="impl:RNAforesterException" name="RNAforesterException"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="response_orig" parameterOrder="id">
+
+         <wsdl:input message="impl:response_origRequest" name="response_origRequest"/>
+
+         <wsdl:output message="impl:response_origResponse" name="response_origResponse"/>
+
+         <wsdl:fault message="impl:RNAforesterException" name="RNAforesterException"/>
+
+      </wsdl:operation>
+
+   </wsdl:portType>
+
+   <wsdl:binding name="RNAforesterPortSoapBinding" type="impl:RNAforesterImplementation">
+
+      <wsdlsoap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+      <wsdl:operation name="request">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="requestRequest">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://bibiwsserv.techfak.uni-bielefeld.de/RNAforester/axis/RNAforesterPort" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="requestResponse">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://bibiwsserv.techfak.uni-bielefeld.de/RNAforester/axis/RNAforesterPort" use="encoded"/>
+
+         </wsdl:output>
+
+         <wsdl:fault name="RNAforesterException">
+
+            <wsdlsoap:fault encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" name="RNAforesterException" namespace="http://bibiwsserv.techfak.uni-bielefeld.de/RNAforester/axis/RNAforesterPort" use="encoded"/>
+
+         </wsdl:fault>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="response">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="responseRequest">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://bibiwsserv.techfak.uni-bielefeld.de/RNAforester/axis/RNAforesterPort" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="responseResponse">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://bibiwsserv.techfak.uni-bielefeld.de/RNAforester/axis/RNAforesterPort" use="encoded"/>
+
+         </wsdl:output>
+
+         <wsdl:fault name="RNAforesterException">
+
+            <wsdlsoap:fault encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" name="RNAforesterException" namespace="http://bibiwsserv.techfak.uni-bielefeld.de/RNAforester/axis/RNAforesterPort" use="encoded"/>
+
+         </wsdl:fault>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getPSFiles">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getPSFilesRequest">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://bibiwsserv.techfak.uni-bielefeld.de/RNAforester/axis/RNAforesterPort" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getPSFilesResponse">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://bibiwsserv.techfak.uni-bielefeld.de/RNAforester/axis/RNAforesterPort" use="encoded"/>
+
+         </wsdl:output>
+
+         <wsdl:fault name="RNAforesterException">
+
+            <wsdlsoap:fault encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" name="RNAforesterException" namespace="http://bibiwsserv.techfak.uni-bielefeld.de/RNAforester/axis/RNAforesterPort" use="encoded"/>
+
+         </wsdl:fault>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getDotFile">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getDotFileRequest">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://bibiwsserv.techfak.uni-bielefeld.de/RNAforester/axis/RNAforesterPort" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getDotFileResponse">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://bibiwsserv.techfak.uni-bielefeld.de/RNAforester/axis/RNAforesterPort" use="encoded"/>
+
+         </wsdl:output>
+
+         <wsdl:fault name="RNAforesterException">
+
+            <wsdlsoap:fault encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" name="RNAforesterException" namespace="http://bibiwsserv.techfak.uni-bielefeld.de/RNAforester/axis/RNAforesterPort" use="encoded"/>
+
+         </wsdl:fault>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getXMLResult">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getXMLResultRequest">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://bibiwsserv.techfak.uni-bielefeld.de/RNAforester/axis/RNAforesterPort" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getXMLResultResponse">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://bibiwsserv.techfak.uni-bielefeld.de/RNAforester/axis/RNAforesterPort" use="encoded"/>
+
+         </wsdl:output>
+
+         <wsdl:fault name="RNAforesterException">
+
+            <wsdlsoap:fault encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" name="RNAforesterException" namespace="http://bibiwsserv.techfak.uni-bielefeld.de/RNAforester/axis/RNAforesterPort" use="encoded"/>
+
+         </wsdl:fault>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getVersions">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getVersionsRequest">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://rnaforester.bibiserv.techfak.unibi.de" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getVersionsResponse">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://bibiwsserv.techfak.uni-bielefeld.de/RNAforester/axis/RNAforesterPort" use="encoded"/>
+
+         </wsdl:output>
+
+         <wsdl:fault name="RNAforesterException">
+
+            <wsdlsoap:fault encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" name="RNAforesterException" namespace="http://bibiwsserv.techfak.uni-bielefeld.de/RNAforester/axis/RNAforesterPort" use="encoded"/>
+
+         </wsdl:fault>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="request_orig">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="request_origRequest">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://rnaforester.bibiserv.techfak.unibi.de" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="request_origResponse">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://bibiwsserv.techfak.uni-bielefeld.de/RNAforester/axis/RNAforesterPort" use="encoded"/>
+
+         </wsdl:output>
+
+         <wsdl:fault name="RNAforesterException">
+
+            <wsdlsoap:fault encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" name="RNAforesterException" namespace="http://bibiwsserv.techfak.uni-bielefeld.de/RNAforester/axis/RNAforesterPort" use="encoded"/>
+
+         </wsdl:fault>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="response_orig">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="response_origRequest">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://rnaforester.bibiserv.techfak.unibi.de" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="response_origResponse">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://bibiwsserv.techfak.uni-bielefeld.de/RNAforester/axis/RNAforesterPort" use="encoded"/>
+
+         </wsdl:output>
+
+         <wsdl:fault name="RNAforesterException">
+
+            <wsdlsoap:fault encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" name="RNAforesterException" namespace="http://bibiwsserv.techfak.uni-bielefeld.de/RNAforester/axis/RNAforesterPort" use="encoded"/>
+
+         </wsdl:fault>
+
+      </wsdl:operation>
+
+   </wsdl:binding>
+
+   <wsdl:service name="RNAforesterImplementationService">
+
+      <wsdl:port binding="impl:RNAforesterPortSoapBinding" name="RNAforesterPort">
+
+         <wsdlsoap:address location="http://bibiwsserv.techfak.uni-bielefeld.de/RNAforester/axis/RNAforesterPort"/>
+
+      </wsdl:port>
+
+   </wsdl:service>
+
+</wsdl:definitions>

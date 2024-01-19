@@ -1,0 +1,1116 @@
+% TXL Grammar for PHP 3,4,5
+% J.R. Cordy, Queen's University, June 2007 
+
+% Version 1.4, June 2017
+
+% After the SDF grammar for PHP by Eric Bouwers and Martin Bravenboer 
+% in PhpFront:  http://www.program-transformation.org/PHP/PhpFront
+
+% Copyright 2007,2011 by Eric Bouwers, Martin Bravenboer and James R. Cordy.
+
+% This grammar is provided free of charge for the use of individuals, companies
+% institutions on an as-is basis, in the hope that it may be useful, but without
+% any warranty, including without any implied warranty as to its merchantability
+% or suitability for any particular purpose.  In no event shall the copyright holders
+% or authors he held liable for any damage, however caused or arising in any way
+% out of the use of this grammar.
+
+% This is an analysis grammar for PHP versions 3,4 and 5 derived from the 
+% source above. It has been tested on several thousand examples from open source 
+% PHP applications including the entire Moodle source, but may still fail on
+% severely malformed examples.
+
+% Known limitations and bugs:
+%
+% 1. This grammar is known to fail on examples where HTML is interspersed in
+%    the middle of PHP statements.  This would be difficult to fix.
+%    Recommended workaround: edit to move split to statement boundary.
+%
+% 2. This grammar is intended primarily for analysis tasks and has not yet been 
+%    tuned for high fidelity transformations.  In particular it does not yet offer 
+%    the option of preserving comments and formatting.
+%
+% 3. PHP has the strange property that keywords are case insensitive but variable 
+%    names are not.  This grammar approximates this by ignoring case, which may 
+%    cause problems when transforming variables.  If the strict PHP rule is required, 
+%    use phpkw.txl as a preprocessor and then use this grammar with -nocase.
+
+% Maintenance Log:
+%
+% v1.4 J.R. Cordy, Queen's University, 31 May 2017
+% - Added PHP 5.3 coalesce ?? expressions
+% - Added PHP 5.3 yield internal functions
+% - Changed all [EOL] to [EOL] so we can count lines
+%
+% v1.3 J.R. Cordy, Queen's University, 29 May 2017
+% - Added handling of #line comments
+% - Added handling of French and Italian tokens in HTML sections
+% - Refined [stringlit] and [charlit] token definitions to handle embedded PHP properly
+% - Removed 'null' keyword, observed as identifier in some programs
+% - Added PHP 5.3 'const' keyword
+% - Refined inline HTML grammar
+% - Added unguarded escaped quote token
+% - Added missing value clause on HTML tag attributes
+% - Added PHP 5.3 const declarations
+% - Added PHP 5.3 trait classes
+% - Added PHP 5.3 use clauses inside classes
+% - Added PHP 5.3 function declaration as return value
+% - Added missing value clause in declare statements
+% - Added missing function declaration as assigned value
+% - Added 'class' as object attribute
+%
+% v1.2 J.R. Cordy, Ecole Polytechnique, December 2013
+% - Added handling of PHP 5.3 namespaces
+% - Refined # comment patterns to handle Moodle
+% - Reined handling of #abc, 42em and 33px in inline CSS
+% - Added handline of Javascript template sections as lexical token
+%
+% v1.1 J.R. Cordy, Ecole Polytechnique, December 2013
+% - Corrected formatting of concatenate (.) operators to avoid confusion with real numbers
+% - Added recognition of PHP-generated tags and attributes in HTML
+% - Added handling of PHP-generated HTML attribute values
+% - Added missing const declarations to interfaces
+% - Added handlng of &nbsp; and other special characters in HTML
+% - Refined handling of PHP # comments to avoid ignoring #xyz in inline CSS
+%
+% v1.0 J.R. Cordy, T.R. Dean, Queen's University, July 2011
+% - Corrected, unified and simplified ObjectCVar / ObjectFunctionCall subgrammar
+% - Guarded HTML fall-through to avoid misparses of PHP code 
+% - Added keywords as object property names.
+%
+% v0.5 J.R. Cordy, Queen's Unviersity, Feb 2009
+% - Reorganized to simplify grammar and remove redundant forms.
+% - Eliminated redefnes.
+%
+% v0.4 J.R. Cordy, Queen's Unviersity, Feb 2009
+% - Replaced entire Expr subgrammar with precedence grammar for PHP operator precedences.
+%
+% v0.3 J.R. Cordy, Queen's Unviersity, Feb 2009
+% - Updated to handle general <<< encapsed HTML using [push/pop id]  
+%
+% v0.2 M. Alalfi, Queen's Unviersity, Sept 2008
+% - Added . and .= operators, rationalized handling of $ variable names
+
+
+% Don't wrap output lines
+#pragma -width 32000
+
+% Ignore case - not quite right for variables
+#pragma -case
+
+% Lexical structure
+comments
+    /* */
+end comments
+
+compounds
+        <<<
+end compounds
+
+compounds
+        ::
+end compounds
+
+compounds
+        <?php <?PHP <? <?= 
+        ?> 
+end compounds
+
+compounds
+        =>
+end compounds
+
+compounds
+        .= +=  -=  *=  /=  .=  '%= '&=  '|=  '^=  '<<=  '>>= 
+end compounds
+
+compounds
+        || && 
+end compounds
+
+compounds
+        === !== == != 
+end compounds
+
+compounds
+        <> <= >=
+end compounds
+
+compounds
+        ++ --
+end compounds
+
+compounds
+        ->
+end compounds
+
+tokens
+    % Cannot use "comments" for this, since it may end at either end-of-line or end-of-php - JRC July 11
+    comment     ... | "//#[\n(?>)]*"
+		    | "\#[ \t$\#]#[\n]*"	% JRC 5dec13 require space - cannot interpret #foobar as comment since it appears in embedded CSS
+		    | "\#\:\n"			% JRC 5dec13 require space - cannot interpret #foobar as comment since it appears in embedded CSS
+		% Careful - these are added to handle specific cases in Moodle.  They must be crafted to avoid #foobar in CSS - JRC 10dec13
+		    | "\#\a[-\i]* \a[-\i]*#[\n]*"	% JRC 10dec13 moodle
+		    | "\#\a[-\i]* \"#[\n]*"		% JRC 10dec13 moodle
+		    | "\#\a[-\i]* \(#[\n]*"		% JRC 10dec13 moodle
+		    | "\#,#[\n]*"			% JRC 10dec13 moodle
+		    | "\#\a[-\i]*\(#[\n]*"		% JRC 10dec13 moodle
+		    | "\#\a[\i]*\:\n"			% JRC 10dec13 moodle
+		    | "\#line \d\d*#[\n]*"	% JRC May 2017
+end tokens
+
+tokens
+	escapedchar	"&\a\a*;"	% e.g., &lt;
+    	french		"[JLNSjlns([Qq]u)]\\?'[à\a]\a*"	% JRC May 2017
+    	italian		"[Ll([Dd]ell)([Uu]n)]\\?'\a\a*"	% JRC May 2017
+end tokens
+
+tokens
+	JSsection	"<\##[(\#>)]*\#>"
+		    |	"<%#[(%>)]*%>"
+	badregexp	"/#[\n/]+/g"
+end tokens
+
+tokens
+        number        ... | ".\d+([eE][+-]?\d+)?" | "\d+.\d*([eE][+-]?\d+)?"
+        Hexa        "0[Xx][01234567989abcdefABCDEF]+"
+        Octa        "0[0123456789]+"
+end tokens
+
+#pragma -esc "\" 
+
+tokens
+	charlit		"'[(\\\\)(\\')(<\?php #[(\?>)(';)]*\?>)(<\?php #[(\?>)']*(\?>)?)(#['( //\]\]>)])]*'"		% JRC May 2017
+	stringlit       "\"[(\\\\)(\\\")(<\?php #[(\?>)(\";)]*\?>)(<\?php #[(\?>)\"]*(\?>)?)(#[\"( //\]\]>)])]*\""	% JRC May 2017
+end tokens
+
+tokens 
+        CommandString        "`#`*`"
+end tokens
+
+tokens
+         MagicConstant        "__\A*__"
+end tokens
+
+keys
+    'abstract 'and 'array 'as 'break 'case 'catch 'class 'continue
+    'declare 'default 'do 'echo 'else 'elseif 'enddeclare 'endfor 
+    'endforeach 'endif 'endswitch 'endwhile 'eval 'exit 'extends
+    'for 'foreach 'function 'global 'if 'include 'include_once 
+    'list 'new 
+    % 'null 	% observed as non-keyword - JRC 20apr17
+    'or 'print 'require 'require_once 'return
+    % 'static 	% observed as non-keyword in moodle - JRC 10dec13
+    'switch 'try 'unset 'var 'while 'xor
+    % PHP 4 only
+    'cfunction 'old_function
+    % Reserved, not really keywords
+    % '__CLASS__ '__FILE__ '__FUNCTION__ '__LINE__
+    'const 	% JRC May 2017
+end keys
+
+
+% PHP Document structure
+
+define program
+        [Document]
+end define
+
+define Document
+        [PHPOpenTag?] [PHPSection] [PHPCloseTagDocumentSection?]
+    |   [HTMLSection] [PHPOpenTagPHPSection?] [PHPCloseTagDocumentSection?]
+end define
+
+define PHPCloseTagDocumentSection 
+        [PHPCloseTag] [HTMLSection] [PHPCloseTagDocumentSection?]
+end define
+
+define PHPOpenTagPHPSection
+        [PHPOpenTag] [PHPSection]
+end define
+
+define PHPSection
+        [TopStatement*] 
+end define
+
+define PHPOpenTag
+        '<?php [EOL] | '<?PHP [EOL] | '<? [EOL] | '<?= [EOL]  
+end define
+
+define PHPCloseTag
+        '?> [EOL] 
+end define
+
+define PHPCloseTagNoNL
+        '?> 
+end define
+
+% Embedded HTML Document structure
+
+% This is tricky business.  
+% We want to accept HTML, Javascript, CSS, ... and output it in a form that still works.
+% Many conventions conflict - in particular, in PHP # begins a comment, whereas #foobar 
+% is a CSS identifier, and <# #> denotes a Javascript template.
+% In PHP, x-y is a subtraction, whereas in CSS it is an identifier.
+% As a result, this section is very fragile - maintain with great care and regression testing!
+
+define HTMLSection
+        [InlineHTML] 
+end define
+
+define InlineHTML
+        [InlineHTMLtoken*]
+end define
+
+define InlineHTMLtoken
+        [not PHPOpenTag] [tag_token_or_key] 
+end define
+
+define tag_token_or_key
+    % The order here matters - JRC
+        [tag] 
+    |	'( [id_or_key] '<	% < in Javascript hack
+    |	'|| [id_or_key] '<	% < in Javascript hack
+    |	'} [EOL]			% < in Javascript hack
+    |	'<br '?> [EOL]		% error, but observed in moodle JRC 10dec13
+    |	[SPOFF] '( [SPON]	% no space before paren in Javascript JRC 16dec13
+    |	'; [EOL] 		% NL after semicolons
+    |	[JSsection] [EOL]	% Javascript template 
+    |	[escapedchar]		% &lt; et al.
+    | 	[not tag] [token]	% important! force syntax error if we don't recognize a tag - JRC 1dec13 - JRC May 2017
+    |	[key] 
+end define
+
+define em_or_px
+	'em | 'px
+end define
+
+comments
+        <!-- -->
+end comments
+
+tokens
+	escapedquote	"\\'"	% JRC May 2017
+		|	"\\\""
+end tokens
+
+define tag
+        '< [SPOFF] [bigtag_id] [repeat tag_attribute]'> [SPON] [IN] [EOL] 
+    |   [EX] [FL] '< [SPOFF] '/ [bigtag_id] '> [SPON] [FL] 
+    |   '< [SPOFF] [tag_id] [repeat tag_attribute] [opt '/] '> [SPON] [EOL]
+    |   '< [SPOFF] '/ [tag_id] '> [SPON] [EOL]
+end define
+
+define bigtag_id
+        'html | 'body | 'head | 'form | 'table | 'tr | 'td | 'script | 'select | 'label | 'div | 'style
+end define
+
+define tag_attribute
+    	[SP] [tag_id] [opt equals_tag_value]	% JRC May 2017 
+    |	[SP] [inlinePHP]	% JRC 28nov13
+    |	[SP] '{{ [id_or_key] '}}	% JRC wordpress 5dec13
+    |	[SP] [JSsection]	% JRC wordpress 5dec13
+end define
+
+define equals_tag_value
+	'= [tag_value] 
+end define
+
+define tag_value	
+	[stringlit] [opt stringlit_extension]
+    |	[charlit] [opt stringlit_extension]
+    |	[id_or_key]
+    |	[number]
+    |	[inlinePHP]	% JRC 28nov13
+end define
+
+define stringlit_extension
+    	[SP] [TVariable] [opt SP_tag_value] 	% JRC 1dec13, Gould
+    |	[SP] [stringlit]			% JRC 5dec13, wordpress
+    |	[SP] [charlit]				% JRC 5dec13, wordpress
+end define
+
+define SP_tag_value
+	[SP] [tag_value]
+end define
+
+define tag_id
+    	[id_or_key] [opt colon_id_or_key] [repeat dash_id_or_key] 
+    |	[inlinePHP] 	% JRC 28nov13
+end define
+
+define inlinePHP
+    	[PHPOpenTag] [SPON] [InlineStatement+] [SPOFF] [SP] [PHPCloseTagNoNL]
+end define
+
+define InlineStatement
+	[not InlineHTMLStatement] [Statement]
+end define
+
+define id_or_key
+	[id] | [key]
+end define
+
+define colon_id_or_key
+        ': [id_or_key]	% JRC 1dec13
+end define
+
+define dash_id_or_key
+	'- [id_or_key]
+end define
+
+
+% Top level declarations and statements
+
+define TopStatement
+        [FunctionDecl] 
+    |   [ClassDecl]
+    |   [Statement]
+    |   [InterfaceDecl]
+    |   [NamespaceDecl]		% namespaces in PHP 5.3 - JRC 10dec13
+    |	[ConstDecl]		% JRC May 2017 PHP 5.3
+end define
+
+define FunctionDecl
+        'function [opt '&] [opt id] '( [Param,] ') [opt UseClause]         [EOL]
+        [Block]
+end define
+
+define UseClause
+	'use '( [Param,] ')
+end define
+
+define ClassDecl
+        [ClassType] [id]         [EOL]
+        [ExtendsClause?] 
+        [ImplementsClause?]         
+        '{                       [EOL][IN]
+            [ClassMember*]       [EX]
+        '} [opt ';]              [EOL]
+end define
+
+define ClassType
+        'class
+    |   'abstract 'class
+    |   'final 'class
+    |	'trait		% JRC May 2017 PHP 5.3
+end define
+
+define ExtendsClause
+        'extends [Name]          [EOL]
+end define
+
+define ImplementsClause
+        'implements [Name,+]     [EOL]
+end define
+
+define ClassMember
+        [VarModifiers?] [FunctionDecl] 
+    |   [VarModifiers?] 'abstract [VarModifiers?] 'function [opt '&] [id] '( [Param,] ') ';  [EOL]
+    |   'var [InstanceVariable,+] ';             [EOL]
+    |   'const [ConstDefn] [CommaConstDefn*] ';  [EOL]
+    |   [VarModifiers] [InstanceVariable,+] ';   [EOL]
+    |   'use [list UseName+] ';	[EOL] 		% JRC May 2017 PHP 5.3
+end define
+
+define CommaConstDefn
+    	', [EOL] [ConstDefn] 
+end define
+
+define ConstDefn
+	[id] '= [StaticScalar]		
+end define
+
+define ConstDecl
+    'const [ConstDefn] [CommaConstDefn*] ';  [EOL]
+end define
+
+define InterfaceDecl
+        'interface [id]                 [EOL]
+        [InterfaceExtendsClause?] 
+        '{                              [EOL][IN]
+            [InterfaceMember*]          [EX][EOL]
+        '} [opt ';]			[EOL]
+end define
+
+define InterfaceExtendsClause
+        'extends [Name,+]
+end define
+
+define InterfaceMember
+        [VarModifiers?] 'function [opt '&] [id] '( [Param,] ') '; [EOL]
+    |   'const [id] '= [StaticScalar] ';         		  [EOL]	% JRC 3dec13
+end define
+
+define InstanceVariable
+        [TVariable] [opt EqualsStaticScalar]
+end define
+
+define TVariable
+        [SimpleVariableName]
+end define
+
+define EqualsStaticScalar
+        '= [StaticScalar]
+end define
+
+define VarModifiers
+        [VarModifier+]
+end define
+
+define VarModifier
+        'public | 'protected | 'private | 'static | 'final
+end define
+
+define Param
+        [opt TypeHint] [opt '&] [TVariable] [opt EqualsStaticScalar]
+    |   'const [TVariable]
+end define
+
+define TypeHint
+        [TypeName] | 'array
+end define
+
+define TypeName
+	[Name]
+end define
+
+% Namespaces PHP 5.3 - JRC 10dec13
+
+define NamespaceDecl
+	'namespace [NamespaceName] ';	[EOL]	
+end define
+
+define NamespaceName
+ 	[Name]
+end define
+
+define Name
+        [opt NamespaceSpec] [id] [SPON]
+end define
+
+define NamespaceSpec
+	'\ [SPOFF] [id_backslash*]
+    |	[id_backslash+]	
+end define
+
+define id_backslash
+	[id] [SPOFF] '\
+end define
+
+% Statements
+
+define Statement
+	[BlockStatement]
+    |	[ExprStatement]
+    |   [EchoStatement]
+    |   [PrintStatement]
+    |   [IfStatement]
+    |   [WhileStatement]
+    |   [DoStatement]
+    |   [ForStatement]
+    |   [SwitchStatement]
+    |   [ControlStatement]
+    |   [GlobalStaticStatement]
+    |   [UnsetStatement]
+    |   [ForEachStatement]
+    |   [NullStatement]
+    |   [DeclareStatement]
+    |   [TryStatement]
+    |   [ThrowStatement]
+    |   [InlineHTMLStatement]
+end define
+
+define ExprStatement
+        [Expr] [semi_or_end]	[EOL]
+end define
+
+define semi_or_end
+    	';
+    |	[: '?>]		
+end define
+
+define BlockStatement
+        [Block]
+end define
+
+define Block
+        '{                         [EOL][IN]
+            [TopStatement*]        [EX]
+        '} [opt ';]                [EOL]
+end define
+
+define IfStatement
+        'if '( [Expr] ') 	  [EOL][IN]
+	    [Statement] 	  [EX]
+	[ElseIfStatement*] 
+	[ElseStatement?]
+    |   
+        'if '( [Expr] ') ':       [EOL][IN]
+            [TopStatement*]       [EX]
+        [AltElseifStatement*] 
+        [AltElseStatement?] 
+        'endif [opt ';]           [EOL]
+end define
+
+define ElseIfStatement
+        'elseif '( [Expr] ') 	  [EOL][IN]
+	    [Statement]		  [EX]
+end define
+
+define ElseStatement
+        'else 			  [EOL][IN]
+	    [Statement]		  [EX]
+end define
+
+define AltElseifStatement
+        'elseif '( [Expr] ') ':   [EOL][IN]
+            [TopStatement*]       [EX]
+end define
+
+define AltElseStatement
+        'else ':                  [EOL][IN]
+            [TopStatement*]       [EX]
+end define
+
+define WhileStatement
+        'while '( [Expr] ')       [EOL]
+            [Statement] 
+    |   
+        'while '( [Expr] ') ':    [EOL][IN]
+            [TopStatement*]       [EX]
+        'endwhile [opt ';]        [EOL]
+end define
+
+define DoStatement
+        'do                       [EOL]
+            [Statement] 
+        'while '( [Expr] ') ';    [EOL]
+end define
+
+define ForStatement
+        'for '( [Expr,] '; [Expr,] '; [Expr,] ')     [EOL]
+            [Statement]
+    |   'for '( [Expr,] '; [Expr,] '; [Expr,] ') ':  [EOL][IN]
+            [Statement*]                             [EX]
+        'endfor [opt ';]                             [EOL]
+end define
+
+define SwitchStatement
+        'switch '( [Expr] ')      [EOL]
+            '{ [opt ';]           [EOL][IN]
+            [Case*]               [EX]
+        '} [opt ';]		  [EOL]
+    |   
+        'switch '( [Expr] ') ': [opt ';]     [EOL][IN]
+            [Case*]                          [EX]
+        'endswitch [opt ';]                  [EOL]
+end define
+
+define Case
+        'case [Expr] [CaseSeparator]         [EOL][IN]
+            [TopStatement*]                  [EX]
+    |   'default [CaseSeparator]             [EOL][IN]
+            [TopStatement*]                  [EX]
+end define
+
+define CaseSeparator
+        '; | ':
+end define
+
+define ControlStatement
+        'break [Expr?] ';         [EOL]
+    |   'continue [Expr?] ';      [EOL]
+    |   'return [Expr?] ';        [EOL]
+    |   'return [FunctionDecl] '; [EOL]	% JRC May 2017
+end define
+
+define GlobalStaticStatement
+        'global [CVar,+] ';               [EOL]
+    |   'static [StaticVariable,+] ';     [EOL]
+end define
+
+define StaticVariable
+        [TVariable] [opt EqualsStaticScalar]
+end define
+
+define UnsetStatement
+        'unset '( [ObjectCVar,+] ') ';    [EOL]
+end define
+
+define EchoStatement
+        'echo [Expr,+] [opt ';]           [EOL]
+end define
+
+define PrintStatement
+        'print [Expr,+] [opt ';]          [EOL]
+end define
+
+define InlineHTMLStatement
+            [PHPCloseTag] [InlineHTML] [PHPOpenTag]
+end define
+
+define ForEachStatement
+        'foreach '( [Expr] 'as [ForEachPattern] ')     [EOL]
+            [Statement]
+    |   'foreach '( [Expr] 'as [ForEachPattern] ') ':  [EOL][IN]
+            [Statement*]                               [EX]
+        'endforeach [opt ';]                           [EOL]
+end define
+
+define ForEachPattern
+        [ForEachKey?] [ForEachVar] 
+end define
+
+define ForEachKey
+        [ForEachVar] '=>
+end define
+
+define ForEachVar
+        [CVar]
+    |   '& [CVar]
+end define
+
+define NullStatement
+        ';  [EOL]
+end define
+
+define DeclareStatement
+        'declare '( [Directive*] ')  [EOL]
+            [Statement]
+end define
+
+define Directive
+        [id] [EqualsScalarConstant?]
+end define
+
+define EqualsScalarConstant	% JRC May 2017
+	'= [ScalarConstant]
+end define
+
+define TryStatement
+        'try                         [EOL]
+            [Block]
+            [Catch*]
+end define
+
+define Catch
+        'catch '( [ExceptionName] [TVariable] ')    [EOL]
+            [Block]
+end define
+
+define ExceptionName
+	[Name]
+end define
+
+define ThrowStatement
+        'throw [Expr] ';             [EOL]
+end define
+
+
+% Expressions
+
+define Expr
+        [LogicalOrExpr]
+end define
+
+define LogicalOrExpr
+        [LogicalXorExpr] [repeat OrLogicalXorExpr]
+end define
+
+define OrLogicalXorExpr
+        'or [LogicalXorExpr]
+end define
+
+define LogicalXorExpr
+        [LogicalAndExpr] [repeat LogicalXorLogicalAndExpr]
+end define
+
+define LogicalXorLogicalAndExpr
+        'xor [LogicalAndExpr]
+end define
+
+define LogicalAndExpr
+        [AssignmentExpr] [repeat LogicalAndAssignmentExpr]
+end define
+
+define LogicalAndAssignmentExpr
+        'and [AssignmentExpr]
+end define
+
+define AssignmentExpr
+        [TernaryExpr] [repeat AssignOpAssignmentExpr]
+    |	[FunctionDecl]	% JRC May 2017
+end define
+
+define AssignOpAssignmentExpr
+        [AssignOp] [AssignmentExpr]
+end define
+
+define AssignOp
+        [SP] '.= | '= | '+= | '-= | '*= | '/= |  '%= | '&= | '|= | '^= | '<<= | '>>= 
+    |    '=&         % intentionally NOT a compound - JRC
+end define
+
+define TernaryExpr
+        [ConditionalOrExpr] [repeat IfConditionalOrExpr]
+end define
+
+define IfConditionalOrExpr
+        '? [Expr?] ': [Expr]
+    |	'?? [Expr]	%%% JRC 31may17
+end define
+
+define ConditionalOrExpr
+        [ConditionalAndExpr] [repeat ConditionalOrConditionalAndExpr]
+end define
+
+define ConditionalOrConditionalAndExpr
+        '|| [ConditionalAndExpr]
+end define
+
+define ConditionalAndExpr
+        [BitOrExpr] [repeat ConditionalAndBitOrExpr]
+end define
+
+define ConditionalAndBitOrExpr
+        '&& [BitOrExpr]
+end define
+
+define BitOrExpr
+        [BitXorExpr] [repeat BitOrBitXorExpr]
+end define
+
+define BitOrBitXorExpr
+       '| [BitXorExpr]
+end define
+
+define BitXorExpr
+        [BitAndExpr] [repeat BitXorBitAndExpr]
+end define
+
+define BitXorBitAndExpr
+        '^ [BitAndExpr]
+end define
+
+define BitAndExpr
+        [EqualityExpr] [repeat BitAndEqualityExpr]
+end define
+
+define BitAndEqualityExpr
+        '& [EqualityExpr]
+end define
+
+define EqualityExpr
+        [InequalityExpr] [repeat EqualityOpInequalityExpr]
+end define
+
+define EqualityOpInequalityExpr
+        [EqualityOp] [InequalityExpr]
+end define
+
+define EqualityOp
+        '== | '!= | '=== | '!== 
+end define
+
+define InequalityExpr
+        [ShiftExpr] [repeat InequalityOpShiftExpr]
+end define
+
+define InequalityOpShiftExpr
+        [InequalityOp] [ShiftExpr]
+end define
+
+define InequalityOp
+        '<> | '< | '<= | '> | '>=
+end define
+
+define ShiftExpr
+        [CatExpr] [repeat ShiftOpCatExpr]
+end define
+
+define ShiftOpCatExpr
+        [ShiftOp] [CatExpr]
+end define
+
+% compounds
+%	<< >>  		% Intenionally not compound - JRC 28nov13
+% end compounds
+
+define ShiftOp
+         '< [SPOFF] < [SPON] | '> [SPOFF] > [SPON]
+end define
+
+define CatExpr        
+        [AddExpr] [repeat CatAddExpr]
+end define
+
+define CatAddExpr
+        [SP] '. [SP] [AddExpr]
+end define
+
+define AddExpr
+        [MultExpr] [repeat AddOpMultExpr]
+end define
+
+define AddOpMultExpr
+        [AddOp] [MultExpr]
+end define
+
+define AddOp
+        '+ | '- 
+end define
+
+define MultExpr
+        [NotExpr] [repeat MultOpNotExpr]
+end define
+
+define MultOpNotExpr
+        [MultOp] [NotExpr]
+end define
+
+define MultOp
+        '* | '/ | '% 
+end define
+
+define NotExpr
+        [repeat '!] [InstanceExpr]
+end define
+
+define InstanceExpr
+        [UnaryExpr] [opt InstanceOfUnaryExpr]
+end define
+
+define InstanceOfUnaryExpr
+        'instanceof [UnaryExpr]
+end define
+
+define UnaryExpr
+        [repeat UnaryOp] [IncDecExpr]
+end define
+
+define UnaryOp
+        '~ | '- | '@ | '( [CastType] ') 
+    |    '@ | '!        % precedence error, but observed in Moodle
+end define
+
+define CastType
+        'int | 'integer | 'bool | 'boolean | 'real | 'double
+    |   'float | 'string | 'array | 'object | 'unset
+end define
+
+define IncDecExpr
+        [repeat IncDec] [Primary] [repeat IncDec]
+end define
+
+define IncDec
+        '++ | '--
+end define
+
+define Primary
+        [VariableOrFunctionCall]
+    |   [ScalarConstant]
+    |   [Array]
+    |   [List]
+    |   [InternalFunction]
+    |   '( [Expr] ')
+end define
+
+define ScalarConstant
+        [opt PlusMinus] [NumericConstant]
+    |   [StringConstant]
+    |   [MagicConstant]
+    |   [BooleanConstant]
+    |   'null
+end define
+
+define PlusMinus
+        '+ | '-
+end define
+
+define NumericConstant
+        [number]
+    |   [Hexa]
+    |   [Octa]
+end define
+
+define StringConstant
+        [stringlit] 
+    |   [charlit]
+    |   [CommandString]
+    |   '<<< [push id] [IN][EOL] [repeat EncapsedInlineHTML] [pop id] [EX] 
+end define
+
+%% #pragma -nomultiline
+
+%% tokens
+	%% french	"\a'"
+%% end tokens
+
+%%
+
+define EncapsedInlineHTML
+	%% no need to format these - JRC
+        [not popid] [token_or_key] %% [tag_token_or_key] 
+end define
+
+define popid
+        [pop id]
+end define
+
+define token_or_key
+        [token] | [key]
+end define
+
+define BooleanConstant
+        'true | 'false
+end define
+
+define StaticScalar
+        [Primary]
+end define
+
+define Array
+        'array '( [IN] [ArrayPair,] [opt ',] [EX] ')
+    |	'[ [IN] [ArrayPair,] [opt ',] [EX] ']
+end define
+
+define ArrayPair
+        [EOL] [opt ArrayKey] [ArrayValue]
+end define
+
+define ArrayKey
+        [Expr] '=>
+end define
+
+define ArrayValue
+        [Expr]
+    |   '& [ObjectCVar]
+end define
+
+define VariableOrFunctionCall
+        [ObjectCVar]
+end define
+
+%%%define ObjectCVar
+%%%        % Includes ObjectFunctionCall, otherwise inefficiency reigns - JRC July 2011
+%%%        [opt ClassNameColonColon] [CVar] [opt CallParams] [ArrowObjectProperty*]
+%%%    |	[ClassNameColonColon] 'class	% JRC May 2017
+%%%end define
+
+define ObjectCVar
+        % Includes ObjectFunctionCall, otherwise inefficiency reigns - JRC July 2011
+        [opt ClassNameColonColon] [CVar_or_FunctionCall] [ArrowObjectProperty*]
+    |	[ClassNameColonColon] 'class	% JRC May 2017
+end define
+
+define CVar_or_FunctionCall
+	[CVar]
+    |	[FunctionCall]
+end define
+
+define FunctionCall
+	[CVar] [CallParams]
+end define
+
+define ClassNameColonColon
+        [ClassName] '::
+end define
+
+define CallParam
+        [opt '&] [Expr]
+    |	[FunctionDecl]
+end define
+
+define CallParams
+        '( [CallParam,] ')
+end define
+
+define ClassName
+	[SimpleVariableName]
+end define
+
+define ArrowObjectProperty
+        '-> [ObjectProperty] [opt CallParams]
+end define
+
+define ObjectProperty
+        [VariableName] 
+    |   [id_or_key]        % T.D. July 2011
+    |   [ObjectProperty] [VariableExtension]
+    |   [ObjectCVar] 
+end define
+
+define CVar
+        [ReferenceVariable]
+end define
+
+define ReferenceVariable
+        [CompoundVariable] [VariableExtension*]
+end define
+
+define VariableExtension
+        '[ [Expr?] ']
+    |   '{ [Expr] '}
+end define
+
+define CompoundVariable
+        [VariableName] 
+end define
+
+define VariableName
+        [SimpleVariableName]
+    |   '$ [VariableName]
+    |   '{ [SimpleVariableName] '}
+    |   '{ [Expr] '}
+    |   '( [Expr] ')
+end define
+
+define SimpleVariableName
+        [opt NamespaceSpec] [id] [SPON]
+    |   [opt NamespaceSpec] '$ [SPOFF] [id_or_key] [SPON]
+end define
+
+define List
+        'list '( [ListElem,] ')
+end define
+
+define ListElem
+        [List]
+    |	[Expr]
+    |   [empty]
+end define
+
+define InternalFunction
+        'new [Primary]
+    |   'clone [Primary]
+    |   'isset '( [ObjectCVar,+] ')
+    |   'empty '( [ObjectCVar] ')
+    |   'intval '( [ObjectCVar] ')
+    |   'eval  '( [Expr] ')
+    |   'exit  [opt exit_value] 	% T.D. June 15
+    |   'include [Expr]
+    |   'include_once [Expr]
+    |   'require [Expr]
+    |   'require_once [Expr]
+    |   'use [list UseName+] 		% namespaces JRC 10dec13
+    |	'yield ['from ?] [Expr]		%%% new JRC 31may17
+end define
+
+define UseName
+	[SimpleVariableName] [opt AsSimpleVariableName]
+end define
+
+define AsSimpleVariableName
+	'as [SimpleVariableName]
+end define
+
+% T.D. June 15
+define exit_value
+        '( [opt Expr] ')
+end define
+
+% nonterminal name for [NL]s so we can count them
+define EOL
+	[NL]
+end define

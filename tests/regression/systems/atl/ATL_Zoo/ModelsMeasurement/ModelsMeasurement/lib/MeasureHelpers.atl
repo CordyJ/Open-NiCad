@@ -1,0 +1,190 @@
+--@atlcompiler	atl2006
+--@name			MeasureHelpers
+--@version		2.0
+--@domains		Measure, Helpers
+--@authors		Eric Vepa (evepa <at> sodius.com) for SODIUS (www.sodius.com)
+--@date			2007/08/24
+--@description	This library contains common helpers on the Table metamodel.
+
+library MeasureHelpers; -- Library Template
+
+--@begin helper metricName
+--@comments Returns the metric name prefixed by the name of the category of the metric.
+helper context Measure!Metric
+def : metricName() : String =
+	self.category.name + '::' + self.name;
+--@end helper metricName
+
+--@begin helper metricName
+--@comments Returns the metric name prefixed by the name of the category of the metric of the measure.
+helper context Measure!Measure
+def : metricName() : String =
+	self.metric.metricName();
+--@end helper metricName
+
+--@begin helper allMetric
+--@comments Returns all the metrics which category name is given.
+helper def : allMetrics(catName : String) : Sequence(Measure!Metric) =
+	Measure!Metric.allInstances()->
+		select(metric|metric.category.name = catName)->asSet();
+--@end helper allMetric
+
+--@begin attribute helper absoluteName
+--@comments Returns the absolute name of the measured model element for this measure set.
+helper context Measure!MeasureSet
+def : absoluteName() : String =
+	if (self.elementType = #model)
+		then self.elementName
+		else if (self.parent.oclIsUndefined())
+				then ''
+				else if (self.parent.elementType = #model)
+						then ''
+						else self.parent.absoluteName() + '.'
+					endif
+			endif + self.elementName
+	endif;
+--@end attribute helper absoluteName
+
+--@begin helper allMeasureSets
+--@comments Returns all the measure sets for a given element type and sorted by element name.
+helper def : allMeasureSets(elementType : Measure!ElementKind) : Sequence(Measure!MeasureSet) =
+	Measure!MeasureSet.allInstances()->
+		select(ms|ms.elementType = elementType)->
+			select(ms|ms.measures->notEmpty())->
+				asSet()->sortedBy(ms|ms.absoluteName());
+--@end helper allMeasureSets
+
+--@begin helper categories
+--@comments Returns all the categories used by the measures of the measure set.
+helper context Measure!MeasureSet
+def : categories() : Sequence(Measure!Category) =
+	self.measures->collect(meas|meas.metric.category)->asSet();
+--@end helper categories
+
+--@begin helper allMeasures
+--@comments Returns all the measures of the measure set and sorted by metric full name.
+helper context Measure!MeasureSet
+def : allMeasures : Sequence(Measure!Measure) =
+	self.measures->sortedBy(meas|meas.metricName());
+--@end helper allMeasures
+
+--@begin helper allMeasures
+--@comments Returns all the measures of the measure set for a category.
+helper context Measure!MeasureSet
+def : allMeasures(cat : Measure!Category) : Sequence(Measure!Measure) =
+	self.measures->select(meas|meas.metric.category = cat);
+--@end helper allMeasures
+
+--@begin helper getModelKind
+--@comments Returns the String value for model type of the root measure set.		
+helper def : getModelKind() : String =
+	thisModule.modelKind.get(Measure!RootMeasureSet.allInstances()->
+		asSequence()->first().modelType.toString());
+--@end helper getModelKind
+
+--@begin helper simplifiedValue
+--@comments Returns the value with at most one digit after the dot.
+helper context String
+def : simplifiedValue() : String =
+	let dot : Integer =
+		self->indexOf('.') in
+	if (dot > 0)
+		then if ((self->size() - (dot + 1)) = 1)
+				then if self->substring(dot + 2,self->size()) = '0'
+						then self->substring(1,dot)
+						else self
+					endif
+				else if ((self->size() - (dot + 1)) > 1)
+						then self->substring(1,dot + 1 + 1)
+						else self
+					endif
+			endif
+		else self
+	endif;
+--@end helper simplifiedValue
+
+--@begin helper getElementKind
+--@comments Returns the String value for element type of the measure set.		
+helper context Measure!MeasureSet
+def : getElementKind() : String =
+	thisModule.elementKind.get(self.elementType.toString());
+--@end helper getElementKind
+
+--@begin helper stringValue
+--@comments Returns a string value for a measure with an integer value.
+helper context Measure!IntegerMeasure
+def : stringValue() : String =
+	self.value.toString();
+--@end helper stringValue
+
+--@begin helper stringValue
+--@comments Returns a string value for a measure with a double value.
+helper context Measure!DoubleMeasure
+def : stringValue() : String =
+	(if self.value.toString()->indexOf('E') < 0
+		then self.value.toString()
+		else self.value.toString()->
+			substring(1,self.value.toString()->indexOf('E'))
+	endif).simplifiedValue();
+--@end helper stringValue
+
+--@begin helper stringValue
+--@comments Returns a string value for a measure with a percentage value (string value between 0 and 100 and ended with '%' unit).
+helper context Measure!PercentageMeasure
+def : stringValue() : String =
+	((if self.value.toString()->indexOf('E') < 0
+		then self.value.toString()
+		else self.value.toString()->
+			substring(1,self.value.toString()->indexOf('E'))
+	endif).toReal() * 100).toString().simplifiedValue() + '%';
+--@end helper stringValue
+
+--@begin helper toNumber
+--@comments Returns an integer value for an integer measure.
+helper context Measure!IntegerMeasure
+def : toNumber() : Integer =
+	self.stringValue().toInteger();
+--@end helper toNumber
+
+--@begin helper toNumber
+--@comments Returns a real value for a double measure.
+helper context Measure!DoubleMeasure
+def : toNumber() : Real =
+	self.stringValue().toReal();
+--@end helper toNumber
+
+--@begin helper toNumber
+--@comments Returns a real value for a percentage measure.
+helper context Measure!PercentageMeasure
+def : toNumber() : Real =
+	let stringValue : String =
+		self.stringValue() in
+	stringValue.substring(1,stringValue.size()-1).toReal();
+--@end helper toNumber
+
+--@begin helper matchPreferredValue
+--@comments Returns true if the value match the predicate for the preferred value.
+helper context Measure!Measure
+def : matchPreferredValue() : Boolean =
+	let value : String =
+		self.metric.preferredValue in
+	if (value.startsWith('!='))
+		then not (self.toNumber() = value.substring(3,value.size()).toReal())
+		else if (value.startsWith('<='))
+				then (self.toNumber() <= value.substring(3,value.size()).toReal())
+				else if (value.startsWith('>='))
+						then (self.toNumber() >= value.substring(3,value.size()).toReal())
+						else if (value.startsWith('='))
+								then (self.toNumber() = value.substring(2,value.size()).toReal())
+								else if (value.startsWith('<'))
+										then (self.toNumber() < value.substring(2,value.size()).toReal())
+										else if (value.startsWith('>'))
+												then (self.toNumber() > value.substring(2,value.size()).toReal())
+												else false
+											endif
+									endif
+							endif
+					endif
+			endif
+	endif;
+--@end helper matchPreferredValue

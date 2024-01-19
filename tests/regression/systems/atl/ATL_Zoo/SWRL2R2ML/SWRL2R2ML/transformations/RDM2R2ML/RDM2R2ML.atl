@@ -1,0 +1,1391 @@
+-- ============================================================
+-- Transforms an RDM metamodel into R2ML metamodel.
+-- Created as part of M.Sc. theses at GOOD OLD AI Laboratory
+-- Author: Milan Milanovic (milan at milanovic.org)
+-- Works for R2ML v0.4 (Integrity and Derivation rules)
+-- Licence: GNU General Public License, version 2
+-- ============================================================
+
+module RDM2R2ML; -- Module Template
+create OUT : R2ML from IN : RDM;
+
+uses strings;
+
+-------------------------------------------------------------------------------
+-- HELPERS --------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+---------------------------------------------------------------------
+-- Helpers for searching on Class elements for Atoms Predicate Symbol
+---------------------------------------------------------------------
+
+-- HELPER: getAtomForClassElement
+-- Returns atom which contains cla Class element in hasPredicateSymbol, or
+-- in childrens of predicate symbol.
+-- This helper is needed because we want to find (for some element) in which
+-- Atom it's containted, for getting terms of that Atom.
+-- IN:		RDM!Class
+-- OUT:		RDM!Atom
+helper def: getAtomForClassElement(cla : RDM!Class) : RDM!Atom = 
+	let allAtoms : Sequence(RDM!Atom) = RDM!Atom.allInstancesFrom('IN')->asSequence()->select(c | c.hasPredicateSymbol.oclIsKindOf(RDM!Class)) in
+		allAtoms->iterate(p; res : RDM!Atom = allAtoms->first() |
+			if(p.childrenClasses(cla)->includes(cla))
+				then p
+				else res
+				endif
+		);
+
+-- HELPER: childrenClasses
+-- Returns all children classes for predicate symbol of Atom.
+-- It's returns not only Class, but all elements which inherit Class. 
+-- CONTEXT:	RDM!Atom
+-- IN:		RDM!Class
+-- OUT:		Sequence(RDM!Class)
+helper context RDM!Atom def: childrenClasses(cla : RDM!Class) : Sequence(RDM!Class) = 
+	if self.hasPredicateSymbol.oclIsTypeOf(RDM!Class)
+		then Sequence{self.hasPredicateSymbol}
+		else Sequence{self.hasPredicateSymbol.childrenClasses(cla)}->flatten()
+	endif;
+	
+-- HELPER: childrenClasses
+-- Returns all children classes for IntersectionClass. If this class contains 
+-- some other elements, then this helper is called for that elements.
+-- CONTEXT:	RDM!IntersectionClass
+-- IN:		RDM!Class
+-- OUT:		Sequence(RDM!Class)
+helper context RDM!IntersectionClass def: childrenClasses(cla : RDM!Class) : Sequence(RDM!Class) = 
+	let allClasses : Sequence(RDM!Class) = self.intersectionOf->select(e | e.oclIsTypeOf(RDM!Class)) in
+		allClasses.union(self.intersectionOf->select(e | not e.oclIsTypeOf(RDM!Class))->collect(c | c.childrenClasses(cla))->flatten())->append(self);
+
+-- HELPER: childrenClasses
+-- Returns all children classes for UnionClass. If this class contains 
+-- some other elements, then this helper is called for that elements.
+-- CONTEXT:	RDM!UnionClass
+-- IN:		RDM!Class
+-- OUT:		Sequence(RDM!Class)
+helper context RDM!UnionClass def: childrenClasses(cla : RDM!Class) : Sequence(RDM!Class) = 
+	let allClasses : Sequence(RDM!Class) = self.unionOf->select(e | e.oclIsTypeOf(RDM!Class)) in
+		allClasses.union(self.unionOf->select(e | not e.oclIsTypeOf(RDM!Class))->collect(c | c.childrenClasses(cla))->flatten())->append(self);
+
+-- HELPER: childrenClasses
+-- Returns all children classes for ComplementClass. If this class contains 
+-- some other elements, then this helper is called for that elements.
+-- CONTEXT:	RDM!ComplementClass
+-- IN:		RDM!Class
+-- OUT:		Sequence(RDM!Class)
+helper context RDM!ComplementClass def: childrenClasses(cla : RDM!Class) : Sequence(RDM!Class) = 
+	if(self.complementOf.oclIsTypeOf(RDM!Class)) then
+		Sequence{self.complementOf}->append(self)
+	else self.complementOf.childrenClasses(cla)->append(self)
+	endif;
+
+-- HELPER: childrenClasses
+-- Returns all children classes for EnumeratedClass. 
+-- This class doesn't have any children classes.
+-- CONTEXT:	RDM!EnumeratedClass
+-- IN:		RDM!Class
+-- OUT:		Sequence(RDM!Class)
+helper context RDM!EnumeratedClass def: childrenClasses(cla : RDM!Class) : Sequence(RDM!Class) = 
+	self.oneOf->asSequence();
+
+-- HELPER: childrenClasses
+-- Returns all children classes for HasValueRestriction. 
+-- This class doesn't have any children classes.
+-- CONTEXT:	RDM!HasValueRestriction
+-- IN:		RDM!Class
+-- OUT:		Sequence(RDM!Class)
+helper context RDM!HasValueRestriction def: childrenClasses(cla : RDM!Class) : Sequence(RDM!Class) = 
+	Sequence{self};
+	
+-- HELPER: childrenClasses
+-- Returns all children classes for MinCardinalityRestriction. 
+-- This class doesn't have any children classes.
+-- CONTEXT:	RDM!MinCardinalityRestriction
+-- IN:		RDM!Class
+-- OUT:		Sequence(RDM!Class)
+helper context RDM!MinCardinalityRestriction def: childrenClasses(cla : RDM!Class) : Sequence(RDM!Class) = 
+	Sequence{self};
+
+-- HELPER: childrenClasses
+-- Returns all children classes for MaxCardinalityRestriction. 
+-- This class doesn't have any children classes.
+-- CONTEXT:	RDM!MaxCardinalityRestriction
+-- IN:		RDM!Class
+-- OUT:		Sequence(RDM!Class)
+helper context RDM!MaxCardinalityRestriction def: childrenClasses(cla : RDM!Class) : Sequence(RDM!Class) = 
+	Sequence{self};
+	
+-- HELPER: childrenClasses
+-- Returns all children classes for CardinalityRestriction. 
+-- This class doesn't have any children classes.
+-- CONTEXT:	RDM!CardinalityRestriction
+-- IN:		RDM!Class
+-- OUT:		Sequence(RDM!Class)
+helper context RDM!CardinalityRestriction def: childrenClasses(cla : RDM!Class) : Sequence(RDM!Class) = 
+	Sequence{self};	
+
+-- HELPER: childrenClasses
+-- Returns all children classes for SomeValuesFromRestriction. If this class contains 
+-- some other elements, then this helper is called for that elements.
+-- CONTEXT:	RDM!SomeValuesFromRestriction
+-- IN:		RDM!Class
+-- OUT:		Sequence(RDM!Class)
+helper context RDM!SomeValuesFromRestriction def: childrenClasses(cla : RDM!Class) : Sequence(RDM!Class) =
+	if(not self.someValuesFromClass.oclIsUndefined()) then
+		Sequence{self.someValuesFromClass}->append(self)
+	else Sequence {self}
+	endif;	
+
+-- HELPER: childrenClasses
+-- Returns all children classes for AllValuesFromRestriction. If this class contains 
+-- some other elements, then this helper is called for that elements.
+-- CONTEXT:	RDM!AllValuesFromRestriction
+-- IN:		RDM!Class
+-- OUT:		Sequence(RDM!Class)
+helper context RDM!AllValuesFromRestriction def: childrenClasses(cla : RDM!Class) : Sequence(RDM!Class) =
+	if(not self.allValuesFromClass.oclIsUndefined()) then
+		Sequence{self.allValuesFromClass}->append(self)
+	else Sequence {self}
+	endif;	
+	
+-- HELPER: childrenClasses
+-- Returns all children classes for ObjectProperty. 
+-- This class doesn't have any children classes.
+-- CONTEXT:	RDM!ObjectProperty
+-- IN:		RDM!Class
+-- OUT:		Sequence(RDM!Class)
+helper context RDM!ObjectProperty def: childrenClasses(cla : RDM!Class) : Sequence(RDM!Class) = 
+	Sequence{};	
+
+---------------------------------------------------------------------
+-- Helpers for searching on Data elements for Atoms Predicate Symbol
+---------------------------------------------------------------------
+
+-- HELPER: getAtomForDataElement
+-- Returns atom which contains dtp OntologyElement element in hasPredicateSymbol, or
+-- in childrens of predicate symbol.
+-- This helper is needed because we want to find (for some element) in which
+-- Atom it's containted, for getting terms of that Atom.
+-- Annotation: we use OntologyElement, instead of Datatype becase we want to
+--             include DataRange element, which is not Datatype (but Class).
+-- IN:		RDM!OntologyElement
+-- OUT:		RDM!Atom
+helper def: getAtomForDataElement(dtp : RDM!OntologyElement) : RDM!Atom = 
+	let allAtoms : Sequence(RDM!Atom) = RDM!Atom.allInstancesFrom('IN')->asSequence()->select(c | c.hasPredicateSymbol.oclIsKindOf(RDM!OntologyElement)) in
+		allAtoms->iterate(p; res : RDM!Atom = allAtoms->first() |
+			if(p.childrenElems(dtp)->includes(dtp))
+				then p
+				else res
+				endif
+		);
+
+-- HELPER: childrenElems
+-- Returns all children data elements for predicate symbol of Atom.
+-- It's returns not only Datatypes, but also DataRange. 
+-- CONTEXT:	RDM!Atom
+-- IN:		RDM!OntologyElement
+-- OUT:		Sequence(RDM!OntologyElement)
+helper context RDM!Atom def: childrenElems(ont : RDM!OntologyElement) : Sequence(RDM!OntologyElement) = 
+	if self.hasPredicateSymbol.oclIsKindOf(RDM!Datatype) or self.hasPredicateSymbol.oclIsTypeOf(RDM!DataRange)
+		then Sequence{self.hasPredicateSymbol.childrenElems(ont)}->flatten()
+		else Sequence{self.hasPredicateSymbol}
+	endif;
+
+-- HELPER: childrenElems
+-- Returns all children data elements for DataRange.
+-- CONTEXT:	RDM!DataRange
+-- IN:		RDM!OntologyElement
+-- OUT:		Sequence(RDM!OntologyElement)
+helper context RDM!DataRange def: childrenElems(dtp : RDM!OntologyElement) : Sequence(RDM!OntologyElement) = 
+	if self.oneOf.oclIsUndefined()
+		then Sequence {self.datatype}->append(self)
+		else self.oneOf->select(e | e.oclIsKindOf(RDM!OntologyElement))->append(self)
+		endif;
+
+-- HELPER: childrenElems
+-- Returns all children data elements for AllValuesFromRestriction.
+-- CONTEXT:	RDM!AllValuesFromRestriction
+-- IN:		RDM!OntologyElement
+-- OUT:		Sequence(RDM!OntologyElement)
+helper context RDM!AllValuesFromRestriction def: childrenElems(dtp : RDM!OntologyElement) : Sequence(RDM!OntologyElement) = 
+	self.allValuesFromRange.oneOf->select(e | e.oclIsKindOf(RDM!OntologyElement))->append(self);
+
+-- HELPER: childrenElems
+-- Returns all children data elements for SomeValuesFromRestriction.
+-- CONTEXT:	RDM!SomeValuesFromRestriction
+-- IN:		RDM!OntologyElement
+-- OUT:		Sequence(RDM!OntologyElement)
+helper context RDM!SomeValuesFromRestriction def: childrenElems(dtp : RDM!OntologyElement) : Sequence(RDM!OntologyElement) = 
+	self.someValuesFromRange.oneOf->select(e | e.oclIsKindOf(RDM!OntologyElement))->append(self);
+
+-- HELPER: childrenElems
+-- Returns all children data elements for HasValueRestriction.
+-- CONTEXT:	RDM!HasValueRestriction
+-- IN:		RDM!OntologyElement
+-- OUT:		Sequence(RDM!OntologyElement)
+helper context RDM!HasValueRestriction def: childrenElems(dtp : RDM!OntologyElement) : Sequence(RDM!OntologyElement) = 
+	Sequence{self.hasLiteralValue}->append(self);
+	
+-- HELPER: childrenElems
+-- Returns all children data elements for MinCardinalityRestriction.
+-- CONTEXT:	RDM!MinCardinalityRestriction
+-- IN:		RDM!OntologyElement
+-- OUT:		Sequence(RDM!OntologyElement)
+helper context RDM!MinCardinalityRestriction def: childrenElems(dtp : RDM!OntologyElement) : Sequence(RDM!OntologyElement) = 
+	Sequence{self};
+
+-- HELPER: childrenElems
+-- Returns all children data elements for MaxCardinalityRestriction.
+-- CONTEXT:	RDM!MaxCardinalityRestriction
+-- IN:		RDM!OntologyElement
+-- OUT:		Sequence(RDM!OntologyElement)
+helper context RDM!MaxCardinalityRestriction def: childrenElems(dtp : RDM!OntologyElement) : Sequence(RDM!OntologyElement) = 
+	Sequence{self};
+
+-- HELPER: childrenElems
+-- Returns all children data elements for CardinalityRestriction.
+-- CONTEXT:	RDM!CardinalityRestriction
+-- IN:		RDM!OntologyElement
+-- OUT:		Sequence(RDM!OntologyElement)
+helper context RDM!CardinalityRestriction def: childrenElems(dtp : RDM!OntologyElement) : Sequence(RDM!OntologyElement) = 
+	Sequence{self};	
+
+-- HELPER: childrenElems
+-- Returns all children data elements for Literal. It works also for elements
+-- which extends Literal (TypedLiteral, PlainLiteral).
+-- CONTEXT:	RDM!Literal
+-- IN:		RDM!OntologyElement
+-- OUT:		Sequence(RDM!OntologyElement)
+helper context RDM!Literal def: childrenElems(dtp : RDM!OntologyElement) : Sequence(RDM!OntologyElement) =
+	Sequence{self};
+	
+-- HELPER: childrenElems
+-- Returns all children data elements for PrimitiveType. 
+-- CONTEXT:	RDM!PrimitiveType
+-- IN:		RDM!OntologyElement
+-- OUT:		Sequence(RDM!OntologyElement)
+helper context RDM!PrimitiveType def: childrenElems(dtp : RDM!OntologyElement) : Sequence(RDM!OntologyElement) =
+	Sequence{self};
+	
+-- HELPER: childrenClasses
+-- Returns all children elements for DatatypeProperty. 
+-- This class doesn't have any children classes.
+-- CONTEXT:	RDM!DatatypeProperty
+-- IN:		RDM!OntologyElement
+-- OUT:		Sequence(RDM!Class)
+helper context RDM!DatatypeProperty def: childrenElems(dtp : RDM!OntologyElement) : Sequence(RDM!OntologyElement) =
+	Sequence{};	
+
+-- Other helpers
+
+-- HELPER: maxCardinalityOnSameProperty
+-- Returns MaxCardinalityRestriction which is defined on same property as 
+-- contextual MinCardinalityRestriction. 
+-- This helper is needed because we want to find if two restrictions (min, max)
+-- are defined on same property.
+-- CONTEXT:	RDM!MinCardinalityRestriction
+-- OUT:		Sequence(RDM!MaxCardinalityRestriction)
+helper context RDM!MinCardinalityRestriction def: maxCardinalityOnSameProperty : RDM!MaxCardinalityRestriction = 
+	let maxCardinalityRestrictions : Sequence(RDM!MaxCardinalityRestriction) = RDM!MaxCardinalityRestriction.allInstancesFrom('IN')->asSequence() in
+		maxCardinalityRestrictions->iterate(p; res : RDM!MaxCardinalityRestriction = maxCardinalityRestrictions->first() |
+			if(p.onProperty->asSequence()->includes(self.onProperty->asSequence()->first()))
+				then p
+				else res
+				endif
+		);
+
+-- HELPER: minCardinalityOnSameProperty
+-- Returns MinCardinalityRestriction which is defined on same property as 
+-- contextual MaxCardinalityRestriction. 
+-- This helper is needed because we want to find if two restrictions (min, max)
+-- are defined on same property.
+-- CONTEXT:	RDM!MaxCardinalityRestriction
+-- OUT:		Sequence(RDM!MinCardinalityRestriction)
+helper context RDM!MaxCardinalityRestriction def: minCardinalityOnSameProperty : RDM!MinCardinalityRestriction = 
+	let minCardinalityRestrictions : Sequence(RDM!MinCardinalityRestriction) = RDM!MinCardinalityRestriction.allInstancesFrom('IN')->asSequence() in
+		minCardinalityRestrictions->iterate(p; res : RDM!MinCardinalityRestriction = minCardinalityRestrictions->first() |
+			if(p.onProperty->asSequence()->includes(self.onProperty->asSequence()->first()))
+				then p
+				else res
+				endif
+		);
+	
+-- HELPER: transform
+-- This OCL helper with side-effects, is used to create new instance of R2ML ObjectClassificationAtom
+-- from RDM Class, using Class-es parent and transformed Class. It is used with lazy rule.
+-- CONTEXT:	RDM!Class
+-- IN:		RDM!Class, R2ML!Class
+-- OUT:		R2ML!ObjectClassificationAtom
+helper context RDM!Class def: transform(parent : RDM!Class, transformedClass : R2ML!Class) : R2ML!ObjectClassificationAtom =
+               		R2ML!ObjectClassificationAtom.newInstance()
+				    	.refSetValue('isNegated', false)
+                    	.refSetValue('term', thisModule.IndividualVariable2ObjectVariable(thisModule.getAtomForClassElement(parent).terms->first()))
+                    	.refSetValue('type', transformedClass);
+
+-- HELPER: getDefaultTypedLiteral
+-- Return always same typed literal with defined type. Or OclUndefined if no typed 
+-- literal are found.
+-- IN:		type
+-- OUT:		RDM!TypedLiteral
+helper def: getDefaultTypedLiteral(type : String) : RDM!TypedLiteral = 
+	let typ : RDM!TypedLiteral = RDM!TypedLiteral.allInstancesFrom('IN')->asSequence()->select(c | c.theType = type)->first() in
+		if typ.oclIsUndefined()
+		then OclUndefined
+		else typ
+		endif;
+
+-- HELPER: getDefaultPlainLiteral
+-- Return always same plain literal. Or OclUndefined if no typed literal are found.
+-- IN:		type
+-- OUT:		RDM!PlainLiteral
+helper def: getDefaultPlainLiteral() : RDM!PlainLiteral = 
+	let typ : RDM!PlainLiteral = RDM!PlainLiteral.allInstancesFrom('IN')->asSequence()->first() in
+		if typ.oclIsUndefined()
+		then OclUndefined
+		else typ
+		endif;
+
+-- HELPER: getAllAtoms
+-- Return all RDM Atoms for RDM Rule.
+-- CONTEXT:	RDM!Rule
+-- OUT:		Sequence(RDM!Atom)
+helper context RDM!Rule def: getAllAtoms() : Sequence(RDM!Atom) = 
+	self.hasAntecedent.containsAtom->asSequence().union(self.hasConsequent.containsAtom->asSequence());
+		
+-------------------------------------------------------------------------------
+-- RULES ----------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- Atoms
+
+-- ClassAtom
+
+-- Rule 'ClassAtom2ObjectClassificationAtom'
+-- Create R2ML ObjectClassificationAtom from RDM ClassAtom
+-- with Class PredicateSymbol
+rule ClassAtom2ObjectClassificationAtom {
+	from i : RDM!Atom (
+			i.name = 'ClassAtom' and i.hasPredicateSymbol.oclIsTypeOf(RDM!Class)
+		)
+	to o : R2ML!ObjectClassificationAtom (
+				isNegated <- false,
+				term <- thisModule.IndividualVariable2ObjectVariable(i.terms->first()),
+				type <- thisModule.Class2Class(i.hasPredicateSymbol)
+			)
+}
+
+-- Rule 'Intersection2Conjuction'
+-- Create R2ML Conjuction of elements from RDM ClassAtom
+-- with IntersectionClass PredicateSymbol
+-- Annotation: design decision is that predicate symbol's elements
+--             knows how to transform (based on his parent and Atom).
+rule Intersection2Conjuction {
+	from i : RDM!Atom (
+			i.name = 'ClassAtom' and i.hasPredicateSymbol.oclIsTypeOf(RDM!IntersectionClass)
+		)
+	to 
+		o : R2ML!Conjuction (
+				formulas <- Sequence { i.hasPredicateSymbol.intersectionOf->asSequence()->select(c | c.oclIsTypeOf(RDM!Class))->collect(e | e.transform(i.hasPredicateSymbol, thisModule.Class2Class(e))),
+									   i.hasPredicateSymbol.intersectionOf->asSequence()->select(c | not c.oclIsTypeOf(RDM!Class))->asSequence()
+							}
+			)
+}
+
+-- Rule 'UnionAtom2Disjunction'
+-- Create R2ML Disjunction of elements from RDM ClassAtom
+-- with UnionClass PredicateSymbol
+rule UnionAtom2Disjunction {
+	from i : RDM!Atom (
+			i.name = 'ClassAtom' and i.hasPredicateSymbol.oclIsTypeOf(RDM!UnionClass)
+		)
+	to 
+		o : R2ML!Disjunction (
+				formulas <- Sequence { i.hasPredicateSymbol.unionOf->asSequence()->select(c | c.oclIsTypeOf(RDM!Class))->collect(e | e.transform(i.hasPredicateSymbol, thisModule.Class2Class(e))),
+									   i.hasPredicateSymbol.unionOf->asSequence()->select(c | not c.oclIsTypeOf(RDM!Class))->asSequence()
+							}
+			)
+}
+
+-- Rule 'Union2Disjunction'
+-- Create R2ML Disjunction of elements from UnionClass
+rule Union2Disjunction {
+	from i : RDM!UnionClass (
+			i.oclIsTypeOf(RDM!UnionClass) and
+			RDM!Atom.allInstancesFrom('IN')->asSequence()->collect(c | c.hasPredicateSymbol)->flatten()->excludes(i)
+		)
+	to 
+		o : R2ML!Disjunction (
+				formulas <- Sequence { i.unionOf->asSequence()->select(c | c.oclIsTypeOf(RDM!Class))->collect(e | e.transform(i, thisModule.Class2Class(e))),
+									   i.unionOf->asSequence()->select(c | not c.oclIsTypeOf(RDM!Class))->asSequence()
+							}
+			)
+}
+
+-- Rule 'Complement2Negation'
+-- Create R2ML Negation of elements from RDM ClassAtom
+-- with ComplementClass PredicateSymbol
+rule Complement2Negation {
+	from i : RDM!Atom (
+			i.name = 'ClassAtom' and i.hasPredicateSymbol.oclIsTypeOf(RDM!ComplementClass)
+		)
+	to 
+		o : R2ML!StrongNegation (
+				formula <- if i.hasPredicateSymbol.complementOf.oclIsTypeOf(RDM!Class) then
+							    i.hasPredicateSymbol.complementOf.transform(i.hasPredicateSymbol, thisModule.Class2Class(i.hasPredicateSymbol.complementOf))
+							else i.hasPredicateSymbol.complementOf
+							endif
+			)	
+}
+
+-- Rule 'EnumeratedClass2Disjunction'
+-- Create R2ML Disjunction of elements from EnumeratedClass
+rule EnumeratedClass2Disjunction {
+	from i : RDM!EnumeratedClass (
+			i.oclIsTypeOf(RDM!EnumeratedClass) and 
+			RDM!Atom.allInstancesFrom('IN')->asSequence()->collect(c | c.hasPredicateSymbol)->flatten()->excludes(i)
+		)
+	to 
+		o : R2ML!Disjunction (
+				formulas <- i.oneOf
+			)
+}
+
+-- Rule 'EnumeratedClassAtom2Disjunction'
+-- Create R2ML Disjunction of elements from RDM ClassAtom
+-- with EnumeratedClass PredicateSymbol
+rule EnumeratedClassAtom2Disjunction {
+	from i : RDM!Atom (
+			i.name = 'ClassAtom' and i.hasPredicateSymbol.oclIsTypeOf(RDM!EnumeratedClass)
+		)
+	to 
+		o : R2ML!Disjunction (
+				formulas <- i.hasPredicateSymbol.oneOf
+			)
+}
+
+-- Rule 'Individual2EqualityAtom'
+-- Create R2ML EqualityAtom from Individual elements, which are
+-- oneOf elements of EnumeratedClass.
+rule Individual2EqualityAtom {
+	from i : RDM!Individual (
+			RDM!EnumeratedClass.allInstancesFrom('IN')->asSequence()->collect(e | e.oneOf)->flatten()->includes(i)
+		)
+	to o : R2ML!EqualityAtom (
+			terms <- Sequence{obj, thisModule.IndividualVariable2ObjectVariable(thisModule.getAtomForClassElement(i).terms->first())}
+		),
+		obj : R2ML!ObjectName (
+			name <- i.name
+			)
+}
+
+-- Rule 'Class2ObjectClassificationAtom'
+-- Create R2ML ObjectClassificationAtom from Class element
+-- Annotation: Currently not used, switched with transform helper.
+unique lazy rule Class2ObjectClassificationAtom {
+	from i : RDM!Class 
+	to o : R2ML!ObjectClassificationAtom (
+				isNegated <- false,
+				term <- thisModule.IndividualVariable2ObjectVariable(thisModule.getAtomForClassElement(i).terms->first()), -- Helper koji ce naci Atom koji sadrzi ovu klasu
+				type <-	thisModule.Class2Class(i)
+			)
+}
+
+-- Rule 'Class2Class'
+-- Create R2ML Class from RDM Class element
+unique lazy rule Class2Class {
+	from i : RDM!Class 
+	to cla : R2ML!Class (
+				name <- i.name,
+				predicateCategory <- #closed
+			)
+}
+
+-- Rule 'HasValueRestrictionClass2ReferencePropertyAtom'
+-- Create R2ML ReferencePropertyAtom from HasValueRestriction element, which have
+-- hasValue attribute defined.
+rule HasValueRestrictionClass2ReferencePropertyAtom {
+	from i : RDM!HasValueRestriction (
+			i.oclIsTypeOf(RDM!HasValueRestriction) and not i.hasValue.oclIsUndefined()
+			and i.onProperty->asSequence()->first().oclIsTypeOf(RDM!ObjectProperty)
+		)
+	to o : R2ML!ReferencePropertyAtom (
+		isNegated <- false,
+		object <- thisModule.Individual2ObjectVariable(i.hasValue),
+		referenceProperty <- i.onProperty->asSequence()->first(),
+		subject <- thisModule.IndividualVariable2ObjectVariable(thisModule.getAtomForClassElement(i).terms->first())
+		)
+}
+
+-- Rule 'SomeValuesFromRestrictionClass2ExistentiallyQuantifiedFormula'
+-- Create R2ML ExistentiallyQuantifiedFormula from SomeValuesFromRestriction element, which have
+-- someValuesFromClass attribute defined.
+rule SomeValuesFromRestrictionClass2ExistentiallyQuantifiedFormula {
+	from i : RDM!SomeValuesFromRestriction (
+			i.oclIsTypeOf(RDM!SomeValuesFromRestriction) and not i.someValuesFromClass.oclIsUndefined()
+		)
+	to o : R2ML!ExistentiallyQuantifiedFormula (
+			variables <- objVar,
+			formula <- conj
+		),
+		objVar : R2ML!ObjectVariable (
+				name <- 'x',
+				typeCategory <- #individual
+			),
+		conj : R2ML!Conjuction (
+				formulas <- if i.someValuesFromClass.oclIsTypeOf(RDM!Class) then
+								Sequence {i.someValuesFromClass.transform(i, thisModule.Class2Class(i.someValuesFromClass)), refPropAt}
+							else Sequence{ i.someValuesFromClass, refPropAt }
+							endif
+			),
+		refPropAt : R2ML!ReferencePropertyAtom (
+			isNegated <- false,
+			subject <- thisModule.IndividualVariable2ObjectVariable(thisModule.getAtomForClassElement(i).terms->first()),
+			object <- objVar,
+			referenceProperty <- i.onProperty->asSequence()->first()
+			)	
+}
+
+-- Rule 'AllValuesFromRestrictionClass2UniversallyQuantifiedFormula'
+-- Create R2ML UniversallyQuantifiedFormula from AllValuesFromRestriction element, which have
+-- allValuesFromClass attribute defined.
+rule AllValuesFromRestrictionClass2UniversallyQuantifiedFormula {
+	from i : RDM!AllValuesFromRestriction (
+			i.oclIsTypeOf(RDM!AllValuesFromRestriction) and not i.allValuesFromClass.oclIsUndefined()
+		)
+	to o : R2ML!UniversallyQuantifiedFormula (
+			variables <- objVar,
+			formula <- impl
+		),
+		objVar : R2ML!ObjectVariable (
+				name <- 'x',
+				typeCategory <- #individual
+			),
+		impl : R2ML!Implication (
+				antecedent <- refPropAt,
+				consequent <- if i.allValuesFromClass.oclIsTypeOf(RDM!Class) then
+								i.allValuesFromClass.transform(i, thisModule.Class2Class(i.allValuesFromClass))
+							else i.allValuesFromClass
+							endif
+			),
+		refPropAt : R2ML!ReferencePropertyAtom (
+			isNegated <- false,
+			subject <- thisModule.IndividualVariable2ObjectVariable(thisModule.getAtomForClassElement(i).terms->first()),
+			object <- objVar,
+			referenceProperty <- i.onProperty->asSequence()->first()
+			)	
+}
+
+-- Rule 'MinCardinalityRestrictionClass2AtLeastQuantifiedFormula'
+-- Create R2ML AtLeastQuantifiedFormula from MinCardinalityRestriction element, 
+-- which is defined on ObjectProperty and there is no maxCardinality defined
+-- on same property.
+rule MinCardinalityRestrictionClass2AtLeastQuantifiedFormula {
+	from i : RDM!MinCardinalityRestriction (
+			i.oclIsTypeOf(RDM!MinCardinalityRestriction) and
+			RDM!MaxCardinalityRestriction.allInstancesFrom('IN')->asSequence()->collect(c | c.onProperty)->flatten()->excludes(i.onProperty->asSequence()->first()) and
+			i.onProperty->asSequence()->first().oclIsTypeOf(RDM!ObjectProperty)
+		)
+	to o : R2ML!AtLeastQuantifiedFormula (
+		minCardinality <- i.minCardinality.lexicalForm.toInteger(),
+		variables <- objVar,
+		formula <- refPropAt
+		),
+		objVar : R2ML!ObjectVariable (
+				name <- 'x',
+				typeCategory <- #individual
+		),
+		refPropAt : R2ML!ReferencePropertyAtom (
+			isNegated <- false,
+			subject <- thisModule.IndividualVariable2ObjectVariable(thisModule.getAtomForClassElement(i).terms->first()),
+			object <- objVar,
+			referenceProperty <- i.onProperty->asSequence()->first()
+		)		
+}
+
+-- Rule 'MaxCardinalityRestrictionClass2AtLeastQuantifiedFormula'
+-- Create R2ML AtMostQuantifiedFormula from MaxCardinalityRestriction element, 
+-- which is defined on ObjectProperty and there is no minCardinality defined
+-- on same property.
+rule MaxCardinalityRestrictionClass2AtLeastQuantifiedFormula {
+	from i : RDM!MaxCardinalityRestriction (
+			i.oclIsTypeOf(RDM!MaxCardinalityRestriction) and
+			RDM!MinCardinalityRestriction.allInstancesFrom('IN')->asSequence()->collect(c | c.onProperty)->flatten()->excludes(i.onProperty->asSequence()->first()) and
+			i.onProperty->asSequence()->first().oclIsTypeOf(RDM!ObjectProperty)
+		)
+	to o : R2ML!AtMostQuantifiedFormula (
+		maxCardinality <- i.maxCardinality.lexicalForm.toInteger(),
+		variables <- objVar,
+		formula <- refPropAt
+		),
+		objVar : R2ML!ObjectVariable (
+				name <- 'x',
+				typeCategory <- #individual
+		),
+		refPropAt : R2ML!ReferencePropertyAtom (
+			isNegated <- false,
+			subject <- thisModule.IndividualVariable2ObjectVariable(thisModule.getAtomForClassElement(i).terms->first()),
+			object <- objVar,
+			referenceProperty <- i.onProperty->asSequence()->first()
+		)		
+}
+
+-- Rule 'MaxMinCardinalityRestrictionClass2AtLeastAndAtMostQuantifiedFormula'
+-- Create R2ML AtLeastAndAtMostQuantifiedFormula from MaxCardinalityRestriction element, 
+-- which is defined on ObjectProperty and there is minCardinality defined
+-- on same property.
+-- ANNOTATION: It is needed, because we can have it as predicateSymbol of Atom, where
+--             exists MinCardinaltyRestriction defined on it.
+rule MaxMinCardinalityRestrictionClass2AtLeastAndAtMostQuantifiedFormula {
+	from i : RDM!MaxCardinalityRestriction (
+			i.oclIsTypeOf(RDM!MaxCardinalityRestriction) and
+			RDM!MinCardinalityRestriction.allInstancesFrom('IN')->asSequence()->collect(c | c.onProperty)->flatten()->includes(i.onProperty->asSequence()->first()) and
+			i.onProperty->asSequence()->first().oclIsTypeOf(RDM!ObjectProperty) and
+			RDM!Atom.allInstancesFrom('IN')->asSequence()->collect(c | c.hasPredicateSymbol)->flatten()->excludes(i.minCardinalityOnSameProperty)
+		)
+	to o : R2ML!AtLeastAndAtMostQuantifiedFormula (
+			maxCardinality <- i.maxCardinality.lexicalForm.toInteger(),
+			minCardinality <- i.minCardinalityOnSameProperty.minCardinality.lexicalForm.toInteger(),
+			variables <- objVar,
+			formula <- refPropAt
+		),
+		objVar : R2ML!ObjectVariable (
+				name <- 'x',
+				typeCategory <- #individual
+		),
+		refPropAt : R2ML!ReferencePropertyAtom (
+			isNegated <- false,
+			subject <- thisModule.IndividualVariable2ObjectVariable(thisModule.getAtomForClassElement(i).terms->first()),
+			object <- objVar,
+			referenceProperty <- i.onProperty->asSequence()->first()
+		)		
+}
+
+-- Rule 'MinMaxCardinalityRestrictionClass2AtLeastAndAtMostQuantifiedFormula'
+-- Create R2ML AtLeastAndAtMostQuantifiedFormula from MinCardinalityRestriction element, 
+-- which is defined on ObjectProperty and there is maxCardinality defined
+-- on same property.
+-- ANNOTATION: It is needed, because we can have it as predicateSymbol of Atom, where
+--             exists MaxCardinaltyRestriction defined on it.
+rule MinMaxCardinalityRestrictionClass2AtLeastAndAtMostQuantifiedFormula {
+	from i : RDM!MinCardinalityRestriction ( -- We start from MinCardinality, but
+											 -- we also can start from MaxCardinality.
+			i.oclIsTypeOf(RDM!MinCardinalityRestriction) and
+			RDM!MaxCardinalityRestriction.allInstancesFrom('IN')->asSequence()->collect(c | c.onProperty)->flatten()->includes(i.onProperty->asSequence()->first()) and
+			i.onProperty->asSequence()->first().oclIsTypeOf(RDM!ObjectProperty) and
+			RDM!Atom.allInstancesFrom('IN')->asSequence()->collect(c | c.hasPredicateSymbol)->flatten()->excludes(i.maxCardinalityOnSameProperty)
+		)
+	to o : R2ML!AtLeastAndAtMostQuantifiedFormula (
+			maxCardinality <- i.maxCardinalityOnSameProperty.maxCardinality.lexicalForm.toInteger(),
+			minCardinality <- i.minCardinality.lexicalForm.toInteger(),
+			variables <- objVar,
+			formula <- refPropAt
+		),
+		objVar : R2ML!ObjectVariable (
+				name <- 'x',
+				typeCategory <- #individual
+		),
+		refPropAt : R2ML!ReferencePropertyAtom (
+			isNegated <- false,
+			subject <- thisModule.IndividualVariable2ObjectVariable(thisModule.getAtomForClassElement(i).terms->first()),
+			object <- objVar,
+			referenceProperty <- i.onProperty->asSequence()->first()
+		)		
+}
+
+-- Rule 'CardinalityRestrictionClass2AtLeastAndAtMostQuantifiedFormula'
+-- Create R2ML AtLeastAndAtMostQuantifiedFormula from CardinalityRestriction element, 
+-- which is defined on ObjectProperty.
+rule CardinalityRestrictionClass2AtLeastAndAtMostQuantifiedFormula {
+	from i : RDM!CardinalityRestriction (
+			i.oclIsTypeOf(RDM!CardinalityRestriction) and i.onProperty->asSequence()->first().oclIsTypeOf(RDM!ObjectProperty)		
+		)
+	to o : R2ML!AtLeastAndAtMostQuantifiedFormula (
+			maxCardinality <- i.cardinality.lexicalForm.toInteger(),
+			minCardinality <- i.cardinality.lexicalForm.toInteger(),
+			variables <- objVar,
+			formula <- refPropAt
+		),
+		objVar : R2ML!ObjectVariable (
+				name <- 'x',
+				typeCategory <- #individual
+		),
+		refPropAt : R2ML!ReferencePropertyAtom (
+			isNegated <- false,
+			subject <- thisModule.IndividualVariable2ObjectVariable(thisModule.getAtomForClassElement(i).terms->first()),
+			object <- objVar,
+			referenceProperty <- i.onProperty->asSequence()->first()
+		)		
+}
+
+-- DataRangeAtom
+
+-- Rule 'DataRangeAtom2DataClassificationAtom'
+-- Create R2ML DataClassificationAtom from Atom element, 
+-- which have DataRange as predicate Symbol and undefined datatype.
+rule DataRangeAtomOneOf2DataClassificationAtom {
+	from i : RDM!Atom (
+			i.name = 'DataRangeAtom' and 
+			if i.hasPredicateSymbol.oclIsTypeOf(RDM!DataRange) then
+				not i.hasPredicateSymbol.datatype.oclIsUndefined()
+			else 
+				false
+			endif
+		)
+	to 
+		o : R2ML!DataClassificationAtom (
+				isNegated <- false,
+				term <- thisModule.IndividualVariable2DataVariable(i.terms->first()),
+				type <- if thisModule.getDefaultTypedLiteral(i.hasPredicateSymbol.datatype.name) <> OclUndefined
+							then thisModule.TypedLiteral2Datatype( thisModule.getDefaultTypedLiteral(i.hasPredicateSymbol.datatype.name) )
+							else thisModule.PrimitiveType2Datatype(i.hasPredicateSymbol.datatype)
+						endif
+				
+				
+			)
+}
+
+-- Rule 'DataRange2DataClassificationAtom'
+-- Create R2ML DataClassificationAtom from DataRange element, 
+-- which is not predicate symbol of Atom,
+-- and datatype is defined.
+rule DataRange2DataClassificationAtom {
+	from i : RDM!DataRange (
+		i.oclIsTypeOf(RDM!DataRange) 
+		and RDM!Atom.allInstancesFrom('IN')->asSequence()->collect(c | c.hasPredicateSymbol)->flatten()->excludes(i)
+		and if i.datatype.oclIsUndefined() then
+				 false
+			else true
+			endif
+		)
+	to o : R2ML!DataClassificationAtom (
+				isNegated <- false,
+				term <- thisModule.IndividualVariable2DataVariable(thisModule.getAtomForDataElement(i).terms->first()),
+				type <- if thisModule.getDefaultTypedLiteral(i.datatype.name) <> OclUndefined
+							then thisModule.TypedLiteral2Datatype( thisModule.getDefaultTypedLiteral(i.datatype.name) )
+							else thisModule.PrimitiveType2Datatype(i.datatype)
+						endif
+			)
+}
+
+-- Rule 'PrimitiveType2Datatype'
+-- Create R2ML Datatype from RDM PrimitiveType element.
+unique lazy rule PrimitiveType2Datatype {
+	from i : RDM!PrimitiveType
+	to o : R2ML!Datatype (
+		predicateCategory <- #closed,
+		name <- i.name
+		)
+}
+
+-- Rule 'DataRangeAtom2Disjunction'
+-- Create R2ML Disjunction from Atom element, 
+-- which have DataRange as predicate Symbol and undefined datatype.
+rule DataRangeAtom2Disjunction {
+	from i : RDM!Atom (
+			i.name = 'DataRangeAtom' and 
+			if i.hasPredicateSymbol.oclIsTypeOf(RDM!DataRange) then
+				i.hasPredicateSymbol.datatype.oclIsUndefined()
+			else 
+				false
+			endif
+		)
+	to 
+		o : R2ML!Disjunction (
+				formulas <- i.hasPredicateSymbol.oneOf
+			)
+}
+
+-- Rule 'DataRange2Disjunction'
+-- Create R2ML Disjunction from DataRange element, 
+-- which is not predicate symbol of Atom, and
+-- datatype is undefined.
+rule DataRange2Disjunction {
+	from i : RDM!DataRange (
+		i.oclIsTypeOf(RDM!DataRange) and
+		RDM!Atom.allInstancesFrom('IN')->asSequence()->collect(c | c.hasPredicateSymbol)->flatten()->excludes(i)
+		and if i.datatype.oclIsUndefined() then
+		       true
+			else false
+			endif
+		)
+	to o : R2ML!Disjunction (
+				formulas <- i.oneOf
+			)
+}
+
+-- Rule 'PlainLiteral2PlainLiteral'
+-- Create R2ML PlainLiteral from RDM PlainLiteral element,
+-- which is not children of some DataRange.
+rule PlainLiteral2PlainLiteral {
+	from i : RDM!PlainLiteral (
+		i.oclIsTypeOf(RDM!PlainLiteral) and RDM!DataRange.allInstancesFrom('IN')->asSequence()->select(e | not e.oneOf.oclIsUndefined())->collect(c | c.oneOf)->flatten()->excludes(i)
+		)
+	to o : R2ML!PlainLiteral (
+		languageTag <- i.language,
+		lexicalValue <- i.lexicalForm,
+		typeCategory <- #individual
+		)
+}
+
+-- Rule 'TypedLiteral2TypedLiteral'
+-- Create R2ML TypedLiteral from RDM TypedLiteral element,
+-- which is not children of some DataRange.
+rule TypedLiteral2TypedLiteral {
+	from i : RDM!TypedLiteral (
+			i.oclIsTypeOf(RDM!TypedLiteral) and RDM!DataRange.allInstancesFrom('IN')->asSequence()->select(e | not e.oneOf.oclIsUndefined())->collect(c | c.oneOf)->flatten()->excludes(i) and
+			RDM!CardinalityRestriction.allInstancesFrom('IN')->asSequence()->collect(c | c.cardinality)->flatten()->excludes(i) and
+			RDM!MinCardinalityRestriction.allInstancesFrom('IN')->asSequence()->collect(c | c.minCardinality)->flatten()->excludes(i) and
+			RDM!MaxCardinalityRestriction.allInstancesFrom('IN')->asSequence()->collect(c | c.maxCardinality)->flatten()->excludes(i)
+		)
+	to o : R2ML!TypedLiteral (
+		type <- thisModule.TypedLiteral2Datatype( thisModule.getDefaultTypedLiteral(i.theType) ),
+		lexicalValue <- i.lexicalForm,
+		typeCategory <- #individual
+		)
+}
+
+-- Rule 'TypedLiteral2Datatype'
+-- Lazy rule which creates R2ML Datatype from RDM TypedLiteral element.
+unique lazy rule TypedLiteral2Datatype {
+	from i : RDM!TypedLiteral
+	to o : R2ML!Datatype (
+		name <- i.theType,
+		predicateCategory <- #closed
+		)
+}
+
+-- Rule 'PlainLiteral2DatatypePredicateAtom'
+-- Create R2ML DatatypePredicateAtom from RDM PlainLiteral element,
+-- which is children of some DataRange.
+rule PlainLiteral2DatatypePredicateAtom {
+	from i : RDM!PlainLiteral (
+		i.oclIsTypeOf(RDM!PlainLiteral) and RDM!DataRange.allInstancesFrom('IN')->asSequence()->select(e | not e.oneOf.oclIsUndefined())->collect(c | c.oneOf)->flatten()->includes(i)
+		)
+	to o : R2ML!DatatypePredicateAtom (
+		isNegated <- false,
+		dataArguments <- Sequence { pl, thisModule.IndividualVariable2DataVariable(thisModule.getAtomForDataElement(i).terms->first()) },
+		predicate <- thisModule.PlainLiteral2DatatypePredicate(thisModule.getDefaultPlainLiteral())
+		),
+	    pl : R2ML!PlainLiteral (
+	    	lexicalValue <- i.lexicalForm,
+			typeCategory <- #individual
+	    	)
+}
+
+-- Rule 'TypedLiteral2DatatypePredicateAtom'
+-- Create R2ML DatatypePredicateAtom from RDM TypedLiteral element,
+-- which is children of some DataRange.
+rule TypedLiteral2DatatypePredicateAtom {
+	from i : RDM!TypedLiteral (
+		i.oclIsTypeOf(RDM!TypedLiteral) and RDM!DataRange.allInstancesFrom('IN')->asSequence()->select(e | not e.oneOf.oclIsUndefined())->collect(c | c.oneOf)->flatten()->includes(i)
+		)
+	to o : R2ML!DatatypePredicateAtom (
+		isNegated <- false,
+		dataArguments <- Sequence { pl, thisModule.IndividualVariable2DataVariable(thisModule.getAtomForDataElement(i).terms->first()) },
+		predicate <- thisModule.TypedLiteral2DatatypePredicate( thisModule.getDefaultTypedLiteral(i.theType) )
+		),
+	    pl : R2ML!TypedLiteral (
+	    	lexicalValue <- i.lexicalForm,
+			type <- thisModule.TypedLiteral2Datatype( thisModule.getDefaultTypedLiteral(i.theType) ),
+			typeCategory <- #individual
+	    	)
+}
+
+-- Rule 'TypedLiteral2DatatypePredicate'
+-- Create R2ML DatatypePredicate (swrlb:equal) from RDM TypedLiteral element.
+unique lazy rule TypedLiteral2DatatypePredicate {
+	from i : RDM!TypedLiteral
+	to o : R2ML!DatatypePredicate (
+		   	name <- 'swrlb:equal',
+			predicateCategory <- #closed
+	   	)
+}
+
+-- Rule 'PlainLiteral2DatatypePredicate'
+-- Create R2ML DatatypePredicate (swrlb:equal) from RDM PlainLiteral element.
+unique lazy rule PlainLiteral2DatatypePredicate {
+	from i : RDM!PlainLiteral
+	to o : R2ML!DatatypePredicate (
+		   	name <- 'swrlb:equal',
+			predicateCategory <- #closed
+	   	)
+}
+
+-- Rule 'DatatypeProperty2Attribute'
+-- Create R2ML Attribute from RDM DatatypeProperty element.
+unique lazy rule DatatypeProperty2Attribute {
+	from i : RDM!DatatypeProperty
+	to o : R2ML!Attribute(
+		name <- i.name,
+		predicateCategory <- #closed
+		)
+}
+
+-- Rule 'AllValuesFromRestrictionData2UniversallyQuantifiedFormula'
+-- Create R2ML UniversallyQuantifiedFormula from RDM AllValuesFromRestriction element,
+-- in which allValuesFromRange is defined.
+rule AllValuesFromRestrictionData2UniversallyQuantifiedFormula {
+	from i : RDM!AllValuesFromRestriction (
+			i.oclIsTypeOf(RDM!AllValuesFromRestriction) and not i.allValuesFromRange.oclIsUndefined()
+		)
+	to o : R2ML!UniversallyQuantifiedFormula (
+			variables <- objVar,
+			formula <- impl
+		),
+		objVar : R2ML!ObjectVariable (
+				name <- 'x',
+				typeCategory <- #individual
+			),
+		impl : R2ML!Implication (
+				antecedent <- attrAt,
+				consequent <- i.allValuesFromRange
+			),
+		attrAt : R2ML!AttributionAtom (
+			isNegated <- false,
+			attribute <- thisModule.DatatypeProperty2Attribute(i.onProperty->asSequence()->first()),
+			subject <- objVar,
+			dataValue <- thisModule.IndividualVariable2DataVariable(thisModule.getAtomForDataElement(i).terms->first())
+			)
+		
+}
+
+-- Rule 'SomeValuesFromRestrictionData2ExistentiallyQuantifiedFormula'
+-- Create R2ML ExistentiallyQuantifiedFormula from RDM SomeValuesFromRestriction element,
+-- in which someValuesFromRange is defined.
+rule SomeValuesFromRestrictionData2ExistentiallyQuantifiedFormula {
+	from i : RDM!SomeValuesFromRestriction (
+			i.oclIsTypeOf(RDM!SomeValuesFromRestriction) and not i.someValuesFromRange.oclIsUndefined()
+		)
+	to o : R2ML!ExistentiallyQuantifiedFormula (
+			variables <- objVar,
+			formula <- conj
+		),
+		objVar : R2ML!ObjectVariable (
+				name <- 'x',
+				typeCategory <- #individual
+			),
+		conj : R2ML!Conjuction (
+				formulas <- Sequence{i.someValuesFromRange, attrAt}
+			),
+		attrAt : R2ML!AttributionAtom (
+			isNegated <- false,
+			attribute <- thisModule.DatatypeProperty2Attribute(i.onProperty->asSequence()->first()),
+			subject <- objVar,
+			dataValue <- thisModule.IndividualVariable2DataVariable(thisModule.getAtomForDataElement(i).terms->first())
+			)
+}
+
+-- Rule 'HasValueRestrictionData2AttributeAtom'
+-- Create R2ML AttributionAtom from RDM HasValueRestriction element,
+-- in which hasLiteralValue is defined.
+rule HasValueRestrictionData2AttributeAtom {
+	from i : RDM!HasValueRestriction (
+			i.oclIsTypeOf(RDM!HasValueRestriction) and not i.hasLiteralValue.oclIsUndefined()
+		)
+	to o : R2ML!AttributionAtom (
+			isNegated <- false,
+			attribute <- thisModule.DatatypeProperty2Attribute(i.onProperty->asSequence()->first()),
+			subject <- thisModule.IndividualVariable2ObjectVariable(thisModule.getAtomForDataElement(i).terms->first()),
+			dataValue <- i.hasLiteralValue
+			)
+}
+
+-- Rule 'MinCardinalityRestrictionData2AtLeastQuantifiedFormula'
+-- Create R2ML AtLeastQuantifiedFormula from MinCardinalityRestriction element, 
+-- which is defined on DatatypeProperty and there is no maxCardinality defined
+-- on same property.
+rule MinCardinalityRestrictionData2AtLeastQuantifiedFormula {
+	from i : RDM!MinCardinalityRestriction (
+			i.oclIsTypeOf(RDM!MinCardinalityRestriction) and
+			RDM!MaxCardinalityRestriction.allInstancesFrom('IN')->asSequence()->collect(c | c.onProperty)->flatten()->excludes(i.onProperty->asSequence()->first()) and
+			i.onProperty->asSequence()->first().oclIsTypeOf(RDM!DatatypeProperty)
+		)
+	to o : R2ML!AtLeastQuantifiedFormula (
+		minCardinality <- i.minCardinality.lexicalForm.toInteger(),
+		variables <- objVar,
+		formula <- attrAt
+		),
+		objVar : R2ML!ObjectVariable (
+				name <- 'x',
+				typeCategory <- #individual
+		), 
+	   attrAt: R2ML!AttributionAtom (
+	   		isNegated <- false,
+			attribute <- thisModule.DatatypeProperty2Attribute(i.onProperty->asSequence()->first()),
+			subject <- objVar,
+			dataValue <- thisModule.IndividualVariable2DataVariable(thisModule.getAtomForDataElement(i).terms->first())
+			)
+}
+
+-- Rule 'MaxCardinalityRestrictionData2AtLeastQuantifiedFormula'
+-- Create R2ML AtMostQuantifiedFormula from MaxCardinalityRestriction element, 
+-- which is defined on DatatypeProperty and there is no minCardinality defined
+-- on same property.
+rule MaxCardinalityRestrictionData2AtLeastQuantifiedFormula {
+	from i : RDM!MaxCardinalityRestriction (
+			i.oclIsTypeOf(RDM!MaxCardinalityRestriction) and
+			RDM!MinCardinalityRestriction.allInstancesFrom('IN')->asSequence()->collect(c | c.onProperty)->flatten()->excludes(i.onProperty->asSequence()->first()) and
+			i.onProperty->asSequence()->first().oclIsTypeOf(RDM!DatatypeProperty)
+		)
+	to o : R2ML!AtMostQuantifiedFormula (
+		maxCardinality <- i.maxCardinality.lexicalForm.toInteger(),
+		variables <- objVar,
+		formula <- attrAt
+		),
+		objVar : R2ML!ObjectVariable (
+				name <- 'x',
+				typeCategory <- #individual
+		), 
+	   attrAt: R2ML!AttributionAtom (
+		   	isNegated <- false,
+			attribute <- thisModule.DatatypeProperty2Attribute(i.onProperty->asSequence()->first()),
+			subject <- objVar,
+			dataValue <- thisModule.IndividualVariable2DataVariable(thisModule.getAtomForDataElement(i).terms->first())
+			)		
+}
+
+-- Rule 'MinMaxCardinalityRestrictionClass2AtLeastAndAtMostQuantifiedFormula'
+-- Create R2ML AtLeastAndAtMostQuantifiedFormula from MinCardinalityRestriction element, 
+-- which is defined on DatatypeProperty and there is maxCardinality defined
+-- on same property.
+-- ANNOTATION: It is needed, because we can have it as predicateSymbol of Atom, where
+--             exists MaxCardinaltyRestriction defined on it.
+rule MinMaxCardinalityRestrictionData2AtLeastAndAtMostQuantifiedFormula {
+	from i : RDM!MinCardinalityRestriction ( -- We start from MinCardinality, but
+											 -- we also can start from MaxCardinality.
+			i.oclIsTypeOf(RDM!MinCardinalityRestriction) and
+			RDM!MaxCardinalityRestriction.allInstancesFrom('IN')->asSequence()->collect(c | c.onProperty)->flatten()->includes(i.onProperty->asSequence()->first()) and
+			RDM!Atom.allInstancesFrom('IN')->asSequence()->collect(c | c.hasPredicateSymbol)->flatten()->excludes(i.maxCardinalityOnSameProperty) and
+			i.onProperty->asSequence()->first().oclIsTypeOf(RDM!DatatypeProperty)
+		)
+	to o : R2ML!AtLeastAndAtMostQuantifiedFormula (
+			maxCardinality <- i.maxCardinalityOnSameProperty.maxCardinality.lexicalForm.toInteger(),
+			minCardinality <- i.minCardinality.lexicalForm.toInteger(),
+			variables <- objVar,
+			formula <- attrAt
+		),
+		objVar : R2ML!ObjectVariable (
+				name <- 'x',
+				typeCategory <- #individual
+		), 
+	    attrAt: R2ML!AttributionAtom (
+	    	isNegated <- false,
+			attribute <- thisModule.DatatypeProperty2Attribute(i.onProperty->asSequence()->first()),
+			subject <- objVar,
+			dataValue <- thisModule.IndividualVariable2DataVariable(thisModule.getAtomForDataElement(i).terms->first())
+			)		
+}
+
+-- Rule 'MaxMinCardinalityRestrictionClass2AtLeastAndAtMostQuantifiedFormula'
+-- Create R2ML AtLeastAndAtMostQuantifiedFormula from MaxCardinalityRestriction element, 
+-- which is defined on DatatypeProperty and there is minCardinality defined
+-- on same property.
+-- ANNOTATION: It is needed, because we can have it as predicateSymbol of Atom, where
+--             exists MinCardinaltyRestriction defined on it.
+rule MaxMinCardinalityRestrictionData2AtLeastAndAtMostQuantifiedFormula {
+	from i : RDM!MaxCardinalityRestriction ( 
+			i.oclIsTypeOf(RDM!MaxCardinalityRestriction) and
+			RDM!MinCardinalityRestriction.allInstancesFrom('IN')->asSequence()->collect(c | c.onProperty)->flatten()->includes(i.onProperty->asSequence()->first()) and
+			RDM!Atom.allInstancesFrom('IN')->asSequence()->collect(c | c.hasPredicateSymbol)->flatten()->excludes(i.minCardinalityOnSameProperty) and
+			i.onProperty->asSequence()->first().oclIsTypeOf(RDM!DatatypeProperty)
+		)
+	to o : R2ML!AtLeastAndAtMostQuantifiedFormula (
+			maxCardinality <- i.maxCardinality.lexicalForm.toInteger(),
+			minCardinality <- i.minCardinalityOnSameProperty.minCardinality.lexicalForm.toInteger(),
+			variables <- objVar,
+			formula <- attrAt
+		),
+		objVar : R2ML!ObjectVariable (
+				name <- 'x',
+				typeCategory <- #individual
+		), 
+	    attrAt: R2ML!AttributionAtom (
+	    	isNegated <- false,
+			attribute <- thisModule.DatatypeProperty2Attribute(i.onProperty->asSequence()->first()),
+			subject <- objVar,
+			dataValue <- thisModule.IndividualVariable2DataVariable(thisModule.getAtomForDataElement(i).terms->first())
+			)		
+}
+
+-- Rule 'CardinalityRestrictionData2AtLeastAndAtMostQuantifiedFormula'
+-- Create R2ML AtLeastAndAtMostQuantifiedFormula from CardinalityRestriction element, 
+-- which is defined on DatatypeProperty.
+rule CardinalityRestrictionData2AtLeastAndAtMostQuantifiedFormula {
+	from i : RDM!CardinalityRestriction (
+			i.oclIsTypeOf(RDM!CardinalityRestriction) and i.onProperty->asSequence()->first().oclIsTypeOf(RDM!DatatypeProperty)
+		)
+	to o : R2ML!AtLeastAndAtMostQuantifiedFormula (
+			maxCardinality <- i.cardinality.lexicalForm.toInteger(),
+			minCardinality <- i.cardinality.lexicalForm.toInteger(),
+			variables <- objVar,
+			formula <- attrAt
+		),
+		objVar : R2ML!ObjectVariable (
+				name <- 'x',
+				typeCategory <- #individual
+		),  
+	    attrAt: R2ML!AttributionAtom (
+	    	isNegated <- false,
+			attribute <- thisModule.DatatypeProperty2Attribute(i.onProperty->asSequence()->first()),
+			subject <- objVar,
+			dataValue <- thisModule.IndividualVariable2DataVariable(thisModule.getAtomForDataElement(i).terms->first())
+			)	
+}
+
+-- DataValuedPropertyAtom
+
+-- Rule 'DataValuedPropertyAtom2AttributeAtom'
+-- Create R2ML AttributionAtom from Atom element, 
+-- which is DataValuedPropertyAtom.
+rule DataValuedPropertyAtom2AttributeAtom {
+	from i : RDM!Atom (
+		i.name = 'DataValuedPropertyAtom'
+	)
+	to o : R2ML!AttributionAtom (
+			isNegated <- false,
+			attribute <- thisModule.DatatypeProperty2Attribute(i.hasPredicateSymbol),
+			subject <- thisModule.IndividualVariable2ObjectVariable(i.terms->select(e | e.oclIsKindOf(RDM!IndividualVariable))->first()),
+			dataValue <- if i.terms->select(c | c.oclIsTypeOf(RDM!DataValue))->size() > 0 then
+						 i.terms->select(c | c.oclIsTypeOf(RDM!DataValue))->collect(e | thisModule.DataValue2TypedLiteral(e))->first()
+					 else
+					     i.terms->select(c | c.oclIsTypeOf(RDM!DataVariable))->collect(e | thisModule.DataVariable2DataVariable(e))->first()
+				     endif
+		)
+}
+
+-- Lazy Rule 'DataValue2TypedLiteral'
+-- Create R2ML PlainLiteral from DataValue RDM element.
+lazy rule DataValue2TypedLiteral {
+	from i : RDM!DataValue
+	to o : R2ML!TypedLiteral (
+			lexicalValue <- i.value,
+			type <- thisModule.PrimitiveType2Datatype(i.type),
+			typeCategory <- #individual
+		)
+}
+
+-- SameIndividualAtom
+
+-- Rule 'SameIndividualAtom2EqualityAtom'
+-- Create R2ML EqualityAtom from Atom element, 
+-- which is SameIndividualAtom.
+rule SameIndividualAtom2EqualityAtom {
+	from i : RDM!Atom (
+		i.name = 'SameIndividualAtom'
+	)
+	to o : R2ML!EqualityAtom (
+			terms <- Sequence { i.terms->select(e | e.oclIsTypeOf(RDM!IndividualVariable))->collect(c | thisModule.IndividualVariable2ObjectVariable(c)),
+								i.terms->select(e | e.oclIsTypeOf(RDM!Individual))->collect(c | thisModule.Individual2ObjectVariable(c))
+					 }
+		) 
+}
+
+-- DifferentIndividualAtom
+
+-- Rule 'DifferentIndividualAtom2InequalityAtom'
+-- Create R2ML InequalityAtom from Atom element, 
+-- which is DifferentIndividualAtom.
+rule DifferentIndividualAtom2InequalityAtom {
+	from i : RDM!Atom (
+		i.name = 'DifferentIndividualAtom'
+	)
+	to o : R2ML!InequalityAtom (
+			terms <-  Sequence { i.terms->select(e | e.oclIsTypeOf(RDM!IndividualVariable))->collect(c | thisModule.IndividualVariable2ObjectVariable(c)),
+								 i.terms->select(e | e.oclIsTypeOf(RDM!Individual))->collect(c | thisModule.Individual2ObjectVariable(c))
+					  }
+		)
+}
+
+-- BuiltinAtom
+
+-- Rule 'BuiltinAtom2DatatypePredicateAtom'
+-- Create R2ML DatatypePredicateAtom from Atom element, 
+-- which is BuiltinAtom.
+rule BuiltinAtom2DatatypePredicateAtom {
+	from i : RDM!Atom (
+		i.name = 'BuiltinAtom'
+	)
+	to o : R2ML!DatatypePredicateAtom (
+		isNegated <- false,
+		dataArguments <- Sequence { i.terms->select(e | e.oclIsKindOf(RDM!DataVariable))->collect(c | thisModule.DataVariable2DataVariable(c)),
+									i.terms->select(e | e.oclIsKindOf(RDM!DataValue))->collect(c | thisModule.DataValue2TypedLiteral(c))							
+						},		     
+		predicate <- thisModule.BuiltIn2DatatypePredicate(i.hasPredicateSymbol)
+		)
+}
+
+-- Rule 'BuiltIn2DatatypePredicate'
+-- Lazy rule which creates R2ML DatatypePredicate from RDM BuiltIn
+unique lazy rule BuiltIn2DatatypePredicate {
+	from i : RDM!BuiltIn 
+	to o : R2ML!DatatypePredicate (
+		name <- i.buildInID
+		)
+}
+
+-- IndividualPropertyAtom
+
+-- Rule 'IndividualPropertyAtom2UniversallyQuantifiedFormula'
+-- Create UniversallyQuantifiedFormula R2ML element from RDM Atom element.
+rule IndividualPropertyAtom2ReferencePropertyAtom{
+	from i : RDM!Atom (
+		i.name = 'IndividualPropertyAtom'
+	)
+	to refpropat : R2ML!ReferencePropertyAtom (
+				isNegated <- false,
+				referenceProperty <- i.hasPredicateSymbol,
+				subject <- if i.terms->last().oclIsTypeOf(RDM!IndividualVariable) then
+							thisModule.IndividualVariable2ObjectVariable(i.terms->last())
+						   else thisModule.Individual2ObjectVariable(i.terms->last())
+						   endif,
+				object <- thisModule.IndividualVariable2ObjectVariable(i.terms->first())
+			)	
+}
+
+-- Rule 'ObjectProperty2ReferenceProperty'
+-- Transformation from RDM ObjectProperty element to R2ML ReferenceProperty element.
+rule ObjectProperty2ReferenceProperty {
+	from i : RDM!ObjectProperty
+	to o : R2ML!ReferenceProperty (
+			predicateCategory <- #closed,
+			name <- i.name
+		)
+}
+
+-- Rule 'DatatypeProperty2ReferenceProperty'
+-- Transformation from RDM DatatypeProperty element to R2ML ReferenceProperty element.
+rule DatatypeProperty2ReferenceProperty {
+	from i : RDM!DatatypeProperty
+	to o : R2ML!ReferenceProperty (
+			predicateCategory <- #closed,
+			name <- i.name
+		)
+}
+	
+-- Rule 'Rule2Implication'
+-- Create Implication R2ML element from RDM Rule element
+rule Rule2Implication {
+	from i : RDM!Rule 
+	to  ir : R2ML!AlethicIntegrityRule (
+				constraint <- o
+			),
+			o : R2ML!UniversallyQuantifiedFormula (
+					-- Collects all variables from all Atoms
+					variables <- let atoms : Sequence (RDM!Atom) = i.getAllAtoms() in
+								Sequence { atoms->select(c | c.name = 'ClassAtom')->collect(e | e.terms)->flatten()->collect(c | thisModule.IndividualVariable2ObjectVariable(c)),
+										   atoms->select(c | c.name = 'DataValuedPropertyAtom')->collect(e | e.terms)->flatten()->select(e | e.oclIsKindOf(RDM!IndividualVariable))->collect(c | thisModule.IndividualVariable2ObjectVariable(c)),
+										   atoms->select(c | c.name = 'DataValuedPropertyAtom')->collect(e | e.terms)->flatten()->select(e | e.oclIsKindOf(RDM!DataVariable))->collect(c | thisModule.DataVariable2DataVariable(c)),
+										   atoms->select(c | c.name = 'SameIndividualAtom')->collect(e | e.terms)->flatten()->select(e | e.oclIsKindOf(RDM!IndividualVariable))->collect(c | thisModule.IndividualVariable2ObjectVariable(c)),
+										   atoms->select(c | c.name = 'SameIndividualAtom')->collect(e | e.terms)->flatten()->select(e | e.oclIsKindOf(RDM!Individual))->collect(c | thisModule.Individual2ObjectVariable(c)),
+					  					   atoms->select(c | c.name = 'DifferentIndividualAtom')->collect(e | e.terms)->flatten()->select(e | e.oclIsKindOf(RDM!IndividualVariable))->collect(c | thisModule.IndividualVariable2ObjectVariable(c)),
+										   atoms->select(c | c.name = 'DifferentIndividualAtom')->collect(e | e.terms)->flatten()->select(e | e.oclIsKindOf(RDM!Individual))->collect(c | thisModule.Individual2ObjectVariable(c)),
+										   atoms->select(c | c.name = 'IndividualPropertyAtom')->collect(e | e.terms)->flatten()->select(e | e.oclIsKindOf(RDM!IndividualVariable))->collect(c | thisModule.IndividualVariable2ObjectVariable(c)),
+										   atoms->select(c | c.name = 'DataRangeAtom')->collect(e | e.terms)->flatten()->select(e | e.oclIsKindOf(RDM!IndividualVariable))->collect(c | thisModule.IndividualVariable2DataVariable(c)),
+										   atoms->select(c | c.name = 'BuiltinAtom')->collect(e | e.terms)->flatten()->select(e | e.oclIsKindOf(RDM!DataVariable))->collect(c | thisModule.DataVariable2DataVariable(c))										
+										},
+					formula <- imp
+				),
+			imp : R2ML!Implication (
+				antecedent <- if i.hasAntecedent.containsAtom->size() > 1
+	 				  	 	  then i.hasAntecedent
+						      else if i.hasAntecedent.containsAtom->asSequence()->first().hasPredicateSymbol.oclIsKindOf(RDM!Restriction) then
+							  		i.hasAntecedent.containsAtom->asSequence()->first().hasPredicateSymbol
+									else i.hasAntecedent.containsAtom->asSequence()->first()
+									endif
+						      endif,
+				consequent <- if i.hasConsequent.containsAtom->size() > 1
+					  	      then i.hasConsequent
+					  	      else if i.hasConsequent.containsAtom->asSequence()->first().hasPredicateSymbol.oclIsKindOf(RDM!Restriction) then
+								  	i.hasConsequent.containsAtom->asSequence()->first().hasPredicateSymbol
+								   else i.hasConsequent.containsAtom->asSequence()->first()
+								   endif	
+					  	      endif
+		)
+}
+
+-- Endpoint Rule 'RuleBase'
+-- Create RuleBase R2ML element as parent of all Integrity rules
+endpoint rule RuleBase() {
+     to rb : R2ML!RuleBase (
+				rules <- Sequence { rs }
+			),
+    rs : R2ML!IntegrityRuleSet (
+				rules <- RDM!Rule.allInstancesFrom('IN')->asSequence()
+			)
+}
+
+
+-- Rule 'Antecedent2Conjuction'
+-- Create Conjuction R2ML element from RDM Antecedent element,
+-- if antecedent have more than one element.
+rule Antecedent2Conjuction {
+	from i : RDM!Antecedent (
+			i.containsAtom->size () > 1
+		)
+	to o : R2ML!Conjuction (
+			formulas <- Sequence{ i.containsAtom->select(c | c.hasPredicateSymbol.oclIsKindOf(RDM!Restriction))->collect(c | c.hasPredicateSymbol)->flatten(),
+  								  i.containsAtom->select(c | not c.hasPredicateSymbol.oclIsKindOf(RDM!Restriction))			
+								}
+		)
+}
+
+-- Rule 'Consequent2Conjuction'
+-- Create Conjuction R2ML element from RDM Consequent element,
+-- if consequent have more than one element.
+rule Consequent2Conjuction {
+	from i : RDM!Consequent (
+			i.containsAtom->size () > 1
+		)
+	to o : R2ML!Conjuction (
+			formulas <- Sequence{ i.containsAtom->select(c | c.hasPredicateSymbol.oclIsKindOf(RDM!Restriction))->collect(c | c.hasPredicateSymbol)->flatten(),
+  								  i.containsAtom->select(c | not c.hasPredicateSymbol.oclIsKindOf(RDM!Restriction))			
+								}
+		)
+}
+
+-- Rule 'IndividualVariable2ObjectVariable'
+-- Create R2ML ObjectVariable from RDM IndividualVariable.
+unique lazy rule IndividualVariable2ObjectVariable {
+	from i : RDM!IndividualVariable
+	to o : R2ML!ObjectVariable (
+			name <- i.name,
+			classRef <- if not i.classRef.oclIsUndefined() then
+							thisModule.Class2Class(i.classRef)
+						else OclUndefined
+						endif
+		)		
+}
+
+-- Rule 'Individual2ObjectVariable'
+-- Create R2ML ObjectVariable from RDM Individual.
+unique lazy rule Individual2ObjectVariable {
+	from i : RDM!Individual
+	to o : R2ML!ObjectVariable (
+			name <- i.name,
+			typeCategory <- #individual,
+			classRef <- if not i.type.oclIsUndefined() then
+							thisModule.Class2Class(i.type)
+						else OclUndefined
+						endif 
+		)		
+}
+
+-- Rule 'IndividualVariable2DataVariable'
+-- Create R2ML DataVariable from RDM IndividualVariable.
+unique lazy rule IndividualVariable2DataVariable {
+	from i : RDM!IndividualVariable
+	to o : R2ML!DataVariable (
+			name <- i.name,
+			typeCategory <- #individual
+		)		
+}
+
+-- Rule 'DataVariable2DataVariable'
+-- Create R2ML DataVariable from RDM DataVariable.
+unique lazy rule DataVariable2DataVariable {
+	from i : RDM!DataVariable
+	to o : R2ML!DataVariable (
+			name <- i.name,
+			typeCategory <- #individual
+		)		
+}

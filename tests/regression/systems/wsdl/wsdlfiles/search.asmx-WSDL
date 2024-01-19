@@ -1,0 +1,777 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://microsoft.com/webservices/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" targetNamespace="http://microsoft.com/webservices/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://microsoft.com/webservices/">
+      <s:element name="ReviewHome">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="aCruiseLine" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="aShip" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="aCultureName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ReviewHomeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ReviewHomeResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ReviewHome_Ship">
+        <s:complexType />
+      </s:element>
+      <s:element name="ReviewHome_ShipResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ReviewHome_ShipResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="Home">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="aDestination" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="aMonth" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="aCruiseLine" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="aShip" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="aCultureName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="HomeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="HomeResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="Home_Destination">
+        <s:complexType />
+      </s:element>
+      <s:element name="Home_DestinationResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="Home_DestinationResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="Home_Month">
+        <s:complexType />
+      </s:element>
+      <s:element name="Home_MonthResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="Home_MonthResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="Home_Cruiseline">
+        <s:complexType />
+      </s:element>
+      <s:element name="Home_CruiselineResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="Home_CruiselineResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="Home_Ship">
+        <s:complexType />
+      </s:element>
+      <s:element name="Home_ShipResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="Home_ShipResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CruiseSearch">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="aDestination" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="aSubDestination" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="aDeparturePort" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="aDuration" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="aMonth" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="aMonthTo" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="aDay" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="aDayTo" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="aCruiseLine" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="aShip" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="aPromotion" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="aWebID" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="aProductScope" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="aCultureName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CruiseSearchResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CruiseSearchResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CruiseSearch_List">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="aListName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CruiseSearch_ListResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CruiseSearch_ListResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="string" nillable="true" type="s:string" />
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="ReviewHomeSoapIn">
+    <wsdl:part name="parameters" element="tns:ReviewHome" />
+  </wsdl:message>
+  <wsdl:message name="ReviewHomeSoapOut">
+    <wsdl:part name="parameters" element="tns:ReviewHomeResponse" />
+  </wsdl:message>
+  <wsdl:message name="ReviewHome_ShipSoapIn">
+    <wsdl:part name="parameters" element="tns:ReviewHome_Ship" />
+  </wsdl:message>
+  <wsdl:message name="ReviewHome_ShipSoapOut">
+    <wsdl:part name="parameters" element="tns:ReviewHome_ShipResponse" />
+  </wsdl:message>
+  <wsdl:message name="HomeSoapIn">
+    <wsdl:part name="parameters" element="tns:Home" />
+  </wsdl:message>
+  <wsdl:message name="HomeSoapOut">
+    <wsdl:part name="parameters" element="tns:HomeResponse" />
+  </wsdl:message>
+  <wsdl:message name="Home_DestinationSoapIn">
+    <wsdl:part name="parameters" element="tns:Home_Destination" />
+  </wsdl:message>
+  <wsdl:message name="Home_DestinationSoapOut">
+    <wsdl:part name="parameters" element="tns:Home_DestinationResponse" />
+  </wsdl:message>
+  <wsdl:message name="Home_MonthSoapIn">
+    <wsdl:part name="parameters" element="tns:Home_Month" />
+  </wsdl:message>
+  <wsdl:message name="Home_MonthSoapOut">
+    <wsdl:part name="parameters" element="tns:Home_MonthResponse" />
+  </wsdl:message>
+  <wsdl:message name="Home_CruiselineSoapIn">
+    <wsdl:part name="parameters" element="tns:Home_Cruiseline" />
+  </wsdl:message>
+  <wsdl:message name="Home_CruiselineSoapOut">
+    <wsdl:part name="parameters" element="tns:Home_CruiselineResponse" />
+  </wsdl:message>
+  <wsdl:message name="Home_ShipSoapIn">
+    <wsdl:part name="parameters" element="tns:Home_Ship" />
+  </wsdl:message>
+  <wsdl:message name="Home_ShipSoapOut">
+    <wsdl:part name="parameters" element="tns:Home_ShipResponse" />
+  </wsdl:message>
+  <wsdl:message name="CruiseSearchSoapIn">
+    <wsdl:part name="parameters" element="tns:CruiseSearch" />
+  </wsdl:message>
+  <wsdl:message name="CruiseSearchSoapOut">
+    <wsdl:part name="parameters" element="tns:CruiseSearchResponse" />
+  </wsdl:message>
+  <wsdl:message name="CruiseSearch_ListSoapIn">
+    <wsdl:part name="parameters" element="tns:CruiseSearch_List" />
+  </wsdl:message>
+  <wsdl:message name="CruiseSearch_ListSoapOut">
+    <wsdl:part name="parameters" element="tns:CruiseSearch_ListResponse" />
+  </wsdl:message>
+  <wsdl:message name="ReviewHomeHttpGetIn">
+    <wsdl:part name="aCruiseLine" type="s:string" />
+    <wsdl:part name="aShip" type="s:string" />
+    <wsdl:part name="aCultureName" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="ReviewHomeHttpGetOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="ReviewHome_ShipHttpGetIn" />
+  <wsdl:message name="ReviewHome_ShipHttpGetOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="HomeHttpGetIn">
+    <wsdl:part name="aDestination" type="s:string" />
+    <wsdl:part name="aMonth" type="s:string" />
+    <wsdl:part name="aCruiseLine" type="s:string" />
+    <wsdl:part name="aShip" type="s:string" />
+    <wsdl:part name="aCultureName" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="HomeHttpGetOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="Home_DestinationHttpGetIn" />
+  <wsdl:message name="Home_DestinationHttpGetOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="Home_MonthHttpGetIn" />
+  <wsdl:message name="Home_MonthHttpGetOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="Home_CruiselineHttpGetIn" />
+  <wsdl:message name="Home_CruiselineHttpGetOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="Home_ShipHttpGetIn" />
+  <wsdl:message name="Home_ShipHttpGetOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="CruiseSearchHttpGetIn">
+    <wsdl:part name="aDestination" type="s:string" />
+    <wsdl:part name="aSubDestination" type="s:string" />
+    <wsdl:part name="aDeparturePort" type="s:string" />
+    <wsdl:part name="aDuration" type="s:string" />
+    <wsdl:part name="aMonth" type="s:string" />
+    <wsdl:part name="aMonthTo" type="s:string" />
+    <wsdl:part name="aDay" type="s:string" />
+    <wsdl:part name="aDayTo" type="s:string" />
+    <wsdl:part name="aCruiseLine" type="s:string" />
+    <wsdl:part name="aShip" type="s:string" />
+    <wsdl:part name="aPromotion" type="s:string" />
+    <wsdl:part name="aWebID" type="s:string" />
+    <wsdl:part name="aProductScope" type="s:string" />
+    <wsdl:part name="aCultureName" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="CruiseSearchHttpGetOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="CruiseSearch_ListHttpGetIn">
+    <wsdl:part name="aListName" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="CruiseSearch_ListHttpGetOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="ReviewHomeHttpPostIn">
+    <wsdl:part name="aCruiseLine" type="s:string" />
+    <wsdl:part name="aShip" type="s:string" />
+    <wsdl:part name="aCultureName" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="ReviewHomeHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="ReviewHome_ShipHttpPostIn" />
+  <wsdl:message name="ReviewHome_ShipHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="HomeHttpPostIn">
+    <wsdl:part name="aDestination" type="s:string" />
+    <wsdl:part name="aMonth" type="s:string" />
+    <wsdl:part name="aCruiseLine" type="s:string" />
+    <wsdl:part name="aShip" type="s:string" />
+    <wsdl:part name="aCultureName" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="HomeHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="Home_DestinationHttpPostIn" />
+  <wsdl:message name="Home_DestinationHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="Home_MonthHttpPostIn" />
+  <wsdl:message name="Home_MonthHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="Home_CruiselineHttpPostIn" />
+  <wsdl:message name="Home_CruiselineHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="Home_ShipHttpPostIn" />
+  <wsdl:message name="Home_ShipHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="CruiseSearchHttpPostIn">
+    <wsdl:part name="aDestination" type="s:string" />
+    <wsdl:part name="aSubDestination" type="s:string" />
+    <wsdl:part name="aDeparturePort" type="s:string" />
+    <wsdl:part name="aDuration" type="s:string" />
+    <wsdl:part name="aMonth" type="s:string" />
+    <wsdl:part name="aMonthTo" type="s:string" />
+    <wsdl:part name="aDay" type="s:string" />
+    <wsdl:part name="aDayTo" type="s:string" />
+    <wsdl:part name="aCruiseLine" type="s:string" />
+    <wsdl:part name="aShip" type="s:string" />
+    <wsdl:part name="aPromotion" type="s:string" />
+    <wsdl:part name="aWebID" type="s:string" />
+    <wsdl:part name="aProductScope" type="s:string" />
+    <wsdl:part name="aCultureName" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="CruiseSearchHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="CruiseSearch_ListHttpPostIn">
+    <wsdl:part name="aListName" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="CruiseSearch_ListHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:portType name="SearchSoap">
+    <wsdl:operation name="ReviewHome">
+      <wsdl:input message="tns:ReviewHomeSoapIn" />
+      <wsdl:output message="tns:ReviewHomeSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ReviewHome_Ship">
+      <wsdl:input message="tns:ReviewHome_ShipSoapIn" />
+      <wsdl:output message="tns:ReviewHome_ShipSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="Home">
+      <wsdl:input message="tns:HomeSoapIn" />
+      <wsdl:output message="tns:HomeSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="Home_Destination">
+      <wsdl:input message="tns:Home_DestinationSoapIn" />
+      <wsdl:output message="tns:Home_DestinationSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="Home_Month">
+      <wsdl:input message="tns:Home_MonthSoapIn" />
+      <wsdl:output message="tns:Home_MonthSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="Home_Cruiseline">
+      <wsdl:input message="tns:Home_CruiselineSoapIn" />
+      <wsdl:output message="tns:Home_CruiselineSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="Home_Ship">
+      <wsdl:input message="tns:Home_ShipSoapIn" />
+      <wsdl:output message="tns:Home_ShipSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CruiseSearch">
+      <wsdl:input message="tns:CruiseSearchSoapIn" />
+      <wsdl:output message="tns:CruiseSearchSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CruiseSearch_List">
+      <wsdl:input message="tns:CruiseSearch_ListSoapIn" />
+      <wsdl:output message="tns:CruiseSearch_ListSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="SearchHttpGet">
+    <wsdl:operation name="ReviewHome">
+      <wsdl:input message="tns:ReviewHomeHttpGetIn" />
+      <wsdl:output message="tns:ReviewHomeHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ReviewHome_Ship">
+      <wsdl:input message="tns:ReviewHome_ShipHttpGetIn" />
+      <wsdl:output message="tns:ReviewHome_ShipHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="Home">
+      <wsdl:input message="tns:HomeHttpGetIn" />
+      <wsdl:output message="tns:HomeHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="Home_Destination">
+      <wsdl:input message="tns:Home_DestinationHttpGetIn" />
+      <wsdl:output message="tns:Home_DestinationHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="Home_Month">
+      <wsdl:input message="tns:Home_MonthHttpGetIn" />
+      <wsdl:output message="tns:Home_MonthHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="Home_Cruiseline">
+      <wsdl:input message="tns:Home_CruiselineHttpGetIn" />
+      <wsdl:output message="tns:Home_CruiselineHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="Home_Ship">
+      <wsdl:input message="tns:Home_ShipHttpGetIn" />
+      <wsdl:output message="tns:Home_ShipHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CruiseSearch">
+      <wsdl:input message="tns:CruiseSearchHttpGetIn" />
+      <wsdl:output message="tns:CruiseSearchHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CruiseSearch_List">
+      <wsdl:input message="tns:CruiseSearch_ListHttpGetIn" />
+      <wsdl:output message="tns:CruiseSearch_ListHttpGetOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="SearchHttpPost">
+    <wsdl:operation name="ReviewHome">
+      <wsdl:input message="tns:ReviewHomeHttpPostIn" />
+      <wsdl:output message="tns:ReviewHomeHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ReviewHome_Ship">
+      <wsdl:input message="tns:ReviewHome_ShipHttpPostIn" />
+      <wsdl:output message="tns:ReviewHome_ShipHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="Home">
+      <wsdl:input message="tns:HomeHttpPostIn" />
+      <wsdl:output message="tns:HomeHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="Home_Destination">
+      <wsdl:input message="tns:Home_DestinationHttpPostIn" />
+      <wsdl:output message="tns:Home_DestinationHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="Home_Month">
+      <wsdl:input message="tns:Home_MonthHttpPostIn" />
+      <wsdl:output message="tns:Home_MonthHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="Home_Cruiseline">
+      <wsdl:input message="tns:Home_CruiselineHttpPostIn" />
+      <wsdl:output message="tns:Home_CruiselineHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="Home_Ship">
+      <wsdl:input message="tns:Home_ShipHttpPostIn" />
+      <wsdl:output message="tns:Home_ShipHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CruiseSearch">
+      <wsdl:input message="tns:CruiseSearchHttpPostIn" />
+      <wsdl:output message="tns:CruiseSearchHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CruiseSearch_List">
+      <wsdl:input message="tns:CruiseSearch_ListHttpPostIn" />
+      <wsdl:output message="tns:CruiseSearch_ListHttpPostOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="SearchSoap" type="tns:SearchSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="ReviewHome">
+      <soap:operation soapAction="http://microsoft.com/webservices/ReviewHome" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ReviewHome_Ship">
+      <soap:operation soapAction="http://microsoft.com/webservices/ReviewHome_Ship" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Home">
+      <soap:operation soapAction="http://microsoft.com/webservices/Home" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Home_Destination">
+      <soap:operation soapAction="http://microsoft.com/webservices/Home_Destination" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Home_Month">
+      <soap:operation soapAction="http://microsoft.com/webservices/Home_Month" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Home_Cruiseline">
+      <soap:operation soapAction="http://microsoft.com/webservices/Home_Cruiseline" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Home_Ship">
+      <soap:operation soapAction="http://microsoft.com/webservices/Home_Ship" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CruiseSearch">
+      <soap:operation soapAction="http://microsoft.com/webservices/CruiseSearch" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CruiseSearch_List">
+      <soap:operation soapAction="http://microsoft.com/webservices/CruiseSearch_List" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="SearchSoap12" type="tns:SearchSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="ReviewHome">
+      <soap12:operation soapAction="http://microsoft.com/webservices/ReviewHome" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ReviewHome_Ship">
+      <soap12:operation soapAction="http://microsoft.com/webservices/ReviewHome_Ship" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Home">
+      <soap12:operation soapAction="http://microsoft.com/webservices/Home" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Home_Destination">
+      <soap12:operation soapAction="http://microsoft.com/webservices/Home_Destination" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Home_Month">
+      <soap12:operation soapAction="http://microsoft.com/webservices/Home_Month" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Home_Cruiseline">
+      <soap12:operation soapAction="http://microsoft.com/webservices/Home_Cruiseline" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Home_Ship">
+      <soap12:operation soapAction="http://microsoft.com/webservices/Home_Ship" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CruiseSearch">
+      <soap12:operation soapAction="http://microsoft.com/webservices/CruiseSearch" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CruiseSearch_List">
+      <soap12:operation soapAction="http://microsoft.com/webservices/CruiseSearch_List" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="SearchHttpGet" type="tns:SearchHttpGet">
+    <http:binding verb="GET" />
+    <wsdl:operation name="ReviewHome">
+      <http:operation location="/ReviewHome" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ReviewHome_Ship">
+      <http:operation location="/ReviewHome_Ship" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Home">
+      <http:operation location="/Home" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Home_Destination">
+      <http:operation location="/Home_Destination" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Home_Month">
+      <http:operation location="/Home_Month" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Home_Cruiseline">
+      <http:operation location="/Home_Cruiseline" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Home_Ship">
+      <http:operation location="/Home_Ship" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CruiseSearch">
+      <http:operation location="/CruiseSearch" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CruiseSearch_List">
+      <http:operation location="/CruiseSearch_List" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="SearchHttpPost" type="tns:SearchHttpPost">
+    <http:binding verb="POST" />
+    <wsdl:operation name="ReviewHome">
+      <http:operation location="/ReviewHome" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ReviewHome_Ship">
+      <http:operation location="/ReviewHome_Ship" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Home">
+      <http:operation location="/Home" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Home_Destination">
+      <http:operation location="/Home_Destination" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Home_Month">
+      <http:operation location="/Home_Month" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Home_Cruiseline">
+      <http:operation location="/Home_Cruiseline" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Home_Ship">
+      <http:operation location="/Home_Ship" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CruiseSearch">
+      <http:operation location="/CruiseSearch" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CruiseSearch_List">
+      <http:operation location="/CruiseSearch_List" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="Search">
+    <wsdl:port name="SearchSoap" binding="tns:SearchSoap">
+      <soap:address location="http://www.kamloops.cruiseshipcenters.com/search.asmx" />
+    </wsdl:port>
+    <wsdl:port name="SearchSoap12" binding="tns:SearchSoap12">
+      <soap12:address location="http://www.kamloops.cruiseshipcenters.com/search.asmx" />
+    </wsdl:port>
+    <wsdl:port name="SearchHttpGet" binding="tns:SearchHttpGet">
+      <http:address location="http://www.kamloops.cruiseshipcenters.com/search.asmx" />
+    </wsdl:port>
+    <wsdl:port name="SearchHttpPost" binding="tns:SearchHttpPost">
+      <http:address location="http://www.kamloops.cruiseshipcenters.com/search.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

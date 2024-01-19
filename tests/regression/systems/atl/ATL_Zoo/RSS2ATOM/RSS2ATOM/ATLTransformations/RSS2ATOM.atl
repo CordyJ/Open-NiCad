@@ -1,0 +1,75 @@
+module RSS2ATOM;
+create OUT : ATOM from IN : RSS;
+
+-- ============================================================
+-- RSS2ATOM
+-- Created by : Youssef Srour (srour.youssef@gmail.com)
+-- Date: 23/06/2006
+-- Version: 1
+-- ============================================================
+
+	
+--Rule Channel to ATOM
+--Create a ATOM from the input Channel Element
+rule Channel2ATOM {
+	from 
+    	At : RSS!Channel
+	to
+   		out : ATOM!ATOM (
+   			
+    	title <- At.title,
+    	subtitle <- At.description,
+    	rights <- At.copyright,    	
+    	generator <- At.generator,
+    	lastUpdate <- At.lastBuildDate,
+    	categories <- At.category->asSet(),
+		links <- Sequence{link}.first(),
+		authors <- Sequence{auth}.first(),
+		entrie <- At.items->asSequence()		
+	),
+	
+	link : ATOM!Link(
+		
+		hrefl<-At.link	
+	),
+	auth : ATOM!Author(
+		
+		email<-At.webmaster,
+		name<-At.managingEditor
+	)
+}
+
+--Rule Item to Entry
+--Create a Entry from the input Item Element
+rule Item2Entry {
+	from 
+    	it : RSS!Item
+	to
+   		out : ATOM!Entry (
+   			
+    	title <- it.title,
+    	id <- it.guid,
+    	published <- it.pubDate,
+    	content <- it.description,
+    	summary <- it.comments,
+		links <- Sequence{link}.first()
+    	),
+	
+		link : ATOM!Link(
+			
+			hrefl<-it.link	
+		)
+}
+
+--Rule Category to Category
+--Create a category from  the input Category Element
+rule Category2Category {
+	from 
+    	it : RSS!Category
+	to
+   		out : ATOM!Category (
+	    	scheme<-it.domain,
+			label<-it.value
+    	
+	)
+}

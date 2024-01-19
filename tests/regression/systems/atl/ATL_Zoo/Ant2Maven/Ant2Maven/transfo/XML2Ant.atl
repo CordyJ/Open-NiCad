@@ -1,0 +1,459 @@
+module XML2Ant;
+create OUT : Ant from IN : XML;
+
+
+----------------------------------------------------------------------------------
+-- helper : to extract a list of String from a String
+
+-- extract a sequence of String from the String listString in the same order
+-- (two elements are separated by a comma)
+helper def:getList(listString : String):Sequence(String)=
+	if(listString.size()=0)
+		then Sequence{}
+		else thisModule.getListAux(listString,1,1,Sequence{})
+		endif;
+
+-- index1 : begin of the word
+-- index2 : compteur
+helper def:getListAux(listString : String,index1 : Integer,index2 : Integer,provSequence : Sequence(String)):Sequence(String)=
+	if (listString.size()<index2)
+		then provSequence -> append(listString.substring(index1,index2-1))
+		else
+			if (listString.substring(index2,index2)=',')
+				then thisModule.getListAux(listString,index2+1,index2+1, provSequence -> append(listString.substring(index1,index2-1)))
+				else thisModule.getListAux(listString,index1,index2+1, provSequence)
+			endif
+	endif;
+
+
+------------------------------------------------------------------------------------------
+-- helper : to get an attribute
+
+-- returns the value of the attribute 'name' (without test of existence)
+helper context XML!Element def: getAttrVal(name : String) : String =
+    self.children->
+		select(c | c.oclIsKindOf(XML!Attribute) and c.name = name)
+			->first().value;
+
+-- returns true if the attribute 'name' is defined
+helper context XML!Element def: testAttribute(name : String) : Boolean =
+	not (self.children -> select(d | d.oclIsKindOf(XML!Attribute) and d.name = name)->
+		first().oclIsUndefined());
+
+
+-- returns the value of the attribute given in parameter
+-- returns '' if this attribute does not exist
+helper context XML!Element def:getAttribute(name : String):String = 
+	if (self.testAttribute(name))
+		then self.getAttrVal(name)
+		else ''
+		endif;
+
+--------------------------------------------------------------------------------
+-- others helpers
+
+-- returns true if the element 'name' is defined
+helper context XML!Element def: testElement(name : String) : Boolean =
+	not (self.children -> select(d | d.oclIsKindOf(XML!Element) and d.name = name)->
+		first().oclIsUndefined());
+
+
+
+-- returns the value  of a text belonging to an element 'name'
+-- return '' if the element does not exist
+helper context XML!Element def: getText(name : String) : String =
+	if self.testElement(name) then
+    	self.children->
+			select(c | c.oclIsKindOf(XML!Element) and c.name=name) ->
+				first().children ->
+					select(c | c.oclIsKindOf(XML!Text)) -> 
+						first().value
+	else ''
+	endif;
+
+
+--------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------
+--									RULES											--
+
+
+-- central rule
+rule Root2Project{
+	from i : XML!Root
+	to o : Ant!Project(
+		name <- i.getAttribute('name'),
+		basedir <- i.getAttribute('basedir'),
+		description <- i.getText('description'),
+		default <-  XML!Element.allInstances() ->
+			select(d |  d.name = 'target' 
+				and d.getAttribute('name')=i.getAttribute('default')) ->
+					first(),
+		path <- i.children ->
+			select(d | d.oclIsKindOf(XML!Element) and d.name = 'path')
+				-> first(),
+		properties <- i.children ->
+			select(d | d.oclIsKindOf(XML!Element) and d.name = 'property'),
+		taskdef <- i.children ->
+			select(d | d.oclIsKindOf(XML!Element) and d.name = 'taskdef'),
+		targets <- i.children ->
+			select(d | d.oclIsKindOf(XML!Element) and d.name = 'target')
+	)
+}
+
+---------------------------------------------------------------------
+-- properties
+
+rule PropertyLocation{
+	from i : XML!Element(
+		i.name = 'property' and
+		i.testAttribute('location')
+	)
+	to o : Ant!PropertyLocation(
+		name <- i.getAttribute('name'),
+		location <- i.getAttribute('location')
+	)
+}
+
+rule PropertyValue{
+	from i : XML!Element(
+		i.name = 'property' and
+		i.testAttribute('value')
+	)
+	to o : Ant!PropertyValue(
+		name <- i.getAttribute('name'),
+		value <- i.getAttribute('value')
+	)
+}
+
+rule PropertyFile{
+	from i : XML!Element(
+		i.name = 'property' and
+		i.testAttribute('file')
+	)
+	to o : Ant!PropertyFile(
+		file <- i.getAttribute('file')
+	)
+}
+
+rule PropertyEnv{
+	from i : XML!Element(
+		i.name = 'property' and
+		i.testAttribute('environment')
+	)
+	to o : Ant!PropertyEnv(
+		environment <- i.getAttribute('environment')
+	)
+}
+
+
+---------------------------------------------------------------
+-- target
+rule Target{
+	from i : XML!Element(
+		i.name = 'target'
+	)
+	to o : Ant!Target(
+		name <- i.getAttribute('name'),
+		description <- i.getAttribute('description'),
+		ifCondition <- i.getAttribute('if'),
+		unless <- i.getAttribute('unless'),
+		depends <-  XML!Element.allInstances() ->
+			select(d |  d.name = 'target' 
+				and thisModule.getList(i.getAttribute('depends'))->
+						includes( d.getAttribute('name'))),
+		tasks <- i.children ->
+			select(d | d.oclIsKindOf(XML!Element))
+	)
+}
+
+
+
+-----------------------------------------------------------------
+-- tasks
+-----------------------------------------------------------------
+-- concerning the taks defined by the user
+
+-- definition of the task
+rule TaskDef{
+	from i : XML!Element(
+		i.name = 'taskdef'
+	)
+	to o : Ant!TaskDef(
+		name <- i.getAttribute('name'),
+		classname <- i.getAttribute('classname')
+	)
+}
+
+-- call of a task created by the user
+rule NewTask{
+	from i : XML!Element(
+		-- this task must be defined
+		not(XML!Element.allInstances() ->
+			select(d |  d.name = 'taskdef' 
+				and d.getAttribute('name')=i.name) ->
+					isEmpty())
+	)
+	to o : Ant!NewTask(
+		-- reference to the definition of this task
+		taskName <- XML!Element.allInstances() ->
+			select(d |  d.name = 'taskdef' 
+				and d.getAttribute('name')=i.name) ->
+					first(),
+		-- its attributes
+		attributes <- i.children ->
+			select(d | d.oclIsKindOf(XML!Attribute))
+	)
+}
+
+
+rule Attribut{
+	from i : XML!Attribute(
+		not(XML!Element.allInstances() ->
+			select(d |  d.name = 'taskdef' 
+				and d.getAttribute('name')=i.parent.name) ->
+					isEmpty())
+	)
+	to o : Ant!Attribut(
+		name <- i.name,
+		value<- i.value
+	)
+}
+
+
+---------------------------------------------------------------------
+-- pre defined tasks
+
+rule Mkdir{
+	from i : XML!Element(
+		i.name = 'mkdir'
+	)
+	to o : Ant!Mkdir(
+		dir <- i.getAttribute('dir')
+	)
+}
+
+rule Tstamp{
+	from i : XML!Element(
+		i.name = 'tstamp'
+	)
+	to o : Ant!Tstamp()
+}
+
+rule Java{
+	from i : XML!Element(
+		i.name = 'java'
+	)
+	to o : Ant!Java(
+		classname <- i.getAttribute('classname'),
+		jar <- i.getAttribute('jar'),
+		fork <- i.getAttribute('fork'),
+  		classPath <- i.children ->
+			select(d | d.oclIsKindOf(XML!Element) and d.name = 'classpath')
+	)
+}
+
+rule Javac{
+	from i : XML!Element(
+		i.name = 'javac'
+	)
+	to o : Ant!Javac(
+		destdir <- i.getAttribute('destdir'),
+		srcdir <- i.getAttribute('srcdir'),
+  		classPath <- i.children ->
+			select(d | d.oclIsKindOf(XML!Element) and d.name = 'classpath')->
+				first(),
+		inExcludes <- i.children ->
+			select(d | d.oclIsKindOf(XML!Element) and (d.name = 'include' or d.name = 'exclude'))
+	)
+}
+
+rule Javadoc{
+	from i : XML!Element(
+		i.name = 'javadoc'
+	)
+	to o : Ant!Javadoc(
+	 	sourcepath <- i.getAttribute('sourcepath'),
+  		destdir <- i.getAttribute('destdir'),
+  		packagenames <- i.getAttribute('packagenames'),
+  		defaultexcludes <- i.getAttribute('defaultexcludes'),
+  		author <- i.getAttribute('author'),
+  		version <- i.getAttribute('version'),
+  		use <- i.getAttribute('use'),
+  		windowtitle <- i.getAttribute('windowtitle')
+	)
+}
+
+rule Copy{
+	from i : XML!Element(
+		i.name = 'copy'
+	)
+	to o : Ant!Copy(
+		todir <- i.getAttribute('todir'),
+		fileset <- i.children ->
+			select(d | d.oclIsKindOf(XML!Element) and d.name = 'fileset') ->
+				first(),
+		filterset <- i.children ->
+			select(d | d.oclIsKindOf(XML!Element) and d.name = 'filterset') ->
+				first()
+	)
+}
+
+rule Delete{
+	from i : XML!Element(
+		i.name = 'delete'
+	)
+	to o : Ant!Delete(
+		dir <- i.getAttribute('dir')
+	)
+}
+
+rule Jar{
+	from i : XML!Element(
+		i.name = 'jar'
+	)
+	to o : Ant!Jar(
+		jarfile <- i.getAttribute('jarfile'),
+		basedir <- i.getAttribute('basedir')
+	)
+}
+
+------------------------------------------------------------------------------
+-- path, file and pattern
+
+rule Path{
+	from i : XML!Element(
+		i.name = 'path')
+	to o : Ant!Path(
+		id <- i.getAttribute('id'),
+		refid <- i.getAttribute('refid'),
+		fileset <- i.children ->
+			select(d | d.oclIsKindOf(XML!Element) and d.name = 'fileset')
+	)
+}
+
+rule FileSet{
+	from i : XML!Element(
+		i.name = 'fileset'
+	)
+	to o : Ant!FileSet(
+		dir <- i.getAttribute('dir'),
+		patternset <- i.children ->
+			select(d | d.oclIsKindOf(XML!Element) and d.name = 'patternset'),
+		include <- i.children ->
+			select(d | d.oclIsKindOf(XML!Element) and d.name = 'include'),
+		exclude <- i.children ->
+			select(d | d.oclIsKindOf(XML!Element) and d.name = 'exclude')
+	)
+}
+
+rule PatternSet{
+	from i : XML!Element(
+		i.name = 'patternset'
+	)
+	to o : Ant!PatternSet(
+		inexcludes <- i.children ->
+			select(d | d.oclIsKindOf(XML!Element) and (d.name = 'exclude' or d.name='include'))
+	)
+}
+
+rule ClassPath{
+	from i : XML!Element(
+		i.name = 'classpath'
+	)
+	to o : Ant!ClassPath(
+		refid <- i.getAttribute('refid'),
+		pathElement <- i.children ->
+			select(d | d.oclIsKindOf(XML!Element) and d.name = 'pathElement'),
+        fileset <- i.children ->
+			select(d | d.oclIsKindOf(XML!Element) and d.name = 'fileset')
+	)
+ }
+  
+rule PathElement{
+	from i : XML!Element(
+		i.name = 'pathelement'
+	)
+	to o : Ant!PathElement(
+		path <- i.getAttribute('path'),
+		location <- i.getAttribute('location')
+	)
+}
+
+
+
+rule FilterSet{
+	from i : XML!Element(
+		i.name = 'filterset'
+	)
+	to o : Ant!FilterSet(
+		starttoken <- i.getAttribute('starttoken'),
+   		endtoken <- i.getAttribute('endtoken'),
+		filter <- i.children ->
+			select(d | d.oclIsKindOf(XML!Element) and d.name = 'filter'),
+		filtersfile <- i.children ->
+			select(d | d.oclIsKindOf(XML!Element) and d.name = 'filtersfile')
+	)
+}
+
+rule Filter{
+	from i : XML!Element(
+		i.name = 'filter'
+	)
+	to o : Ant!Filter(
+		token <- i.getAttribute('token'),
+		value <- i.getAttribute('value')
+	)
+}
+
+rule FiltersFile{
+	from i : XML!Element(
+		i.name = 'filtersfile'
+	)
+	to o : Ant!FiltersFile(
+		file <- i.getAttribute('file')
+	)
+}
+
+rule Includes{
+	from i : XML!Element(
+		i.name = 'include'
+	)
+	to o : Ant!Includes(
+		name <- i.getAttribute('name'),
+		ifCondition <- i.getAttribute('if'),
+		unless <- i.getAttribute('unless')
+	)
+}
+
+rule Excludes{
+	from i : XML!Element(
+		i.name = 'exclude'
+	)
+	to o : Ant!Excludes(
+		name <- i.getAttribute('name'),
+		ifCondition <- i.getAttribute('if'),
+		unless <- i.getAttribute('unless')
+	)
+}
+
+rule IncludesFile{
+	from i : XML!Element(
+		i.name = 'includesfile'
+	)
+	to o: Ant!IncludesFile(
+		name <- i.getAttribute('name'),
+		ifCondition <- i.getAttribute('if'),
+		unless <- i.getAttribute('unless')
+	)
+}
+
+rule ExcludesFile{
+	from i : XML!Element(
+		i.name = 'excludesfile'
+	)
+	to o : Ant!ExcludesFile(
+		name <- i.getAttribute('name'),
+		ifCondition <- i.getAttribute('if'),
+		unless <- i.getAttribute('unless')
+	)
+}

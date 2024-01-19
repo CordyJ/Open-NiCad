@@ -1,0 +1,125 @@
+module KM32EMF;
+create OUT : MOF from IN : KM3;
+
+uses strings;
+
+rule Package {
+	from e : KM3!Package
+	to
+		c : MOF!EPackage (
+			name <- e.name,
+			eClassifiers <- e.contents->select(e | e.oclIsKindOf(KM3!Classifier)),
+			eSubpackages <- e.contents->select(e | e.oclIsKindOf(KM3!Package))
+		)
+}
+
+--rule OCLConstraint {
+--	from e : XML!Element (e.name = 'ocl')
+--	to
+--		c : MOF!Constraint (
+--			name <- e.getAttrVal('name'),
+--			container <- e.parent.parent.parent,		-- WARNING Poseidon->UML2MOF stores constraints in packages, not classes
+--			constrainedElements <- Sequence {e.parent},
+--			language <- 'OCL',
+--			expression <- e.getAttrVal('expr'),
+--			annotation <- ''
+--		)
+--}
+
+--rule Import {
+--	from e : XML!Element (e.name = 'import')
+--	to
+--		c : MOF!Import (
+--			name <- e.getAttrVal('name'),
+--			visibility <- #public_vis,
+--			isClustered <- true,
+--			annotation <- '',
+----			importedNamespace <- xmm2MOF.getElement(e.getAttrVal('name'), Set {'pack'})
+--			importedNamespace <- self.getElement(e.getAttrVal('name'), Set {'pack'})
+--		)
+--}
+
+rule PrimitiveType {
+	from e : KM3!DataType
+	to
+		c : MOF!EDataType (
+			name <- e.name
+		)
+}
+
+rule Reference {
+	from e : KM3!Reference
+	to
+		c : MOF!EReference (
+			name <- e.name,
+			eType <- e.type,
+			lowerBound <- e.lower,
+			upperBound <- e.upper,
+			ordered <- e.isOrdered,
+			eOpposite <- e.opposite,
+			containment <- e.isContainer
+		)
+}
+
+rule Class {
+	from e : KM3!Class
+	to
+		c : MOF!EClass (
+			name <- e.name,
+			eStructuralFeatures <- e.structuralFeatures,
+			eOperations <- e.operations,
+			eSuperTypes <- e.supertypes,
+			"abstract" <- e.isAbstract
+		)
+}
+
+rule Attribute {
+	from e : KM3!Attribute
+	to
+		c : MOF!EAttribute (
+			name <- e.name,
+			eType <- e.type,
+			lowerBound <- e.lower,
+			upperBound <- e.upper,
+			ordered <- e.isOrdered
+		)
+}
+
+rule Enumeration {
+	from e : KM3!Enumeration
+	to
+		c : MOF!EEnum (
+			name <- e.name,
+			eLiterals <- e.literals
+		)
+}
+
+rule EnumLiteral {
+	from e : KM3!EnumLiteral
+	to
+		c : MOF!EEnumLiteral (
+			name <- e.name
+		)
+}
+
+rule Operation {
+	from
+		io : KM3!Operation
+	to
+		oo : MOF!EOperation (
+			name <- io.name,
+			eParameters <- io.parameters,
+			eType <- io.type
+		)
+}
+
+rule Parameter {
+	from
+		ip : KM3!Parameter
+	to
+		op : MOF!EParameter (
+			name <- ip.name,
+			eType <- ip.type
+		)
+}
+

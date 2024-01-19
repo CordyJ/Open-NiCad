@@ -1,0 +1,143 @@
+// Copyright 2004-2007 Castle Project - http://www.castleproject.org/
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+namespace Castle.DynamicProxy.Tests
+{
+	using System;
+	using Castle.Core.Interceptor;
+	using Castle.DynamicProxy.Tests.BugsReported;
+	using NUnit.Framework;
+
+	[TestFixture]
+	public class BugsReportedTestCase
+	{
+		[Test]
+		public void InterfaceInheritance()
+		{
+			ProxyGenerator generator = new ProxyGenerator();
+
+			ICameraService proxy = (ICameraService)
+			                       generator.CreateInterfaceProxyWithTarget(typeof(ICameraService),
+			                                                                new CameraService(),
+			                                                                new StandardInterceptor());
+
+			Assert.IsNotNull(proxy);
+
+			proxy.Add("", "");
+			proxy.Record(null);
+		}
+
+		[Test]
+		public void ProxyInterfaceWithSetterOnly()
+		{
+			ProxyGenerator generator = new ProxyGenerator();
+
+			IHaveOnlySetter proxy = (IHaveOnlySetter)
+			                        generator.CreateInterfaceProxyWithTarget(typeof(IHaveOnlySetter),
+			                                                                 new HaveOnlySetter(),
+			                                                                 new SkipCallingMethodInterceptor());
+
+			Assert.IsNotNull(proxy);
+
+			proxy.Foo = "bar";
+		}
+
+		[Test]
+		[ExpectedException(typeof(NotImplementedException),
+			"This is a DynamicProxy2 error: the interceptor attempted to 'Proceed' for a method without a target, for example, an interface method or an abstract method"
+			)]
+		public void CallingProceedOnAbstractMethodShouldThrowException()
+		{
+			ProxyGenerator generator = new ProxyGenerator();
+
+			AbstractClass proxy = (AbstractClass)
+			                      generator.CreateClassProxy(typeof(AbstractClass), ProxyGenerationOptions.Default,
+			                                                 new StandardInterceptor());
+
+			Assert.IsNotNull(proxy);
+
+			proxy.Foo();
+		}
+
+		[Test]
+		public void ProxyTypeThatInheritFromGenericType()
+		{
+			ProxyGenerator generator = new ProxyGenerator();
+
+			IUserRepository proxy = (IUserRepository)
+			                        generator.CreateInterfaceProxyWithoutTarget(typeof(IUserRepository),
+			                                                                    new SkipCallingMethodInterceptor());
+
+			Assert.IsNotNull(proxy);
+		}
+
+		[Test]
+		public void DYNPROXY_51_GenericMarkerInterface()
+		{
+			ProxyGenerator gen = new ProxyGenerator();
+			WithMixin p =
+				(WithMixin) gen.CreateClassProxy(typeof(WithMixin), new Type[] {typeof(Marker<int>)}, new IInterceptor[0]);
+			p.Method();
+		}
+	}
+
+	public interface IRepository<TEntity, TKey>
+	{
+		TEntity GetById(TKey key);
+	}
+
+	public class User
+	{
+	}
+
+	public interface IUserRepository : IRepository<User, string>
+	{
+	}
+
+	public abstract class AbstractClass
+	{
+		public abstract string Foo();
+	}
+
+	public class SkipCallingMethodInterceptor : IInterceptor
+	{
+		public void Intercept(IInvocation invocation)
+		{
+		}
+	}
+
+	public interface IHaveOnlySetter
+	{
+		string Foo { set; }
+	}
+
+	public class HaveOnlySetter : IHaveOnlySetter
+	{
+		public string Foo
+		{
+			set { throw new Exception("The method or operation is not implemented."); }
+		}
+	}
+
+	public interface Marker<T>
+	{
+	}
+
+	public class WithMixin
+	{
+		public virtual void Method()
+		{
+		}
+	}
+}

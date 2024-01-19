@@ -1,0 +1,127 @@
+-- Transforms an Ecore metamodel into a KM3 metamodel.
+module EMF2KM3;
+create OUT : KM3 from IN : MOF;
+
+uses strings;
+
+helper def: metamodel : KM3!Metamodel = OclUndefined;
+
+-- The Metamodel root element is created in an imperative rule because there
+-- is no corresponding root element in Ecore metamodels.
+entrypoint rule Metamodel() {
+	to
+		t : KM3!Metamodel
+	do {
+		thisModule.metamodel <- t;
+	}
+}
+
+rule Package {
+	from
+		ip : MOF!EPackage
+	to
+		op : KM3!Package (
+			name <- ip.name,
+			metamodel <-	if ip.eSuperPackage.oclIsUndefined() then
+						thisModule.metamodel
+					else
+						OclUndefined
+					endif,
+			contents <- ip.eClassifiers
+		)
+}
+
+rule PrimitiveType {
+	from
+		idt : MOF!EDataType (
+			-- we do not want to transform enumerations here
+			idt.oclIsTypeOf(MOF!EDataType)
+		)
+	to
+		odt : KM3!DataType (
+			name <- idt.name
+		)
+}
+
+rule Reference {
+	from
+		ir : MOF!EReference
+	to
+		oref : KM3!Reference (
+			name <- ir.name,
+			type <- ir.eType,
+			lower <- ir.lowerBound,
+			upper <- ir.upperBound,
+			isOrdered <- ir.ordered,
+			opposite <- ir.eOpposite,
+			isContainer <- ir.containment
+		)
+}
+
+rule Class {
+	from
+		ic : MOF!EClass
+	to
+		oc : KM3!Class (
+			name <- ic.name,
+			structuralFeatures <- ic.eStructuralFeatures,
+			operations <- ic.eOperations,
+			supertypes <- ic.eSuperTypes,
+			isAbstract <- ic."abstract"
+		)
+}
+
+rule Attribute {
+	from
+		ia : MOF!EAttribute
+	to
+		oa : KM3!Attribute (
+			name <- ia.name,
+			type <- ia.eType,
+			lower <- ia.lowerBound,
+			upper <- ia.upperBound,
+			isOrdered <- ia.ordered,
+			isUnique <- if ia.upperBound = 1 then false else ia."unique" endif
+		)
+}
+
+rule Enumeration {
+	from
+		ie : MOF!EEnum
+	to
+		oe : KM3!Enumeration (
+			name <- ie.name
+		)
+}
+
+rule EnumLiteral {
+	from
+		iel : MOF!EEnumLiteral
+	to
+		oel : KM3!EnumLiteral (
+			name <- iel.name,
+			enum <- iel.eEnum
+		)
+}
+
+rule Operation {
+	from
+		io : MOF!EOperation
+	to
+		oo : KM3!Operation (
+			name <- io.name,
+			parameters <- io.eParameters,
+			type <- io.eType
+		)
+}
+
+rule Parameter {
+	from
+		ip : MOF!EParameter
+	to
+		op : KM3!Parameter (
+			name <- ip.name,
+			type <- ip.eType
+		)
+}
+

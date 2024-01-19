@@ -1,0 +1,50 @@
+module Book2Publication;
+create OUT : Publication from IN : Book;
+
+-- getAuthors collects all Autors of a Book
+-- the asSet operation removes all duplicates
+
+helper context Book!Book def : getAuthors() : String =
+       self.chapters->collect(e | e.author)->
+	   					asSet()->
+						iterate(authorName; acc : String = '' |
+                   				acc + 
+								if acc = '' 
+									then authorName 
+									else ' and ' + authorName 
+								endif)
+;
+
+-- getNbPages collects all nbPages of all chapters
+-- and calculates the sum
+
+helper context Book!Book def : getNbPages() : Integer =
+		self.chapters->collect(f|f.nbPages)->
+						iterate(pages; acc : Integer = 0 |
+                      	acc + pages)
+;
+
+-- getSumPages does the same as getNbPages,
+-- but it uses the OCL sum operation
+
+helper context Book!Book def : getSumPages() : Integer =
+		self.chapters->collect(f|f.nbPages).sum()
+;
+
+
+rule Book2Publication {
+	from 
+		b : Book!Book (
+			b.getSumPages() > 2
+			-- only Books with more than 2 pages are publications
+		) 
+	to 
+		out : Publication!Publication (
+            title <- b.title,
+			authors <- b.getAuthors(),
+			nbPages <- b.getSumPages()
+		)
+}
+
+
+

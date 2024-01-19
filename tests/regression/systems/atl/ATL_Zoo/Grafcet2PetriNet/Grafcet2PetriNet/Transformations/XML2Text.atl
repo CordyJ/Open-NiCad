@@ -1,0 +1,38 @@
+query XML2Text = XML!Root.allInstances()
+	->asSequence()
+	->first().toString2('').writeTo('C:\\... Complete this path ...\\Grafcet-PetriNet\\Models\\XML2Text_example.xml');
+
+helper context XML!Element def: toString2(indent : String) : String =
+	let na : Sequence(XML!Node) =
+		self.children->select(e | not e.oclIsKindOf(XML!Attribute)) in
+	let a : Sequence(XML!Node) =
+		self.children->select(e | e.oclIsKindOf(XML!Attribute)) in
+	indent + '<' + self.name + 
+	a->iterate(e; acc : String = '' |
+		acc + ' ' + e.toString2()
+	) +
+	if na->size() > 0 then
+		'>'
+		+ na->iterate(e; acc : String = '' |
+			acc + 
+			if e.oclIsKindOf(XML!Text) then
+				''
+			else
+				'\r\n'
+			endif
+			+ e.toString2(indent + '  ')
+		) +
+		if na->first().oclIsKindOf(XML!Text) then
+			'</' + self.name + '>'
+			else
+				'\r\n' + indent + '</' + self.name + '>'
+		endif
+	else
+		'/>'
+	endif;
+
+helper context XML!Attribute def: toString2() : String =
+	self.name + '=\"' + self.value + '\"';
+
+helper context XML!Text def: toString2() : String =
+	self.value;

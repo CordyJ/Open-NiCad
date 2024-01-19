@@ -1,0 +1,78 @@
+--@atlcompiler	atl2006
+--@name			EMOOSE4UML2
+--@version		1.0
+--@domains		UML2, MOOSE, EMOOSE, metrics
+--@authors		Eric Vepa (evepa <at> sodius.com) for SODIUS (www.sodius.com)
+--@date			2007/06/05
+--@description	This library provides MOOSE (Metrics for Object-Oriented Software Engineering) and EMOOSE (Extended MOOSE) metrics suites on UML2 models (from Eclipse UML2 Project). The models have been extracted from Jar files using the Eclipse plug-in Jar2UML. Only the metrics that fit to UML2 models have been implemented.
+--@see			Baroni, A.L.: Formal Definition of Object-Oriented Design Metrics. Master Thesis, Vrije University, Brussel, Belgium, 2002.
+
+library EMOOSE4UML2; -- Library Template
+
+-- ===============
+-- MOOSE Metrics =
+-- ===============
+
+--@begin helper MOOSE::DIT
+--@comments Depth of Inheritance Tree
+--@comments The length of the longest path of inheritance from the current Class to the root of the tree.
+helper context UML2!Class
+def : DIT() : Integer =
+	if self.isRoot
+		then 0
+		else if self.PARN() = 1
+				then 1
+				else 0
+			endif + self.parents->iterate(c; acc : Integer = 0|acc + c.DIT())
+	endif;
+--@end helper MOOSE::DIT
+
+--@begin helper MOOSE::NOC
+--@comments Number of Children
+--@comments The number of classes that inherit directly from the current Class.
+helper context UML2!Class
+def : NOC() : Integer =
+	self.CHIN();
+--@end helper MOOSE::NOC
+
+--@begin helper MOOSE::CBO
+--@comments Coupling Between Objects
+--@comments The number of other Classes that are coupled to the current one. Two Classes are coupled when methods declared in one Class use Methods or instance variables defined by the other Class.
+helper context UML2!Class
+def : CBO() : Integer =
+	self.coupledClasses->size();
+--@end helper MOOSE::CBO
+
+--@begin helper MOOSE::RFC
+--@comments Response for a Class
+--@comments The number of Methods in the current Class that might respond to a message received by its object, including Methods both inside and outside of this Class.
+--@comments RFC = {M} ∪all i {Ri} where {Ri} = set of Methods called by Method i and {M} = set of all Methods in a Class. Ri is dependent on the implementation of the Method i.
+helper context UML2!Class
+def : RFC() : Integer =
+	self.allOperations->
+		union(self.allOperations->
+			collect(o|o.method->collect(m|m.allClients)->
+				flatten()->asSet()->select(c|c.oclAsType(UML2!Operation))))->
+					flatten()->asSet()->size();
+--@end helper MOOSE::RFC
+
+
+-- ================
+-- EMOOSE Metrics =
+-- ================
+
+--@begin helper EMOOSE::NOM
+--@comments Number of Methods
+--@comments Number of Operations that are local to the Class, i.e., that can only be accessed by other Class Operations (and not in other Classes).
+--@comments The Class must have some Operations.
+helper context UML2!Class
+def : NOM() : Integer =
+	self.allOperations->select(o|o.visibility = #private)->size();
+--@end helper EMOOSE::NOM
+
+--@begin helper EMOOSE::SIZE2
+--@comments Number of local Attributes and Operations defined in the Class.
+helper context UML2!Class
+def : SIZE2() : Integer =
+	self.DON() + self.DAN();
+--@end helper EMOOSE::SIZE2

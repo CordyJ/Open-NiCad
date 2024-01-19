@@ -1,0 +1,182 @@
+module Replace; -- Module Template
+create OUT : KM3target from IN : KM3;
+
+--@begin rule Metamodel
+rule Metamodel {
+	from
+		inputMm:KM3!Metamodel
+	to
+		outputMm:KM3target!Metamodel (
+			location <- inputMm.location,
+			contents <- inputMm.contents
+		)
+}
+--@end rule Metamodel
+
+--@begin rule Package
+rule Package {
+	from
+		inputPkg:KM3!Package
+	to
+		outputPkg:KM3target!Package (
+			name <- inputPkg.name,
+			contents <- inputPkg.contents
+		)
+}
+--@end rule Package
+
+--@begin Class 
+rule ClassWithPartialOrder {
+	from
+		inputClass:KM3!Class (
+			not(inputClass.structuralFeatures->select(r|(r.upper=1)and(r.lower=0))->isEmpty())	
+		)
+		
+	to
+		outputClass:KM3target!Class (
+			name <- inputClass.name,
+			isAbstract <- inputClass.isAbstract,
+			structuralFeatures <- inputClass.structuralFeatures,
+			supertypes <- inputClass.supertypes
+		),
+		totalOrderClass : KM3target!Class (
+			name <- inputClass.name+'TotalOrder',
+			isAbstract <- true,
+			package <- inputClass.package,
+			supertypes <- inputClass.structuralFeatures->iterate(a;acc:Sequence(KM3!Class)=Sequence{}|
+																	if (a->oclIsKindOf(KM3!Reference)) 
+																		then acc->including(a.opposite.owner)
+																		else acc->union(Sequence{})
+																		endif)
+		)
+}
+--@end Class
+
+--@begin Class 
+rule ClassWithoutPartialOrder {
+	from
+		inputClass:KM3!Class (
+			inputClass.structuralFeatures->select(r|(r.upper=1)and(r.lower=0))->isEmpty()
+		)
+		
+	to
+		outputClass:KM3target!Class (
+			name <- inputClass.name,
+			isAbstract <- inputClass.isAbstract,
+			structuralFeatures <- inputClass.structuralFeatures,
+			supertypes <- inputClass.supertypes
+		)
+}
+--@end Class
+
+--@begin reference partial order
+rule referencePartialOrder {
+	from 
+		inputRef : KM3!Reference (
+			inputRef.upper = 1 and inputRef.lower = 0
+		)
+	to
+		outputRef : KM3target!Reference (
+			name <- inputRef.opposite.owner.name+'TotalOrder',
+			isOrdered <- inputRef.isOrdered,
+			isUnique <- inputRef.isUnique,
+			location <- inputRef.location,
+			lower <- 1,
+			upper <- 1,
+			type <- KM3target!Class.allInstances()->select(a|a.name=inputRef.owner.name+'TotalOrder')->asSequence()->first(),
+			owner <- inputRef.owner,
+			opposite <- inputRef.opposite
+		),
+		outputOppositeRef : KM3target!Reference (
+			name <- inputRef.opposite.owner.name+'OppositeTotalOrder',
+			isOrdered <- inputRef.opposite.isOrdered,
+			isUnique <- inputRef.opposite.isUnique,
+			location <- inputRef.opposite.location,
+			lower <- 1,
+			upper <- 1,
+			type <- inputRef.opposite.type,
+			owner <- KM3target!Class.allInstances()->select(a|a.name=inputRef.owner.name+'TotalOrder')->asSequence()->first(),
+			opposite <- outputRef
+		)
+}
+
+--@begin rule attribute 
+rule attribute {
+	from
+		inputAtt:KM3!Attribute 
+	to
+		outputAtt:KM3target!Attribute(
+			name <- inputAtt.name,
+			isOrdered <- inputAtt.isOrdered,
+			isUnique <- inputAtt.isUnique,
+			location <- inputAtt.location,
+			lower <- inputAtt.lower,
+			upper <- inputAtt.upper,
+			type <- inputAtt.type,
+			owner <- inputAtt.owner
+			
+		)
+}
+--@end rule attribute
+
+--@begin rule DataType
+rule DataType {
+from
+		inputData:KM3!DataType
+	to
+		outputData:KM3target!DataType(
+			name <- inputData.name,
+			location <- inputData.location
+		)
+}
+--@end rule DataType
+
+--@begin reference
+rule reference {
+	from
+		inputRef:KM3!Reference (
+			not(inputRef.upper = 1 and 	inputRef.lower = 0) and
+			not(inputRef.opposite.upper = 1 and inputRef.opposite.lower = 0)
+		)
+	to
+		outputRef:KM3target!Reference (
+			name <- inputRef.name,
+			isOrdered <- inputRef.isOrdered,
+			isUnique <- inputRef.isUnique,
+			location <- inputRef.location,
+			lower <- inputRef.lower,
+			upper <- inputRef.upper,
+			type <- inputRef.type,
+			owner <- inputRef.owner,
+			opposite <- inputRef.opposite
+		)
+}
+--@end reference
+
+--@begin enumeration
+rule enumeration {
+	from
+		inputEnum:KM3!Enumeration 
+	to
+		outputEnum:KM3target!Enumeration (
+			location <- inputEnum.location,
+			name  <- inputEnum.name,
+			package  <- inputEnum.package
+		)
+
+}
+--@end enumeration
+
+--@begin literal
+rule literal {
+	from
+		inputEnum:KM3!EnumLiteral
+	to
+		outputEnum:KM3target!EnumLiteral (
+			location <- inputEnum.location,
+			name  <- inputEnum.name,
+			enum  <- inputEnum.enum
+		)
+
+}
+--@end literal

@@ -1,0 +1,1046 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<definitions name="TaporwareService" 
+      targetNamespace="http://taporware.mcmaster.ca/webserviceTEMP/taporwareServices.wsdl" 
+      xmlns="http://schemas.xmlsoap.org/wsdl/" 
+      xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+      xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+      xmlns:tns="http://taporware.mcmaster.ca/webserviceTEMP/taporwareServices.wsdl"      
+      xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+      <types>
+      </types>
+<!--googlizer first time call error message -->
+      <message name="googleError">
+            <part name="errorString" type="xsd:string"/>
+      </message>
+
+<!-- this is the output data type. All tools have the same output type - an XML string-->
+      <message name="serviceOutput">
+            <part name="anyString" type="xsd:string"/>
+      </message>
+
+<!-- input for hypergraph -->
+      <message name="hypergraphInput">
+            <part name="xmlSource" type="xsd:string"/>
+      </message>
+
+<!-- input for rain words tool -->
+      <message name="rainWordsInput">
+            <part name="textInput" type="xsd:string"/>
+            <part name="element" type="xsd:string"/>
+            <part name="listOption" type="xsd:string"/>
+            <part name="pattern" type="xsd:string"/>
+            <part name="exclusion" type="xsd:string"/>
+            <part name="typein" type="xsd:string"/>
+      </message>
+
+<!-- input for word brush tool -->
+      <message name="wordBrushInput">
+            <part name="textInput" type="xsd:string"/>
+            <part name="element" type="xsd:string"/>
+      </message>
+
+<!-- input for word cloud tool -->
+      <message name="wordCloudInput">
+            <part name="textInput" type="xsd:string"/>
+            <part name="element" type="xsd:string"/>
+            <part name="numOfWords" type="xsd:string"/>
+            <part name="glasgow" type="xsd:string"/>
+            <part name="sorting" type="xsd:string"/>
+      </message>
+
+<!-- input for list word pairs tool -->
+      <message name="listWordsPairInput">
+            <part name="textInput" type="xsd:string"/>
+            <part name="listOption" type="xsd:string"/>
+            <part name="pattern" type="xsd:string"/>
+            <part name="exclusion" type="xsd:string"/>
+            <part name="typein" type="xsd:string"/>
+            <part name="sorting" type="xsd:string"/>
+            <part name="outFormat" type="xsd:string"/>
+      </message>
+
+<!-- input for visual collocates tool -->
+      <message name="vcollocateHTMLInput">
+            <part name="htmlInput" type="xsd:string"/>
+            <part name="htmlTag" type="xsd:string"/>
+            <part name="pattern" type="xsd:string"/>
+            <part name="glasgow" type="xsd:string"/>
+            <part name="context" type="xsd:string"/>
+            <part name="contextLength" type="xsd:string"/>
+            <part name="sorting" type="xsd:string"/>
+      </message>
+
+<!-- input for weighted centroid tool -->
+      <message name="weightedCentroidInput">
+            <part name="textSource" type="xsd:string"/>
+            <part name="suboption" type="xsd:string"/>
+            <part name="percent" type="xsd:string"/>
+            <part name="chunk" type="xsd:string"/>
+            <part name="topWords" type="xsd:string"/>
+            <part name="glasgow" type="xsd:string"/>
+            <part name="userwords" type="xsd:string"/>
+            <part name="outFormat" type="xsd:string"/>
+      </message>
+
+<!-- input for plain text PCA tool -->
+      <message name="plainPCAInput">
+            <part name="textSource" type="xsd:string"/>
+            <part name="suboption" type="xsd:string"/>
+            <part name="optionSel" type="xsd:string"/>
+            <part name="topWords" type="xsd:string"/>
+            <part name="glasgow" type="xsd:string"/>
+            <part name="userwords" type="xsd:string"/>
+            <part name="outFormat" type="xsd:string"/>
+      </message>
+
+<!-- input for xml pattern distribution -->
+      <message name="xmlDistributionInput">
+            <part name="xmlSource" type="xsd:string"/>
+            <part name="option" type="xsd:string"/>
+            <part name="element" type="xsd:string"/>
+            <part name="attriName" type="xsd:string"/>
+            <part name="attriValue" type="xsd:string"/>
+            <part name="percent" type="xsd:string"/>
+            <part name="chunk" type="xsd:string"/>
+            <part name="relative" type="xsd:string"/>
+            <part name="pattern" type="xsd:string"/>
+            <part name="outFormat" type="xsd:string"/>
+      </message>
+
+<!-- input for html pattern distribution -->
+      <message name="htmlDistributionInput">
+            <part name="htmlSource" type="xsd:string"/>
+            <part name="option" type="xsd:string"/>
+            <part name="percent" type="xsd:string"/>
+            <part name="element" type="xsd:string"/>
+            <part name="chunk" type="xsd:string"/>
+            <part name="relative" type="xsd:string"/>
+            <part name="pattern" type="xsd:string"/>
+            <part name="outFormat" type="xsd:string"/>
+      </message>
+
+<!-- input for plain text pattern distribution -->
+      <message name="plainDistributionInput">
+            <part name="textSource" type="xsd:string"/>
+            <part name="option" type="xsd:string"/>
+            <part name="percent" type="xsd:string"/>
+            <part name="chunk" type="xsd:string"/>
+            <part name="relative" type="xsd:string"/>
+            <part name="pattern" type="xsd:string"/>
+            <part name="outFormat" type="xsd:string"/>
+      </message>
+
+
+<!-- input for date finder [xml] tool -->
+      <message name="dateFinderXMLInput">
+            <part name="xmlInput" type="xsd:string"/>
+            <part name="element" type="xsd:string"/>
+            <part name="dateOption" type="xsd:string"/>
+            <part name="userDate" type="xsd:string"/>
+            <part name="outFormat" type="xsd:string"/>
+      </message>
+
+<!-- input for date finder [html] tool -->
+      <message name="dateFinderHTMLInput">
+            <part name="htmlInput" type="xsd:string"/>
+            <part name="element" type="xsd:string"/>
+            <part name="dateOption" type="xsd:string"/>
+            <part name="userDate" type="xsd:string"/>
+            <part name="outFormat" type="xsd:string"/>
+      </message>
+
+<!-- input for date finder [plain] tool -->
+      <message name="dateFinderPlainInput">
+            <part name="textInput" type="xsd:string"/>
+            <part name="dateOption" type="xsd:string"/>
+            <part name="userDate" type="xsd:string"/>
+            <part name="outFormat" type="xsd:string"/>
+      </message>
+
+<!--input for list xml elements [xml] tool -->
+      <message name="listXMLElementInput">
+            <part name="xmlInput" type="xsd:string"/>
+            <part name="listOption" type="xsd:string"/>
+            <part name="optionSeletion" type="xsd:string"/>
+            <part name="outFormat" type="xsd:string"/>
+      </message>
+<!--input for list words [xml] tool -->
+      <message name="listWordXMLInput">
+            <part name="xmlInput" type="xsd:string"/>
+            <part name="element" type="xsd:string"/>
+            <part name="listOption" type="xsd:string"/>
+            <part name="optionSeletion" type="xsd:string"/>
+            <part name="sorting" type="xsd:string"/>
+            <part name="outFormat" type="xsd:string"/>
+      </message>
+<!--input for extract text [xml] tool -->         
+      <message name="extractTextXMLInput">
+            <part name="xmlInput" type="xsd:string"/>
+            <part name="element" type="xsd:string"/>
+            <part name="attributeName" type="xsd:string"/>
+            <part name="attributeValue" type="xsd:string"/>
+            <part name="outFormat" type="xsd:string"/>
+      </message>
+
+<!--input for concordance [xml] tool -->
+      <message name="concordanceXMLInput">
+            <part name="xmlInput" type="xsd:string"/>
+            <part name="element" type="xsd:string"/>
+            <part name="attributeName" type="xsd:string"/>
+            <part name="attributeValue" type="xsd:string"/>
+            <part name="pattern" type="xsd:string"/>
+            <part name="contextOption" type="xsd:string"/>
+            <part name="optionSelection1" type="xsd:string"/>
+            <part name="optionSelection2" type="xsd:string"/>
+            <part name="outFormat" type="xsd:string"/>
+      </message>
+
+<!--input for cooccurrence [xml] tool -->
+      <message name="cooccurrenceXMLInput">
+            <part name="xmlInput" type="xsd:string"/>
+            <part name="element" type="xsd:string"/>
+            <part name="attributeName" type="xsd:string"/>
+            <part name="attributeValue" type="xsd:string"/>
+            <part name="pattern" type="xsd:string"/>
+            <part name="copattern" type="xsd:string"/>
+            <part name="contextOption" type="xsd:string"/>
+            <part name="optionSelection1" type="xsd:string"/>
+            <part name="optionSelection2" type="xsd:string"/>
+            <part name="outFormat" type="xsd:string"/>
+      </message>
+
+<!--input for collocation [xml] tool -->
+      <message name="collocationXMLInput">
+            <part name="xmlInput" type="xsd:string"/>
+            <part name="element" type="xsd:string"/>
+            <part name="attributeName" type="xsd:string"/>
+            <part name="attributeValue" type="xsd:string"/>
+            <part name="pattern" type="xsd:string"/>
+            <part name="contextOption" type="xsd:string"/>
+            <part name="optionSelection1" type="xsd:string"/>
+            <part name="optionSelection2" type="xsd:string"/>
+            <part name="sorting" type="xsd:string"/>
+            <part name="outFormat" type="xsd:string"/>
+      </message>
+
+<!--input for tokenizer [xml] tool -->
+      <message name="tokenizerXMLInput">
+            <part name="xmlInput" type="xsd:string"/>
+            <part name="element" type="xsd:string"/>
+            <part name="attributeName" type="xsd:string"/>
+            <part name="attributeValue" type="xsd:string"/>
+            <part name="tokenType" type="xsd:string"/>
+            <part name="option1" type="xsd:string"/>
+            <part name="option2" type="xsd:string"/>
+            <part name="displayOption" type="xsd:string"/>
+            <part name="outFormat" type="xsd:string"/>
+      </message>
+
+<!--input for distribution [xml] tool -->
+      <message name="distributionXMLInput">
+            <part name="xmlInput" type="xsd:string"/>
+            <part name="distOption" type="xsd:string"/>
+            <part name="element" type="xsd:string"/>
+            <part name="attribute" type="xsd:string"/>
+            <part name="relative" type="xsd:string"/>
+            <part name="pattern" type="xsd:string"/>
+            <part name="outFormat" type="xsd:string"/>
+      </message>
+
+<!--the following are the plain text tools -->
+<!--input for list words [plain] tool -->
+      <message name="listWordsPlainInput">
+            <part name="textInput" type="xsd:string"/>
+            <part name="listOption" type="xsd:string"/>
+            <part name="optionSeletion" type="xsd:string"/>
+            <part name="sorting" type="xsd:string"/>
+            <part name="outFormat" type="xsd:string"/>
+      </message>
+
+<!--input for concordance [plain] tool -->
+      <message name="concordancePlainInput">
+            <part name="textInput" type="xsd:string"/>
+            <part name="pattern" type="xsd:string"/>
+            <part name="context" type="xsd:string"/>
+            <part name="contextLength" type="xsd:string"/>
+            <part name="outFormat" type="xsd:string"/>
+      </message>
+
+<!--input for cooccurrence [plain] tool -->
+      <message name="cooccurrencePlainInput">
+            <part name="textInput" type="xsd:string"/>
+            <part name="pattern" type="xsd:string"/>
+            <part name="copattern" type="xsd:string"/>
+            <part name="context" type="xsd:string"/>
+            <part name="contextLength" type="xsd:string"/>
+            <part name="outFormat" type="xsd:string"/>
+      </message>
+
+<!--input for collocation [plain] tool -->
+      <message name="collocationPlainInput">
+            <part name="textInput" type="xsd:string"/>
+            <part name="pattern" type="xsd:string"/>
+            <part name="context" type="xsd:string"/>
+            <part name="contextLength" type="xsd:string"/>
+            <part name="sorting" type="xsd:string"/>
+            <part name="outFormat" type="xsd:string"/>
+      </message>
+
+<!--input for tokenizer [plain] tool -->
+      <message name="tokenizerPlainInput">
+            <part name="textInput" type="xsd:string"/>
+            <part name="tokenType" type="xsd:string"/>
+            <part name="option1" type="xsd:string"/>
+            <part name="option2" type="xsd:string"/>
+            <part name="displayOption" type="xsd:string"/>
+            <part name="outFormat" type="xsd:string"/>
+      </message>
+
+<!--the following are the html text tools -->
+<!--input for list words [html] tool -->
+      <message name="listWordsHTMLInput">
+            <part name="htmlInput" type="xsd:string"/>
+            <part name="htmlTag" type="xsd:string"/>
+            <part name="listOption" type="xsd:string"/>
+            <part name="optionSeletion" type="xsd:string"/>
+            <part name="sorting" type="xsd:string"/>
+            <part name="outFormat" type="xsd:string"/>
+      </message>
+
+<!--input for list tags [html] tool -->
+      <message name="listTagsHTMLInput">
+            <part name="htmlInput" type="xsd:string"/>
+            <part name="sorting" type="xsd:string"/>
+            <part name="outFormat" type="xsd:string"/>
+      </message>
+
+<!--input for extract text [html] tool -->
+      <message name="extractTextHTMLInput">
+            <part name="htmlInput" type="xsd:string"/>
+            <part name="htmlTag" type="xsd:string"/>
+            <part name="outFormat" type="xsd:string"/>
+      </message>
+
+<!--input for concordance [html] tool -->
+      <message name="concordanceHTMLInput">
+            <part name="htmlInput" type="xsd:string"/>
+            <part name="htmlTag" type="xsd:string"/>
+            <part name="pattern" type="xsd:string"/>
+            <part name="context" type="xsd:string"/>
+            <part name="contextLength" type="xsd:string"/>
+            <part name="outFormat" type="xsd:string"/>
+      </message>
+
+<!--input for co-occurence [html] tool -->
+      <message name="cooccurrenceHTMLInput">
+            <part name="htmlInput" type="xsd:string"/>
+            <part name="htmlTag" type="xsd:string"/>
+            <part name="pattern" type="xsd:string"/>
+            <part name="copattern" type="xsd:string"/>
+            <part name="context" type="xsd:string"/>
+            <part name="contextLength" type="xsd:string"/>
+            <part name="outFormat" type="xsd:string"/>
+      </message>
+
+<!--input for collocation [html] tool -->
+      <message name="collocationHTMLInput">
+            <part name="htmlInput" type="xsd:string"/>
+            <part name="htmlTag" type="xsd:string"/>
+            <part name="pattern" type="xsd:string"/>
+            <part name="context" type="xsd:string"/>
+            <part name="contextLength" type="xsd:string"/>
+            <part name="sorting" type="xsd:string"/>
+            <part name="outFormat" type="xsd:string"/>
+      </message>
+
+<!--input for tokenizer [html] tool -->
+      <message name="tokenizerHTMLInput">
+            <part name="htmlInput" type="xsd:string"/>
+            <part name="htmlTag" type="xsd:string"/>
+            <part name="tokenType" type="xsd:string"/>
+            <part name="option1" type="xsd:string"/>
+            <part name="option2" type="xsd:string"/>
+            <part name="displayOption" type="xsd:string"/> 
+            <part name="outFormat" type="xsd:string"/>
+      </message>
+
+<!--input for googlizer [html] tool (use google API to search-->
+      <message name="googlizerHTMLInput">
+            <part name="keyword" type="xsd:string"/>
+            <part name="restrict" type="xsd:string"/>
+            <part name="r_context" type="xsd:string"/>
+            <part name="pages" type="xsd:string"/>
+            <part name="outputOption" type="xsd:string"/>
+            <part name="outFormat" type="xsd:string"/>
+      </message>
+
+<!--input for googlizer2 [html] tool (directly call googlizer search engine)-->
+      <message name="googlizer2HTMLInput">
+            <part name="keyword" type="xsd:string"/>
+            <part name="pages" type="xsd:string"/>
+            <part name="outputOption" type="xsd:string"/>
+            <part name="outFormat" type="xsd:string"/>
+      </message>
+
+<!--input for aggregator [html] tool -->
+      <message name="aggregatorHTMLInput">
+            <part name="urls" type="xsd:string"/>
+            <part name="anyTextString" type="xsd:string"/>
+            <part name="htmlTag" type="xsd:string"/>
+            <part name="processOption" type="xsd:string"/>
+            <part name="outFormat" type="xsd:string"/>
+      </message>
+
+<!-- input for plain text comparator -->
+      <message name="textComparatorInput">
+            <part name="textSource1" type="xsd:string"/>
+            <part name="textSource2" type="xsd:string"/>
+            <part name="wordOption" type="xsd:string"/>
+            <part name="optionSelection" type="xsd:string"/>
+            <part name="outFormat" type="xsd:string"/>
+      </message>
+
+<!-- input for HTML text comparator -->
+      <message name="htmlComparatorInput">
+            <part name="htmlSource1" type="xsd:string"/>
+            <part name="htmlSource2" type="xsd:string"/>
+            <part name="htmltag" type="xsd:string"/>
+            <part name="wordOption" type="xsd:string"/>
+            <part name="optionSelection" type="xsd:string"/>
+            <part name="outFormat" type="xsd:string"/>
+      </message>
+
+<!-- input for XML text comparator -->
+      <message name="xmlComparatorInput">
+            <part name="xmlSource1" type="xsd:string"/>
+            <part name="xmlSource2" type="xsd:string"/>
+            <part name="xmltag" type="xsd:string"/>
+            <part name="wordOption" type="xsd:string"/>
+            <part name="optionSelection" type="xsd:string"/>
+            <part name="outFormat" type="xsd:string"/>
+      </message>
+
+
+      <portType name="TaporwareService_xml">
+         <operation name="rain_words">
+             <input message="tns:rainWordsInput"/>
+             <output message="tns:serviceOutput"/>
+          </operation>
+         <operation name="word_brush">
+             <input message="tns:wordBrushInput"/>
+             <output message="tns:serviceOutput"/>
+          </operation>
+         <operation name="word_cloud">
+             <input message="tns:wordCloudInput"/>
+             <output message="tns:serviceOutput"/>
+          </operation>
+         <operation name="list_Words_Pair">
+             <input message="tns:listWordsPairInput"/>
+             <output message="tns:serviceOutput"/>
+          </operation>
+         <operation name="visual_collocates_HTML">
+             <input message="tns:vcollocateHTMLInput"/>
+             <output message="tns:serviceOutput"/>
+          </operation>
+         <operation name="weighted_centroid">
+             <input message="tns:weightedCentroidInput"/>
+             <output message="tns:serviceOutput"/>
+          </operation>
+         <operation name="plainPCA">
+             <input message="tns:plainPCAInput"/>
+             <output message="tns:serviceOutput"/>
+          </operation>
+         <operation name="hypergraph">
+                  <input message="tns:hypergraphInput"/>
+                  <output message="tns:serviceOutput"/>
+          </operation>
+         <operation name="pattern_Distribution_XML">
+                  <input message="tns:xmlDistributionInput"/>
+                  <output message="tns:serviceOutput"/>
+          </operation>
+         <operation name="pattern_Distribution_HTML">
+                  <input message="tns:htmlDistributionInput"/>
+                  <output message="tns:serviceOutput"/>
+          </operation>
+         <operation name="pattern_Distribution_Plain">
+                  <input message="tns:plainDistributionInput"/>
+                  <output message="tns:serviceOutput"/>
+          </operation>
+         <operation name="list_XML_Elements_XML">
+                  <input message="tns:listXMLElementInput"/>
+                  <output message="tns:serviceOutput"/>
+          </operation> 
+         <operation name="list_Words_XML">
+                  <input message="tns:listWordXMLInput"/>
+                  <output message="tns:serviceOutput"/>
+          </operation>
+         <operation name="extract_Text_XML">
+                  <input message="tns:extractTextXMLInput"/>
+                  <output message="tns:serviceOutput"/>
+          </operation>
+         <operation name="find_Concordance_XML">
+                  <input message="tns:concordanceXMLInput"/>
+                  <output message="tns:serviceOutput"/>
+          </operation>
+         <operation name="find_Cooccurrence_XML">
+                  <input message="tns:cooccurrenceXMLInput"/>
+                  <output message="tns:serviceOutput"/>
+          </operation>
+         <operation name="find_Collocation_XML">
+                  <input message="tns:collocationXMLInput"/>
+                  <output message="tns:serviceOutput"/>
+          </operation>
+         <operation name="tokenizer_XML">
+                  <input message="tns:tokenizerXMLInput"/>
+                  <output message="tns:serviceOutput"/>
+          </operation>
+         <operation name="distribution_XML">
+                  <input message="tns:distributionXMLInput"/>
+                  <output message="tns:serviceOutput"/>
+          </operation>
+
+         
+         <operation name="list_Words_Plain">
+                  <input message="tns:listWordsPlainInput"/>
+                  <output message="tns:serviceOutput"/>
+          </operation>
+         <operation name="find_Concordance_Plain">
+                  <input message="tns:concordancePlainInput"/>
+                  <output message="tns:serviceOutput"/>
+          </operation>
+         <operation name="find_Cooccurrence_Plain">
+                  <input message="tns:cooccurrencePlainInput"/>
+                  <output message="tns:serviceOutput"/>
+          </operation>
+         <operation name="find_Collocation_Plain">
+                  <input message="tns:collocationPlainInput"/>
+                  <output message="tns:serviceOutput"/>
+          </operation>
+          <operation name="tokenizer_Plain">
+                  <input message="tns:tokenizerPlainInput"/>
+                  <output message="tns:serviceOutput"/>
+          </operation>
+
+         <operation name="list_Words_HTML">
+                  <input message="tns:listWordsHTMLInput"/>
+                  <output message="tns:serviceOutput"/>
+          </operation>
+         <operation name="list_Tags_HTML">
+                  <input message="tns:listTagsHTMLInput"/>
+                  <output message="tns:serviceOutput"/>
+          </operation>
+         <operation name="extract_Text_HTML">
+                  <input message="tns:extractTextHTMLInput"/>
+                  <output message="tns:serviceOutput"/>
+          </operation>
+         <operation name="find_Concordance_HTML">
+                  <input message="tns:concordanceHTMLInput"/>
+                  <output message="tns:serviceOutput"/>
+          </operation>
+         <operation name="find_Cooccurrence_HTML">
+                  <input message="tns:cooccurrenceHTMLInput"/>
+                  <output message="tns:serviceOutput"/>
+          </operation>
+         <operation name="find_Collocation_HTML">
+                  <input message="tns:collocationHTMLInput"/>
+                  <output message="tns:serviceOutput"/>
+          </operation>
+         <operation name="tokenizer_HTML">
+                  <input message="tns:tokenizerHTMLInput"/>
+                  <output message="tns:serviceOutput"/>
+          </operation>
+         <operation name="googlizer_HTML">
+                  <input message="tns:googlizerHTMLInput"/>
+                  <output message="tns:serviceOutput"/>
+                  <fault message="tns:googleError"/>
+          </operation>
+         <operation name="googlizer2_HTML">
+                  <input message="tns:googlizer2HTMLInput"/>
+                  <output message="tns:serviceOutput"/>
+                  <fault message="tns:googleError"/>
+          </operation>
+         <operation name="aggregator_HTML">
+                  <input message="tns:aggregatorHTMLInput"/>
+                  <output message="tns:serviceOutput"/>
+          </operation>
+         <operation name="comparator_HTML">
+                  <input message="tns:htmlComparatorInput"/>
+                  <output message="tns:serviceOutput"/>
+          </operation>
+         <operation name="comparator_Plain">
+                  <input message="tns:textComparatorInput"/>
+                  <output message="tns:serviceOutput"/>
+          </operation>
+         <operation name="comparator_XML">
+                  <input message="tns:xmlComparatorInput"/>
+                  <output message="tns:serviceOutput"/>
+          </operation>
+         <operation name="date_finder_XML">
+                  <input message="tns:dateFinderXMLInput"/>
+                  <output message="tns:serviceOutput"/>
+          </operation>
+         <operation name="date_finder_HTML">
+                  <input message="tns:dateFinderHTMLInput"/>
+                  <output message="tns:serviceOutput"/>
+          </operation>
+         <operation name="date_finder_Plain">
+                  <input message="tns:dateFinderPlainInput"/>
+                  <output message="tns:serviceOutput"/>
+          </operation>
+      </portType>
+
+       <binding name="TaporwareService_xml_binding" type="tns:TaporwareService_xml">
+           <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+           <operation name="rain_words">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+           <operation name="word_brush">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+           <operation name="word_cloud">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+
+           <operation name="list_Words_Pair">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+           <operation name="visual_collocates_HTML">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+           <operation name="weighted_centroid">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+           <operation name="plainPCA">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+           <operation name="hypergraph">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+           <operation name="pattern_Distribution_XML">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+           <operation name="pattern_Distribution_HTML">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+           <operation name="pattern_Distribution_Plain">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+           <operation name="list_XML_Elements_XML">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+           <operation name="list_Words_XML">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+           <operation name="extract_Text_XML">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+           <operation name="find_Concordance_XML">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+           <operation name="find_Cooccurrence_XML">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+           <operation name="find_Collocation_XML">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+           <operation name="tokenizer_XML">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+           <operation name="distribution_XML">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+
+
+           <operation name="list_Words_Plain">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+           <operation name="find_Concordance_Plain">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+           <operation name="find_Cooccurrence_Plain">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+           <operation name="find_Collocation_Plain">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+           <operation name="tokenizer_Plain">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+
+           <operation name="list_Words_HTML">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+           <operation name="list_Tags_HTML">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+           <operation name="extract_Text_HTML">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+           <operation name="find_Concordance_HTML">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+           <operation name="find_Cooccurrence_HTML">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+           <operation name="find_Collocation_HTML">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+           <operation name="tokenizer_HTML">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+           <operation name="googlizer_HTML">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+           <operation name="googlizer2_HTML">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+           <operation name="aggregator_HTML">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+           <operation name="comparator_HTML">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+           <operation name="comparator_Plain">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+           <operation name="comparator_XML">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+           <operation name="date_finder_XML">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+           <operation name="date_finder_HTML">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+           <operation name="date_finder_Plain">
+                   <soap:operation soapAction=""/>
+                <input>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </input>
+                <output>
+                        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding"
+                        namespace="http://taporware.mcmaster.ca/webserviceTEMP" use="encoded"/>
+                </output>
+           </operation>
+       </binding>
+
+       <service name="TaporwareServices">
+	       <port name="TaporwareService_xml" binding="tns:TaporwareService_xml_binding">
+		       <soap:address location="http://taporware.mcmaster.ca/webserviceTEMP"/>
+	   </port>
+       </service>
+</definitions>

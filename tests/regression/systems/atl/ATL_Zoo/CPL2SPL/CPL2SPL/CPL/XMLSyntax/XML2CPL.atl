@@ -1,0 +1,400 @@
+module XML2CPL;
+create OUT : CPL from IN : XML;
+
+uses XMLHelpers;
+
+rule CPL {
+	from
+		s : XML!Root
+		(
+			s.name = 'cpl'
+		)
+	to
+		t : CPL!CPL (
+			subActions <- s.getElemsByNames(Sequence {'subaction'}),
+			outgoing <- s.getElemsByNames(Sequence {'outgoing'})->first(),
+			incoming <- s.getElemsByNames(Sequence {'incoming'})->first()
+		)
+}
+
+rule SubAction {
+	from
+		s : XML!Element
+		(
+			s.name = 'subaction'
+		)
+	to
+		t : CPL!SubAction (
+			id <- s.getAttrVal('id'),
+			contents <- s.getElemsByNames(Sequence {'<no-element-for:Switch>', 'sub', 'address-switch', '<no-element-for:Action>', 'priority-switch', 'location', 'proxy', '<no-element-for:SignallingAction>', 'reject', 'time-switch', 'string-switch', 'redirect', 'language-switch', '<no-element-for:Node>'})->first()
+		)
+}
+
+rule Incoming {
+	from
+		s : XML!Element
+		(
+			s.name = 'incoming'
+		)
+	to
+		t : CPL!Incoming (
+			contents <- s.getElemsByNames(Sequence {'<no-element-for:Switch>', 'sub', 'address-switch', '<no-element-for:Action>', 'priority-switch', 'location', 'proxy', '<no-element-for:SignallingAction>', 'reject', 'time-switch', 'string-switch', 'redirect', 'language-switch', '<no-element-for:Node>'})->first()
+		)
+}
+
+rule Outgoing {
+	from
+		s : XML!Element
+		(
+			s.name = 'outgoing'
+		)
+	to
+		t : CPL!Outgoing (
+			contents <- s.getElemsByNames(Sequence {'<no-element-for:Switch>', 'sub', 'address-switch', '<no-element-for:Action>', 'priority-switch', 'location', 'proxy', '<no-element-for:SignallingAction>', 'reject', 'time-switch', 'string-switch', 'redirect', 'language-switch', '<no-element-for:Node>'})->first()
+		)
+}
+
+rule NotPresent {
+	from
+		s : XML!Element
+		(
+			s.name = 'not-present'
+		)
+	to
+		t : CPL!NotPresent (
+			contents <- s.getElemsByNames(Sequence {'<no-element-for:Switch>', 'sub', 'address-switch', '<no-element-for:Action>', 'priority-switch', 'location', 'proxy', '<no-element-for:SignallingAction>', 'reject', 'time-switch', 'string-switch', 'redirect', 'language-switch', '<no-element-for:Node>'})->first()
+		)
+}
+
+rule Otherwise {
+	from
+		s : XML!Element
+		(
+			s.name = 'otherwise'
+		)
+	to
+		t : CPL!Otherwise (
+			contents <- s.getElemsByNames(Sequence {'<no-element-for:Switch>', 'sub', 'address-switch', '<no-element-for:Action>', 'priority-switch', 'location', 'proxy', '<no-element-for:SignallingAction>', 'reject', 'time-switch', 'string-switch', 'redirect', 'language-switch', '<no-element-for:Node>'})->first()
+		)
+}
+
+rule SwitchedAddress {
+	from
+		s : XML!Element
+		(
+			s.name = 'address'
+		)
+	to
+		t : CPL!SwitchedAddress (
+			is <- s.getAttrVal('is'),
+			contains <- s.getAttrVal('contains'),
+			subDomainOf <- s.getAttrVal('subdomain-of'),
+			contents <- s.getElemsByNames(Sequence {'<no-element-for:Switch>', 'sub', 'address-switch', '<no-element-for:Action>', 'priority-switch', 'location', 'proxy', '<no-element-for:SignallingAction>', 'reject', 'time-switch', 'string-switch', 'redirect', 'language-switch', '<no-element-for:Node>'})->first()
+		)
+}
+
+rule SwitchedString {
+	from
+		s : XML!Element
+		(
+			s.name = 'string'
+		)
+	to
+		t : CPL!SwitchedString (
+			is <- s.getAttrVal('is'),
+			contains <- s.getAttrVal('contains'),
+			contents <- s.getElemsByNames(Sequence {'<no-element-for:Switch>', 'sub', 'address-switch', '<no-element-for:Action>', 'priority-switch', 'location', 'proxy', '<no-element-for:SignallingAction>', 'reject', 'time-switch', 'string-switch', 'redirect', 'language-switch', '<no-element-for:Node>'})->first()
+		)
+}
+
+rule SwitchedLanguage {
+	from
+		s : XML!Element
+		(
+			s.name = 'language'
+		)
+	to
+		t : CPL!SwitchedLanguage (
+			matches <- s.getAttrVal('matches'),
+			contents <- s.getElemsByNames(Sequence {'<no-element-for:Switch>', 'sub', 'address-switch', '<no-element-for:Action>', 'priority-switch', 'location', 'proxy', '<no-element-for:SignallingAction>', 'reject', 'time-switch', 'string-switch', 'redirect', 'language-switch', '<no-element-for:Node>'})->first()
+		)
+}
+
+rule SwitchedTime {
+	from
+		s : XML!Element
+		(
+			s.name = 'time'
+		)
+	to
+		t : CPL!SwitchedTime (
+			dtstart <- s.getAttrVal('dtstart'),
+			dtend <- s.getAttrVal('dtend'),
+			duration <- s.getAttrVal('duration'),
+			freq <- s.getAttrVal('freq'),
+			until <- s.getAttrVal('until'),
+			count <- s.getAttrVal('count'),
+			interval <- let v : String = s.getAttrVal('interval') in
+			if v.oclIsUndefined() then
+				'1'
+			else
+				v
+			endif,
+			bySecond <- s.getAttrVal('bysecond'),
+			byMinute <- s.getAttrVal('byminute'),
+			byHour <- s.getAttrVal('byhour'),
+			byDay <- s.getAttrVal('byday'),
+			byMonthDay <- s.getAttrVal('bymonthday'),
+			byYearDay <- s.getAttrVal('byyearday'),
+			byWeekNo <- s.getAttrVal('byweekno'),
+			byMonth <- s.getAttrVal('bymonth'),
+			wkst <- let v : String = s.getAttrVal('WKST') in
+			if v.oclIsUndefined() then
+				'MO'
+			else
+				v
+			endif,
+			bySetPos <- s.getAttrVal('bysetpos'),
+			contents <- s.getElemsByNames(Sequence {'<no-element-for:Switch>', 'sub', 'address-switch', '<no-element-for:Action>', 'priority-switch', 'location', 'proxy', '<no-element-for:SignallingAction>', 'reject', 'time-switch', 'string-switch', 'redirect', 'language-switch', '<no-element-for:Node>'})->first()
+		)
+}
+
+rule SwitchedPriority {
+	from
+		s : XML!Element
+		(
+			s.name = 'priority'
+		)
+	to
+		t : CPL!SwitchedPriority (
+			less <- s.getAttrVal('less'),
+			greater <- s.getAttrVal('greater'),
+			equal <- s.getAttrVal('equal'),
+			contents <- s.getElemsByNames(Sequence {'<no-element-for:Switch>', 'sub', 'address-switch', '<no-element-for:Action>', 'priority-switch', 'location', 'proxy', '<no-element-for:SignallingAction>', 'reject', 'time-switch', 'string-switch', 'redirect', 'language-switch', '<no-element-for:Node>'})->first()
+		)
+}
+
+rule Busy {
+	from
+		s : XML!Element
+		(
+			s.name = 'busy'
+		)
+	to
+		t : CPL!Busy (
+			contents <- s.getElemsByNames(Sequence {'<no-element-for:Switch>', 'sub', 'address-switch', '<no-element-for:Action>', 'priority-switch', 'location', 'proxy', '<no-element-for:SignallingAction>', 'reject', 'time-switch', 'string-switch', 'redirect', 'language-switch', '<no-element-for:Node>'})->first()
+		)
+}
+
+rule NoAnswer {
+	from
+		s : XML!Element
+		(
+			s.name = 'noanswer'
+		)
+	to
+		t : CPL!NoAnswer (
+			contents <- s.getElemsByNames(Sequence {'<no-element-for:Switch>', 'sub', 'address-switch', '<no-element-for:Action>', 'priority-switch', 'location', 'proxy', '<no-element-for:SignallingAction>', 'reject', 'time-switch', 'string-switch', 'redirect', 'language-switch', '<no-element-for:Node>'})->first()
+		)
+}
+
+rule Redirection {
+	from
+		s : XML!Element
+		(
+			s.name = 'redirection'
+		)
+	to
+		t : CPL!Redirection (
+			contents <- s.getElemsByNames(Sequence {'<no-element-for:Switch>', 'sub', 'address-switch', '<no-element-for:Action>', 'priority-switch', 'location', 'proxy', '<no-element-for:SignallingAction>', 'reject', 'time-switch', 'string-switch', 'redirect', 'language-switch', '<no-element-for:Node>'})->first()
+		)
+}
+
+rule Failure {
+	from
+		s : XML!Element
+		(
+			s.name = 'failure'
+		)
+	to
+		t : CPL!Failure (
+			contents <- s.getElemsByNames(Sequence {'<no-element-for:Switch>', 'sub', 'address-switch', '<no-element-for:Action>', 'priority-switch', 'location', 'proxy', '<no-element-for:SignallingAction>', 'reject', 'time-switch', 'string-switch', 'redirect', 'language-switch', '<no-element-for:Node>'})->first()
+		)
+}
+
+rule Default {
+	from
+		s : XML!Element
+		(
+			s.name = 'default'
+		)
+	to
+		t : CPL!Default (
+			contents <- s.getElemsByNames(Sequence {'<no-element-for:Switch>', 'sub', 'address-switch', '<no-element-for:Action>', 'priority-switch', 'location', 'proxy', '<no-element-for:SignallingAction>', 'reject', 'time-switch', 'string-switch', 'redirect', 'language-switch', '<no-element-for:Node>'})->first()
+		)
+}
+
+rule AddressSwitch {
+	from
+		s : XML!Element
+		(
+			s.name = 'address-switch'
+		)
+	to
+		t : CPL!AddressSwitch (
+			field <- s.getAttrVal('field'),
+			subField <- s.getAttrVal('subField'),
+			addresses <- s.getElemsByNames(Sequence {'address'}),
+			notPresent <- s.getElemsByNames(Sequence {'not-present'})->first(),
+			otherwise <- s.getElemsByNames(Sequence {'otherwise'})->first()
+		)
+}
+
+rule StringSwitch {
+	from
+		s : XML!Element
+		(
+			s.name = 'string-switch'
+		)
+	to
+		t : CPL!StringSwitch (
+			field <- s.getAttrVal('field'),
+			strings <- s.getElemsByNames(Sequence {'string'}),
+			notPresent <- s.getElemsByNames(Sequence {'not-present'})->first(),
+			otherwise <- s.getElemsByNames(Sequence {'otherwise'})->first()
+		)
+}
+
+rule LanguageSwitch {
+	from
+		s : XML!Element
+		(
+			s.name = 'language-switch'
+		)
+	to
+		t : CPL!LanguageSwitch (
+			languages <- s.getElemsByNames(Sequence {'language'}),
+			notPresent <- s.getElemsByNames(Sequence {'not-present'})->first(),
+			otherwise <- s.getElemsByNames(Sequence {'otherwise'})->first()
+		)
+}
+
+rule TimeSwitch {
+	from
+		s : XML!Element
+		(
+			s.name = 'time-switch'
+		)
+	to
+		t : CPL!TimeSwitch (
+			tzid <- s.getAttrVal('tzid'),
+			tzurl <- s.getAttrVal('tzurl'),
+			times <- s.getElemsByNames(Sequence {'time'}),
+			notPresent <- s.getElemsByNames(Sequence {'not-present'})->first(),
+			otherwise <- s.getElemsByNames(Sequence {'otherwise'})->first()
+		)
+}
+
+rule PrioritySwitch {
+	from
+		s : XML!Element
+		(
+			s.name = 'priority-switch'
+		)
+	to
+		t : CPL!PrioritySwitch (
+			priorities <- s.getElemsByNames(Sequence {'priority'}),
+			notPresent <- s.getElemsByNames(Sequence {'not-present'})->first(),
+			otherwise <- s.getElemsByNames(Sequence {'otherwise'})->first()
+		)
+}
+
+rule Location {
+	from
+		s : XML!Element
+		(
+			s.name = 'location'
+		)
+	to
+		t : CPL!Location (
+			url <- s.getAttrVal('url'),
+			clear <- let v : String = s.getAttrVal('clear') in
+			if v.oclIsUndefined() then
+				'no'
+			else
+				v
+			endif,
+			contents <- s.getElemsByNames(Sequence {'<no-element-for:Switch>', 'sub', 'address-switch', '<no-element-for:Action>', 'priority-switch', 'location', 'proxy', '<no-element-for:SignallingAction>', 'reject', 'time-switch', 'string-switch', 'redirect', 'language-switch', '<no-element-for:Node>'})->first()
+		)
+}
+
+rule Proxy {
+	from
+		s : XML!Element
+		(
+			s.name = 'proxy'
+		)
+	to
+		t : CPL!Proxy (
+			timeout <- s.getAttrVal('timeout'),
+			recurse <- let v : String = s.getAttrVal('recurse') in
+			if v.oclIsUndefined() then
+				'yes'
+			else
+				v
+			endif,
+			ordering <- let v : String = s.getAttrVal('ordering') in
+			if v.oclIsUndefined() then
+				'parallel'
+			else
+				v
+			endif,
+			busy <- s.getElemsByNames(Sequence {'busy'})->first(),
+			noAnswer <- s.getElemsByNames(Sequence {'noanswer'})->first(),
+			redirection <- s.getElemsByNames(Sequence {'redirection'})->first(),
+			failure <- s.getElemsByNames(Sequence {'failure'})->first(),
+			default <- s.getElemsByNames(Sequence {'default'})->first()
+		)
+}
+
+rule Redirect {
+	from
+		s : XML!Element
+		(
+			s.name = 'redirect'
+		)
+	to
+		t : CPL!Redirect (
+			permanent <- let v : String = s.getAttrVal('permanent') in
+			if v.oclIsUndefined() then
+				'no'
+			else
+				v
+			endif
+		)
+}
+
+rule Reject {
+	from
+		s : XML!Element
+		(
+			s.name = 'reject'
+		)
+	to
+		t : CPL!Reject (
+			status <- s.getAttrVal('status'),
+			reason <- s.getAttrVal('reason')
+		)
+}
+
+rule SubCall {
+	from
+		s : XML!Element
+		(
+			s.name = 'sub'
+		)
+	to
+		t : CPL!SubCall (
+			ref <- s.getAttrVal('ref')
+		)
+}

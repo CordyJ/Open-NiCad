@@ -1,0 +1,447 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://Grass_Image_RGB2HIS.grass.ws.laits.gmu.edu" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://Grass_Image_RGB2HIS.grass.ws.laits.gmu.edu" xmlns:intf="http://Grass_Image_RGB2HIS.grass.ws.laits.gmu.edu" xmlns:tns1="http://grass.ws.laits.gmu.edu" xmlns:tns2="http://ws.laits.gmu.edu" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+	 <wsdl:types>
+
+		  <schema elementFormDefault="qualified" targetNamespace="http://Grass_Image_RGB2HIS.grass.ws.laits.gmu.edu" xmlns="http://www.w3.org/2001/XMLSchema">
+
+			<!-- ELEMENTS -->
+
+			   <element name="RGB2HISElement">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Name of the element to describe input parameters. 
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element minOccurs="1" name="redImageURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of red map. Default data format is GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element minOccurs="1" name="greenImageURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of green map. Default data format is GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element minOccurs="1" name="blueImageURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of blue map. Default data format is GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element default="Byte" minOccurs="1" name="outputGeoTiffType" type="tns1:GeoTiffFileType">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Type of output GeoTIFF file. The output Format Type is specified as GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+			   <element name="fault" type="tns2:WebServiceExceptionsType"/>
+
+			   <element name="RGB2HISResponse">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Always return URL and Format of output file.
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element name="hueReturnURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of output map representing the hue.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element name="intensityReturnURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of output map representing the intensity.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element name="saturationReturnURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of output map representing the saturation.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element name="hueReturnFormat" type="xsd:string">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Format of output map representing the hue. Default is GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element name="intensityReturnFormat" type="xsd:string">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Format of output map representing the intensity. Default is GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element name="saturationReturnFormat" type="xsd:string">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Format of output map representing the saturation. Default is GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+		  </schema>
+
+		  <schema elementFormDefault="qualified" targetNamespace="http://grass.ws.laits.gmu.edu" xmlns="http://www.w3.org/2001/XMLSchema">
+
+			   <simpleType name="GeoTiffFileType">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Type of output file if the outputFormatType is specified as GeoTIFF.
+                         </documentation>
+
+				    </annotation>
+
+				    <restriction base="string">
+
+					     <enumeration value="Byte">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be Byte - 8-bit unsigned integer.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="Int16">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be Int16 - 16-bit signed integer.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="UInt16">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be UInt16 - 16-bit unsigned integer.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="UInt32">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be UInt32 - 32-bit unsigned integer.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="Int32">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be Int32 - 32-bit signed integer.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="Float32">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be Float32 - 32-bit floating point.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="Float64">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be Float64 - 64-bit floating point.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="CInt16">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be CInt16 - Complex 16-bit signed integer (ie. two Int16's one representing the real component, and one the imaginary component).
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="CInt32">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be CInt32 - Complex 32-bit signed integer.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="CFloat32">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be CFloat32 - Complex 32-bit floating point.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="CFloat64">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be CFloat64 - Complex 64-bit floating point.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+				    </restriction>
+
+			   </simpleType>
+
+		  </schema>
+
+		  <schema elementFormDefault="qualified" targetNamespace="http://ws.laits.gmu.edu" xmlns="http://www.w3.org/2001/XMLSchema">
+
+			   <complexType name="WebServiceExceptionsType">
+
+				    <sequence>
+
+					     <element name="exception" type="xsd:string"/>
+
+				    </sequence>
+
+			   </complexType>
+
+		  </schema>
+
+	 </wsdl:types>
+
+	 <wsdl:message name="rgb2HISRequest">
+
+		  <wsdl:part element="impl:RGB2HISElement" name="parameters"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="rgb2HISResponse">
+
+		  <wsdl:part element="impl:RGB2HISResponse" name="return"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="WebServiceExceptionsType">
+
+		  <wsdl:part element="impl:fault" name="fault"/>
+
+	 </wsdl:message>
+
+	 <wsdl:portType name="Grass_Image_RGB2HISPortType">
+
+		  <wsdl:operation name="rgb2HIS">
+
+			   <wsdl:input message="impl:rgb2HISRequest" name="rgb2HISRequest"/>
+
+			   <wsdl:output message="impl:rgb2HISResponse" name="rgb2HISResponse"/>
+
+			   <wsdl:fault message="impl:WebServiceExceptionsType" name="WebServiceExceptionsType"/>
+
+		  </wsdl:operation>
+
+	 </wsdl:portType>
+
+	 <wsdl:binding name="Grass_Image_RGB2HISSoapBinding" type="impl:Grass_Image_RGB2HISPortType">
+
+		  <wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+		  <wsdl:operation name="rgb2HIS">
+
+			   <wsdl:documentation>
+Process three input raster map layers as red, green, and blue components and produce one output raster map layers representing the hue, intensity, saturation of the data.   </wsdl:documentation>
+
+			   <wsdlsoap:operation soapAction="rgb2HIS" style="document"/>
+
+			   <wsdl:input>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:input>
+
+			   <wsdl:output>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:output>
+
+			   <wsdl:fault name="WebServiceExceptionsType">
+
+				    <wsdlsoap:fault name="WebServiceExceptionsType" use="literal"/>
+
+			   </wsdl:fault>
+
+		  </wsdl:operation>
+
+	 </wsdl:binding>
+
+	 <wsdl:service name="Grass_Image_RGB2HISService">
+
+		  <wsdl:documentation>
+Convert an image from the red-green-blue (rgb) space into the hue-intensity-saturation (his) color space. Each output raster map layer is given a linear gray scale color table.  </wsdl:documentation>
+
+		  <wsdl:port binding="impl:Grass_Image_RGB2HISSoapBinding" name="Grass_Image_RGB2HIS">
+
+			   <wsdlsoap:address location="http://65.123.203.154:8099/axis/services/Grass_Image_RGB2HIS"/>
+
+		  </wsdl:port>
+
+	 </wsdl:service>
+
+	<!--WSDL created by Apache Axis version: 1.4
+Built on Apr 22, 2006 (06:55:48 PDT)-->
+
+</wsdl:definitions>

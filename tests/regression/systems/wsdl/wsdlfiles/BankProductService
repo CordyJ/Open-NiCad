@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://www.arikan.at/axis/services/BankProductService" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://www.arikan.at/axis/services/BankProductService" xmlns:intf="http://www.arikan.at/axis/services/BankProductService" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tns1="urn:BankProductService.wit.ws.arikan.at" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><wsdl:types><schema targetNamespace="urn:BankProductService.wit.ws.arikan.at" xmlns="http://www.w3.org/2001/XMLSchema"><import namespace="http://schemas.xmlsoap.org/soap/encoding/"/><complexType name="Account_Fee"><sequence><element name="accounts" nillable="true" type="tns1:Accounts"/><element name="acct_type" nillable="true" type="xsd:string"/><element name="acct_type_intern" nillable="true" type="xsd:string"/><element name="from_amount" nillable="true" type="xsd:double"/><element name="monthly_acct_fee" nillable="true" type="xsd:double"/><element name="to_amount" nillable="true" type="xsd:double"/></sequence></complexType><complexType name="Credit_Card"><complexContent><extension base="tns1:Accounts"><sequence><element name="accounts" nillable="true" type="tns1:Accounts"/><element name="additional_card" nillable="true" type="xsd:boolean"/><element name="additional_card_fee" nillable="true" type="xsd:double"/><element name="blocking_fine" nillable="true" type="xsd:string"/><element name="card_fee" nillable="true" type="xsd:double"/><element name="card_id" nillable="true" type="xsd:string"/><element name="card_reorder_fee" nillable="true" type="xsd:double"/></sequence></extension></complexContent></complexType><complexType name="EC_Card"><complexContent><extension base="tns1:Accounts"><sequence><element name="accounts" nillable="true" type="tns1:Accounts"/><element name="additional_card_fee" nillable="true" type="xsd:double"/><element name="blocking_fine" nillable="true" type="xsd:string"/><element name="card_fee" nillable="true" type="xsd:double"/><element name="card_id" nillable="true" type="xsd:string"/><element name="card_reorder_fee" nillable="true" type="xsd:double"/></sequence></extension></complexContent></complexType><complexType name="Accounts"><sequence><element name="EC_card" nillable="true" type="xsd:boolean"/><element name="account_fees" nillable="true" type="impl:ArrayOf_tns1_Account_Fee"/><element name="acct_close_fee" nillable="true" type="xsd:double"/><element name="acct_type" nillable="true" type="xsd:string"/><element name="acct_type_anonym" nillable="true" type="xsd:string"/><element name="acct_type_intern" nillable="true" type="xsd:string"/><element name="bank_id" nillable="true" type="xsd:string"/><element name="credit_card" nillable="true" type="xsd:boolean"/><element name="credit_cards" nillable="true" type="impl:ArrayOf_tns1_Credit_Card"/><element name="debit_interest" nillable="true" type="xsd:double"/><element name="duplicate_acct_statement" nillable="true" type="xsd:string"/><element name="ec_cards" nillable="true" type="impl:ArrayOf_tns1_EC_Card"/><element name="foreign_transf_fee_upto_12500" nillable="true" type="xsd:double"/><element name="foreign_transf_fee_upto_25000" nillable="true" type="xsd:double"/><element name="foreign_transf_fee_upto_50000" nillable="true" type="xsd:double"/><element name="free_acct_statement_per_year" nillable="true" type="xsd:int"/><element name="interest_due" nillable="true" type="xsd:double"/><element name="internet_banking" nillable="true" type="xsd:boolean"/><element name="standing_order" nillable="true" type="xsd:boolean"/><element name="telefon_banking" nillable="true" type="xsd:boolean"/></sequence></complexType></schema><schema targetNamespace="http://www.arikan.at/axis/services/BankProductService" xmlns="http://www.w3.org/2001/XMLSchema"><import namespace="http://schemas.xmlsoap.org/soap/encoding/"/><complexType name="ArrayOf_tns1_Account_Fee"><complexContent><restriction base="soapenc:Array"><attribute ref="soapenc:arrayType" wsdl:arrayType="tns1:Account_Fee[]"/></restriction></complexContent></complexType><complexType name="ArrayOf_tns1_Credit_Card"><complexContent><restriction base="soapenc:Array"><attribute ref="soapenc:arrayType" wsdl:arrayType="tns1:Credit_Card[]"/></restriction></complexContent></complexType><complexType name="ArrayOf_tns1_EC_Card"><complexContent><restriction base="soapenc:Array"><attribute ref="soapenc:arrayType" wsdl:arrayType="tns1:EC_Card[]"/></restriction></complexContent></complexType></schema></wsdl:types>
+  <wsdl:message name="findAllEC_CardsResponse">
+    <wsdl:part name="findAllEC_CardsReturn" type="impl:ArrayOf_tns1_EC_Card"/>
+  </wsdl:message>
+  <wsdl:message name="findAllCredit_CardsResponse">
+    <wsdl:part name="findAllCredit_CardsReturn" type="impl:ArrayOf_tns1_Credit_Card"/>
+  </wsdl:message>
+  <wsdl:message name="findAllEC_CardsRequest">
+  </wsdl:message>
+  <wsdl:message name="findAllCredit_CardsRequest">
+  </wsdl:message>
+  <wsdl:portType name="BankProductService">
+    <wsdl:operation name="findAllEC_Cards">
+      <wsdl:input message="impl:findAllEC_CardsRequest" name="findAllEC_CardsRequest"/>
+      <wsdl:output message="impl:findAllEC_CardsResponse" name="findAllEC_CardsResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="findAllCredit_Cards">
+      <wsdl:input message="impl:findAllCredit_CardsRequest" name="findAllCredit_CardsRequest"/>
+      <wsdl:output message="impl:findAllCredit_CardsResponse" name="findAllCredit_CardsResponse"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="BankProductServiceSoapBinding" type="impl:BankProductService">
+    <wsdlsoap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="findAllEC_Cards">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="findAllEC_CardsRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://www.arikan.at/axis/services/BankProductService" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="findAllEC_CardsResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://www.arikan.at/axis/services/BankProductService" use="encoded"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="findAllCredit_Cards">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="findAllCredit_CardsRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://www.arikan.at/axis/services/BankProductService" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="findAllCredit_CardsResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://www.arikan.at/axis/services/BankProductService" use="encoded"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="BankProductServiceService">
+    <wsdl:port binding="impl:BankProductServiceSoapBinding" name="BankProductService">
+      <wsdlsoap:address location="http://www.arikan.at/axis/services/BankProductService"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

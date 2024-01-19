@@ -1,0 +1,173 @@
+query DOT2Text = DOT!Graph.allInstances()->asSequence()->first().toString2().writeTo('./runtime-workbench-workspace/KM32DOT/example.dot');
+
+helper context DOT!Graph def: toString2() : String =
+	let subs : Sequence(DOT!SubGraph) = self.nodes->select(
+		e | e.oclIsKindOf(DOT!SubGraph)) in
+	let nod : Sequence(DOT!Node) = self.nodes->select(
+		e | e.oclIsKindOf(DOT!Node)) in
+	self.type +  ' ' + '\"' + self.name +'\"' + ' ' + '{\r\n' +
+	'graph[' +
+		if self.rankDir.oclIsUndefined() then
+			''
+		else
+			'rankdir=' + self.rankDir + ','
+		endif +
+		if self.labeljust.oclIsUndefined() then
+			''
+		else
+			'labeljust=' + self.labeljust + ','
+		endif +
+		if self.labelloc.oclIsUndefined() then
+			''
+		else
+			'labelloc=' + self.labelloc + ','
+		endif +
+		if self.nodeSeparation.oclIsUndefined() then
+			''
+		else
+			'nodeSep=' + self.nodeSeparation.toString() + ','
+		endif +
+		if self.compound.oclIsUndefined() then
+			''
+		else
+			'compound=' + self.compound.toString()
+		endif +
+		'];\r\n' +
+		subs->iterate(e; acc : String = '' |
+			acc + ' ' + e.toString2()
+		) +
+		if nod->size() > 0 then
+			nod->iterate(e; acc : String = '' |
+				acc + ' ' + e.toString2()
+			)
+		else
+			''
+		endif
+		+ '\r\n}';
+		
+helper context DOT!SubGraph def: toString2() : String = 
+	let subs : Sequence(DOT!SubGraph) = self.nodes->select(
+		e | e.oclIsKindOf(DOT!SubGraph)) in
+	let nod : Sequence(DOT!Node) = self.nodes->select(
+		e | e.oclIsKindOf(DOT!Node)) in
+	'subgraph ' + '\"' + self.name + '\"' + '{\r\n' +
+		if self.labelloc.oclIsUndefined() then
+			''
+		else
+			'labelloc=' + self.labelloc + '\r\n'
+		endif +
+		if self.color.oclIsUndefined() then
+			''
+		else
+			'color=' + self.color + '\r\n'
+		endif +
+		if self.label.oclIsUndefined() then
+			''
+		else
+			'label=' + self.label.content + '\r\n'
+		endif +
+		if nod->size() > 0 then
+			nod->iterate(e; acc : String = '' |
+				acc + ' ' + e.toString2()
+			)
+		else
+			''
+		endif +
+		if subs->size() > 0 then
+			subs->iterate(e; acc : String = '' |
+				acc + ' ' + e.toString2()
+			)
+		else
+			''
+		endif +
+		'\r\n}';
+
+helper context DOT!Node def: toString2() : String = 
+	'node' + '[shape=' + self.shape.name + '];\r\n' +
+		self.name + 
+		if self.shape.label.oclIsUndefined() then
+			''
+		else
+			'[label=' + self.shape.label.toString2() + ']'
+		endif + '\r\n' +
+		if self.refers->size() > 0 then
+			self.refers->iterate(e; acc : String = '' |
+				acc + ' ' + e.toString2()
+			)
+		else
+			''
+		endif +
+		';\r\n';
+
+helper context DOT!DirectedArc def: toString2() : String = 
+	self.fromNode.name + '->' + self.toNode.name +
+		'[' + 
+		if self.arrowHead.oclIsUndefined() then
+			''
+		else
+			'arrowhead=' +
+			if self.arrowHead.isPlain then
+				'o'
+			else
+				''
+			endif + 
+			if self.arrowHead.clipping = 'right' then
+				'r'
+			else
+				if self.arrowHead.clipping = 'left' then
+					'l'
+				else
+					''
+				endif
+			endif +
+			self.arrowHead.name + ','
+		endif +
+		if self.arrowTail.oclIsUndefined() then
+			''
+		else
+			'arrowtail=' + 
+			if self.arrowTail.isPlain then
+				'o'
+			else
+				''
+			endif + 
+			if self.arrowTail.clipping = 'right' then
+				'r'
+			else
+				if self.arrowTail.clipping = 'left' then
+					'l'
+				else
+					''
+				endif
+			endif +
+			self.arrowTail.name + ','
+		endif +
+		if self.headlabel.oclIsUndefined() then
+			''
+		else
+			'headlabel=\"' + self.headlabel.content + '\",'
+		endif +
+		if self.taillabel.oclIsUndefined() then
+			''
+		else
+			'taillabel=\"' + self.taillabel.content + '\",'
+		endif +
+		if self.group.oclIsUndefined() then
+			''
+		else
+			'group=' + self.group + ','
+		endif +
+		if self.minlen.oclIsUndefined() then
+			''
+		else
+			'minlen=' + self.minlen.toString() + ','
+		endif +
+		if self.constraint.oclIsUndefined() then
+			''
+		else
+			'constraint=' + self.constraint.toString() + ','
+		endif +
+		']\r\n';
+		
+helper context DOT!SimpleLabel def: toString2() : String = 
+	'\"' + self.content + '\"';

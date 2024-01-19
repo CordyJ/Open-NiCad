@@ -1,0 +1,175 @@
+<?xml version="1.0"?>
+
+<definitions name="NewsReader"
+             targetNamespace="urn:NewsReader"
+             xmlns:typens="urn:NewsReader"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
+             xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+             xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+  <types>
+    <xsd:schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:NewsReader">
+       
+	   <!-- News categories handles categories and sub category result array types. -->     
+      <xsd:complexType name="CategoriesResultArray">
+        <xsd:all>
+          <xsd:element name="categoryElements" type="typens:CategoryElementArray"/>
+        </xsd:all>
+      </xsd:complexType>
+
+      <xsd:complexType name="CategoryElementArray">
+        <xsd:complexContent>
+          <xsd:restriction base="soapenc:Array">
+             <xsd:attribute ref="soapenc:arrayType" wsdl:arrayType="typens:CategoryElement[]"/>
+          </xsd:restriction>
+        </xsd:complexContent>
+      </xsd:complexType>
+
+      <xsd:complexType name="CategoryElement">
+        <xsd:all>
+          <xsd:element name="category" type="xsd:string"/>
+        </xsd:all>
+      </xsd:complexType>
+	    
+	  <!--- News Search Result handles actual news results -->
+      <xsd:complexType name="NewsResultArray">
+        <xsd:all>
+			<xsd:element name="newsElements" type="typens:NewsElementArray" /> 
+        </xsd:all>
+      </xsd:complexType>
+	  
+      <xsd:complexType name="NewsElementArray">
+        <xsd:complexContent>
+          <xsd:restriction base="soapenc:Array">
+             <xsd:attribute ref="soapenc:arrayType" wsdl:arrayType="typens:NewsElement[]"/>
+          </xsd:restriction>
+        </xsd:complexContent>
+      </xsd:complexType>	  
+      
+      <xsd:complexType name="NewsElement">
+        <xsd:all>
+		  <xsd:element name="title" 		type="xsd:string"/>
+          <xsd:element name="URL" 			type="xsd:string"/>
+          <xsd:element name="source" 		type="xsd:string"/>
+          <xsd:element name="date" 			type="xsd:string"/>
+        </xsd:all>
+      </xsd:complexType>
+	  
+    </xsd:schema>
+  </types> 
+
+  <!-- Get categories -->
+  <message name="getNewsCategories">
+    <part name="username"       type="xsd:string"/>
+    <part name="password"       type="xsd:string"/>
+  </message>
+
+  <message name="getNewsCategoriesResponse">
+    <part name="return"         type="typens:CategoriesResultArray"/>           
+  </message>
+  
+  
+  <!-- Gets sub categories - takes category as input -->
+  <message name="getNewsSubCategories">
+    <part name="username"       type="xsd:string"/>
+    <part name="password"       type="xsd:string"/>
+	<part name="category"       type="xsd:string"/>
+  </message>
+
+  <message name="getNewsSubCategoriesResponse">
+    <part name="return"         type="typens:NewsCategoriesResult"/>  
+  </message>
+
+  <!-- Gets actual news items -->
+  <message name="getNews">
+    <part name="username"       type="xsd:string"/>
+    <part name="password"       type="xsd:string"/>
+	<part name="category"       type="xsd:string"/>
+	<part name="query"       	type="xsd:string"/>
+	<part name="numberResults"  type="xsd:int"/>	
+  </message>
+
+  <message name="getNewsResponse">
+    <part name="return"         type="typens:NewsResultArray"/> 
+  </message>  
+  
+  
+  <portType name="NewsReaderPort">
+
+    <operation name="getNewsCategories">
+      <input message="typens:getNewsCategories"/>
+      <output message="typens:getNewsCategoriesResponse"/>
+    </operation>
+
+    <operation name="getNewsSubCategories">
+      <input message="typens:getNewsSubCategories"/>
+      <output message="typens:getNewsSubCategoriesResponse"/>
+    </operation>
+
+    <operation name="getNews">
+      <input message="typens:getNews"/>
+      <output message="typens:getNewsResponse"/>
+    </operation>
+
+  </portType>
+
+
+  <binding name="NewsReaderBinding" type="typens:NewsReaderPort">
+    <soap:binding style="rpc"
+                  transport="http://schemas.xmlsoap.org/soap/http"/>
+
+    <operation name="getNewsCategories">
+      <soap:operation soapAction="urn:NewsReaderAction"/>
+      <input>
+        <soap:body use="encoded"
+                   namespace="urn:NewsReader"
+                   encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </input>
+      <output>
+        <soap:body use="encoded"
+                   namespace="urn:NewsReader"
+                   encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </output>
+    </operation>
+
+    <operation name="getNewsSubCategories">
+      <soap:operation soapAction="urn:NewsReaderAction"/>
+      <input>
+        <soap:body use="encoded"
+                   namespace="urn:NewsReader"
+                   encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </input>
+      <output>
+        <soap:body use="encoded"
+                   namespace="urn:NewsReader"
+                   encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </output>
+    </operation>
+
+	
+    <operation name="getNews">
+      <soap:operation soapAction="urn:NewsReaderAction"/>
+      <input>
+        <soap:body use="encoded"
+                   namespace="urn:NewsReader"
+                   encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </input>
+      <output>
+        <soap:body use="encoded"
+                   namespace="urn:NewsReader"
+                   encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </output>
+    </operation>
+  </binding>
+
+  <!-- Endpoint for flash-db News Reader -->
+  <service name="NewsReaderService">
+   <documentation>Returns Categories, Sub-categories, and then allows a complex search of Moreover news.</documentation>
+    <port name="NewsReaderPort" binding="typens:NewsReaderBinding">
+      <soap:address location="http://www.flash-db.com/services/ws/newsReader.php"/>
+    </port>
+  </service>
+
+</definitions>

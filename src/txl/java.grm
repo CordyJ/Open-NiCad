@@ -1,0 +1,1091 @@
+% TXL Java Grammar
+% Version 5.0, November 2023
+
+% Copyright 2001-2023 James R. Cordy, Xinping Guo and Thomas R. Dean
+
+% Redistribution and use in source and binary forms, with or without
+% modification, are permitted provided that the following conditions are met:
+%
+%    Redistributions of source code must retain the above copyright notice, 
+%    this list of conditions and the following disclaimer.
+%    Redistributions in binary form must reproduce the above copyright notice,
+%    this list of conditions and the following disclaimer in the documentation
+%    and/or other materials provided with the distribution.
+%
+%    THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+%    INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+%    AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+%    AUTHORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+%    OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+%    SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+%    INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+%    CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+%    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+%    POSSIBILITY OF SUCH DAMAGE.
+
+% Originally based on the Java Language Specification, 2nd edition, 2001,
+% updated to 3rd edition, 2007, Java standard edition 8, 2018,
+% and Java standard edition 15, 2023.
+
+% Modification Log:
+
+% v5.0, Jim Cordy, November 2023.
+%   Added support for Java 15 textblocks.
+%   Added support for Java 14 records.
+%   Added missing Java 14 modifiers and annotations in some contexts. 
+%   Added missing wildcard type parameters and arguments.
+%   Minor bug fixes to identifiers and strings.
+
+% v4.4, Jim Cordy, December 2020.
+%   Added support for Java 14 pattern matching for instanceof. 
+%   Added support for Java 14 switch arrow labels.
+%   Added support for Java 14 switch expressions.
+%   Refactored [statement] to avoid new switch expression ambiguity.
+%   Updated cast expressions to handle type bounds.
+
+% v4.3, Jim Cordy, November 2020.
+%   Corrected expression precedence to allow for assigned and conditional lambda expressions.
+%   Added missing binary and octal integer literals.
+%   Updated annotation handling.
+%   Added UTF-8 identifier handling.
+
+% v4.2, Jim Cordy, October 2020.
+%   Corrected formatting of class bodies, for loops.
+
+% v4.1, Jim Cordy, August 2018.
+%   Corrected cast expression to allow for lambda expressions.
+
+% v4.0, Jim Cordy, May 2018.
+%   Updated to Java 8.
+%   Added _ digit to all numeric tokens.
+%   Added optional class body to enums.
+%   Added default modifier.
+%   Updated with resourced try statement.
+%   Updated with multiple catch type specifiers.
+%   Added lambda expressions.
+%   Added method references.
+%   Corrected error in [conditional_expression].
+%   Added optional [expression_statement_no_semi] at end of [block].
+%   Validated against Qualitas Java corpus (44,817 files), 
+%        Java8InAction examples (100 files, covering all of Java 8), 
+%        GitHub random corpus of 1,000 Java projects (117,430 files).
+
+% v3.8, Jim Cordy, February 2018.
+%   Corrected label_name to [id].
+
+% v3.7, Jim Cordy, November 2015.
+%   Removed enum from keyword list.  In Java, enum is not reserved and may be used as an identifier.
+
+% v3.6, Jim Cordy, March 2012.
+%   Refactored to add [condition] for if/while conditions.
+
+% v3.5, Jim Cordy, July 2011.
+%   Tuning to improve parsing by specializing type components from reference compoenents
+
+% v3.4, Jim Cordy, June 2010.
+%   Minor fixes to annotations, reference components
+
+% v3.3, Krellner/Reichel (Chemnitz University of Technology, Germany), September/November 2008.
+%   New complex but JLS conform number token definition.
+%   Token definition for both DOS and UNIX newline usage.
+%   Fixed grammar resulted syntax errors.
+%   Allowed method calls appended to a new class or array creation.
+%   Modified class instance creations of nested/inner classes.
+%   Allowed default array annotation.
+%   Fixed logic error in class_instance_creation_expression.
+
+% v3.2, Jim Cordy, October 2008.
+%   Corrected method and constructor declarations to allow for generic parameters.
+
+% v3.1, Jim Cordy, May 2008.
+%   Validated on a range of open source Java software including JHotDraw 5.4b1,
+%   Eclipse-Ant, Eclipse-JDTcore, Java2 SDK 1.4.0-Swing, Netbeans-Javadoc and Spule.
+%   Updated to address slight problems.
+
+% v3.0, Tom Dean, October 2007.
+%   Updated to Java 5.
+%   Added parameterized types and type wilcards.
+
+% v2.0-2.3, Xinping Guo, July 2002.
+%   Multiple grammar corrections and updates.
+
+% v1.0, Jim Cordy, Sept 2001.  
+%   Initial revision, based on the Java Language Specification, 2nd edition, 2001.
+
+
+% Lexical conventions of Java 
+
+#pragma -width 128 -id "$"
+
+tokens
+    space   "[ \t]+"
+    newline "\n" | "" | "\n"
+
+    % JRC 27 Nov 2020 - added UTF-8 identifier characters
+    id      "[$\u][$\i]*"
+        |   "[$\uÅ][\iÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿŠŽ™šžŸ¡µ(α)(ε)(𝛁)(π)(℠)(ç)(С)]+"
+
+    % JC 1 May 2018 - added _ digit to all forms 
+    number  "\d[\d_]*[lL]?"                                 % DecimalIntegerLiteral | OctalIntegerLiteral
+          | "\d[\d_]*.[\d_]*([eE][+-]?\d[\d_]*)?[fFdD]?"    % DecimalFloatingPointLiteral
+          | ".\d[\d_]*([eE][+-]?\d[\d_]*)?[fFdD]?"          % DecimalFloatingPointLiteral (cont.'d)
+          | "\d[\d_]*[eE][+-]?\d[\d_]*[fFdD]?"              % DecimalFloatingPointLiteral (cont.'d)
+          | "\d[\d_]*([eE][+-]?\d[\d_]*)?[fFdD]"            % DecimalFloatingPointLiteral (cont.'d)
+          | "0[xX][\dabcdefABCDEF][\d_abcdefABCDEF]*.[pP][+-]?\d[\d_]*[fFdD]?"  % HexadecimalFloatingPointLiteral
+          | "0[xX][\d_abcdefABCDEF]*.[\dabcdefABCDEF][\d_abcdefABCDEF]*[pP][+-]?\d[\d_]*[fFdD]?"  
+                                                            % HexadecimalFloatingPointLiteral (cont.'d)
+          | "0[xX][\dabcdefABCDEF][\d_abcdefABCDEF]*([pP][+-]?\d+)?[lLfFdD]?"  
+                                                            % HexIntegerLiteral | HexadecimalFloatingPointLiteral (cont.'d)
+        % | "0[oO][01]+[lL]?"                               % OctalIntegerLiteral (included in DecimalIntegerLiteral above)
+          | "0[bB][01][01_]*[lL]?"                          % BinaryIntegerLiteral
+
+    % JC Nov 2023 - Java 15 textblocks 
+    textblock   "\"\"\"#(\"\"\")*\"\"\""
+end tokens
+
+comments
+    //
+    /*  */
+end comments
+
+compounds
+    !=  '%=  &&  &=  *=  ++  +=   --  -=  /=  ^=  |=  ||
+    <<  <<=  <=  ==  >=  ...
+end compounds
+
+% Removed this and super - XG June 19, 2002
+% added assert and enum - TD Oct 2007
+% removed cast, inner, they cannot be keywords - JRC Apr 08
+% removed enum, cannot be keyword - JRC Nov 15
+keys
+    'abstract 'assert 'boolean 'break 'byte
+    'case 'catch 'char 'class 'const 'continue
+    'default 'do 'double 'else 'extends
+    'false 'final 'finally 'float 'for
+    'goto 'if 'implements 'import
+    'instanceof 'int 'interface 'long
+    'native 'new 'null 'package 'private 'protected 'public 'return
+    'short 'static 'strictfp 'switch 'synchronized
+     'throw 'throws 'transient 'true 'try 'void 'volatile 'while
+end keys
+
+
+% Compilation units
+
+define program
+    [package_declaration]
+end define
+
+define package_declaration
+    [opt package_header] [repeat import_declaration] [repeat type_declaration]
+end define
+
+define package_header
+    [repeat annotation] 'package [package_name] '; [NL][NL]
+end define
+
+define package_name
+    [qualified_name]
+end define
+
+define import_declaration
+        'import [opt 'static] [imported_name] [opt dot_star] '; [NL][NL]
+    |    '; [NL]    % observed
+end define
+
+define imported_name
+    [qualified_name]
+end define
+
+define dot_star
+    '. '*
+end define
+
+define declared_name
+    [id] [opt type_parameters]
+end define
+
+% Class and interface declarations
+
+define type_declaration
+    [repeat modifier] [class_or_interface_declaration]
+end define
+
+define class_or_interface_declaration
+        [class_declaration]      [NL][NL]
+    |   [interface_declaration]  [NL][NL]
+    |   [record_declaration]     [NL][NL]   % Java 14
+    |   [enum_declaration]       [NL]
+end define
+
+define class_declaration
+    [class_header] [class_body]
+end define
+
+define class_header
+    'class [class_name] [opt extends_clause] [opt implements_clause]
+end define
+
+define class_body
+    [class_or_interface_body]
+end define
+
+define interface_declaration
+    [interface_header] [interface_body]
+end define
+
+define interface_header
+    [opt '@] 'interface [interface_name] [opt extends_clause] [opt implements_clause]
+end define
+
+define interface_body
+    [class_or_interface_body]
+end define
+
+define record_declaration
+    'record [record_declarator] [opt extends_clause] [opt implements_clause] [record_body]
+end define
+
+define record_declarator
+    [record_name] '( [IN] [list formal_parameter] [EX] ') [repeat dimension]    
+end define
+
+define record_name
+    [declared_name]
+end define
+
+define record_body
+    [class_or_interface_body]
+end define
+
+define enum_declaration
+    [enum_header] [enum_body]
+end define
+
+define enum_header
+    'enum [opt declared_name] [opt implements_clause]
+end define
+
+define enum_body
+    '{                                              [IN]
+       [list enum_constant] [opt ',] 
+       [opt ';] [repeat class_body_declaration]     [NL][EX]
+    '} [opt ';]                                     [NL][NL]
+end define
+
+define enum_constant
+    [NL] [repeat modifier] [id] [opt method_argument] 
+        [opt class_body]    % observed
+end define
+
+define modifier
+        [annotation]
+    |   'public
+    |   'protected
+    |   'private
+    |   'static
+    |   'abstract
+    |   'final
+    |   'native
+    |   'synchronized
+    |   'transient
+    |   'volatile
+    |   'strictfp
+    |   'default
+end define
+
+define extends_clause
+    'extends [list type_name+]
+end define
+
+define implements_clause
+    'implements [list qualified_name+]
+end define
+
+define class_name
+    [declared_name]
+end define
+
+define interface_name
+    [declared_name]
+end define
+
+define class_or_interface_body
+    '{                                    [NL][IN]
+       [repeat class_body_declaration]    [NL][EX]
+    '} [opt ';]                           [NL]
+end define
+
+define class_body_declaration
+        [empty_declaration]
+    |   [field_declaration] 
+    |   [method_declaration]
+    |   [constructor_declaration]
+    |   [type_declaration]
+    |   [instance_initializer]
+    |   [static_initializer]
+end define
+
+define empty_declaration
+    '; [NL]
+end define
+
+define instance_initializer
+    [NL] [block] [NL][NL]
+end define
+
+define static_initializer
+    [NL] 'static [block] [NL][NL]
+end define
+
+define constructor_declaration
+    [NL] [repeat modifier] [opt type_parameters] [constructor_declarator] [opt throws] [constructor_body] [NL][NL]
+end define
+
+define constructor_declarator
+    [class_name] [opt constructor_parameters]   % Java 15 record constructors
+end define
+
+define constructor_parameters
+    '( [IN] [list formal_parameter] [EX] ')
+end define
+
+define constructor_body
+    [block] [NL]
+end define
+
+
+% Field declarations 
+
+define field_declaration
+    [variable_declaration] [NL]
+end define
+
+define variable_declaration
+    [repeat modifier] [type_specifier] [variable_declarators] '; 
+end define
+
+define variable_declarators
+    [list variable_declarator+]
+end define
+
+define variable_declarator
+    [variable_name] [opt equals_variable_initializer]
+end define
+
+define variable_name
+    [declared_name] [repeat dimension]
+end define
+
+define equals_variable_initializer
+    '= [variable_initializer]
+end define
+
+define variable_initializer
+        [expression]
+    |   [array_initializer]
+end define
+
+define array_initializer
+    '{ [list variable_initializer] [opt ',] '}
+end define
+
+
+% Method declarations 
+
+define method_declaration
+    [NL] [repeat modifier] [opt type_parameters] [type_specifier] [method_declarator] [opt throws] [method_body]
+end define
+
+define method_declarator
+    [method_name] '( [IN] [list formal_parameter] [EX] ') [repeat dimension]    
+end define
+
+define method_name
+    [declared_name]
+end define
+
+define formal_parameter
+    [repeat variable_modifier] [type_specifier] [opt spread_specifier] [formal_parameter_name]
+end define
+
+define variable_modifier
+        'final
+    |   [annotation]
+end define
+
+define spread_specifier
+    [repeat annotation] '... 
+end define
+
+define formal_parameter_name
+    [variable_name]
+end define
+
+define throws
+    'throws [list qualified_name+]
+end define
+
+define method_body
+        [block]  [NL][NL]
+    |   ';       [NL][NL]
+    |   'default [annotation_value] ';  [NL][NL]
+end define
+
+
+% Type specifiers
+
+define type_specifier
+    [type_name] [repeat dimension] 
+end define
+
+define array_type_specifier
+    [type_name] [repeat dimension+]
+end define
+
+define type_name
+    [repeat annotation] [primitive_type_or_id] [repeat type_component] [repeat annotation]
+end define
+
+define primitive_type_or_id
+        [primitive_type]
+    |   [id]
+    |   '?      % Java 14
+end define
+
+define type_component
+        [dot_id]
+    |   [type_arguments]
+end define
+
+define primitive_type
+        'boolean
+    |   'char
+    |   'byte
+    |   'short
+    |   'int
+    |   'long
+    |   'float
+    |   'double
+    |   'void
+end define
+
+
+% Annotations
+
+define annotation
+   '@ [SPOFF] [qualified_name] [SPON] [opt annotation_elements] [more_annotations?]
+end define
+
+define more_annotations
+        [see annotation] [NL]
+    |   [see 'public] [NL]
+end define 
+
+define annotation_elements
+   '( [IN] [list annotation_element] [EX] ')
+end define
+
+define annotation_element
+        [annotation_value]
+    |   [annotation_value_pair]
+end define
+
+define annotation_value
+        [expression]
+    |   [annotation]
+    |   { [list annotation_value] [opt ',] }
+end define
+
+define annotation_value_pair
+    [id] '= [annotation_value]
+end define
+
+
+% Statements
+
+define block
+    '{                                        [NL][IN] 
+        [repeat declaration_or_statement]     [EX]
+    '}
+end define
+
+define declaration_or_statement
+        [declaration]
+    |   [statement]
+end define
+
+define declaration
+        [local_variable_declaration]  [NL]
+    |   [type_declaration] 
+end define
+
+define local_variable_declaration
+    [variable_declaration]
+end define
+
+define statement
+        [label_statement]        
+    |   [empty_statement]
+    |   [if_statement]
+    |   [switch_statement]
+    |   [while_statement]
+    |   [do_statement]
+    |   [for_statement]
+    |   [for_in_statement]
+    |   [break_statement]
+    |   [continue_statement]
+    |   [return_statement]
+    |   [throw_statement]
+    |   [synchronized_statement]
+    |   [try_statement]
+    |   [assert_statement]
+    |   [block_statement]
+    |   [expression_statement]  % must be last due to ambiguity with switch in Java 14
+end define
+
+define block_statement
+    [block] [NL]
+end define
+
+define empty_statement
+    ';  [NL]
+end define
+
+define label_statement
+    [label_name] ': [statement] 
+end define
+
+define label_name
+    [id]
+end define
+
+define expression_statement
+    [expression] [end_of_statement] [NL]
+end define
+
+define end_of_statement
+        '; 
+    |   [see '}]
+end define
+
+define if_statement
+    'if '( [condition] ')     
+        [statement]
+    [opt else_clause]      
+end define
+
+define else_clause
+    'else
+        [statement]
+end define
+
+define switch_statement
+    'switch '( [expression] ') [switch_block]  [NL]
+end define
+
+define switch_block
+    '{                                         [IN][NL]
+        [repeat switch_alternative]            [EX]
+    '} 
+end define
+
+define switch_alternative
+    [switch_label]                             [IN][NL]
+        [repeat declaration_or_statement]      [EX]
+end define
+
+define switch_label
+        'case [list constant_expression+] [colon_or_arrow]
+    |   'default [colon_or_arrow]
+end define
+
+compounds
+    ->
+end compounds
+
+define colon_or_arrow
+        ':
+    |   '->
+end define
+
+define while_statement
+    'while '( [condition] ') 
+        [statement]
+end define
+
+define do_statement
+    'do
+        [statement]
+    'while '( [condition] ') ';                [NL]
+end define
+
+define for_statement
+    'for '( [for_init] [for_expression] [for_update] ')
+        [statement]
+end define
+
+define for_init
+        [list expression] ';    
+    |   [local_variable_declaration]
+end define
+
+define for_expression
+    [opt expression] ';    
+end define
+
+define for_update
+    [list expression]
+end define
+
+define for_in_statement        
+    'for '( [for_in_variable] : [expression] ') 
+        [statement]
+end define
+
+define for_in_variable
+        [repeat modifier] [type_specifier] [variable_name]
+end define
+
+define break_statement
+    'break [opt label_name] ';       [NL]
+end define
+
+define continue_statement
+    'continue [opt label_name] ';    [NL]
+end define
+
+define return_statement
+    'return [opt expression] ';      [NL]
+end define
+
+define throw_statement
+    'throw [expression] ';           [NL]
+end define
+
+define synchronized_statement
+    'synchronized '( [expression] ')
+        [statement]
+end define
+
+define try_statement
+    'try [resource_specification?] 
+        [block] 
+    [repeat catch_clause] 
+    [opt finally_clause]    [NL]
+end define
+
+define resource_specification
+    '( [resource_list] [opt ';] ')
+end define
+
+define resource_list
+    [resource] [repeat semi_resource] 
+end define
+
+define resource
+    [repeat variable_modifier] [type_specifier?] [variable_name] [equals_expression?] 
+end define
+
+define semi_resource
+        '; [resource]
+end define
+
+define equals_expression
+    '= [expression]
+end define
+
+define catch_clause
+    'catch '( [repeat variable_modifier] [catch_type_specifier] [variable_name] ') 
+        [block] 
+end define
+
+define catch_type_specifier
+    [type_specifier] [or_type_specifier*]
+end define
+
+define or_type_specifier
+    '| [type_specifier]
+end define
+
+define finally_clause
+    'finally 
+        [block] 
+end define
+
+define assert_statement
+    'assert [expression] [opt assert_error_code] ';  [NL]
+end define
+
+define assert_error_code
+    ': [expression]
+end define
+
+
+% Expressions
+
+define constant_expression
+    [expression]    % which is a constant
+end define
+
+define expression
+    [assignment_expression]
+end define
+
+define condition
+    [expression]
+end define
+
+define assignment_expression
+        [conditional_expression]
+    |   [unary_expression] [assignment_operator] [assignment_expression]    
+end define
+
+define assignment_operator
+        '=
+    |   '*=
+    |   '/=
+    |   '%=
+    |   '+=
+    |   '-=
+    |   '<<=
+    |   [SPOFF] '> '>= [SPON]
+    |   [SPOFF] '> '> '>= [SPON]
+    |   '&=
+    |   '^=
+    |   '|=
+end define
+
+define conditional_expression
+        [conditional_or_expression] [repeat conditional_choice]
+    |   [lambda_expression]
+end define
+
+define lambda_expression
+    [lambda_parameters] '-> [lambda_body]
+end define
+
+define lambda_parameters
+        [id]
+    |   '( [IN] [list lambda_parameter] [EX] ')
+end define
+
+define lambda_parameter
+        [formal_parameter]
+    |   [inferred_formal_parameter]
+end define
+
+define inferred_formal_parameter
+    [id]
+end define
+
+define lambda_body
+        [expression]
+    |   [block]
+end define
+
+define conditional_choice
+    '? [expression] ': [conditional_expression]
+end define
+
+define conditional_or_expression
+    [conditional_and_expression] [repeat or_conditional_and_expression]
+end define
+
+define or_conditional_and_expression
+    '|| [conditional_and_expression]
+end define
+
+define conditional_and_expression
+    [inclusive_or_expression] [repeat and_inclusive_or_expression]
+end define
+
+define and_inclusive_or_expression
+    '&& [inclusive_or_expression]
+end define
+
+define inclusive_or_expression
+    [exclusive_or_expression] [repeat or_exclusive_or_expression]
+end define
+
+define or_exclusive_or_expression
+    '| [exclusive_or_expression]
+end define
+
+define exclusive_or_expression
+    [and_expression] [repeat or_and_expression]
+end define
+
+define or_and_expression
+    '^ [and_expression]
+end define
+
+define and_expression
+    [equality_expression] [repeat and_equality_expression]
+end define
+
+define and_equality_expression
+    '& [equality_expression]
+end define
+
+define equality_expression
+    [relational_expression] [repeat equality_op_relational_expression]
+end define
+
+define equality_op_relational_expression
+    [equality_op] [relational_expression]
+end define
+
+define equality_op
+    '== | '!=
+end define
+
+define relational_expression
+    [shift_expression] [repeat relational_op_shift_expression]
+end define
+
+define relational_op_shift_expression
+        [relational_op] [shift_expression]
+    |   'instanceof [repeat modifier] [type_specifier] [opt pattern_id]
+end define
+
+define pattern_id
+    [id]
+end define
+
+define relational_op
+    '<  | '> | '<= | '>=
+end define
+
+define shift_expression
+    [additive_expression] [repeat shift_additive_expression]
+end define
+
+define shift_additive_expression
+    [shift_op] [additive_expression]
+end define
+
+define shift_op
+    '<< | [SPOFF] '> '> [SPON] | [SPOFF] '> '> '>  [SPON]
+end define
+
+define additive_expression
+    [multiplicative_expression] [repeat add_op_multiplicative_expression]
+end define
+
+define add_op_multiplicative_expression
+    [add_op] [multiplicative_expression]
+end define
+
+define add_op
+    '+ | '- 
+end define
+
+define multiplicative_expression
+    [unary_expression] [repeat mult_op_unary_expression]
+end define
+
+define mult_op_unary_expression
+    [mult_op] [unary_expression]
+end define
+
+define mult_op
+    '* | '/ | '% 
+end define
+
+define unary_expression
+        [pre_inc_dec] [unary_expression]
+    |   [unary_op] [unary_expression]
+    |   [postfix_expression]
+    |   [cast_expression]
+end define
+
+define pre_inc_dec
+    '++ | '--
+end define
+
+define unary_op
+    '+ | '- | '~ | '!
+end define
+
+define cast_expression
+        '( [type_bound] ') [unary_expression]
+    |   '( [type_bound] ') [lambda_expression]
+end define
+
+define postfix_expression
+    [primary] [repeat post_inc_dec]
+end define
+
+define post_inc_dec
+    '++ | '--
+end define
+
+define subscript
+    '[ [expression] ']        
+end define
+
+define primary
+        [literal] [repeat component]
+    |   [reference]
+    |   '( [expression] ') [repeat component]
+    |   [class_instance_creation_expression] [repeat component]
+    |   [array_creation_expression] [repeat component]
+    |   [switch_expression]
+end define
+
+define literal
+        [numeric_literal]
+    |   [character_literal]
+    |   [string_literal]
+    |   [boolean_literal]
+    |   [null_literal]
+end define
+
+define numeric_literal
+    [number]
+end define
+
+define character_literal
+    [charlit]
+end define
+
+define string_literal
+        [stringlit]
+    |   [textblock]
+end define
+
+define boolean_literal
+        'true
+    |   'false
+end define
+
+define null_literal
+    'null
+end define
+
+define class_instance_creation_expression
+    'new [class_or_interface_name] '( [list argument] ') [opt class_body]
+end define
+
+define class_or_interface_name
+    [repeat annotation] [id] [repeat class_or_interface_component]
+end define
+
+define class_or_interface_component
+        [dot_id]
+    |   [type_arguments]
+end define
+
+define array_creation_expression
+    'new [array_type_specifier] [opt array_initializer]
+end define
+
+define dimension
+    [repeat annotation] '[ [opt expression] ']
+end define
+
+define argument
+        [expression]
+    |   [type_specifier]
+end define
+
+define qualified_name
+    [id] [SPON] [repeat qualifier]
+end define
+
+define qualifier
+        [dot_id]
+    |   [type_arguments]
+end define
+
+define switch_expression
+    'switch '( [expression] ') [switch_block]
+end define
+
+define reference
+        [id] [repeat component]
+    |   [primitive_type] [repeat component]
+end define
+
+define component
+     [dot_id]
+   | [type_arguments]
+   | [method_argument]
+   | [subscript] 
+   | [dimension]
+   | [class_instance_creation_expression]
+   | [method_reference]
+end define
+
+compounds
+    ::
+end compounds
+
+define method_reference
+         ':: [type_arguments?] [id]
+     |   ':: 'new
+end define
+
+define class_instance_declaration
+        [class_instance_creation_expression]
+    |   'class
+end define
+
+define method_argument
+    '( [list argument] ')   
+end define
+
+define dot_id
+        '. [repeat annotation] [opt type_arguments] [id]
+    |   '. [class_instance_declaration]
+    |   '. 'class
+end define
+
+
+% Parameterized types
+
+define type_arguments
+    '< [list type_argument] '>
+end define
+
+define type_argument
+        [type_specifier]
+    |   [wildcard_type]
+end define
+
+define wildcard_type
+    [annotation?] '? [opt wildcard_type_bound_clause]
+end define
+
+define wildcard_type_bound_clause
+        'extends [type_specifier]
+    |   'super [type_specifier]
+end define
+
+define type_parameters
+    < [list type_parameter] >
+end define
+
+define type_parameter
+    [annotation?] [type_parameter_name] [opt type_bound_clause]
+end define
+
+define type_parameter_name
+        [declared_name]
+    |   '?      % Java 14
+end define
+
+define type_bound_clause
+    'extends [type_bound]
+end define
+
+define type_bound
+    [type_specifier] [repeat and_type_spec]
+end define
+
+define and_type_spec
+    '& [type_specifier]
+end define
+
+% END

@@ -1,0 +1,376 @@
+module Ant2XML;
+create OUT : XML from IN : Ant;
+
+-- concatene a list of String
+-- the elements are separated by a comma
+helper def: concat(list : Sequence(String)) : String =
+	list -> asSet() -> iterate(element ;acc : String = '' |
+								acc +
+									if acc = ''
+									then element
+									else ',' + element
+								endif);
+
+-- rule for a project having a description
+rule Project2Root{
+	from i : Ant!Project(
+		if i.description.oclIsUndefined() 
+			then false
+			else not(i.description='')
+			endif
+	)
+	to o : XML!Root(
+		name <- 'project',
+		children <- Sequence {itsName,itsDescription,itsBasedir,itsDefaultTarget,i.properties,i.path,i.taskdef,i.targets}
+	),
+	 itsName : XML!Attribute(
+		name <- 'name',
+		value <- i.name
+	),
+	itsDescription : XML!Element(
+		name <- 'description',
+		children <- textText
+	),
+	textText : XML!Text(
+		value <- i.description
+	),
+	 itsBasedir : XML!Attribute(
+		name <- 'basedir',
+		value <- i.basedir
+	),
+	itsDefaultTarget : XML!Attribute(
+		name <- 'default',
+		value <- i.default.name
+	)
+}
+
+-- rule for a project without description
+rule Project2RootWithoutDescription{
+	from i : Ant!Project(
+		if i.description.oclIsUndefined() 
+			then true
+			else i.description=''
+			endif
+	)
+	to o : XML!Root(
+		name <- 'project',
+		children <- Sequence {itsName,itsBasedir,itsDefaultTarget,i.properties,i.path,i.taskdef,i.targets}
+	),
+	 itsName : XML!Attribute(
+		name <- 'name',
+		value <- i.name
+	),
+	 itsBasedir : XML!Attribute(
+		name <- 'basedir',
+		value <- i.basedir
+	),
+	itsDefaultTarget : XML!Attribute(
+		name <- 'default',
+		value <- i.default.name
+	)
+}
+
+------------------------------------------------------------------------------------
+-- properties
+
+rule PropertyValue{
+	from i : Ant!PropertyValue
+	to o : XML!Element(
+		name <- 'property',
+		children <- Sequence{propertyName2,propertyValue}
+	),
+	propertyName2 : XML!Attribute(
+		name <- 'name',
+		value <- i.name
+	),
+	propertyValue : XML!Attribute(
+		name <- 'value',
+		value <- i.value
+	)
+}
+
+rule PropertyLocation{
+	from i : Ant!PropertyLocation
+	to o : XML!Element(
+		name <- 'property',
+		children <- Sequence{propertyName2,propertyLocation}
+	),
+	propertyName2 : XML!Attribute(
+		name <- 'name',
+		value <- i.name
+	),
+	propertyLocation : XML!Attribute(
+		name <- 'location',
+		value <- i.location
+	)
+}
+
+
+
+rule PropertyFile{
+	from i : Ant!PropertyFile
+	to o : XML!Element(
+		name <- 'property',
+		children <- nameFile
+	),
+	nameFile : XML!Attribute(
+		name <- 'file',
+		value <- i.file
+	)
+}
+
+rule PropertyEnv{
+	from i : Ant!PropertyEnv
+	to o : XML!Element(
+		name <- 'property',
+		children <- environmentName
+	),
+	environmentName : XML!Attribute(
+		name <- 'environment',
+		value <- i.environment
+	)
+}
+
+
+
+------------------------------------------------------------------------
+-- target
+rule TargetWithDescription{
+	from i : Ant!Target(
+		if i.description.oclIsUndefined() 
+			then false
+			else not (i.description='')
+			endif
+	)
+	to o : XML!Element(
+		name <- 'target',
+		children <- Sequence{nameAttribute,descriptionElement,dependsAttribute,i.tasks}
+   ),
+	nameAttribute : XML!Attribute(
+		name <- 'name',
+		value <- i.name
+	),
+	descriptionElement : XML!Element(
+		name <- 'description',
+		children <- descriptionText
+	),
+	descriptionText : XML!Text(
+		value <- i.description
+	),
+	dependsAttribute : XML!Attribute(
+		name <- 'depends',
+		value <- thisModule.concat(i.depends -> collect(e|e.name))
+	)
+ }
+
+rule TargetWithoutDescription{
+	from i : Ant!Target(
+		if i.description.oclIsUndefined() 
+			then true
+			else i.description=''
+			endif
+	)
+	to o : XML!Element(
+		name <- 'target',
+		children <- Sequence{nameAttribute,dependsAttribute,i.tasks}
+   ),
+	nameAttribute : XML!Attribute(
+		name <- 'name',
+		value <- i.name
+	),
+	dependsAttribute : XML!Attribute(
+		name <- 'depends',
+		value <- thisModule.concat(i.depends -> collect(e|e.name))
+	)
+ }
+--------------------------------------------------------------------------------------
+-- tasks
+
+
+------------------------------
+-- task defined by the user
+
+-- taskdef (definition of the task)
+rule TaskDef{
+	from i : Ant!TaskDef
+	to o : XML!Element(
+		name <- 'taskdef',
+		children <- Sequence{nameName,nameClassName}
+	),
+	nameName : XML!Attribute(
+		name <- 'name',
+		value <- i.name
+	),
+	nameClassName : XML!Attribute(
+		name <- 'classname',
+		value <- i.classname
+	)
+}
+
+
+rule NewTask{
+	from i : Ant!NewTask
+	to o : XML!Element(
+		name <- i.taskName.name,
+		children <- i.attributes
+	)
+}
+
+rule Attribut{
+	from i : Ant!Attribut
+	to o : XML!Attribute(
+		name <- i.name,
+		value <- i.value
+	)
+}
+
+----------------------------------
+-- pre-defined tasks
+rule Tstamp{
+	from i : Ant!Tstamp
+	to o : XML!Element(
+		name <- 'tstamp'
+	)
+}
+
+rule Mkdir{
+	from i : Ant!Mkdir
+	to o : XML!Element(
+		name <- 'mkdir',
+		children <- dirAttribute
+	),
+	dirAttribute : XML!Attribute(
+		name <- 'dir',
+		value <- i.dir
+	)
+}
+
+rule Javac{
+	from i : Ant!Javac
+	to o : XML!Element(
+		name <- 'javac',
+		children <- Sequence{sourceDirAttribute,destDirAttribute,i.inExcludes,i.classPath}
+	),
+	sourceDirAttribute : XML!Attribute(
+		name <- 'srcdir',
+		value <- i.srcdir
+	),
+	destDirAttribute : XML!Attribute(
+		name <- 'destdir',
+		value <- i.destdir
+	)
+}
+
+rule Copy{
+	from i : Ant!Copy
+	to o : XML!Element(
+		name <- 'copy',
+		children <- Sequence{toDirAttribute,i.fileset}
+	),
+	toDirAttribute : XML!Attribute(
+		name <- 'todir',
+		value <- i.todir
+	)
+}
+
+
+rule Exec{
+	from i : Ant!Exec
+	to o : XML!Element(
+		name <- 'exec',
+		children <- execAttribute
+	),
+	execAttribute : XML!Attribute(
+		name <- 'executable',
+		value <- i.executable
+	)
+}
+
+rule Echo{
+	from i : Ant!Echo
+	to o : XML!Element(
+		name <- 'echo',
+		children <- echoAttribute
+	),
+	echoAttribute : XML!Attribute(
+		name <- 'message',
+		value <- i.message
+	)
+}
+---------------------------------------------------------------------------------
+-- path
+
+-- this takes only the attribute 'id' (not 'refid')
+rule Path{
+	from i : Ant!Path
+	to o : XML!Element(
+		name <- 'path',
+		children <- Sequence{idAttribute,i.fileset,i.path,i.pathElement}
+	),
+	idAttribute : XML!Attribute(
+		name <- 'id',
+		value <- i.id
+	)
+}
+
+rule ClassPath{
+	from i : Ant!ClassPath
+	to o : XML!Element(
+		name <- 'classpath',
+		children <- refidAttribute),
+	refidAttribute : XML!Attribute(
+		name <- 'refid',
+		value <- i.refid
+	)
+}
+
+rule Fileset{
+	from i : Ant!FileSet
+	to o : XML!Element(
+		name <- 'fileset',
+		children <- Sequence{dirAttribute,i.patternset,i.include,i.exclude}
+	),
+	dirAttribute : XML!Attribute(
+		name <- 'dir',
+		value <- i.dir
+	)
+}
+
+rule PathElement{
+	from i : Ant!PathElement
+	to o : XML!Element(
+		name <- 'pathelement'
+	)
+}
+
+rule PatternSet{
+	from i : Ant!PatternSet
+	to o : XML!Element(
+		name <- 'patternset',
+		children <- i.inexcludes
+	)
+}
+
+rule Include{
+	from i : Ant!Includes
+	to o : XML!Element(
+		name <- 'include',
+		children <- nameAttribute
+	),
+	nameAttribute : XML!Attribute(
+		name <- 'name',
+		value <- i.name
+	)
+}
+
+rule Exclude{
+	from i : Ant!Excludes
+	to o : XML!Element(
+		name <- 'exclude',
+		children <- nameAttribute
+	),
+	nameAttribute : XML!Attribute(
+		name <- 'name',
+		value <- i.name
+	)
+}

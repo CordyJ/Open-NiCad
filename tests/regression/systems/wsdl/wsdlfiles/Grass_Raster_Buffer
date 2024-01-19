@@ -1,0 +1,477 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://Grass_Raster_Buffer.grass.ws.laits.gmu.edu" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://Grass_Raster_Buffer.grass.ws.laits.gmu.edu" xmlns:intf="http://Grass_Raster_Buffer.grass.ws.laits.gmu.edu" xmlns:tns1="http://grass.ws.laits.gmu.edu" xmlns:tns2="http://ws.laits.gmu.edu" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+	 <wsdl:types>
+
+		  <schema elementFormDefault="qualified" targetNamespace="http://Grass_Raster_Buffer.grass.ws.laits.gmu.edu" xmlns="http://www.w3.org/2001/XMLSchema">
+
+			<!-- ELEMENTS -->
+
+			   <element name="BufferElement">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Name of the element to describe input parameters.
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element minOccurs="1" name="sourceURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of input raster map. Default data format is GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element minOccurs="1" name="distances" type="xsd:string">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Distance zone(s). Parameter format: float[,float,...].
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element default="meters" minOccurs="0" name="units" nillable="true" type="impl:UnitsType">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Units of distance.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element default="Byte" minOccurs="1" name="outputGeoTiffType" type="tns1:GeoTiffFileType">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Type of output GeoTIFF file. The output Format Type is specified as GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+			   <simpleType name="UnitsType">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Sensor.
+                         </documentation>
+
+				    </annotation>
+
+				    <restriction base="string">
+
+					     <enumeration value="meters">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Unit: meters
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="kilometers">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Unit: kilometers
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="feet">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Unit: feet
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="miles">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Unit: miles
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="nautmiles">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Unit: nautmiles
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+				    </restriction>
+
+			   </simpleType>
+
+			   <element name="BufferResponse">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Return URL and Format of output raster map.
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element name="returnURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of output raster map.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element name="returnFormat" type="xsd:string">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Format of output raster map.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+			   <element name="fault" type="tns2:WebServiceExceptionsType"/>
+
+		  </schema>
+
+		  <schema elementFormDefault="qualified" targetNamespace="http://grass.ws.laits.gmu.edu" xmlns="http://www.w3.org/2001/XMLSchema">
+
+			   <simpleType name="GeoTiffFileType">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Type of output file if the outputFormatType is specified as GeoTIFF.
+                         </documentation>
+
+				    </annotation>
+
+				    <restriction base="string">
+
+					     <enumeration value="Byte">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be Byte - 8-bit unsigned integer.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="Int16">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be Int16 - 16-bit signed integer.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="UInt16">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be UInt16 - 16-bit unsigned integer.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="UInt32">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be UInt32 - 32-bit unsigned integer.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="Int32">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be Int32 - 32-bit signed integer.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="Float32">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be Float32 - 32-bit floating point.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="Float64">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be Float64 - 64-bit floating point.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="CInt16">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be CInt16 - Complex 16-bit signed integer (ie. two Int16's one representing the real component, and one the imaginary component).
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="CInt32">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be CInt32 - Complex 32-bit signed integer.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="CFloat32">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be CFloat32 - Complex 32-bit floating point.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="CFloat64">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be CFloat64 - Complex 64-bit floating point.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+				    </restriction>
+
+			   </simpleType>
+
+		  </schema>
+
+		  <schema elementFormDefault="qualified" targetNamespace="http://ws.laits.gmu.edu" xmlns="http://www.w3.org/2001/XMLSchema">
+
+			   <complexType name="WebServiceExceptionsType">
+
+				    <sequence>
+
+					     <element name="exception" type="xsd:string"/>
+
+				    </sequence>
+
+			   </complexType>
+
+		  </schema>
+
+	 </wsdl:types>
+
+	 <wsdl:message name="bufferRequest">
+
+		  <wsdl:part element="impl:BufferElement" name="parameters"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="bufferResponse">
+
+		  <wsdl:part element="impl:BufferResponse" name="return"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="WebServiceExceptionsType">
+
+		  <wsdl:part element="impl:fault" name="fault"/>
+
+	 </wsdl:message>
+
+	 <wsdl:portType name="Grass_Raster_BufferPortType">
+
+		  <wsdl:operation name="buffer">
+
+			   <wsdl:input message="impl:bufferRequest" name="bufferRequest"/>
+
+			   <wsdl:output message="impl:bufferResponse" name="bufferResponse"/>
+
+			   <wsdl:fault message="impl:WebServiceExceptionsType" name="WebServiceExceptionsType"/>
+
+		  </wsdl:operation>
+
+	 </wsdl:portType>
+
+	 <wsdl:binding name="Grass_Raster_BufferSoapBinding" type="impl:Grass_Raster_BufferPortType">
+
+		  <wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+		  <wsdl:operation name="buffer">
+
+			   <wsdl:documentation>
+Create a raster map layer showing buffer zones surrounding cells that contain non-NULL category values.   </wsdl:documentation>
+
+			   <wsdlsoap:operation soapAction="buffer" style="document"/>
+
+			   <wsdl:input>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:input>
+
+			   <wsdl:output>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:output>
+
+			   <wsdl:fault name="WebServiceExceptionsType">
+
+				    <wsdlsoap:fault name="WebServiceExceptionsType" use="literal"/>
+
+			   </wsdl:fault>
+
+		  </wsdl:operation>
+
+	 </wsdl:binding>
+
+	 <wsdl:service name="Grass_Raster_BufferService">
+
+		  <wsdl:documentation>
+Create buffer zones for input raster map.  </wsdl:documentation>
+
+		  <wsdl:port binding="impl:Grass_Raster_BufferSoapBinding" name="Grass_Raster_Buffer">
+
+			   <wsdlsoap:address location="http://65.123.203.154:8099/axis/services/Grass_Raster_Buffer"/>
+
+		  </wsdl:port>
+
+	 </wsdl:service>
+
+	<!--WSDL created by Apache Axis version: 1.4
+Built on Apr 22, 2006 (06:55:48 PDT)-->
+
+</wsdl:definitions>

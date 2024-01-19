@@ -1,0 +1,144 @@
+module KM32ATLCopier;
+create OUT : ATL from IN : KM3;
+
+helper context KM3!Package def: allClasses() : Sequence(KM3!Class) =
+	self.contents->select(e |
+		e.oclIsKindOf(KM3!Package)
+	)->iterate(e; acc : Sequence(KM3!Class) = self.contents->select(e |
+							e.oclIsKindOf(KM3!Class)
+						)->iterate(e; acc : Sequence(KM3!Class) = Sequence {} |
+							acc->including(e)
+						) |
+		acc->union(e.allClasses())
+	);
+
+helper context KM3!Metamodel def: allClasses() : Sequence(KM3!Class) =
+	self.contents->iterate(e; acc : Sequence(KM3!Class) = Sequence {} |
+		acc->union(e.allClasses())
+	);
+
+helper def: metamodel : KM3!Metamodel = KM3!Metamodel.allInstances()->asSequence()->first();
+
+-- Creates an ATL transformation module from a KM3 metamodel.
+rule Metamodel {
+	from
+		s : KM3!Metamodel
+	to
+		mm : ATL!OclModel (
+			name <- 'MM'
+		),
+		t : ATL!Module (
+			name <- 'Copy',
+			outModels <- Sequence {tm},
+			inModels <- Sequence {sm},
+			isRefining <- false,
+			elements <- s.allClasses()->select(e | not e.isAbstract)
+		),
+		sm : ATL!OclModel (
+			name <- 'IN',
+			metamodel <- mm
+		),
+		tm : ATL!OclModel (
+			name <- 'OUT',
+			metamodel <- mm
+		)
+}
+
+helper context KM3!Class def: allStructuralFeatures() : Set(KM3!StructuralFeature) =
+	self.supertypes->iterate(e; acc : Set(KM3!StructuralFeature) = self.structuralFeatures |
+		acc->union(e.allStructuralFeatures())
+	);
+
+-- Creates a copy rule for each non-abstract class in the KM3 metamodel.
+rule Class {
+	from
+		s : KM3!Class (
+			not s.isAbstract
+		)
+	using {
+		allSfs : Set(KM3!StructuralFeature) = s.allStructuralFeatures();
+		-- selecting features to keep
+		sfs : Set(KM3!StructuralFeature) =
+			allSfs->select(e |
+				if e.oclIsKindOf(KM3!Attribute) then
+					true
+				else	-- e.oclIsKindOf(KM3!Reference)
+					if e.opposite.oclIsUndefined() then
+						true
+					else
+						if e.opposite.isOrdered then
+							false
+						else
+							true
+						endif
+					endif
+				endif
+			);
+	}
+	to
+		t : ATL!MatchedRule (
+			isAbstract <- false,
+			isRefining <- false,
+			name <- 'Copy' + s.name,
+			inPattern <- ip,
+			outPattern <- op
+		),
+
+		-- Creating the source pattern with a filter enforcing
+		-- that matched elements must have the class s for type.
+		ip : ATL!InPattern (
+			elements <- Sequence {ipe},
+			filter <- f
+		),
+		ipe : ATL!SimpleInPatternElement (
+			varName <- 's',
+			type <- ipet
+		),
+		ipet : ATL!OclModelElement (
+			name <- s.name,
+			model <- thisModule.metamodel
+		),
+		f : ATL!OperationCallExp (
+			operationName <- 'oclIsTypeOf',
+			source <- fv,
+			arguments <- Sequence {ft}
+		),
+		fv : ATL!VariableExp (
+			name <- 's',
+			referredVariable <- ipe
+		),
+		ft : ATL!OclModelElement (
+			name <- s.name,
+			model <- thisModule.metamodel
+		),
+
+		-- Creating the target pattern.
+		op : ATL!OutPattern (
+			elements <- Sequence {ope}
+		),
+		ope : ATL!SimpleOutPatternElement (
+			varName <- 't',
+			type <- opet,
+			bindings <- b
+		),
+		opet : ATL!OclModelElement (
+			name <- s.name,
+			model <- thisModule.metamodel
+		),
+
+		-- Now generating the bindings for each structural feature that needs
+		-- to be initialized in the rule.
+		b : distinct ATL!Binding foreach(sf in sfs) (
+			propertyName <- sf.name,
+			value <- v
+		),
+		v : distinct ATL!NavigationOrAttributeCallExp foreach(sf in sfs) (
+			name <- sf.name,
+			source <- src
+		),
+		src : distinct ATL!VariableExp foreach(sf in sfs) (
+			name <- 's',
+			referredVariable <- ipe
+		)
+}
+

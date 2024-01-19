@@ -1,0 +1,411 @@
+module RSS2XML;
+create OUT : XML from IN : RSS;
+
+-- concatene a list of String
+-- the elements are separated by a comma
+helper def: concat(list : Sequence(String)) : String =
+	list -> asSet() -> iterate(element ;acc : String = '' |
+	acc +
+		if acc = ''
+ 			then element
+ 		else ',' + element
+ 		endif);
+
+ -- rule for a project having a description
+ rule Channel2Element{
+	 from i : RSS!Channel
+	 
+	 to o : XML!Root(
+	 	
+		 name <- 'Channel',
+		 children <- Sequence {title,link,description,language
+		 ,copyright,managingEditor,webmaster,generator,pubDate,lastBuildDate
+		 ,items,category,docs,ttl,rating}
+	 ),
+	 
+	 title : XML!Element(
+	 	
+		 name <- 'title',
+		 children <- letitle
+	 ),
+	 
+	 letitle : XML!Text(
+	 	
+		 name <- 'letitle',
+		 value <- i.title
+	 ),
+	 
+	 link : XML!Element(
+	 	
+		 name <- 'link',
+		 children <- thelink
+	 ),
+	 
+	 thelink : XML!Text(
+	 	
+		 name <- 'thelink',
+		 value <- i.link
+	 ),	 
+	 
+	 description : XML!Element(
+	 	
+		 name <- 'description',
+		 children <- ladescription
+	 ),
+	 
+	 ladescription : XML!Text(
+	 	
+		 name <- 'ladescription',
+		 value <- i.description
+	 ),
+	 
+	 language : XML!Element(
+	 	
+		 name <- 'language',
+		 children <- lelangage
+	 ),
+	 
+	 
+	 lelangage : XML!Text(
+	 	
+		 name <- 'lelangage',
+		 value <- if i.language.oclIsUndefined() then '' else i.language endif
+	 ),
+	 
+	 copyright : XML!Element(
+	 	
+		 name <- 'copyright',
+		 children <- thecopyright
+	 ),
+	 
+	 thecopyright : XML!Text(
+	 	
+		 name <- 'thecopyright',
+		 value <- if i.copyright.oclIsUndefined() then '' else i.copyright endif
+	 ),
+	 
+	 
+	 managingEditor : XML!Element(
+	 	
+		 name <- 'managingEditor',
+		 children <- themanagingEditor
+	 ),
+	  
+	 themanagingEditor : XML!Text(
+	 	
+		 name <- 'themanagingEditor',
+		 value <- if i.managingEditor.oclIsUndefined() then '' else i.managingEditor endif
+	 ),
+	 
+	 webmaster : XML!Element(
+	 	
+		 name <- 'webmaster',
+		 children <- thewebmaster
+	 ),
+	 
+	 thewebmaster : XML!Text(
+	 	
+		 name <- 'thewebmaster',
+		 value <- if i.webmaster.oclIsUndefined() then '' else i.webmaster endif
+	 ),
+	 
+	 
+	 generator : XML!Element(
+	 	
+		 name <- 'generator',
+		 children <- thegenerator
+	 ),
+	 
+	 docs : XML!Element(
+	 	
+		 name <- 'docs',
+		 children <- thedocs
+	 ),
+	 
+	 
+	 thedocs : XML!Text(
+	 	
+		 name <- 'thedocs',
+		 value <- if i.docs.oclIsUndefined() then '' else i.docs endif
+	 ),
+	 
+	 ttl : XML!Element(
+	 	
+		 name <- 'ttl',
+		 children <- thettl
+	 ),
+	 
+	 thettl : XML!Text(
+	 	
+		 name <- 'thettl',
+		 value <- if i.ttl.oclIsUndefined() then '' else i.ttl endif
+	 ),
+	 
+	 
+	 rating : XML!Element(
+	 	
+		 name <- 'rating',
+		 children <- therating
+	 ),
+	  
+	 therating : XML!Text(
+	 	
+		 name <- 'therating',
+		 value <- if i.rating.oclIsUndefined() then '' else i.rating endif
+	 ),
+	 
+	 thegenerator : XML!Text(
+	 	
+		 name <- 'thegenerator',
+		 value <- if i.generator.oclIsUndefined() then '' else i.generator endif
+	 ),
+	 
+	 pubDate : XML!Element(
+	 	
+		 name <- 'pubDate',
+		 children <- thepubDate
+	 ),
+	 
+	 thepubDate : XML!Text(
+	 	
+		 name <- 'thepubDate',
+		 value <- if i.pubDate.oclIsUndefined() then '' else i.pubDate endif
+	 ),
+	 	 
+	 lastBuildDate : XML!Element(
+	 	
+		 name <- 'lastBuildDate',
+		 children <- thelastBuildDate
+	 ),
+	 
+	 thelastBuildDate : XML!Text(
+	 	
+		 name <- 'thelastBuildDate',
+		 value <- if i.lastBuildDate.oclIsUndefined() then '' else i.lastBuildDate endif
+	 ),
+	 
+	 
+	 items : XML!Element(
+	 	
+		 name <- 'items',
+		 children <- i.items->asSequence()
+	 ),
+	 
+	 category : XML!Element(
+	 	
+		 name <- 'category',
+		 children <- i.category->asSequence()
+	 )
+ }
+
+ rule Item2Element{
+ 	
+	 from i : RSS!Item
+	 
+	 to 
+	 
+	 o : XML!Element(
+	 	
+		 name <- 'Item',
+		 children <- Sequence {title,link,comments,description,author,guid,category}
+	 ),
+	 title : XML!Element(
+	 	
+		 name <- 'title',
+		 children <- letitle
+	 ),
+	 letitle : XML!Text(
+	 	
+		 name <- 'letitle',
+		 value <- i.title
+	 ),
+	 
+	 guid : XML!Element(
+	 	
+		 name <- 'guid',
+		 children <- theguid
+	 ),
+	 
+	 theguid : XML!Text(
+	 	
+		 name <- 'theguid',
+		 value <- if i.guid.oclIsUndefined() then '' else i.guid endif
+	 ),
+	 	  
+	 author : XML!Element(
+	 	
+		 name <- 'author',
+		 children <- theauthor
+	 ),
+	 
+	 theauthor : XML!Text(
+	 	
+		 name <- 'theauthor',
+		 value <- if i.author.oclIsUndefined() then '' else i.author endif
+	 ),
+	 
+	 
+	 link : XML!Element(
+	 	
+		 name <- 'link',
+		 children <- thelink
+	 ),
+	 
+	 thelink : XML!Text(
+	 	
+		 name <- 'thelink',
+		 value <- if i.link.oclIsUndefined() then '' else i.link endif
+	 ),
+	 
+	 description : XML!Element(
+	 	
+		 name <- 'description',
+		 children <- thedescription
+	 ),
+	 
+	 thedescription : XML!Text(
+	 	
+		 name <- 'thedescription',
+		 value <- if i.description.oclIsUndefined() then '' else i.description endif
+	 ),	 
+	 
+	 comments : XML!Element(
+	 	
+		 name <- 'comments',
+		 children <- thecomments
+	 ),
+	 
+	 thecomments : XML!Text(
+	 	
+		 name <- 'thecomments',
+		 value <- if i.comments.oclIsUndefined() then '' else i.comments endif
+	 ),
+	 
+	 category : XML!Element(
+	 	
+		 name <- 'category',
+		 children <- i.category
+	 )
+ }
+ 
+ rule Category2Element{
+ 	
+	 from i : RSS!Category
+	 
+	 to 
+	 
+	 o : XML!Element(
+	 	
+		 name <- 'category',
+		 children <- Sequence {domain,value}
+	 ),
+	 domain : XML!Element(
+	 	
+		 name <- 'domain',
+		 children <- thedomain
+	 ),
+	 
+	 thedomain : XML!Text(
+	 	
+		 name <- 'thedomain',
+		 value <- if i.domain.oclIsUndefined() then '' else i.domain endif
+	 ),
+	 
+	 value : XML!Element(
+	 	
+		 name <- 'value',
+		 children <- thevalue
+	 ),
+	 
+	 thevalue : XML!Text(
+	 	
+		 name <- 'thevalue',
+		 value <- if i.value.oclIsUndefined() then '' else i.value endif
+	 )
+ }
+ 
+ rule Image2Element{
+ 	
+	 from i : RSS!Image
+	 
+	 to 
+	 
+	 o : XML!Element(
+	 	
+		 name <- 'Image',
+		 children <- Sequence {url,title,link,description,width,height}
+	 ),
+	 
+	 url : XML!Text(
+	 	
+		 name <- 'url',
+		 value <- the_url
+	 ),
+	 
+	 the_url : XML!Text(
+		 	
+			 name <- 'the_url',
+			 value <- if i.subtitle.oclIsUndefined() then '' else i.subtitle endif
+	 ),
+	 
+	 title : XML!Text(
+	 	
+		 name <- 'title',
+		 value <- the_title
+	 ),
+		 
+	 the_title : XML!Text(
+		 	
+			 name <- 'the_title',
+			 value <- if i.subtitle.oclIsUndefined() then '' else i.subtitle endif
+	 ),
+	 
+	 link : XML!Text(
+	 	
+		 name <- 'link',
+		 value <- the_link
+	 ),
+	 
+	 the_link : XML!Text(
+		 	
+			 name <- 'the_link',
+			 value <- if i.subtitle.oclIsUndefined() then '' else i.subtitle endif
+	 ),
+	 
+	 description : XML!Text(
+	 	
+		 name <- 'description',
+		 value <- the_description
+	 ),
+	 
+	 the_description : XML!Text(
+		 	
+			 name <- 'the_description',
+			 value <- if i.subtitle.oclIsUndefined() then '' else i.subtitle endif
+	 ),
+	 
+	 width : XML!Text(
+	 	
+		 name <- 'width',
+		 value <- the_width
+	 ),
+	 
+	 the_width : XML!Text(
+		 	
+			 name <- 'the_width',
+			 value <- if i.subtitle.oclIsUndefined() then '' else i.subtitle endif
+	 ),
+	 
+	 height : XML!Text(
+	 	
+		 name <- 'height',
+		 value <- the_height
+	 ),
+	 
+	 the_height : XML!Text(
+		 	
+			 name <- 'the_height',
+			 value <- if i.subtitle.oclIsUndefined() then '' else i.subtitle endif
+	 )
+ }
+	 

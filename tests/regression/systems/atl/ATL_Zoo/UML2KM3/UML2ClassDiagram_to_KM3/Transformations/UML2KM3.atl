@@ -1,0 +1,182 @@
+-- @atlcompiler atl2006
+module UML2KM3;
+create OUT : KM3 from IN : UML;
+
+helper def: model : UML!Model = UML!Model.allInstances()->any(e | true);
+
+-- Root Element Creation: Model to Metamodel
+rule Model2Metamodel {
+	from
+		s : UML!Model (s.oclIsTypeOf(UML!Model))
+	to
+		t : KM3!Metamodel (
+			contents <- Set {s.nestedPackage, pt}
+		),
+		pt : KM3!Package (
+			name <- 'PrimitiveType'
+		)
+}
+
+-- Abstruct rule for Element extending NamedElement
+abstract rule NamedElement {
+	from 
+		s : UML!NamedElement
+	to
+		t : KM3!ModelElement (
+			name <- s.name
+		)
+}
+
+-- UML Package 2 KM3 Package
+rule Package extends NamedElement {
+	from
+		s : UML!Package (not s.oclIsTypeOf(UML!Model))
+	to
+		t : KM3!Package (
+			contents <- Set {s.nestedPackage, s.ownedMember}
+		)
+}
+
+-- UML Classifier 2 KM3 Classifier
+abstract rule Classifier extends NamedElement {
+	from
+		s : UML!Classifier
+	to
+		t : KM3!Classifier
+}
+
+-- UML Class 2 KM3 Class
+rule Class extends Classifier {
+	from
+		s : UML!Class
+	to
+		t : KM3!Class (
+			isAbstract <- s.isAbstract,
+			supertypes <- s.superClass,
+			structuralFeatures <- Set {s.attribute}
+		)
+}
+
+-- UML Datatype to KM3 Datatype
+rule DataType extends Classifier {
+	from
+		s : UML!DataType
+	to
+		t : KM3!DataType
+}
+
+-- UML Enumeration 2 KM3 Enumeration
+rule Enumeration extends DataType {
+	from
+		s : UML!Enumeration
+	to
+		t : KM3!Enumeration(
+			literals <- s.ownedLiteral
+		)
+}
+
+--UML Enumeration Literal 2 KM3 Enum Literal
+rule EnumLiteral extends NamedElement {
+	from
+		s : UML!EnumerationLiteral
+	to
+		t : KM3!EnumLiteral
+}
+
+helper def: dataTypeByName : Map(String, KM3!DataType) = Map {};
+
+-- Called rule
+rule getType(s : UML!StructuralFeature) {
+	do {	
+		if(Set {'Boolean', 'Integer', 'String'}->includes(s.type.name)) {
+			if(thisModule.dataTypeByName.containsKey(s.type.name)) {
+				thisModule.dataTypeByName.get(s.type.name);
+			} else {
+				thisModule.dataType(s);
+			}
+		} else {
+			s.type;
+		}
+	}
+}
+
+rule dataType(s : UML!StructuralFeature) {
+	to
+		t : KM3!DataType(
+			name <- s.type.name,
+			package <- thisModule.resolveTemp(thisModule.model, 'pt')
+		)
+	do {
+		thisModule.dataTypeByName <- thisModule.dataTypeByName.including(s.type.name, t);
+		t;
+	}
+}
+
+abstract rule StructuralFeature extends NamedElement {
+	from
+		s : UML!StructuralFeature
+	to
+		t : KM3!StructuralFeature(
+			lower <- s.lower,
+			upper <- s.upper,
+			isOrdered <- s.isOrdered,
+			type <- thisModule.getType(s)
+		)
+}
+
+rule Attribute extends StructuralFeature {
+	from
+		s : UML!Property (s.association.oclIsUndefined())
+	to
+		t : KM3!Attribute(
+			isUnique <- s.isUnique
+		)
+}
+
+-- checker
+helper context UML!Property def: isContainer : Boolean =
+	if self.aggregation = #composite then
+		true
+	else
+		false
+	endif;
+
+-- Opposite property is returned if this property belongs to a class
+helper context UML!Property def: getOpposite : KM3!Reference =
+	let oppositeProp : OclAny = self.association.memberEnd->select(e | not (e = self))->asSequence()->first() in
+	let oppositeClass : OclAny = oppositeProp.class in
+	if (not oppositeClass.oclIsUndefined()) then
+		self.association.memberEnd->select(e | not (e = self))->asSequence()->first()
+	else
+		OclUndefined
+	endif;
+
+helper context UML!Property def: isATwoEndsAssociation : Boolean =
+	if (self.isAnAssociation) then
+		if self.association.memberEnd->size() = 2 then
+			true
+		else
+			false
+		endif
+	else
+		false
+	endif;
+
+-- This helper returns true if the current property is an association end
+helper context UML!Property def: isAnAssociation : Boolean =
+	if (self.association.oclIsUndefined()) then
+		false
+	else
+		true
+	endif;
+
+-- UML Association End (from a 2 Ends Association) 2 KM3 Reference
+rule Reference extends StructuralFeature {
+	from
+		s : UML!Property (s.isATwoEndsAssociation)
+	to
+		t : KM3!Reference(
+			isContainer <- s.isContainer,
+			opposite <- s.getOpposite
+		)
+}

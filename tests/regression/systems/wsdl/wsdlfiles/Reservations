@@ -1,0 +1,1212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns8="http://controller.carrentals.com" xmlns:ns9="http://cc.nyim" xmlns:soap11="http://schemas.xmlsoap.org/soap/envelope/" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope" xmlns:soapenc11="http://schemas.xmlsoap.org/soap/encoding/" xmlns:soapenc12="http://www.w3.org/2003/05/soap-encoding" xmlns:tns="http://model.carrentals.com" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://model.carrentals.com">
+  <wsdl:types xmlns:ns1="http://sql.javax" xmlns:ns2="http://core.jdbc.springframework.org" xmlns:ns3="http://simple.core.jdbc.springframework.org" xmlns:ns4="http://sql.java" xmlns:ns5="http://io.java" xmlns:ns6="http://support.jdbc.springframework.org" xmlns:ns7="http://nativejdbc.support.jdbc.springframework.org" xmlns:ns10="http://util.carrentals.com">
+    <xsd:schema targetNamespace="http://controller.carrentals.com" elementFormDefault="qualified" attributeFormDefault="qualified">
+      <xsd:complexType name="VendorManager">
+        <xsd:sequence>
+          <xsd:element name="allVendorsList" type="tns:ArrayOfVendor" minOccurs="0" nillable="true" />
+          <xsd:element name="dataSource" type="ns1:DataSource" minOccurs="0" nillable="true" />
+          <xsd:element name="idMap" type="tns:int2stringMap" minOccurs="0" nillable="true" />
+          <xsd:element name="independentVendorList" type="tns:ArrayOfVendor" minOccurs="0" nillable="true" />
+          <xsd:element name="jdbcTemplate" type="ns2:JdbcTemplate" minOccurs="0" nillable="true" />
+          <xsd:element name="majorVendorsList" type="tns:ArrayOfVendor" minOccurs="0" nillable="true" />
+          <xsd:element name="oneWayVendorIds" type="tns:ArrayOfInt" minOccurs="0" nillable="true" />
+          <xsd:element name="simpleJdbcTemplate" type="ns3:SimpleJdbcTemplate" minOccurs="0" nillable="true" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="VendorEmailManager">
+        <xsd:sequence>
+          <xsd:element name="dataSource" type="ns1:DataSource" minOccurs="0" nillable="true" />
+          <xsd:element name="jdbcTemplate" type="ns2:JdbcTemplate" minOccurs="0" nillable="true" />
+          <xsd:element name="simpleJdbcTemplate" type="ns3:SimpleJdbcTemplate" minOccurs="0" nillable="true" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="LocationCache">
+        <xsd:sequence>
+          <xsd:element name="dataSource" type="ns1:DataSource" minOccurs="0" nillable="true" />
+          <xsd:element name="jdbcTemplate" type="ns2:JdbcTemplate" minOccurs="0" nillable="true" />
+          <xsd:element name="simpleJdbcTemplate" type="ns3:SimpleJdbcTemplate" minOccurs="0" nillable="true" />
+        </xsd:sequence>
+      </xsd:complexType>
+    </xsd:schema>
+    <xsd:schema targetNamespace="http://sql.javax" elementFormDefault="qualified" attributeFormDefault="qualified">
+      <xsd:complexType name="DataSource">
+        <xsd:sequence>
+          <xsd:element name="connection" type="ns4:Connection" minOccurs="0" nillable="true" />
+          <xsd:element name="logWriter" type="ns5:PrintWriter" minOccurs="0" nillable="true" />
+          <xsd:element name="loginTimeout" type="xsd:int" minOccurs="0" />
+        </xsd:sequence>
+      </xsd:complexType>
+    </xsd:schema>
+    <xsd:schema targetNamespace="http://io.java" elementFormDefault="qualified" attributeFormDefault="qualified">
+      <xsd:complexType name="PrintWriter" />
+    </xsd:schema>
+    <xsd:schema targetNamespace="http://sql.java" elementFormDefault="qualified" attributeFormDefault="qualified">
+      <xsd:complexType name="Connection">
+        <xsd:sequence>
+          <xsd:element name="autoCommit" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="catalog" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="closed" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="holdability" type="xsd:int" minOccurs="0" />
+          <xsd:element name="metaData" type="ns4:DatabaseMetaData" minOccurs="0" nillable="true" />
+          <xsd:element name="readOnly" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="transactionIsolation" type="xsd:int" minOccurs="0" />
+          <xsd:element name="typeMap" type="tns:string2anyTypeMap" minOccurs="0" nillable="true" />
+          <xsd:element name="warnings" type="ns4:SQLWarning" minOccurs="0" nillable="true" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="DatabaseMetaData">
+        <xsd:sequence>
+          <xsd:element name="JDBCMajorVersion" type="xsd:int" minOccurs="0" />
+          <xsd:element name="JDBCMinorVersion" type="xsd:int" minOccurs="0" />
+          <xsd:element name="SQLKeywords" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="SQLStateType" type="xsd:int" minOccurs="0" />
+          <xsd:element name="URL" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="catalogAtStart" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="catalogSeparator" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="catalogTerm" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="catalogs" type="ns4:ResultSet" minOccurs="0" nillable="true" />
+          <xsd:element name="connection" type="ns4:Connection" minOccurs="0" nillable="true" />
+          <xsd:element name="databaseMajorVersion" type="xsd:int" minOccurs="0" />
+          <xsd:element name="databaseMinorVersion" type="xsd:int" minOccurs="0" />
+          <xsd:element name="databaseProductName" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="databaseProductVersion" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="defaultTransactionIsolation" type="xsd:int" minOccurs="0" />
+          <xsd:element name="driverMajorVersion" type="xsd:int" minOccurs="0" />
+          <xsd:element name="driverMinorVersion" type="xsd:int" minOccurs="0" />
+          <xsd:element name="driverName" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="driverVersion" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="extraNameCharacters" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="identifierQuoteString" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="maxBinaryLiteralLength" type="xsd:int" minOccurs="0" />
+          <xsd:element name="maxCatalogNameLength" type="xsd:int" minOccurs="0" />
+          <xsd:element name="maxCharLiteralLength" type="xsd:int" minOccurs="0" />
+          <xsd:element name="maxColumnNameLength" type="xsd:int" minOccurs="0" />
+          <xsd:element name="maxColumnsInGroupBy" type="xsd:int" minOccurs="0" />
+          <xsd:element name="maxColumnsInIndex" type="xsd:int" minOccurs="0" />
+          <xsd:element name="maxColumnsInOrderBy" type="xsd:int" minOccurs="0" />
+          <xsd:element name="maxColumnsInSelect" type="xsd:int" minOccurs="0" />
+          <xsd:element name="maxColumnsInTable" type="xsd:int" minOccurs="0" />
+          <xsd:element name="maxConnections" type="xsd:int" minOccurs="0" />
+          <xsd:element name="maxCursorNameLength" type="xsd:int" minOccurs="0" />
+          <xsd:element name="maxIndexLength" type="xsd:int" minOccurs="0" />
+          <xsd:element name="maxProcedureNameLength" type="xsd:int" minOccurs="0" />
+          <xsd:element name="maxRowSize" type="xsd:int" minOccurs="0" />
+          <xsd:element name="maxSchemaNameLength" type="xsd:int" minOccurs="0" />
+          <xsd:element name="maxStatementLength" type="xsd:int" minOccurs="0" />
+          <xsd:element name="maxStatements" type="xsd:int" minOccurs="0" />
+          <xsd:element name="maxTableNameLength" type="xsd:int" minOccurs="0" />
+          <xsd:element name="maxTablesInSelect" type="xsd:int" minOccurs="0" />
+          <xsd:element name="maxUserNameLength" type="xsd:int" minOccurs="0" />
+          <xsd:element name="numericFunctions" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="procedureTerm" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="readOnly" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="resultSetHoldability" type="xsd:int" minOccurs="0" />
+          <xsd:element name="schemaTerm" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="schemas" type="ns4:ResultSet" minOccurs="0" nillable="true" />
+          <xsd:element name="searchStringEscape" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="stringFunctions" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="systemFunctions" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="tableTypes" type="ns4:ResultSet" minOccurs="0" nillable="true" />
+          <xsd:element name="timeDateFunctions" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="typeInfo" type="ns4:ResultSet" minOccurs="0" nillable="true" />
+          <xsd:element name="userName" type="xsd:string" minOccurs="0" nillable="true" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="ResultSet">
+        <xsd:sequence>
+          <xsd:element name="afterLast" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="beforeFirst" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="concurrency" type="xsd:int" minOccurs="0" />
+          <xsd:element name="cursorName" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="fetchDirection" type="xsd:int" minOccurs="0" />
+          <xsd:element name="fetchSize" type="xsd:int" minOccurs="0" />
+          <xsd:element name="first" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="last" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="metaData" type="ns4:ResultSetMetaData" minOccurs="0" nillable="true" />
+          <xsd:element name="row" type="xsd:int" minOccurs="0" />
+          <xsd:element name="statement" type="ns4:Statement" minOccurs="0" nillable="true" />
+          <xsd:element name="type" type="xsd:int" minOccurs="0" />
+          <xsd:element name="warnings" type="ns4:SQLWarning" minOccurs="0" nillable="true" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="ResultSetMetaData">
+        <xsd:sequence>
+          <xsd:element name="columnCount" type="xsd:int" minOccurs="0" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="SQLWarning">
+        <xsd:sequence>
+          <xsd:element name="SQLState" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="errorCode" type="xsd:int" minOccurs="0" />
+          <xsd:element name="nextException" type="ns4:SQLException" minOccurs="0" nillable="true" />
+          <xsd:element name="nextWarning" type="ns4:SQLWarning" minOccurs="0" nillable="true" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="SQLException">
+        <xsd:sequence>
+          <xsd:element name="SQLState" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="errorCode" type="xsd:int" minOccurs="0" />
+          <xsd:element name="nextException" type="ns4:SQLException" minOccurs="0" nillable="true" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="Statement">
+        <xsd:sequence>
+          <xsd:element name="connection" type="ns4:Connection" minOccurs="0" nillable="true" />
+          <xsd:element name="fetchDirection" type="xsd:int" minOccurs="0" />
+          <xsd:element name="fetchSize" type="xsd:int" minOccurs="0" />
+          <xsd:element name="generatedKeys" type="ns4:ResultSet" minOccurs="0" nillable="true" />
+          <xsd:element name="maxFieldSize" type="xsd:int" minOccurs="0" />
+          <xsd:element name="maxRows" type="xsd:int" minOccurs="0" />
+          <xsd:element name="queryTimeout" type="xsd:int" minOccurs="0" />
+          <xsd:element name="resultSet" type="ns4:ResultSet" minOccurs="0" nillable="true" />
+          <xsd:element name="resultSetConcurrency" type="xsd:int" minOccurs="0" />
+          <xsd:element name="resultSetHoldability" type="xsd:int" minOccurs="0" />
+          <xsd:element name="resultSetType" type="xsd:int" minOccurs="0" />
+          <xsd:element name="updateCount" type="xsd:int" minOccurs="0" />
+          <xsd:element name="warnings" type="ns4:SQLWarning" minOccurs="0" nillable="true" />
+        </xsd:sequence>
+      </xsd:complexType>
+    </xsd:schema>
+    <xsd:schema targetNamespace="http://model.carrentals.com" elementFormDefault="qualified" attributeFormDefault="qualified">
+      <xsd:complexType name="string2anyTypeMap">
+        <xsd:sequence>
+          <xsd:element name="entry" minOccurs="0" maxOccurs="unbounded">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="key" type="xsd:string" minOccurs="0" maxOccurs="1" />
+                <xsd:element name="value" type="xsd:anyType" minOccurs="0" maxOccurs="1" />
+              </xsd:sequence>
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="ArrayOfInt">
+        <xsd:sequence>
+          <xsd:element name="int" type="xsd:int" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="int2stringMap">
+        <xsd:sequence>
+          <xsd:element name="entry" minOccurs="0" maxOccurs="unbounded">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="key" type="xsd:int" minOccurs="0" maxOccurs="1" />
+                <xsd:element name="value" type="xsd:string" minOccurs="0" maxOccurs="1" />
+              </xsd:sequence>
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="ArrayOfVendor">
+        <xsd:sequence>
+          <xsd:element name="Vendor" type="tns:Vendor" nillable="true" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="Vendor">
+        <xsd:sequence>
+          <xsd:element name="accountNumber" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="active" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="allowAddLocation" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="allowAlternateCommission" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="allowAutoPause" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="allowEditLocation" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="allowFlightRequired" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="allowMultiDayRate" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="alternateCommissionExclusionFlags" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="commissionApprovalDue" type="xsd:int" minOccurs="0" />
+          <xsd:element name="commissionReportDue" type="xsd:int" minOccurs="0" />
+          <xsd:element name="corporatePhone" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="defaultCommission" type="xsd:double" minOccurs="0" />
+          <xsd:element name="defaultConsumedTransactionFee" type="xsd:double" minOccurs="0" />
+          <xsd:element name="defaultTransactionFee" type="xsd:double" minOccurs="0" />
+          <xsd:element name="depositShowRatio" type="xsd:double" minOccurs="0" />
+          <xsd:element name="depositThreshold1" type="xsd:double" minOccurs="0" />
+          <xsd:element name="depositThreshold2" type="xsd:double" minOccurs="0" />
+          <xsd:element name="depositThreshold3" type="xsd:double" minOccurs="0" />
+          <xsd:element name="depositThreshold4" type="xsd:double" minOccurs="0" />
+          <xsd:element name="enabled" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="expResults" type="xsd:long" minOccurs="0" />
+          <xsd:element name="expResultsInterval" type="xsd:long" minOccurs="0" />
+          <xsd:element name="fullName" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="id" type="xsd:int" minOccurs="0" />
+          <xsd:element name="independent" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="industryStandardCode" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="loadLimit" type="xsd:double" minOccurs="0" />
+          <xsd:element name="manualPauseText" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="maxOneWayOptions" type="xsd:int" minOccurs="0" />
+          <xsd:element name="maxRentalDays" type="xsd:int" minOccurs="0" />
+          <xsd:element name="maxThreadsPerSearch" type="xsd:int" minOccurs="0" />
+          <xsd:element name="minRentalDays" type="xsd:int" minOccurs="0" />
+          <xsd:element name="partnerId" type="xsd:long" minOccurs="0" />
+          <xsd:element name="paymentMethod" type="tns:PaymentMethod" minOccurs="0" nillable="true" />
+          <xsd:element name="prevThreshold" type="xsd:double" minOccurs="0" />
+          <xsd:element name="querySpace" type="xsd:double" minOccurs="0" />
+          <xsd:element name="rateCalculationType" type="tns:RateCalculationType" minOccurs="0" nillable="true" />
+          <xsd:element name="routingNumber" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="sqlName" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="statsAbbreviation" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="status" type="tns:VendorStatus" minOccurs="0" nillable="true" />
+          <xsd:element name="supportsOneWay" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="taxEditable" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="timeoutPercent" type="xsd:double" minOccurs="0" />
+          <xsd:element name="timeoutTime" type="xsd:long" minOccurs="0" />
+          <xsd:element name="vendorDeposit" type="xsd:double" minOccurs="0" />
+          <xsd:element name="weekendStartDay" type="xsd:int" minOccurs="0" />
+          <xsd:element name="weekendStartHour" type="xsd:int" minOccurs="0" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:simpleType name="VendorStatus">
+        <xsd:restriction base="xsd:string">
+          <xsd:enumeration value="LIVE" />
+          <xsd:enumeration value="AUTOPAUSED" />
+          <xsd:enumeration value="MANUALLYPAUSED" />
+        </xsd:restriction>
+      </xsd:simpleType>
+      <xsd:simpleType name="RateCalculationType">
+        <xsd:restriction base="xsd:string">
+          <xsd:enumeration value="AVERAGE" />
+          <xsd:enumeration value="PICKUP" />
+        </xsd:restriction>
+      </xsd:simpleType>
+      <xsd:simpleType name="PaymentMethod">
+        <xsd:restriction base="xsd:string">
+          <xsd:enumeration value="WIRE" />
+          <xsd:enumeration value="MAIL" />
+          <xsd:enumeration value="ACH" />
+        </xsd:restriction>
+      </xsd:simpleType>
+      <xsd:element name="setVendorManager">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="vendorManager" type="ns8:VendorManager" nillable="true" minOccurs="1" maxOccurs="1" />
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="setVendorManagerResponse">
+        <xsd:complexType />
+      </xsd:element>
+      <xsd:element name="setVendorEmailManager">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="vendorEmailManager" type="ns8:VendorEmailManager" nillable="true" minOccurs="1" maxOccurs="1" />
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="setVendorEmailManagerResponse">
+        <xsd:complexType />
+      </xsd:element>
+      <xsd:complexType name="SimpleUser">
+        <xsd:sequence>
+          <xsd:element name="address1" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="address2" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="city" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="country" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="email" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="firstName" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="homePhone" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="lastName" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="postalCode" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="stateProvince" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="workPhone" type="xsd:string" minOccurs="0" nillable="true" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:element name="MakeReservationWithCC">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="authToken" type="xsd:string" nillable="true" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="rateId" type="xsd:long" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="user" type="tns:SimpleUser" nillable="true" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="ccinfo" type="ns9:ICCInformation" nillable="true" minOccurs="1" maxOccurs="1" />
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="MakeReservationWithCCResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="ConfirmationNumber" type="xsd:string" nillable="true" minOccurs="1" maxOccurs="1" />
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="ModifyReservation">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="authToken" type="xsd:string" nillable="true" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="rateId" type="xsd:long" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="vendorId" type="xsd:int" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="confirmationNumber" type="xsd:string" nillable="true" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="iccinfo" type="ns9:ICCInformation" nillable="true" minOccurs="1" maxOccurs="1" />
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:complexType name="IRate">
+        <xsd:sequence>
+          <xsd:element name="GDSRecordLocator" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="breakDown" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="carModel" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="carSize" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="carTypeToBook" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="ccRequirementInfo" type="tns:CreditCardRequirementInfo" minOccurs="0" nillable="true" />
+          <xsd:element name="chargePerMile" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="charges" type="tns:ArrayOfIRateChargeInfo" minOccurs="0" nillable="true" />
+          <xsd:element name="companyName" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="confirmationNumber" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="corpDiscountNumber" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="costPerAdditionalMileageUnit" type="xsd:double" minOccurs="0" nillable="true" />
+          <xsd:element name="dailyRate" type="xsd:double" minOccurs="0" />
+          <xsd:element name="days" type="xsd:int" minOccurs="0" />
+          <xsd:element name="daysFree" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="errorMessages" type="tns:ArrayOfString" minOccurs="0" nillable="true" />
+          <xsd:element name="estimatedPreTaxPrice" type="xsd:double" minOccurs="0" />
+          <xsd:element name="externalId" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="extraDayRate" type="xsd:double" minOccurs="0" />
+          <xsd:element name="extraDays" type="xsd:int" minOccurs="0" />
+          <xsd:element name="extraDaysFree" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="extraHourRate" type="xsd:double" minOccurs="0" />
+          <xsd:element name="extraHours" type="xsd:int" minOccurs="0" />
+          <xsd:element name="extraHoursFree" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="hasFeesBrokenDown" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="hasLocalPolicy" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="hourlyRate" type="xsd:double" minOccurs="0" />
+          <xsd:element name="hours" type="xsd:int" minOccurs="0" />
+          <xsd:element name="hoursFree" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="imageName" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="includedDailyMileage" type="xsd:int" minOccurs="0" nillable="true" />
+          <xsd:element name="includedHourlyMileage" type="xsd:int" minOccurs="0" nillable="true" />
+          <xsd:element name="includedMonthlyMileage" type="xsd:int" minOccurs="0" nillable="true" />
+          <xsd:element name="includedTotalMileage" type="xsd:int" minOccurs="0" nillable="true" />
+          <xsd:element name="includedWeeklyMileage" type="xsd:int" minOccurs="0" nillable="true" />
+          <xsd:element name="isInternational" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="isSpecialRate" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="itineraryId" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="largeBags" type="xsd:int" minOccurs="0" />
+          <xsd:element name="largePassengers" type="xsd:int" minOccurs="0" />
+          <xsd:element name="message" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="mileage" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="mileageString" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="mileageUnits" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="monthlyRate" type="xsd:double" minOccurs="0" />
+          <xsd:element name="months" type="xsd:int" minOccurs="0" />
+          <xsd:element name="monthsFree" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="oneWayCharge" type="xsd:double" minOccurs="0" />
+          <xsd:element name="originalMileageString" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="originalRateString" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="pending" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="preferred" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="promoCode" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="rateCode" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="rateQualifier" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="rateType" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="recommended" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="sippCode" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="smallBags" type="xsd:int" minOccurs="0" />
+          <xsd:element name="smallPassengers" type="xsd:int" minOccurs="0" />
+          <xsd:element name="specialtyVehicle" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="text" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="totalDays" type="xsd:int" minOccurs="0" />
+          <xsd:element name="uniqueCarTypeIdentifier" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="vehicleTypeCode" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="vendor" type="xsd:int" minOccurs="0" />
+          <xsd:element name="vendorCarClass" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="vendorCarType" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="vendorRateCategory" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="weekendDays" type="xsd:int" minOccurs="0" />
+          <xsd:element name="weekendRate" type="xsd:double" minOccurs="0" />
+          <xsd:element name="weekendsFree" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="weeklyRate" type="xsd:double" minOccurs="0" />
+          <xsd:element name="weeks" type="xsd:int" minOccurs="0" />
+          <xsd:element name="weeksFree" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="CCRequired" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="carImageUrl" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="carInfo" type="tns:SimpleCarInfo" minOccurs="0" nillable="true" />
+          <xsd:element name="currencyCode" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="discountedPreTaxCost" type="xsd:double" minOccurs="0" />
+          <xsd:element name="dropoffDate" type="xsd:dateTime" minOccurs="0" nillable="true" />
+          <xsd:element name="dropoffLocation" type="tns:SimpleLocation" minOccurs="0" nillable="true" />
+          <xsd:element name="flatDiscount" type="xsd:double" minOccurs="0" />
+          <xsd:element name="flightRequired" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="hasFlatDiscount" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="hasPercentDiscount" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="id" type="xsd:long" minOccurs="0" />
+          <xsd:element name="mileageInfo" type="tns:SimpleMileageInfo" minOccurs="0" nillable="true" />
+          <xsd:element name="orderPageUrl" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="percentDiscount" type="xsd:double" minOccurs="0" />
+          <xsd:element name="pickupDate" type="xsd:dateTime" minOccurs="0" nillable="true" />
+          <xsd:element name="pickupLocation" type="tns:SimpleLocation" minOccurs="0" nillable="true" />
+          <xsd:element name="preTaxCost" type="xsd:double" minOccurs="0" />
+          <xsd:element name="rateBreakdownInfo" type="tns:SimpleRateBreakdownInfo" minOccurs="0" nillable="true" />
+          <xsd:element name="ratesPageUrl" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="searchId" type="xsd:long" minOccurs="0" />
+          <xsd:element name="taxesAndFees" type="tns:ArrayOfSimpleCharge" minOccurs="0" nillable="true" />
+          <xsd:element name="totalCost" type="xsd:double" minOccurs="0" />
+          <xsd:element name="vendorLogoUrl" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="vendorName" type="xsd:string" minOccurs="0" nillable="true" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="ArrayOfIRateChargeInfo">
+        <xsd:sequence>
+          <xsd:element name="IRateChargeInfo" type="tns:IRateChargeInfo" nillable="true" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="IRateChargeInfo">
+        <xsd:sequence>
+          <xsd:element name="amountInclusive" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="charge" type="xsd:double" minOccurs="0" />
+          <xsd:element name="currencyCode" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="dailyCharge" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="includedInRate" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="method" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="purpose" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="taxable" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="type" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="amount" type="xsd:double" minOccurs="0" />
+          <xsd:element name="description" type="xsd:string" minOccurs="0" nillable="true" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="SimpleRateBreakdownInfo">
+        <xsd:sequence>
+          <xsd:element name="dailyRate" type="xsd:double" minOccurs="0" />
+          <xsd:element name="days" type="xsd:int" minOccurs="0" />
+          <xsd:element name="extraDayRate" type="xsd:double" minOccurs="0" />
+          <xsd:element name="extraDays" type="xsd:int" minOccurs="0" />
+          <xsd:element name="extraHourRate" type="xsd:double" minOccurs="0" />
+          <xsd:element name="extraHours" type="xsd:int" minOccurs="0" />
+          <xsd:element name="hourlyRate" type="xsd:double" minOccurs="0" />
+          <xsd:element name="hours" type="xsd:int" minOccurs="0" />
+          <xsd:element name="monthlyRate" type="xsd:double" minOccurs="0" />
+          <xsd:element name="months" type="xsd:int" minOccurs="0" />
+          <xsd:element name="weekendDays" type="xsd:int" minOccurs="0" />
+          <xsd:element name="weekendRate" type="xsd:double" minOccurs="0" />
+          <xsd:element name="weeklyRate" type="xsd:double" minOccurs="0" />
+          <xsd:element name="weeks" type="xsd:int" minOccurs="0" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="SimpleCarInfo">
+        <xsd:sequence>
+          <xsd:element name="carModel" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="carSize" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="numLargeBags" type="xsd:int" minOccurs="0" />
+          <xsd:element name="numLargePassengers" type="xsd:int" minOccurs="0" />
+          <xsd:element name="numSmallBags" type="xsd:int" minOccurs="0" />
+          <xsd:element name="numSmallPassengers" type="xsd:int" minOccurs="0" />
+          <xsd:element name="sippCode" type="xsd:string" minOccurs="0" nillable="true" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="SimpleMileageInfo">
+        <xsd:sequence>
+          <xsd:element name="costPerAdditionalMileageUnit" type="xsd:double" minOccurs="0" nillable="true" />
+          <xsd:element name="includedDailyMileage" type="xsd:int" minOccurs="0" nillable="true" />
+          <xsd:element name="includedHourlyMileage" type="xsd:int" minOccurs="0" nillable="true" />
+          <xsd:element name="includedMonthlyMileage" type="xsd:int" minOccurs="0" nillable="true" />
+          <xsd:element name="includedTotalMileage" type="xsd:int" minOccurs="0" nillable="true" />
+          <xsd:element name="includedWeeklyMileage" type="xsd:int" minOccurs="0" nillable="true" />
+          <xsd:element name="unlimitedMileage" type="xsd:boolean" minOccurs="0" nillable="true" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="ArrayOfString">
+        <xsd:sequence>
+          <xsd:element name="string" type="xsd:string" nillable="true" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="ArrayOfSimpleCharge">
+        <xsd:sequence>
+          <xsd:element name="SimpleCharge" type="tns:SimpleCharge" nillable="true" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="SimpleCharge">
+        <xsd:sequence>
+          <xsd:element name="amount" type="xsd:double" minOccurs="0" />
+          <xsd:element name="description" type="xsd:string" minOccurs="0" nillable="true" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="SimpleLocation">
+        <xsd:sequence>
+          <xsd:element name="address1" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="address2" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="airportCode" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="airportName" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="city" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="country" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="description" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="id" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="inAirport" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="latitude" type="xsd:double" minOccurs="0" nillable="true" />
+          <xsd:element name="locationInfo" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="longitude" type="xsd:double" minOccurs="0" nillable="true" />
+          <xsd:element name="phone" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="pickupInfo" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="state" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="vendorName" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="zip" type="xsd:string" minOccurs="0" nillable="true" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="CreditCardRequirementInfo">
+        <xsd:sequence>
+          <xsd:element name="ccProcessor" type="tns:CCProcessor" minOccurs="0" nillable="true" />
+          <xsd:element name="ccText" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="flatCcCharge" type="xsd:double" minOccurs="0" />
+          <xsd:element name="id" type="xsd:int" minOccurs="0" />
+          <xsd:element name="percentCcCharge" type="xsd:double" minOccurs="0" />
+          <xsd:element name="rate" type="tns:Rate" minOccurs="0" nillable="true" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:simpleType name="CCProcessor">
+        <xsd:restriction base="xsd:string">
+          <xsd:enumeration value="CR" />
+          <xsd:enumeration value="VENDOR" />
+        </xsd:restriction>
+      </xsd:simpleType>
+      <xsd:complexType name="Rate">
+        <xsd:sequence>
+          <xsd:element name="CCRequired" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="GDSRecordLocator" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="altCurrencyCode" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="altCurrencyExchangeRate" type="xsd:double" minOccurs="0" />
+          <xsd:element name="applyMultiDayRate" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="breakDown" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="carImageUrl" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="carInfo" type="tns:CarInfo" minOccurs="0" nillable="true" />
+          <xsd:element name="carModel" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="carSize" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="carTypeToBook" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="ccRequirementInfo" type="tns:CreditCardRequirementInfo" minOccurs="0" nillable="true" />
+          <xsd:element name="chargePerMile" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="charges" type="tns:ArrayOfRateChargeInfo" minOccurs="0" nillable="true" />
+          <xsd:element name="companyName" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="confirmationNumber" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="corpDiscountNumber" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="costPerAdditionalMileageUnit" type="xsd:double" minOccurs="0" nillable="true" />
+          <xsd:element name="currencyCode" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="currencyExchangeRate" type="xsd:double" minOccurs="0" />
+          <xsd:element name="dailyRate" type="xsd:double" minOccurs="0" />
+          <xsd:element name="dateDescriptor" type="ns10:DateDescriptor" minOccurs="0" nillable="true" />
+          <xsd:element name="days" type="xsd:int" minOccurs="0" />
+          <xsd:element name="daysFree" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="debitCardNotAccepted" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="debuggingString" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="directExchangeRate" type="xsd:double" minOccurs="0" />
+          <xsd:element name="discountedPreTaxCost" type="xsd:double" minOccurs="0" />
+          <xsd:element name="dropoffDate" type="xsd:dateTime" minOccurs="0" nillable="true" />
+          <xsd:element name="dropoffLocation" type="tns:ILocation" minOccurs="0" nillable="true" />
+          <xsd:element name="dropoffLocationId" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="errorMessages" type="tns:ArrayOfString" minOccurs="0" nillable="true" />
+          <xsd:element name="estimatedPreTaxPrice" type="xsd:double" minOccurs="0" />
+          <xsd:element name="externalId" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="extraDayRate" type="xsd:double" minOccurs="0" />
+          <xsd:element name="extraDays" type="xsd:int" minOccurs="0" />
+          <xsd:element name="extraDaysFree" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="extraHourRate" type="xsd:double" minOccurs="0" />
+          <xsd:element name="extraHours" type="xsd:int" minOccurs="0" />
+          <xsd:element name="extraHoursFree" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="fiveDayRate" type="xsd:double" minOccurs="0" />
+          <xsd:element name="fixableErrorMessages" type="tns:ArrayOfString" minOccurs="0" nillable="true" />
+          <xsd:element name="flatDiscount" type="xsd:double" minOccurs="0" />
+          <xsd:element name="flightInfoMandatory" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="flightRequired" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="fourDayRate" type="xsd:double" minOccurs="0" />
+          <xsd:element name="hasFeesBrokenDown" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="hasFlatDiscount" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="hasLocalPolicy" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="hasPercentDiscount" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="hourlyRate" type="xsd:double" minOccurs="0" />
+          <xsd:element name="hours" type="xsd:int" minOccurs="0" />
+          <xsd:element name="hoursFree" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="id" type="xsd:long" minOccurs="0" />
+          <xsd:element name="imageName" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="includedDailyMileage" type="xsd:int" minOccurs="0" nillable="true" />
+          <xsd:element name="includedHourlyMileage" type="xsd:int" minOccurs="0" nillable="true" />
+          <xsd:element name="includedMonthlyMileage" type="xsd:int" minOccurs="0" nillable="true" />
+          <xsd:element name="includedTotalMileage" type="xsd:int" minOccurs="0" nillable="true" />
+          <xsd:element name="includedWeeklyMileage" type="xsd:int" minOccurs="0" nillable="true" />
+          <xsd:element name="index" type="xsd:int" minOccurs="0" />
+          <xsd:element name="isInternational" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="isSpecialRate" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="itineraryId" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="largeBags" type="xsd:int" minOccurs="0" />
+          <xsd:element name="largePassengers" type="xsd:int" minOccurs="0" />
+          <xsd:element name="locationPair" type="tns:LocationPair" minOccurs="0" nillable="true" />
+          <xsd:element name="message" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="mileage" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="mileageInfo" type="tns:MileageInfo" minOccurs="0" nillable="true" />
+          <xsd:element name="mileageString" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="mileageUnits" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="monthlyRate" type="xsd:double" minOccurs="0" />
+          <xsd:element name="months" type="xsd:int" minOccurs="0" />
+          <xsd:element name="monthsFree" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="oneWayCharge" type="xsd:double" minOccurs="0" />
+          <xsd:element name="optionCosts" type="tns:ArrayOfOptionCost" minOccurs="0" nillable="true" />
+          <xsd:element name="orderPageUrl" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="originalMileageString" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="originalRateString" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="pending" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="percentDiscount" type="xsd:double" minOccurs="0" />
+          <xsd:element name="pickupDate" type="xsd:dateTime" minOccurs="0" nillable="true" />
+          <xsd:element name="pickupLocation" type="tns:ILocation" minOccurs="0" nillable="true" />
+          <xsd:element name="pickupLocationId" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="preTaxCost" type="xsd:double" minOccurs="0" />
+          <xsd:element name="preferred" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="promoCode" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="rateBreakdownInfo" type="tns:RateBreakdownInfo" minOccurs="0" nillable="true" />
+          <xsd:element name="rateCode" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="rateQualifier" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="rateType" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="rateXML" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="ratesPageUrl" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="recommended" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="reservationId" type="xsd:int" minOccurs="0" />
+          <xsd:element name="reserved" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="sameDay2DayMarkup" type="xsd:double" minOccurs="0" />
+          <xsd:element name="sameDay3DayMarkup" type="xsd:double" minOccurs="0" />
+          <xsd:element name="sameDay4DayMarkup" type="xsd:double" minOccurs="0" />
+          <xsd:element name="sameDay5DayMarkup" type="xsd:double" minOccurs="0" />
+          <xsd:element name="sameDay6DayMarkup" type="xsd:double" minOccurs="0" />
+          <xsd:element name="sameDayDailyMarkup" type="xsd:double" minOccurs="0" />
+          <xsd:element name="sameDayHourlyMarkup" type="xsd:double" minOccurs="0" />
+          <xsd:element name="sameDayMonthlyMarkup" type="xsd:double" minOccurs="0" />
+          <xsd:element name="sameDayWeekendMarkup" type="xsd:double" minOccurs="0" />
+          <xsd:element name="sameDayWeeklyMarkup" type="xsd:double" minOccurs="0" />
+          <xsd:element name="searchId" type="xsd:long" minOccurs="0" />
+          <xsd:element name="secondAttempt" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="sippCode" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="sixDayRate" type="xsd:double" minOccurs="0" />
+          <xsd:element name="smallBags" type="xsd:int" minOccurs="0" />
+          <xsd:element name="smallPassengers" type="xsd:int" minOccurs="0" />
+          <xsd:element name="smallRateString" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="smallRateStringWithoutDiscount" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="specialtyVehicle" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="taxesAndFees" type="tns:ArrayOfSimpleCharge" minOccurs="0" nillable="true" />
+          <xsd:element name="tenpercRateAmount" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="text" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="thirdAttempt" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="threeDayRate" type="xsd:double" minOccurs="0" />
+          <xsd:element name="totalCost" type="xsd:double" minOccurs="0" />
+          <xsd:element name="totalDays" type="xsd:int" minOccurs="0" />
+          <xsd:element name="totalDaysForSorting" type="xsd:int" minOccurs="0" />
+          <xsd:element name="totalOptionCost" type="xsd:double" minOccurs="0" />
+          <xsd:element name="twoDayRate" type="xsd:double" minOccurs="0" />
+          <xsd:element name="uniqueCarTypeIdentifier" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="vehicleTypeCode" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="vendor" type="xsd:int" minOccurs="0" />
+          <xsd:element name="vendorCarClass" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="vendorCarType" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="vendorLogoUrl" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="vendorName" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="vendorRateCategory" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="viewed" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="weekendDays" type="xsd:int" minOccurs="0" />
+          <xsd:element name="weekendRate" type="xsd:double" minOccurs="0" />
+          <xsd:element name="weekendsFree" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="weeklyRate" type="xsd:double" minOccurs="0" />
+          <xsd:element name="weeks" type="xsd:int" minOccurs="0" />
+          <xsd:element name="weeksFree" type="xsd:string" minOccurs="0" nillable="true" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="CarInfo">
+        <xsd:sequence>
+          <xsd:element name="carModel" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="carSize" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="carTypeToBook" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="imageName" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="mpg" type="xsd:int" minOccurs="0" />
+          <xsd:element name="numLargeBags" type="xsd:int" minOccurs="0" />
+          <xsd:element name="numLargePassengers" type="xsd:int" minOccurs="0" />
+          <xsd:element name="numSmallBags" type="xsd:int" minOccurs="0" />
+          <xsd:element name="numSmallPassengers" type="xsd:int" minOccurs="0" />
+          <xsd:element name="sippCode" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="uniqueCarTypeIdentifier" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="vehicleTypeCode" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="vendorCarClass" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="vendorCarType" type="xsd:string" minOccurs="0" nillable="true" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="LocationPair">
+        <xsd:sequence>
+          <xsd:element name="dropoffCode" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="dropoffLocation" type="tns:ILocation" minOccurs="0" nillable="true" />
+          <xsd:element name="international" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="oneWay" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="pickupCode" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="pickupLocation" type="tns:ILocation" minOccurs="0" nillable="true" />
+          <xsd:element name="vendor" type="xsd:int" minOccurs="0" />
+          <xsd:element name="vendorDropoffCode" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="vendorPickupCode" type="xsd:string" minOccurs="0" nillable="true" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="ILocation">
+        <xsd:sequence>
+          <xsd:element name="CRCode" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="CRTimeZone" type="xsd:double" minOccurs="0" />
+          <xsd:element name="OId" type="xsd:int" minOccurs="0" />
+          <xsd:element name="alt1" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="ccAcceptedTypes" type="tns:ArrayOfString" minOccurs="0" nillable="true" />
+          <xsd:element name="ccEnabled" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="ccProcessor" type="tns:CCProcessor" minOccurs="0" nillable="true" />
+          <xsd:element name="cityId" type="xsd:long" minOccurs="0" />
+          <xsd:element name="county" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="currency" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="description2" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="displayPhone" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="distance" type="xsd:double" minOccurs="0" />
+          <xsd:element name="dropoff24Hours" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="fax" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="isActive" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="loadLimit" type="xsd:double" minOccurs="0" />
+          <xsd:element name="localPolicy" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="localURL" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="locationType" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="offHoursDropoffInfo" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="percentDiscount" type="xsd:double" minOccurs="0" />
+          <xsd:element name="shortText" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="shortTextWithoutStateAndZip" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="text" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="textWithoutStateAndZip" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="vendorCode" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="vendorId" type="xsd:int" minOccurs="0" />
+          <xsd:element name="address1" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="address2" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="airportCode" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="airportName" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="city" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="country" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="description" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="id" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="inAirport" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="latitude" type="xsd:double" minOccurs="0" nillable="true" />
+          <xsd:element name="locationInfo" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="longitude" type="xsd:double" minOccurs="0" nillable="true" />
+          <xsd:element name="phone" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="pickupInfo" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="state" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="vendorName" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="zip" type="xsd:string" minOccurs="0" nillable="true" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="MileageInfo">
+        <xsd:sequence>
+          <xsd:element name="costPerAdditionalMileageUnit" type="xsd:double" minOccurs="0" nillable="true" />
+          <xsd:element name="includedDailyMileage" type="xsd:int" minOccurs="0" nillable="true" />
+          <xsd:element name="includedHourlyMileage" type="xsd:int" minOccurs="0" nillable="true" />
+          <xsd:element name="includedMonthlyMileage" type="xsd:int" minOccurs="0" nillable="true" />
+          <xsd:element name="includedTotalMileage" type="xsd:int" minOccurs="0" nillable="true" />
+          <xsd:element name="includedWeeklyMileage" type="xsd:int" minOccurs="0" nillable="true" />
+          <xsd:element name="unlimitedMileage" type="xsd:boolean" minOccurs="0" nillable="true" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="ArrayOfOptionCost">
+        <xsd:sequence>
+          <xsd:element name="OptionCost" type="tns:OptionCost" nillable="true" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="OptionCost">
+        <xsd:sequence>
+          <xsd:element name="active" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="cost" type="xsd:double" minOccurs="0" />
+          <xsd:element name="costType" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="endDate" type="xsd:dateTime" minOccurs="0" />
+          <xsd:element name="id" type="xsd:int" minOccurs="0" />
+          <xsd:element name="locationId" type="xsd:long" minOccurs="0" />
+          <xsd:element name="optionId" type="xsd:int" minOccurs="0" />
+          <xsd:element name="startDate" type="xsd:dateTime" minOccurs="0" />
+          <xsd:element name="vendorId" type="xsd:int" minOccurs="0" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="ArrayOfRateChargeInfo">
+        <xsd:sequence>
+          <xsd:element name="RateChargeInfo" type="tns:RateChargeInfo" nillable="true" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="RateChargeInfo">
+        <xsd:sequence>
+          <xsd:element name="amount" type="xsd:double" minOccurs="0" />
+          <xsd:element name="amountInclusive" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="charge" type="xsd:double" minOccurs="0" />
+          <xsd:element name="currencyCode" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="dailyCharge" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="description" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="id" type="xsd:long" minOccurs="0" />
+          <xsd:element name="includedInRate" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="method" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="percentCharge" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="purpose" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="rate" type="tns:Rate" minOccurs="0" nillable="true" />
+          <xsd:element name="taxable" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="type" type="xsd:string" minOccurs="0" nillable="true" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="RateBreakdownInfo">
+        <xsd:sequence>
+          <xsd:element name="dailyRate" type="xsd:double" minOccurs="0" />
+          <xsd:element name="days" type="xsd:int" minOccurs="0" />
+          <xsd:element name="extraDayRate" type="xsd:double" minOccurs="0" />
+          <xsd:element name="extraDays" type="xsd:int" minOccurs="0" />
+          <xsd:element name="extraHourRate" type="xsd:double" minOccurs="0" />
+          <xsd:element name="extraHours" type="xsd:int" minOccurs="0" />
+          <xsd:element name="hourlyRate" type="xsd:double" minOccurs="0" />
+          <xsd:element name="hours" type="xsd:int" minOccurs="0" />
+          <xsd:element name="monthlyRate" type="xsd:double" minOccurs="0" />
+          <xsd:element name="months" type="xsd:int" minOccurs="0" />
+          <xsd:element name="weekendDays" type="xsd:int" minOccurs="0" />
+          <xsd:element name="weekendRate" type="xsd:double" minOccurs="0" />
+          <xsd:element name="weeklyRate" type="xsd:double" minOccurs="0" />
+          <xsd:element name="weeks" type="xsd:int" minOccurs="0" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:element name="ModifyReservationResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="Reservation" type="tns:IRate" nillable="true" minOccurs="1" maxOccurs="1" />
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="ViewReservation">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="authToken" type="xsd:string" nillable="true" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="vendor" type="tns:Vendor" nillable="true" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="confirmationNumber" type="xsd:string" nillable="true" minOccurs="1" maxOccurs="1" />
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:complexType name="SimpleReservation">
+        <xsd:sequence>
+          <xsd:element name="ccInfo" type="ns9:ICCInformation" minOccurs="0" nillable="true" />
+          <xsd:element name="confirmationNumber" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="insurancePolicyNumber" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="rate" type="tns:SimpleRate" minOccurs="0" nillable="true" />
+          <xsd:element name="user" type="tns:SimpleUser" minOccurs="0" nillable="true" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="SimpleRate">
+        <xsd:sequence>
+          <xsd:element name="CCRequired" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="carImageUrl" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="carInfo" type="tns:SimpleCarInfo" minOccurs="0" nillable="true" />
+          <xsd:element name="currencyCode" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="discountedPreTaxCost" type="xsd:double" minOccurs="0" />
+          <xsd:element name="dropoffDate" type="xsd:dateTime" minOccurs="0" nillable="true" />
+          <xsd:element name="dropoffLocation" type="tns:SimpleLocation" minOccurs="0" nillable="true" />
+          <xsd:element name="flatDiscount" type="xsd:double" minOccurs="0" />
+          <xsd:element name="flightRequired" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="hasFlatDiscount" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="hasPercentDiscount" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="id" type="xsd:long" minOccurs="0" />
+          <xsd:element name="mileageInfo" type="tns:SimpleMileageInfo" minOccurs="0" nillable="true" />
+          <xsd:element name="orderPageUrl" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="percentDiscount" type="xsd:double" minOccurs="0" />
+          <xsd:element name="pickupDate" type="xsd:dateTime" minOccurs="0" nillable="true" />
+          <xsd:element name="pickupLocation" type="tns:SimpleLocation" minOccurs="0" nillable="true" />
+          <xsd:element name="preTaxCost" type="xsd:double" minOccurs="0" />
+          <xsd:element name="rateBreakdownInfo" type="tns:SimpleRateBreakdownInfo" minOccurs="0" nillable="true" />
+          <xsd:element name="ratesPageUrl" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="searchId" type="xsd:long" minOccurs="0" />
+          <xsd:element name="taxesAndFees" type="tns:ArrayOfSimpleCharge" minOccurs="0" nillable="true" />
+          <xsd:element name="totalCost" type="xsd:double" minOccurs="0" />
+          <xsd:element name="vendorLogoUrl" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="vendorName" type="xsd:string" minOccurs="0" nillable="true" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:element name="ViewReservationResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="Reservation" type="tns:SimpleReservation" nillable="true" minOccurs="1" maxOccurs="1" />
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="CancelReservation">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="authToken" type="xsd:string" nillable="true" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="vendor" type="tns:Vendor" nillable="true" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="confirmationNumber" type="xsd:string" nillable="true" minOccurs="1" maxOccurs="1" />
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="CancelReservationResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="CancellationNumber" type="xsd:string" nillable="true" minOccurs="1" maxOccurs="1" />
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="setLocationCache">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="locationCache" type="ns8:LocationCache" nillable="true" minOccurs="1" maxOccurs="1" />
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="setLocationCacheResponse">
+        <xsd:complexType />
+      </xsd:element>
+      <xsd:element name="MakeReservation">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="authToken" type="xsd:string" nillable="true" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="rateId" type="xsd:long" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="user" type="tns:SimpleUser" nillable="true" minOccurs="1" maxOccurs="1" />
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="MakeReservationResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="ConfirmationNumber" type="xsd:string" nillable="true" minOccurs="1" maxOccurs="1" />
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+    </xsd:schema>
+    <xsd:schema targetNamespace="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="qualified" />
+    <xsd:schema targetNamespace="http://simple.core.jdbc.springframework.org" elementFormDefault="qualified" attributeFormDefault="qualified">
+      <xsd:complexType name="SimpleJdbcTemplate">
+        <xsd:sequence>
+          <xsd:element name="jdbcOperations" type="ns2:JdbcOperations" minOccurs="0" nillable="true" />
+        </xsd:sequence>
+      </xsd:complexType>
+    </xsd:schema>
+    <xsd:schema targetNamespace="http://core.jdbc.springframework.org" elementFormDefault="qualified" attributeFormDefault="qualified">
+      <xsd:complexType name="JdbcOperations" />
+      <xsd:complexType name="JdbcTemplate">
+        <xsd:sequence>
+          <xsd:element name="dataSource" type="ns1:DataSource" minOccurs="0" nillable="true" />
+          <xsd:element name="exceptionTranslator" type="ns6:SQLExceptionTranslator" minOccurs="0" nillable="true" />
+          <xsd:element name="fetchSize" type="xsd:int" minOccurs="0" />
+          <xsd:element name="ignoreWarnings" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="lazyInit" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="maxRows" type="xsd:int" minOccurs="0" />
+          <xsd:element name="nativeJdbcExtractor" type="ns7:NativeJdbcExtractor" minOccurs="0" nillable="true" />
+          <xsd:element name="skipResultsProcessing" type="xsd:boolean" minOccurs="0" />
+        </xsd:sequence>
+      </xsd:complexType>
+    </xsd:schema>
+    <xsd:schema targetNamespace="http://nativejdbc.support.jdbc.springframework.org" elementFormDefault="qualified" attributeFormDefault="qualified">
+      <xsd:complexType name="NativeJdbcExtractor">
+        <xsd:sequence>
+          <xsd:element name="nativeConnectionNecessaryForNativeCallableStatements" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="nativeConnectionNecessaryForNativePreparedStatements" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="nativeConnectionNecessaryForNativeStatements" type="xsd:boolean" minOccurs="0" />
+        </xsd:sequence>
+      </xsd:complexType>
+    </xsd:schema>
+    <xsd:schema targetNamespace="http://support.jdbc.springframework.org" elementFormDefault="qualified" attributeFormDefault="qualified">
+      <xsd:complexType name="SQLExceptionTranslator" />
+    </xsd:schema>
+    <xsd:schema targetNamespace="http://cc.nyim" elementFormDefault="qualified" attributeFormDefault="qualified">
+      <xsd:complexType name="ICCInformation">
+        <xsd:sequence>
+          <xsd:element name="CCExpMonth" type="xsd:int" minOccurs="0" />
+          <xsd:element name="CCExpYear" type="xsd:int" minOccurs="0" />
+          <xsd:element name="CCName" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="CCNumber" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="CCType" type="xsd:string" minOccurs="0" nillable="true" />
+        </xsd:sequence>
+      </xsd:complexType>
+    </xsd:schema>
+    <xsd:schema targetNamespace="http://util.carrentals.com" elementFormDefault="qualified" attributeFormDefault="qualified">
+      <xsd:complexType name="DateDescriptor">
+        <xsd:sequence>
+          <xsd:element name="8601DropoffDate" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="8601PickupDate" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="dollarDropoffDate" type="xsd:dateTime" minOccurs="0" nillable="true" />
+          <xsd:element name="dollarPickupDate" type="xsd:dateTime" minOccurs="0" nillable="true" />
+          <xsd:element name="dropoffDate" type="xsd:dateTime" minOccurs="0" nillable="true" />
+          <xsd:element name="dropoffDateBeforePickupDate" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="dropoffDateString" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="dropoffDay" type="xsd:int" minOccurs="0" />
+          <xsd:element name="dropoffMonth" type="xsd:int" minOccurs="0" />
+          <xsd:element name="dropoffMonthYear" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="dropoffTime" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="dropoffTimeString" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="dropoffYear" type="xsd:int" minOccurs="0" />
+          <xsd:element name="enterpriseDropoffDateString" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="enterprisePickupDateString" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="fullDropoffDateString" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="fullPickupDateString" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="id" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="lateNightDropoff" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="lateNightPickup" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="messages" type="tns:ArrayOfString" minOccurs="0" nillable="true" />
+          <xsd:element name="newDollarDropoffString" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="newDollarPickupString" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="paylessPickupDateString" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="pickupDate" type="xsd:dateTime" minOccurs="0" nillable="true" />
+          <xsd:element name="pickupDateString" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="pickupDay" type="xsd:int" minOccurs="0" />
+          <xsd:element name="pickupMonth" type="xsd:int" minOccurs="0" />
+          <xsd:element name="pickupMonthYear" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="pickupTime" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="pickupTimeString" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="pickupYear" type="xsd:int" minOccurs="0" />
+          <xsd:element name="prettyDropoffTimeString" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="prettyPickupTimeString" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="resultDropoffDateString" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="resultPickupDateString" type="xsd:string" minOccurs="0" nillable="true" />
+          <xsd:element name="validDropoffDate" type="xsd:boolean" minOccurs="0" />
+          <xsd:element name="validPickupDate" type="xsd:boolean" minOccurs="0" />
+        </xsd:sequence>
+      </xsd:complexType>
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="setLocationCacheRequest">
+    <wsdl:part element="tns:setLocationCache" name="parameters" />
+  </wsdl:message>
+  <wsdl:message name="ViewReservationRequest">
+    <wsdl:part element="tns:ViewReservation" name="parameters" />
+  </wsdl:message>
+  <wsdl:message name="setVendorEmailManagerRequest">
+    <wsdl:part element="tns:setVendorEmailManager" name="parameters" />
+  </wsdl:message>
+  <wsdl:message name="ViewReservationResponse">
+    <wsdl:part element="tns:ViewReservationResponse" name="parameters" />
+  </wsdl:message>
+  <wsdl:message name="CancelReservationRequest">
+    <wsdl:part element="tns:CancelReservation" name="parameters" />
+  </wsdl:message>
+  <wsdl:message name="MakeReservationWithCCResponse">
+    <wsdl:part element="tns:MakeReservationWithCCResponse" name="parameters" />
+  </wsdl:message>
+  <wsdl:message name="MakeReservationWithCCRequest">
+    <wsdl:part element="tns:MakeReservationWithCC" name="parameters" />
+  </wsdl:message>
+  <wsdl:message name="ModifyReservationRequest">
+    <wsdl:part element="tns:ModifyReservation" name="parameters" />
+  </wsdl:message>
+  <wsdl:message name="setVendorManagerRequest">
+    <wsdl:part element="tns:setVendorManager" name="parameters" />
+  </wsdl:message>
+  <wsdl:message name="setLocationCacheResponse">
+    <wsdl:part element="tns:setLocationCacheResponse" name="parameters" />
+  </wsdl:message>
+  <wsdl:message name="ModifyReservationResponse">
+    <wsdl:part element="tns:ModifyReservationResponse" name="parameters" />
+  </wsdl:message>
+  <wsdl:message name="CancelReservationResponse">
+    <wsdl:part element="tns:CancelReservationResponse" name="parameters" />
+  </wsdl:message>
+  <wsdl:message name="MakeReservationResponse">
+    <wsdl:part element="tns:MakeReservationResponse" name="parameters" />
+  </wsdl:message>
+  <wsdl:message name="setVendorManagerResponse">
+    <wsdl:part element="tns:setVendorManagerResponse" name="parameters" />
+  </wsdl:message>
+  <wsdl:message name="MakeReservationRequest">
+    <wsdl:part element="tns:MakeReservation" name="parameters" />
+  </wsdl:message>
+  <wsdl:message name="setVendorEmailManagerResponse">
+    <wsdl:part element="tns:setVendorEmailManagerResponse" name="parameters" />
+  </wsdl:message>
+  <wsdl:portType name="Reservations">
+    <wsdl:operation name="setVendorManager">
+      <wsdl:input message="tns:setVendorManagerRequest" name="setVendorManagerRequest" />
+      <wsdl:output message="tns:setVendorManagerResponse" name="setVendorManagerResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="setVendorEmailManager">
+      <wsdl:input message="tns:setVendorEmailManagerRequest" name="setVendorEmailManagerRequest" />
+      <wsdl:output message="tns:setVendorEmailManagerResponse" name="setVendorEmailManagerResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="MakeReservationWithCC">
+      <wsdl:input message="tns:MakeReservationWithCCRequest" name="MakeReservationWithCCRequest" />
+      <wsdl:output message="tns:MakeReservationWithCCResponse" name="MakeReservationWithCCResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="ModifyReservation">
+      <wsdl:input message="tns:ModifyReservationRequest" name="ModifyReservationRequest" />
+      <wsdl:output message="tns:ModifyReservationResponse" name="ModifyReservationResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="ViewReservation">
+      <wsdl:input message="tns:ViewReservationRequest" name="ViewReservationRequest" />
+      <wsdl:output message="tns:ViewReservationResponse" name="ViewReservationResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="CancelReservation">
+      <wsdl:input message="tns:CancelReservationRequest" name="CancelReservationRequest" />
+      <wsdl:output message="tns:CancelReservationResponse" name="CancelReservationResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="setLocationCache">
+      <wsdl:input message="tns:setLocationCacheRequest" name="setLocationCacheRequest" />
+      <wsdl:output message="tns:setLocationCacheResponse" name="setLocationCacheResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="MakeReservation">
+      <wsdl:input message="tns:MakeReservationRequest" name="MakeReservationRequest" />
+      <wsdl:output message="tns:MakeReservationResponse" name="MakeReservationResponse" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="ReservationsHttpBinding" type="tns:Reservations">
+    <wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="setVendorManager">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="setVendorManagerRequest">
+        <wsdlsoap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="setVendorManagerResponse">
+        <wsdlsoap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="setVendorEmailManager">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="setVendorEmailManagerRequest">
+        <wsdlsoap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="setVendorEmailManagerResponse">
+        <wsdlsoap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="MakeReservationWithCC">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="MakeReservationWithCCRequest">
+        <wsdlsoap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="MakeReservationWithCCResponse">
+        <wsdlsoap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ModifyReservation">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="ModifyReservationRequest">
+        <wsdlsoap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="ModifyReservationResponse">
+        <wsdlsoap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ViewReservation">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="ViewReservationRequest">
+        <wsdlsoap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="ViewReservationResponse">
+        <wsdlsoap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CancelReservation">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="CancelReservationRequest">
+        <wsdlsoap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="CancelReservationResponse">
+        <wsdlsoap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="setLocationCache">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="setLocationCacheRequest">
+        <wsdlsoap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="setLocationCacheResponse">
+        <wsdlsoap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="MakeReservation">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="MakeReservationRequest">
+        <wsdlsoap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="MakeReservationResponse">
+        <wsdlsoap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="Reservations">
+    <wsdl:port binding="tns:ReservationsHttpBinding" name="ReservationsHttpPort">
+      <wsdlsoap:address location="http://www.carrentals.com/services/Reservations" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
+

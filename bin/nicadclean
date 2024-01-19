@@ -1,0 +1,35 @@
+#!/bin/bash
+# NiCad 7.0 results cleaner script - clean out all previous NiCad results
+# J.R. Cordy, Queen's University, March 2013 (Rev Jan 2024)
+
+# One or all previous results?
+if [ "${1}" == "" ]
+then
+    dir=./nicadclones
+else
+    dir="./nicadclones/${1}"
+fi
+
+# Do those previous results exist?
+if [ ! -d "${dir}" ]
+then
+    echo "Usage: nicadclean [SYSTEMNAME]"
+    echo "  (Example: nicadclean JHotDraw)"
+    exit 99
+fi
+
+# Careful!
+echo "Warning, this will remove all previous NiCad extraction and clone analysis results in ${dir}"
+echo -n "Are you certain you want to do this (y/n)? "
+read yesno
+if [ "${yesno}" != "y" ]
+then
+    exit
+fi
+
+# Dangerous, but limited to ./nicadclones
+/bin/rm -rf "${dir}"
+
+echo "Done."
+
+# Rev 15.1.24

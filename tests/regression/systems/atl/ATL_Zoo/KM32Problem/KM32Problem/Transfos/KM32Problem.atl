@@ -1,0 +1,471 @@
+module KM32Problem;
+create OUT : Problem from IN : KM3;
+
+-------------------------------------------------------------------------------
+-- HELPERS --------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- This helper ...
+-- CONTEXT:	thisModule
+-- RETURN:	Sequence(KM3!StructuralFeature)
+--helper def: allSourceMEs : Sequence(oclAny) =
+--	MOF!Class.allInstancesFrom('KM3')->collect(e |
+--		e.allInstancesFrom('IN')
+--	)->asSequence()->flatten();
+
+-- This helper computes a Sequence containing all the Packages of the input
+-- model.
+-- CONTEXT:	thisModule
+-- RETURN:	Sequence(KM3!Package)
+helper def: allPackages : Sequence(KM3!Package) =
+	KM3!Package.allInstances()->asSequence();
+
+-- This helper computes a Sequence containing all the Classes of the input
+-- model.
+-- CONTEXT:	thisModule
+-- RETURN:	Sequence(KM3!Class)
+helper def: allClasses : Sequence(KM3!Class) =
+	KM3!Class.allInstances()->asSequence();
+
+
+-- This helper computes a Sequence that contains all the direct and inherited
+-- StructuralFeatures of the contextual Class. The Sequence s which is also
+-- passed as a parameter contains the KM3!Class elements that have already been
+-- visited by the recursive process and that are not considered anymore.
+-- The helper collects the direct StructuralFeatures of the contextual
+-- Class and, by means of recursice calls, the ones of those of its supertypes
+-- that do not already belong to the Sequence s.
+-- CONTEXT:	KM3!Class
+-- IN:		Sequence(KM3!Class)
+-- RETURN:	Sequence(KM3!StructuralFeature)
+helper context KM3!Class
+	def: allStructuralFeaturesRec(s : Sequence(KM3!Class)) :
+											Sequence(KM3!StructuralFeature) =
+	self.structuralFeatures->union(
+		self.supertypes->iterate(e; res : Sequence(KM3!Class) = Sequence{} |
+			if s->includes(e)
+			then
+				res
+			else
+				res->union( e.allStructuralFeaturesRec(s->append(e)) )
+			endif
+		)
+	);
+
+-- This helper computes a Sequence that contains all the direct and inherited
+-- StructuralFeatures of the contextual Class.
+-- To this end, the helper calls the allStructuralFeaturesRec helper with
+-- an Sequence (containing the contextual Class) as parameter.
+-- CONTEXT:	KM3!Class
+-- RETURN:	Sequence(KM3!StructuralFeature)
+helper context KM3!Class
+	def: allStructuralFeatures() : Sequence(KM3!StructuralFeature) =
+	self.allStructuralFeaturesRec(Sequence{self});
+
+-- This helper computes a Boolean value stating whether a direct or indirect
+-- inheritance is defined from the contextual Class to the Class c passed as a
+-- parameter. The Sequence s which is also passed as a parameter contains the
+-- KM3!Class elements that have already been visited by the recursive process
+-- (except the c element) and that are not consdidered anymore.
+-- To this end, the helper successively tests its own supertypes, and the
+-- supertypes of its supertypes (by means of a recursive call):
+--  * if the contextual Class has no supertype, the helper returns false.
+--  * if the Class passed as a parameter is a supertype of the contextual
+--    Class, the helper returns true.
+--  * otherwise, the helper returns the disjunction of the recursive calls of
+--    the helper on each of its supertypes that has not been already visited
+--    by the recursive process.
+-- CONTEXT:	KM3!Class
+-- IN:		KM3!Class
+-- IN:		Sequence(KM3!Class)
+-- RETURN:	Boolean
+helper context KM3!Class
+	def: recursiveInheritanceRec(c : KM3!Class,
+								 s : Sequence(KM3!Class)) : Boolean =
+	if self.supertypes->isEmpty()
+	then
+		false
+	else
+		if self.supertypes->exists(e | e = c)
+		then
+			true
+		else
+			self.supertypes->iterate(e; res : Boolean = false |
+				if s->includes(e)
+				then
+					res
+				else
+					res or e.recursiveInheritanceRec(c, s->append(e))
+				endif
+			)
+		endif
+	endif;
+
+-- This helper computes a Boolean value stating whether a direct or indirect
+-- recursive inheritance is defined for the contextual Class.
+-- To this end, the helper calls the recursiveInheritanceRec helper with
+-- itself, and an empty Sequence as parameters.
+-- CONTEXT:	KM3!Class
+-- RETURN:	Boolean
+helper context KM3!Class def: recursiveInheritance() : Boolean =
+	self.recursiveInheritanceRec(self, Sequence{});
+
+
+-------------------------------------------------------------------------------
+-- RULES ----------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- Rule 'PackageNameUnique'
+-- This rule generates an 'error' Problem element for each Package whose name
+-- is not unique.
+rule PackageNameUnique {
+	from
+		i : KM3!Package (
+			thisModule.allPackages->exists(e | (i <> e) and (i.name = e.name))
+		)
+	to
+		o : Problem!Problem (
+			severity <- #error,
+			description <-
+					'a Package of the same name already exists: '
+					+ i.name,
+			location <- i.location
+		)
+}
+
+-- Rule 'ClassifierInPackage'
+-- This rule generates an 'error' Problem element for each Classifier which is
+-- not defined within a Package.
+rule ClassifierInPackage {
+	from
+		i : KM3!Classifier (
+			i.package.oclIsUndefined()
+		)
+	to
+		o : Problem!Problem (
+			severity <- #error,
+			description <-
+					'the Classifier ' + i.name
+					+ ' must be contained by a Package',
+			location <- i.location
+		)
+}
+
+-- Rule 'EnumLiteralInPackage'
+-- This rule generates an 'error' Problem element for each EnumLiteral which is
+-- not defined within a Package.
+rule EnumLiteralInPackage {
+	from
+		i : KM3!EnumLiteral (
+			i.package.oclIsUndefined()
+		)
+	to
+		o : Problem!Problem (
+			severity <- #error,
+			description <-
+					'the EnumLiteral ' + i.name
+					+ ' must be contained by a Package',
+			location <- i.location
+		)
+}
+
+-- Rule 'StructuralFeatureInClass'
+-- This rule generates an 'error' Problem element for each Classifier which is
+-- not defined within a Class.
+rule StructuralFeatureInClass {
+	from
+		i : KM3!StructuralFeature (
+			not i.package.oclIsUndefined()
+		)
+	to
+		o : Problem!Problem (
+			severity <- #error,
+			description <-
+					'the Feature ' + i.name
+					+ ' cannot be contained by a Package',
+			location <- i.location
+		)
+}
+
+-- Rule 'OppositeOfOppositeExists'
+-- This rule generates an 'error' Problem element for each Reference whose
+-- opposite of the opposite is not defined.
+rule OppositeOfOppositeExists {
+	from
+		i : KM3!Reference (
+			if i.opposite.oclIsUndefined()
+			then
+				false
+			else
+				i.opposite.opposite.oclIsUndefined()
+			endif
+		)
+	to
+		o : Problem!Problem (
+			severity <- #error,
+			description <-
+					'the opposite of the opposite of Reference ' +
+					i.owner.name + '::' + i.name +
+					' should be defined',
+			location <- i.location
+		)
+}
+
+-- Rule 'OppositeOfOppositeIsSelf'
+-- This rule generates an 'error' Problem element for each Reference whose
+-- opposite of the opposite is different from itself.
+rule OppositeOfOppositeIsSelf {
+	from
+		i : KM3!Reference (
+			if i.opposite.oclIsUndefined()
+			then
+				false
+			else
+				if i.opposite.opposite.oclIsUndefined()
+				then
+					false
+				else
+					i.opposite.opposite <> i
+				endif
+			endif
+		)
+	to
+		o : Problem!Problem (
+			severity <- #error,
+			description <-
+					'the opposite of the opposite of Reference ' +
+					i.owner.name + '::' + i.name +
+					' should be this very same Reference',
+			location <- i.location
+		)
+}
+
+-- Rule 'TypeOfOppositeIsOwner'
+-- This rule generates an 'error' Problem element for each Reference whose
+-- type of the opposite is different from its owner.
+rule TypeOfOppositeIsOwner {
+	from
+		i : KM3!Reference (
+			not
+				if i.opposite.oclIsUndefined() then
+					true
+				else
+					i.opposite.type = i.owner
+				endif
+		)
+	to
+		o : Problem!Problem (
+			severity <- #error,
+			description <-
+					'the type of the opposite of Reference ' +
+					i.owner.name + '::' + i.name +
+					' should be the owner of this Reference (' +
+					i.owner.name + ')',
+			location <- i.location
+		)
+}
+
+-- Rule 'ClassifierNameUniqueInPackage'
+-- This rule generates an 'error' Problem element for each Classifier whose
+-- name is not unique within its Package.
+rule ClassifierNameUniqueInPackage {
+	from
+		i : KM3!Classifier (
+			i.package.contents->exists(e | (i <> e) and (i.name = e.name))
+		)
+	to
+		o : Problem!Problem (
+			severity <- #error,
+			description <-
+					'a Classifier named ' + i.name
+					+ ' already exists in Package '
+					+ i.package.name,
+			location <- i.location
+		)
+}
+
+-- Rule 'ClassIsNotItsOwnSupertype'
+-- This rule generates an 'error' Problem element for each Class which is its
+-- direct or indirect supertype.
+rule ClassIsNotItsOwnSupertype {
+	from
+		i : KM3!Class (
+			i.recursiveInheritance()
+		)
+	to
+		o : Problem!Problem (
+			severity <- #error,
+			description <- 'the Class ' + i.name
+							+ ' is its direct/indirect own supertype',
+			location <- i.location
+		)
+}
+
+-- Rule 'StructuralFeatureNameUniqueInClass'
+-- This rule generates an 'error' Problem element for each StructuralFeature
+-- whose name is not unique within its Class (including inherited SFs).
+rule StructuralFeatureNameUniqueInClass {
+	from
+		i : KM3!StructuralFeature (
+			i.owner.allStructuralFeatures()
+				->exists(e | (i <> e) and (i.name = e.name))
+		)
+	to
+		o : Problem!Problem (
+			severity <- #error,
+			description <-
+					'the Class ' + i.owner.name
+					+ ' contains another feature (including inherited ones) '
+					+ 'with the same name: '
+					+ i.name,
+			location <- i.location
+		)
+}
+
+-- Rule 'StructuralFeatureLower'
+-- This rule generates an 'error' Problem element for each StructuralFeature
+-- whose lower attribute is lower than 0.
+rule StructuralFeatureLower {
+	from
+		i : KM3!StructuralFeature (
+			i.lower < 0
+		)
+	to
+		o : Problem!Problem (
+			severity <- #error,
+			description <-
+					'Lower bound value of Feature ' + i.owner.name + '::'
+					+ i.name + 'is unvalid (lower than 0)',
+			location <- i.location
+		)
+}
+
+-- Rule 'StructuralFeatureUpper'
+-- This rule generates an 'error' Problem element for each StructuralFeature
+-- whose upper attribute is lower than 1.
+rule StructuralFeatureUpper {
+	from
+		i : KM3!StructuralFeature (
+			(i.upper < 1) and (i.upper <> 0-1)
+		)
+	to
+		o : Problem!Problem (
+			severity <- #error,
+			description <-
+					'Upper bound of Feature ' + i.owner.name + '::'
+					+ i.name + 'is unvalid (lower than 1)',
+			location <- i.location
+		)
+}
+
+-- Rule 'StructuralFeatureLowerUpper'
+-- This rule generates an 'error' Problem element for each StructuralFeature
+-- whose upper attribute is lower than its upper attribute.
+rule StructuralFeatureLowerUpper {
+	from
+		i : KM3!StructuralFeature (
+			(i.upper < i.lower) and (i.upper <> 0-1)
+		)
+	to
+		o : Problem!Problem (
+			severity <- #error,
+			description <-
+					'Upper bound of Feature ' + i.owner.name + '::'
+					+ i.name + ' is lower than its lower bound',
+			location <- i.location
+		)
+}
+
+-- Rule 'StructuralFeatureUniqueOrdered'
+-- This rule generates an 'error' Problem element for each StructuralFeature
+-- whose upper attribute is 1 and isOrdered attribute is true.
+rule StructuralFeatureUniqueOrdered {
+	from
+		i : KM3!StructuralFeature (
+			(i.upper = 1) and (i.isOrdered = true)
+		)
+	to
+		o : Problem!Problem (
+			severity <- #error,
+			description <-
+					'Feature ' + i.owner.name + '::' + i.name
+					+ ' cannot be ordered with an upper bound equals to 1',
+			location <- i.location
+		)
+}
+
+-- Rule 'DataTypeReferenceProhibited'
+-- This rule generates an 'error' Problem element for each Reference which
+-- targets a Datatype element.
+rule DataTypeReferenceProhibited {
+	from
+		i : KM3!Reference (
+			not i.type.oclIsTypeOf(KM3!Class)
+		)
+	to
+		o : Problem!Problem (
+			severity <- #error,
+			description <-
+					'Reference ' + i.owner.name + '::' + i.name
+					+ ' cannot target a DataType element',
+			location <- i.location
+		)
+}
+
+-- Rule 'ClassAttributeUnsupportedByEcore'
+-- This rule generates an 'warning' Problem element for each Attribute whose
+-- type is Class.
+rule ClassAttributeUnsupportedByEcore {
+	from
+		i : KM3!Attribute (
+			i.type.oclIsTypeOf(KM3!Class)
+		)
+	to
+		o : Problem!Problem (
+			severity <- #warning,
+			description <-
+					'Class ' + i.owner.name + ' defines a class Attribute ('
+					+ i.name
+					+ ') that is not supported by the Ecore metamodel',
+			location <- i.location
+		)
+}
+
+-- Rule 'AbstractClassShouldHaveChildren'
+-- This rule generates an 'error' Problem element for each abstract Class which
+-- has no child.
+rule AbstractClassShouldHaveChildren {
+	from
+		i : KM3!Class (
+			i.isAbstract and
+			(thisModule.allClasses
+			 	->select(e | e.supertypes->includes(i))
+				->isEmpty()
+			 )
+		)
+	to
+		o : Problem!Problem (
+			severity <- #warning,
+			description <- 'the abstract Class ' + i.name + ' has no children',
+			location <- i.location
+		)
+}
+
+-- Rule 'ClassifierNameShouldStartWithUpperCase'
+-- This rule generates an 'critic' Problem element for each Classifier whose
+-- name does not start by an upper case character.
+rule ClassifierNameShouldStartWithUpperCase {
+	from
+		i : KM3!Classifier (
+			let firstChar : String = i.name.substring(1, 1) in
+				firstChar <> firstChar.toUpper()
+		)
+	to
+		o : Problem!Problem (
+			severity <- #critic,
+			description <-
+					'the name of Classifier ' + i.name
+					+ ' should begin with an upper case',
+			location <- i.location
+		)
+}

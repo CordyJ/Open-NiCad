@@ -1,0 +1,160 @@
+-- @name		Removal of association classes
+-- @version		1.0
+-- @domains		Catalogue of Model Transformations
+-- @authors		SIMON Eric(simon.eric3<at>gmail.com)
+-- @date		2006/08/02
+-- @description	This transformation replaces an association class with a new class and two associations.
+-- @see http://www.dcs.kcl.ac.uk/staff/kcl/tcat.pdf   
+-- @see section 1.2, page 2
+-- @see author of article : K. Lano
+
+module RemovingAnAssociationClass; -- Module Template
+create OUT : UML2 from IN : UML2;
+
+-- @begin Model
+rule Model {
+	from
+		inputM : UML2!Model
+	to
+		outputM : UML2!Model (
+			name <- inputM.name,
+			ownedMember <- inputM.ownedMember,
+			ownedMember <- inputM.ownedMember ->
+			select(a | a.oclIsTypeOf(UML2!AssociationClass))->
+			collect(c|Sequence {thisModule.resolveTemp(c, 'outputAsso1')})->flatten(),
+	  		ownedMember <- inputM.ownedMember ->
+	  		select(a | a.oclIsTypeOf(UML2!AssociationClass))->
+	  		collect(c|Sequence {thisModule.resolveTemp(c, 'outputAsso2')})->flatten()
+		)
+}
+-- @end Model
+
+-- @begin DataType
+rule DataType {
+	from 
+		inputC : UML2!DataType
+	to
+		outputC : UML2!DataType (
+		name <- inputC.name
+		)
+}
+-- @end DataType
+
+-- @begin LiteralNull
+rule LiteralNull {
+	from 
+		inputLN : UML2!LiteralNull
+	to
+		outputLN : UML2!LiteralNull
+}
+-- @end LiteralNull
+
+-- @begin LiteralInteger
+rule LiteralInteger {
+	from 
+		inputLI : UML2!LiteralInteger
+	to
+		outputLI : UML2!LiteralInteger (
+			value <- inputLI.value	
+		)
+}
+-- @end LiteralInteger
+
+-- @begin LiteralUnlimitedNatural
+rule LiteralUnlimitedNatural {
+	from 
+		inputLUN : UML2!LiteralUnlimitedNatural
+	to
+		outputLUN : UML2!LiteralUnlimitedNatural (
+			value <- inputLUN.value	
+		)
+}
+-- @end LiteralUnlimitedNatural
+
+-- @begin Property
+rule Property {
+	from 
+		inputC : UML2!Property
+		(
+			not (
+				inputC.class_.oclIsTypeOf(UML2!AssociationClass)
+			and
+				inputC.association.oclIsTypeOf(UML2!AssociationClass)
+				)
+		)
+	to
+		outputC : UML2!Property (
+			name <- inputC.name,
+			type <- inputC.type
+		)
+}
+-- @end Property
+
+-- @begin Class
+rule Class {
+	from 
+		inputC : UML2!Class
+		(not inputC.oclIsTypeOf(UML2!AssociationClass))
+	to 
+		outputC : UML2!Class (
+			name <- inputC.name,
+			ownedOperation <- inputC.ownedOperation,
+			nestedClassifier <-  inputC.nestedClassifier,
+			isActive <-  inputC.isActive,
+			ownedReception <-  inputC.ownedReception,
+			ownedAttribute <- inputC.ownedAttribute
+		)
+}
+-- @end Class
+
+-- @comment this rule replace a association class by a new class between two associations.
+-- @begin AssociationClass2Class
+rule AssociationClass2Class {
+	from 
+		inputA : UML2!AssociationClass
+	to
+		outputClass : UML2!Class (
+			name <- inputA.name,
+			ownedAttribute <- inputA.ownedAttribute->select(a|a.association->oclIsUndefined())
+		),
+		outputDef1 : UML2! LiteralInteger (
+			value <- 1	
+		),
+		outputPro11 : UML2!Property (
+			owningAssociation <- outputAsso1,
+			name <- inputA.memberEnd->at(1).name,
+			upperValue <- inputA.memberEnd->at(1).upperValue,
+			lowerValue <- inputA.memberEnd->at(1).lowerValue,
+			defaultValue <- inputA.memberEnd->at(1).defaultValue
+		),
+		outputPro12 : UML2!Property (
+			owningAssociation <- outputAsso1,
+			name <- inputA.memberEnd->at(2).type.name->toLower(),
+			defaultValue <- outputDef1
+		),
+		outputAsso1 : UML2!Association(
+			memberEnd <- outputPro11,
+			memberEnd <- outputPro12
+			
+		),
+		outputDef2 : UML2! LiteralInteger (
+			value <- 1	
+		),
+		outputPro21 : UML2!Property (
+			owningAssociation <- outputAsso2,
+			name <- inputA.memberEnd->at(2).name,
+			upperValue <- inputA.memberEnd->at(2).upperValue,
+			lowerValue <- inputA.memberEnd->at(2).lowerValue,
+			defaultValue <- inputA.memberEnd->at(2).defaultValue
+		),
+		outputPro22 : UML2!Property (
+			owningAssociation <- outputAsso2,
+			name <- inputA.memberEnd->at(1).type.name->toLower(),
+			defaultValue <- outputDef2
+		),
+		outputAsso2 : UML2!Association(
+			memberEnd <- outputPro21,
+			memberEnd <- outputPro22
+		)
+}
+-- @end	AssociationClass2Class

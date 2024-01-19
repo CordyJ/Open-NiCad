@@ -1,0 +1,105 @@
+module PathExp2PetriNet;
+create OUT : PetriNet from IN : PathExp;
+
+
+-------------------------------------------------------------------------------
+-- HELPERS --------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-- This helper computes the Set containing all the Transitions of the input
+-- PathExp model.
+-- CONTEXT: thisModule
+-- RETURN:	Set(PathExp!Transition)
+helper def: allTransitions : Set(PathExp!Transition) = 
+	PathExp!Transition.allInstances();
+
+
+-------------------------------------------------------------------------------
+-- RULES ----------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-- Rule 'Main'
+-- This rule generates a PetriNet element from the input PathExp element.
+-- The name of the generated PetriNet is copied from the input PathExp element.
+-- Its set of places and its set of transitions respectively correspond to the
+-- elements generated for states and the transitions of the input PathExp.
+-- Its set of arcs correspond to the 'pn_ia' and 'pn_oa' elements generated for
+-- the input Transition elements.
+rule Main {
+	from
+        pe : PathExp!PathExp
+	to 
+		pn : PetriNet!PetriNet (
+			name <- pe.name,
+			places <- pe.states,
+			transitions <- pe.transitions,
+			arcs <- thisModule.allTransitions
+						->collect(e | thisModule.resolveTemp(e, 'pn_ia'))
+						->union(
+							thisModule.allTransitions
+							->collect(e | thisModule.resolveTemp(e, 'pn_oa'))
+						)
+		)
+}
+
+
+-- Rule 'State'
+-- This rule generates a Place element from an input State element.
+-- Generated Place accepts an empty string as name.
+-- Its set of incoming arcs correspond to 'pn_oa' elements that are generated
+-- for the incoming Transitions of the input State.
+-- Its set of outgoing arcs correspond to 'pn_ia' elements that are generated
+-- for the outgoing Transitions of the input State.
+rule State {
+	from
+       pe_s : PathExp!State
+	to 
+		pn_p : PetriNet!Place (
+			name <- '',
+			incoming <-	pe_s.incoming
+							->collect(e | thisModule.resolveTemp(e, 'pn_oa')),
+			outgoing <- pe_s.outgoing
+							->collect(e | thisModule.resolveTemp(e, 'pn_ia'))
+		)
+}
+
+
+-- Rule 'Transition'
+-- From an input PathExp Transition, this rule generates:
+--  * a PetriNet Transition
+--  * a PlaceToTransArc
+--  * a TransToPlaceArc
+-- The generated Transition accepts an empty string as name, the generated
+-- 'pn_ia' PlaceToTransArc as incoming arc, and the generated 'pn_oa'
+-- TransToPlaceArc as outgoing arc.
+-- The generated PlaceToTransArc accepts the element generated for the source
+-- of the input PathExpTransition as source, and the generated PetriNet
+-- Transition as target.
+-- The generated TransToPlaceArc accepts the generated PetriNet Transition as
+-- source, and the element generated for the target of the input
+-- PathExpTransition as target.
+rule Transition {
+	from
+       pe_t : PathExp!Transition
+	to 
+		pn_t : PetriNet!Transition (
+			name <- '',
+			incoming <- pn_ia,
+			outgoing <- pn_oa
+		),
+		
+		pn_ia : PetriNet!PlaceToTransArc (
+			source <- pe_t.source,
+			target <- pn_t,
+			weight <- 1
+		),
+		
+		pn_oa : PetriNet!TransToPlaceArc (
+			source <- pn_t,
+			target <- pe_t.target,
+			weight <- 1			
+		)
+}
+

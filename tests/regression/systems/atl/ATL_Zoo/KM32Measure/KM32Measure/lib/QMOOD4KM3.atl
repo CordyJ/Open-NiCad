@@ -1,0 +1,286 @@
+--@atlcompiler	atl2006
+--@name			QMOOD4KM3
+--@version		1.0
+--@domains		KM3, QMOOD, metrics
+--@authors		Eric Vepa (evepa <at> sodius.com) for SODIUS (www.sodius.com)
+--@date			2007/06/05
+--@description	This library provides QMOOD (Quality Model for Object-Oriented Design) metrics suite on KM3 metamodels. Only the metrics that fit to KM3 metamodels have been implemented.
+--@see			Baroni, A.L.: Formal Definition of Object-Oriented Design Metrics. Master Thesis, Vrije University, Brussel, Belgium, 2002.
+
+library QMOOD4KM3; -- Library Template
+
+uses FLAME4KM3;
+
+-- ===============
+-- QMOOD Metrics =
+-- ===============
+
+--@begin helper QMOOD::DSC
+--@comments Design Size in Classes
+--@comments Count of the total number of Classes in the design.
+helper context KM3!Package
+def : DSC() : Integer =
+	self.CN();
+--@end helper QMOOD::DSC
+
+--@begin helper QMOOD::NOH
+--@comments Number of Hierarchies
+--@comments Count of the number of Class hierarchies in the design.
+--@comments In [Abreu et al., 2000], this metric has another interpretation.
+--@comments  There, hierarchies are not the number of inheritance relations but the number of inheritance trees.
+--@comments  In this case, this metric is always equal to 1 for systems developed in languages that have a common super class (like Object in Smalltalk and Java).
+--@comments  This case shows that the metric is centered in the language, which is considered as a potential problem (Remember QMOOD metrics were created based upon C++). 
+helper context KM3!Package
+def : NOH() : Integer =
+	self.allClasses->collect(c|c.children)->flatten()->asSet()->size();
+--@end helper QMOOD::NOH
+
+--@begin helper QMOOD::NIC
+--@comments Number of Independent Classes
+--@comments Count of the number of Classes that are not inherited by any Class in the design.
+helper context KM3!Package
+def : NIC() : Integer =
+	self.allClasses->select(c|c.isLeaf)->size();
+--@end helper QMOOD::NIC
+
+--@begin helper QMOOD::NSI
+--@comments Number of Single Inheritance
+--@comments Number of Classes (sub classes) that use inheritance in the design.
+--@comments According to [Abreu et al., 2000], for the same reason than in NOH, this metric would be always equal to DSC (if the Classes belonging to the development environment were considered) or to DSC – 1 (in the opposite case).
+--@comments This is another signal of language dependency.
+helper context KM3!Package
+def : NSI() : Integer =
+	self.allClasses->iterate(c; acc : Integer = 0|
+		if c.PARN() = 1
+			then acc + 1
+			else acc
+		endif);
+--@end helper QMOOD::NSI
+
+--@begin helper QMOOD::NMI
+--@comments Number of Multiple Inheritance
+--@comments Count of the number of instances of multiple inheritance in the design.
+--@comments [Abreu et al., 2000] say that for languages as Smalltalk or Delphi, which do not support multiple inheritance, this metric is always equal to zero.
+--@comments This interpretation is a clear signal of ill definition of the metric.
+helper context KM3!Package
+def : NMI() : Integer =
+	self.allClasses->iterate(c; acc : Integer = 0|
+		if c.PARN() > 1
+			then acc + 1
+			else acc
+		endif);
+--@end helper QMOOD::NMI
+
+--@begin helper QMOOD::NNC
+--@comments Number of Internal Classes
+--@comments Count of the number of internal Classes defined for creating generalization-specialization structures in Class hierarchies of the design.
+--@comments In this case, why to have the same value than NOH? Has this metric another interpretation? [Abreu et al., 2000] say that this metric is always equal to DSC or DSC -1, by the reasons pointed out in NOH and NSI.
+helper context KM3!Package
+def : NNC() : Integer =
+	self.NOH();
+--@end helper QMOOD::NNC
+
+--@begin helper QMOOD::NAC
+--@comments Number of Abstract Classes
+--@comments Count of the number of Classes that have been defined purely for organizing information in the design.
+helper context KM3!Package
+def : NAC() : Integer =
+	self.allClasses->select(c|c.isAbstract)->size();
+--@end helper QMOOD::NAC
+
+--@begin helper QMOOD::NLC
+--@comments Number of Leaf Classes
+--@comments Count of the number of leaf Classes in the hierarchies of the design.
+--@comments This metric is the same than NIC, defined above.
+helper context KM3!Package
+def : NLC() : Integer =
+	self.allClasses->select(c|c.isLeaf)->size();
+--@end helper QMOOD::NLC
+
+--@begin helper QMOOD::ADI
+--@comments Average Depth of Inheritance
+--@comments The average depth of inheritance of Classes in the design. It is computed by dividing the summation of maximum path lengths to all Classes by the number of Classes. The path length for a Class is the number of edges from the root to the Class in an inheritance tree representation. 
+helper context KM3!Package
+def : ADI() : Real =
+	self.allClasses->iterate(c; acc : Real = 0|(acc + c.DIT()) / self.CN());
+--@end helper QMOOD::ADI
+
+--@begin helper QMOOD::AWI
+--@comments Average Width of Inheritance
+--@comments The average number of children per Class in the design. The metric is computed by dividing the summation of the number of children over all Classes by the number of Classes in the design.
+--@comments Accordingly to a different view point, [Abreu et al., 2000] say this metric is always equal to DSC or DSC - 1, when multiple inheritance is not supported by the language, as in Smalltalk, Eiffel or Java. The same happens with NOH, NSI and NNC.
+helper context KM3!Package
+def : AWI() : Real =
+	self.allClasses->iterate(c; acc : Real = 0|(acc + c.CHIN()) / self.CN());
+--@end helper QMOOD::AWI
+
+--@begin helper QMOOD::ANA
+--@comments Average Number of Ancestors
+--@comments The average number of Classes from which a class inherits information.
+--@comments This metric is similar to the ADI measure and differs only when there are instances of multiple inheritance in the design.
+helper context KM3!Package
+def : ANA() : Real =
+	if self.CN() > 0
+		then self.internalBaseClasses->size() / self.CN()
+		else 0
+	endif;
+--@end helper QMOOD::ANA
+
+--@begin helper QMOOD::MAA
+--@comments Measure of Attribute Abstraction
+--@comments The ratio of the number of Attributes inherited by a Class to the total number of Attributes in the Class.
+--@comments In order to calculate MAA, number of attributes must be greater than zero.
+helper context KM3!Classifier
+def : MAA() : Integer =
+	let nbFCV : Integer =
+		self.allAttributes->iterate(a; acc : Integer = 0|
+			if self.FCV(a)
+				then acc + 1
+				else acc
+			endif) in
+	if nbFCV > 0
+		then self.IAN() / nbFCV
+		else 0
+	endif;
+--@end helper QMOOD::MAA
+
+--@begin helper QMOOD::MRA
+--@comments Measure of Reference Abstraction
+--@comments The ratio of the number of References inherited by a Class to the total number of References in the Class.
+--@comments In order to calculate MRA, number of references must be greater than zero.
+helper context KM3!Classifier
+def : MRA() : Integer =
+	let nbFCV : Integer =
+		self.allReferences->iterate(r; acc : Integer = 0|
+			if self.FCV(r)
+				then acc + 1
+				else acc
+			endif) in
+	if nbFCV > 0
+		then self.IRN() / nbFCV
+		else 0
+	endif;
+--@end helper QMOOD::MRA
+
+--@begin helper QMOOD::MOA
+--@comments Measure of Aggregation
+--@comments Count of the number of data declarations whose types are user defined Classes.
+helper context KM3!Classifier
+def : MOA() : Integer =
+	let owner : KM3!Package = self.package in
+	if not owner.oclIsUndefined()
+		then self.allFeatures->iterate(f; acc: Integer = 0|
+			if owner.allClasses->includes(f.type)
+				then acc + 1
+				else acc
+			endif)
+		else 0
+	endif;
+--@end helper QMOOD::MOA
+
+--@begin helper QMOOD::MRM
+--@comments Modeled Relationship Measure
+--@comments Measure of the total number of Attribute and Parameter based relationships in a Class.
+helper context KM3!Classifier
+def : MRM() : Integer =
+	self.DCC() + self.NAD();
+--@end helper QMOOD::MRM
+
+--@begin helper QMOOD::NOA
+--@comments Number of Ancestors
+--@comments Counts the number of distinct Classes which a Class inherits.
+helper context KM3!Classifier
+def : NOA() : Integer =
+	self.ASCN();
+--@end helper QMOOD::NOA
+
+--@begin helper QMOOD::NOR
+--@comments Number of References
+--@comments Count of all the References defined in a Class.
+helper context KM3!Classifier
+def : NOR() : Integer =
+	self.ARN();
+--@end helper QMOOD::NOR
+
+--@begin helper QMOOD::NOD
+--@comments Number of Attributes
+--@comments Number of Attributes in the Class.
+helper context KM3!Classifier
+def : NOD() : Integer =
+	self.AAN();
+--@end helper QMOOD::NOD
+
+--@begin helper QMOOD::NAD
+--@comments Number of Abstract Data Types
+--@comments Number of user defined objects (ADTs) used as Features in the Class and which are necessary to instantiate an object instance of the (aggregate) Class.
+helper context KM3!Classifier
+def : NAD() : Integer =
+	self.allFeatures->collect(f|f.type)->
+		reject(c|c.oclIsKindOf(KM3!DataType))->
+			reject(c|c.oclIsKindOf(KM3!Enumeration))->asSet()->size();
+--@end helper QMOOD::NAD
+
+--@begin helper QMOOD::CSM
+--@comments Class Size Metric
+--@comments Sum of the number of References and Attributes in the Class.
+helper context KM3!Classifier
+def : CSM() : Integer =
+	self.AAN() + self.ARN();
+--@end helper QMOOD::CSM
+
+--@begin helper QMOOD::DCC
+--@comments Direct Class Coupling
+--@comments Count of the different number of Classes that a Class is directly related to. The metric includes Classes that are directly related by Attribute and References declarations.
+helper context KM3!Classifier
+def : DCC() : Integer =
+	self.allFeatures->collect(f|f.type)->
+		reject(c|c.oclIsKindOf(KM3!DataType))->
+			reject(c|c.oclIsKindOf(KM3!Enumeration))->asSet()->size();
+--@end helper QMOOD::DCC
+
+--@begin helper QMOOD::MCC
+--@comments Maximum Class Coupling
+--@comments This metric not only includes Classes that are directly related to a Class by Attributes and References, but also Classes that are indirectly related through the directly related Classes.
+helper context KM3!Classifier
+def : MCC() : Integer =
+	self.allFeatures->collect(f|f.type)->
+		reject(c|c.oclIsKindOf(KM3!DataType))->
+			reject(c|c.oclIsKindOf(KM3!Enumeration))->
+				iterate(t; acc : Sequence(KM3!Classifier) = Sequence{}|
+					acc->union(t.allFeatures->collect(f|f.type)))->
+						reject(c|c.oclIsKindOf(KM3!DataType))->asSet()->size();
+--@end helper QMOOD::MCC
+
+--@begin helper QMOOD::DAC
+--@comments Direct Attribute Based Coupling
+--@comments This metric is a direct count of the number of different Class types that are declared as Attribute references inside a Class.
+helper context KM3!Classifier
+def : DAC() : Integer =
+	self.allAttributes->collect(a|a.type)->
+		reject(c|c.oclIsKindOf(KM3!DataType))->
+			reject(c|c.oclIsKindOf(KM3!Enumeration))->asSet()->size();
+--@end helper QMOOD::DAC
+
+--@begin helper QMOOD::DRC
+--@comments Direct Reference Based Coupling
+--@comments This metric is a direct count of the number of different Class types that are declared as Reference inside a Class.
+helper context KM3!Classifier
+def : DRC() : Integer =
+	self.allReferences->collect(a|a.type)->
+		reject(c|c.oclIsKindOf(KM3!DataType))->
+			reject(c|c.oclIsKindOf(KM3!Enumeration))->asSet()->size();
+--@end helper QMOOD::DRC
+
+--@begin helper QMOOD::CCD
+--@comments Class Complexity Based on Data
+--@comments Computes complexity based upon the number of components (Attributes) that are defined in the Class.
+--@comments All component declarations are resolved to the basic primitives (integers, doubles and characters).
+--@comments The metric value is a count of the number of primitives.
+helper context KM3!Classifier
+def : CCD() : Integer =
+	self.AAN() + (self.allAttributes->
+		collect(a|a.type)->
+		reject(c|c.oclIsKindOf(KM3!DataType))->
+			reject(c|c.oclIsKindOf(KM3!Enumeration))->
+				iterate(t; acc : Integer = 0|acc + t.AAN()));
+--@end helper QMOOD::CCD

@@ -1,0 +1,352 @@
+module Ant2Maven;
+create OUTMaven : MavenMaven ,OUTProject : MavenProject  from IN : Ant;
+
+-- central element : Project
+-- two files to create : MavenMaven (representing maven.xml)
+--						and MavenProject (representing project.xml)
+rule AntProject2Maven{
+		from a : Ant!Project(
+		if a.description.oclIsUndefined() 
+			then false
+			else not (a.description='')
+			endif
+	)
+		-- for MavenProject
+		to mp : MavenProject!Project(
+			    id <- a.name,
+			    name <- a.name,
+				description <- a.description,
+				build <- mpBuild
+				),
+			 mpBuild : MavenProject!Build(
+				sourceDirectory <- a.basedir,
+				defaultGoal <- a.default.name
+				),
+		-- for MavenMaven
+			mm : MavenMaven!Project(
+				xmlns <- itsXmlns,
+				default <- a.default,
+				path <- a.path,
+				properties <- a.properties,
+				taskdefs <- a.taskdef,
+				goals <- a.targets
+			 	),
+			itsXmlns : MavenMaven!Xmlns(
+				name <- 'ant',
+				value <- 'jelly:ant'
+			)
+}
+
+rule AntProject2MavenWithoutDescription{
+		from a : Ant!Project(
+		if a.description.oclIsUndefined() 
+			then true
+			else a.description=''
+			endif
+	)
+		-- for MavenProject
+		to mp : MavenProject!Project(
+			    id <- a.name,
+			    name <- a.name,
+				build <- mpBuild
+				),
+			 mpBuild : MavenProject!Build(
+				sourceDirectory <- a.basedir,
+				defaultGoal <- a.default.name
+				),
+		-- for MavenMaven
+			mm : MavenMaven!Project(
+				xmlns <- itsXmlns,
+				default <- a.default,
+				path <- a.path,
+				properties <- a.properties,
+				taskdefs <- a.taskdef,
+				goals <- a.targets--,
+			--	prePostGoals <- a.targets -> select(e|not e.depends.oclIsUndefined() and e.depends->size()>0)
+			 	),
+			itsXmlns : MavenMaven!Xmlns(
+				name <- 'ant',
+				value <- 'jelly:ant'
+			)
+}
+
+-----------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------
+-- rules only for Maven.xml (meta model : MavenMaven)
+
+ -- goals
+-- rule AntTarget2MavenMavenGoal2{
+--	from a : Ant!Target(
+--		a.depends.oclIsUndefined() or a.depends->size()=0
+--	)
+--	to mg : MavenMaven!Goal(
+--		name <- a.name,
+--		contentsGoal <- a.tasks
+--		)
+-- }
+
+rule AntTarget2MavenMavenGoal{
+	from a : Ant!Target
+	using {
+		itsDependencies : Sequence(Ant!Target) = a.depends->asSequence();
+	}
+	to mg : MavenMaven!Goal(
+		name <- a.name,
+		contentsGoal <- Sequence{dependencies,a.tasks}
+		),
+	dependencies : distinct MavenMaven!AttainGoal foreach(g in itsDependencies) (
+		attainGoal <- g
+	)
+ }
+ 
+------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------
+-- for the following rules : simple copy
+-----------------------------------------------------------
+-- copy of Ant Properties
+
+rule AntPropertyValue2MavenMavenAntPropertyValue{
+	from a : Ant!PropertyValue
+	to m : MavenMaven!AntPropertyValue(
+		name <- a.name,
+		value <- a.value
+	)
+}
+
+rule AntPropertyLocation2MavenMavenAntPropertyLocation{
+	from a : Ant!PropertyLocation
+	to m : MavenMaven!AntPropertyLocation(
+		name <- a.name,
+		location <- a.location
+	)
+}
+
+
+rule AntPropertyFile2MavenMavenAntPropertyFile{
+	from a : Ant!PropertyFile
+	to m : MavenMaven!AntPropertyFile(
+		file <- a.file)
+}
+
+rule AntPropertyEnv2MavenMavenAntPropertyEnv{
+	from a : Ant!PropertyEnv
+	to m : MavenMaven!AntPropertyEnv(
+		environment <- a.environment)
+}
+
+----------------------------------------------------------------------------------------
+-- copy of tasks
+
+------------------------------------------------------
+-- java tasks
+rule AntJava2MavenMavenJava{
+	from a : Ant!Java
+	to m : MavenMaven!Java(
+		classname <- a.classname,
+		jar <- a.jar,
+		fork <- a.fork,
+  		classPath <- a.classPath
+	)
+}
+
+rule AntJavac2MavenMavenJavac{
+	from a : Ant!Javac
+	to m : MavenMaven!Javac(
+		destdir <- a.destdir,
+		srcdir <- a.srcdir,
+  		classPath <- a.classPath,
+		inExcludes <- a.inExcludes
+	)
+}
+
+rule AntJavadoc2MavenMavenJavadoc{
+	from a : Ant!Javadoc
+	to m : MavenMaven!Javadoc(
+	 	sourcepath <- a.sourcepath,
+  		destdir <- a.destdir,
+  		packagenames <- a.packagenames,
+  		defaultexcludes <- a.defaultexcludes,
+  		author <- a.author,
+  		version <- a.version,
+  		use <- a.use,
+  		windowtitle <- a.windowtitle
+	)
+}
+
+---------------------------------------------------------
+-- MANAGEMENT PROPERTIES tasks 
+rule AntTstamp2MavenMavenTstamp{
+    from a : Ant!Tstamp
+	to m : MavenMaven!Tstamp()
+}
+
+---------------------------------------------------------
+-- MANAGEMENT ARCHIVE tasks 
+rule AntJar2MavenMavenJar{
+	from a : Ant!Jar
+	to m : MavenMaven!Jar(
+		jarfile <- a.jarfile,
+		basedir <- a.basedir)
+}
+
+---------------------------------------------------------
+-- MANAGEMENT FILES tasks 
+rule AntMkdir2MavenMavenMkdir{
+	from a : Ant!Mkdir
+	to m : MavenMaven!Mkdir(
+		dir <- a.dir)
+}
+
+rule AntCopy2MavenMavenCopy{
+	from a : Ant!Copy
+	to m : MavenMaven!Copy(
+		todir <- a.todir,
+		fileset <- a.fileset,
+		filterset <- a.filterset
+	)
+}
+
+
+rule AntDelete2MavenMavenDelete{
+	from a : Ant!Delete
+	to m : MavenMaven!Delete(
+		dir <- a.dir)
+}
+
+------------------------------------------------------------
+-- tasks defined by the user
+rule AntTaskDef2MavenMavenTaskDef{
+	from a : Ant!TaskDef
+	to m : MavenMaven!AntTaskDef(
+		name <- a.name,
+		classname <- a.classname
+	)
+}
+
+rule AntNewTask2MavenMavenNewTask{
+	from a : Ant!NewTask
+	to m : MavenMaven!NewTask(
+		taskName <- a.taskName,
+		attributes <- a.attributes
+	)
+}
+
+rule AntAttribut2MavenMavenAttribut{
+	from a : Ant!Attribut
+	to m : MavenMaven!Attribut(
+		name <- a.name,
+		value <- a.value
+	)
+}
+-------------------------------------------------------------------------------------
+-- copy for Path
+
+ rule AntPath2MavenMavenPath{
+	from a : Ant!Path
+	to mm : MavenMaven!Path(
+		id <- a.id,
+		refid <- a.refid,
+		fileset <- a.fileset,
+		path <- a.path,
+	 	pathElement <- a.pathElement
+	)
+}
+
+ rule AntClassPath2MavenMavenClassPath{
+	from a : Ant!ClassPath
+	to mm : MavenMaven!ClassPath(
+		refid <- a.refid,
+		pathElement <- a.pathElement,
+        fileset <- a.fileset
+	)
+ }
+ 
+rule AntPathElement2MavenMavenPathElement{
+	from a : Ant!PathElement
+	to mm : MavenMaven!PathElement(
+		path <- a.path,
+		location <- a.location
+	)
+}
+
+rule AntFileSet2MavenMavenFileSet{
+	from a : Ant!FileSet
+	to m : MavenMaven!FileSet(
+		dir <- a.dir,
+        patternset <- a.patternset,
+        include <- a.include,
+        exclude <- a.exclude
+	)
+}
+
+-- filters
+rule AntFilterSet2MavenMavenFilterSet{
+	from a : Ant!FilterSet
+	to m : MavenMaven!FilterSet(
+		starttoken <- a.starttoken,
+   		endtoken <- a.endtoken,
+		filter <- a.filter,
+		filtersfile <- a.filtersfile
+	)
+}
+
+rule AntFilter2MavenMavenFilter{
+	from a : Ant!Filter
+	to m : MavenMaven!Filter(
+		token <- a.token,
+		value <- a.value
+	)
+}
+
+rule AntFiltersFile2MavenMavenFiltersFile{
+	from a : Ant!FiltersFile
+	to m : MavenMaven!FiltersFile(
+		file <- a.file
+	)
+}
+
+-- pattern
+rule AntPatternset2MavenMavenPatternset{
+	from a : Ant!PatternSet
+	to m : MavenMaven!PatternSet(
+		inexcludes <- a.inexcludes
+	)
+}
+ 
+
+ rule AntIncludes2MavenMavenIncludes{
+	from a : Ant!Includes
+	to m : MavenMaven!Includes(
+		name <- a.name,
+		ifCondition <- a.ifCondition,
+		unless <- a.unless
+	)
+}
+ 
+rule AntExcludes2MavenMavenExcludes{
+	from a : Ant!Excludes
+	to m : MavenMaven!Excludes(
+		name <- a.name,
+		ifCondition <- a.ifCondition,
+		unless <- a.unless
+		)
+}
+
+rule AntIncludesFile2MavenMavenIncludesFile{
+	from a : Ant!IncludesFile
+	to m : MavenMaven!IncludesFile(
+		name <- a.name,
+		ifCondition <- a.ifCondition,
+		unless <- a.unless
+	)
+}
+
+rule AntExcludesFile2MavenMavenExcludesFile{
+	from a : Ant!ExcludesFile
+	to m : MavenMaven!ExcludesFile(
+		name <- a.name,
+		ifCondition <- a.ifCondition,
+		unless <- a.unless
+		)
+}

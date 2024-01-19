@@ -1,0 +1,451 @@
+module KM32DOT;
+create OUT: DOT from IN: KM3;
+
+-- Parameters
+
+	-- DiagramType
+	-- Specifies what kind of diagram shall be rendered: a Generalization one, 
+	-- or one based on composition links, or a standard one.
+	-- Possible values:	'None' | 'Generalization' | 'Composition'
+helper def: DiagramType(): String = 'None';
+
+	-- Mode
+	-- Specifies what association type shall be used so as to compute the
+	-- layout of the diagram
+	-- Possible values:	'All' | 'Generalization' | 'Composition' | 'Reference'
+helper def: Mode(): String = 'All';
+
+	-- Invisible
+	-- Specifies whether the associations not used in the computation of the
+	-- layout have yet to be rendered. For example, if Invisible = true and
+	-- Mode = Generalization, the diagram will be rendered as if only
+	-- generalization links did matter. If Invisible = false, then only
+	-- generalization links are drawn, but the layout is the same as if
+	-- Possible values:	true | false
+helper def: Invisible(): Boolean = false;
+
+	-- MinimumArcLength
+	-- Specifies the minimum length of an association, in inches.
+	-- Possible values:	any positive integer value
+helper def: MinimumArcLength(): Integer = 2;
+
+	-- MinimumNodeSeparation
+	-- Specifies the minimum distance between two nodes, in inches.
+	-- Possible values:	any positive real value
+helper def: MinimumNodeSeparation(): Real = 0.75;
+
+	-- RankingDirection
+	-- Specifies the direction in which the diagram should be rendered. Most
+	-- class diagrams are rendered with the value 'BT'
+	-- Possible values:	'BT' | 'TB' | 'LR' | 'RL' (Bottom to Top, 
+	-- 	Top to Bottom, Left to Right, Right to Left)
+helper def: RankingDirection(): String = 'BT';
+
+helper def: LabelJustification(): String = 'l';
+
+helper def: LabelLocation(): String = 't';
+
+	-- DataTypeHeader
+	-- The name of a datatype should begin with <<DataType>>
+helper def: DataTypeHeader(): String = '&#171;DataType&#187;\\n';
+
+-- End Parameters
+
+-- HELPERS
+	-- DiagramMode
+	-- Returns whether the DiagramMode parameter is the one tried or not
+	-- IN:	mode: String
+	-- OUT:	Boolean
+helper def: DiagramMode(mode: String): Boolean =
+	mode = thisModule.Mode();
+
+	-- getDataTypeHead
+	-- Returns the name of the datatype, with its header
+	-- IN:	N/A
+	-- OUT: String
+helper context KM3!DataType def: getDataTypeHead(): String =
+	thisModule.DataTypeHeader() + self.name;
+
+	-- getLabel
+	-- Returns the correct SimpleLabel content for a KM3 Class:
+	--	Name | Attributes | Operations
+	-- IN:	N/A
+	-- OUT: String
+helper context KM3!Class def: getLabel(): String =
+	'{' + self.getName() + '|' 
+	+ self.getAttributes() + '|' 
+	+ self.getOperations() + '}';
+
+	-- getName
+	-- Returns the name of the class. If the class is abstract, the name
+	-- is put between slashes
+	-- IN:	N/A
+	-- OUT:	String
+helper context KM3!Class def: getName(): String = 
+	if self.isAbstract then
+		'/' + self.name + '/'
+	else
+		self.name
+	endif;
+
+	-- getAttributes
+	-- Returns the list of attributes of the class, with one attribute per line
+	-- and the correct multiplicities, using the getMultiplicity helper.
+	-- IN:	N/A
+	-- OUT:	String
+helper context KM3!Class def: getAttributes(): String =
+	let attributes : Sequence(KM3!Attribute) = self.structuralFeatures->
+		select( e |
+		e.oclIsKindOf(KM3!Attribute)) in
+	if attributes->notEmpty() then
+		attributes->iterate( e; acc: String = '' |
+			acc + if acc = '' then '' else '\\n' endif +
+			e.name + e.getMultiplicity() + ' : ' + e.type.name
+		)
+	else
+		' '
+	endif;
+
+	-- getOperations
+	-- Returns the list of operation of the class, with one operation per line,
+	-- their parameters and return type.
+	-- IN:	N/A
+	-- OUT:	String
+helper context KM3!Class def: getOperations(): String =
+	let operations : Sequence(KM3!Operation) = self.operations in
+	if operations->notEmpty() then
+		operations->iterate( e; acc: String = '' |
+			acc + e.name + e.getParameters() +
+			if e.type.oclIsUndefined() then
+				''
+			else
+				' : ' 	+ e.type.name
+			endif + '\\n')
+	else
+		' '
+	endif;
+
+	-- getMultiplicity
+	-- Returns the multiplicity of the element
+	-- IN:	N/A
+	-- OUT:	String
+helper context KM3!TypedElement def: getMultiplicity(): String =
+	if self.lower = 0 then
+		if self.upper = 0-1 then
+			'[*]'
+		else
+			'[' + self.lower.toString() + '-' + self.upper.toString() + ']'
+		endif
+	else
+		if self.upper = 1 then
+			''
+		else
+			if self.upper = 0-1 then
+				'[' + self.lower.toString() + '-' + '*]'
+			else
+				'[' + self.lower.toString() + self.upper.toString() + ']'
+			endif
+		endif
+	endif;
+
+	-- getParameters
+	-- Returns the parameters of the current operation, with their types,
+	-- and separated with commas.
+	-- IN:	N/A
+	-- OUT:	String
+helper context KM3!Operation def: getParameters(): String =
+	let parameters : Sequence(KM3!Parameters) = self.parameters in
+	'(' + parameters->iterate( e; acc: String = '' |
+		acc + 
+		if e.name = parameters->last().name then
+			e.name + ' : ' + e.type.name
+		else
+			e.name + ' : ' + e.type.name + ','
+		endif)
+	+ ')';
+
+	-- relationsList
+	-- This helper is used so as to match a reference only once. Indeed, in 
+	-- KM3, if the relation is bidirectionnal, it is referenced in both its
+	-- edge classes.
+	-- It puts the container class the second part of the returned tuple.
+	-- IN:	N/A
+	-- OUT:	Sequence(Tuple (reference, opposite reference))
+helper def: relationsList: Sequence(
+	TupleType(ref: KM3!Reference, opposite : KM3!Reference)) =
+	let references: Sequence(KM3!Reference) = KM3!Reference.allInstances()->
+	reject( e |
+		e.opposite.oclIsUndefined()) in
+	references->iterate( e; 
+		acc: Sequence(TupleType(ref: KM3!Reference, opposite: KM3!Reference)) =
+		Sequence{} |
+			if acc->excludes(Tuple{ref = e, opposite = e.opposite}) then
+				if acc->excludes(Tuple{ref = e.opposite, opposite = e}) then
+					if e.opposite.isContainer then
+						acc->append(Tuple{ref = e, opposite = e.opposite})
+					else
+						acc->append(Tuple{ref = e.opposite, opposite = e})
+					endif
+				else
+					acc
+				endif
+			else
+				acc
+			endif);
+-- END HELPERS
+
+-- RULES
+	-- Metamodel2Graph
+	-- Transforms a KM3 Metamodel element into a DOT oriented graph element,
+	-- using many parameters defined at the beginning of this transformation.
+	-- The Graph elements contains then contents of the KM3 Metamodel element.
+rule Metamodel2Graph {
+	from
+		m: KM3!Metamodel
+	to
+		out: DOT!Graph (
+			type <- 'digraph',
+			name <- 'KM3 Model in DOT',
+			rankDir <- thisModule.RankingDirection(),
+			labeljust <- thisModule.LabelJustification(),
+			labelloc <- thisModule.LabelLocation(),
+			compound <- true,
+			concentrate <- thisModule.DiagramMode('Generalization') and 
+			not thisModule.Invisible(),
+			nodeSeparation <- thisModule.MinimumNodeSeparation(),
+			nodes <- m.contents
+		)
+}
+
+	-- Package
+	-- Transforms a Package into a SubGraph that will be rendered within a 
+	-- black box (because its name begins with 'cluster_' and its color is set
+	-- at black). It may contain nodes or subgraphs, dot supports nested 
+	-- subgraphs, and KM3 supports nested packages.
+rule Package {
+	from
+		p: KM3!Package
+	to
+		out: DOT!SubGraph (
+			name <- 'cluster_' + p.name,
+			label <- SubGraphLabel,
+			color <- 'black',
+			labelloc <- thisModule.LabelLocation(),
+			nodes <- p.contents
+		),
+		SubGraphLabel: DOT!SimpleLabel (
+			content <- p.name
+		)
+}
+
+	-- Datatypes
+	-- Transforms a Datatype into a Record Node using the datatype header
+rule Datatypes {
+	from
+		d: KM3!DataType
+	to
+		out: DOT!Node (
+			name <- d.name,
+			shape <- NodeShape
+		),
+		NodeShape: DOT!RecordNodeShape (
+			name <- 'record',
+			label <- NodeLabel
+		),
+		NodeLabel: DOT!SimpleLabel (
+			content <- '{' + d.getDataTypeHead() +  '|' + '}'	
+		)
+}
+
+	-- ClassWithSupertypesGeneralizationsDrawn2Node
+	-- Transforms a class into a node, and creates the generalization arcs
+	-- foreach superclass
+rule ClassWithSupertypesGeneralizationsDrawn2Node {
+	from
+		c: KM3!Class (
+			not(c.supertypes->oclIsUndefined())	and 
+			(thisModule.Invisible() or 
+			(thisModule.DiagramMode('Generalization') or 
+			thisModule.DiagramMode('All')))
+		)
+	to
+		out: DOT!Node (
+			name <- c.name,
+			shape <- nodeShape,
+			refers <- Sequence {c.structuralFeatures->select( e |
+					e.oclIsKindOf(KM3!Reference))}->append(supertypeClasses)
+		),
+		nodeShape: DOT!RecordNodeShape (
+			name <- 'record',
+			label <- NodeLabel
+		),
+		NodeLabel : DOT!SimpleLabel (
+			content <- c.getLabel()	
+		),
+		supertypeClasses: distinct DOT!DirectedArc 
+		foreach(super in c.supertypes) (
+			constraint <- (thisModule.DiagramType() = 'Generalization' or
+				thisModule.DiagramType() = 'None'),
+			style <- if thisModule.DiagramMode('Generalization') or 
+			thisModule.DiagramMode('All') then 'none' else 'invis' endif,
+			fromNode <- c,
+			toNode <- super,
+			group <- super.name,
+			minlen <- thisModule.MinimumArcLength(),
+			arrowHead <- arrowHeadShape
+		),
+		arrowHeadShape: distinct DOT!ArrowShape 
+		foreach(super in c.supertypes) (
+			name <- 'normal',
+			isPlain <- true
+		)
+}
+
+	-- ClassWithSupertypesGeneralizationsNotDrawn2Node
+	-- Transforms a class into a node, and does not create the generalization 
+	-- arcs either because it has no superclass, or because the parameters set 
+	-- for the transformation imply not drawing any generalization arc
+rule ClassWithSupertypesGeneralizationsNotDrawn2Node {
+	from
+		c: KM3!Class (
+			c.supertypes->oclIsUndefined() or
+			(not(c.supertypes->oclIsUndefined()) and 
+			(thisModule.Invisible() or 
+			not(thisModule.DiagramMode('Generalization') or 
+			thisModule.DiagramMode('All'))))
+		)
+	to
+		out: DOT!Node (
+			name <- c.name,
+			shape <- nodeShape,
+			refers <- Sequence {c.structuralFeatures->select( e |
+					e.oclIsKindOf(KM3!Reference))}
+		),
+		nodeShape: DOT!RecordNodeShape (
+			name <- 'record',
+			label <- NodeLabel
+		),
+		NodeLabel : DOT!SimpleLabel (
+			content <- c.getLabel()	
+		)
+}
+
+	-- Reference2OneWayArc
+	-- Transforms a one way reference into a unidirectional arc, with the
+	-- proper arrowhead and arrowtail (there may be one way compositions for
+	-- instance), and with its role and multiplicity
+rule Reference2OneWayArc {
+	from
+		r: KM3!Reference (
+			r.opposite.oclIsUndefined()	and 
+			(thisModule.Invisible() or 
+			(if r.isContainer then
+				thisModule.DiagramMode('Composition')
+			else thisModule.DiagramMode('Reference') 
+			endif or 
+			thisModule.DiagramMode('All')))
+		)
+	to
+		out: DOT!DirectedArc (
+			fromNode <- r.owner,
+			toNode <- r.type,
+			arrowHead <- arrowHeadShape,
+			arrowTail <- arrowTailShape,
+			group <- r.type.name,
+			style <- if thisModule.DiagramMode('All') or
+			thisModule.DiagramMode('Reference') then 'none' else
+				if thisModule.DiagramMode('Composition') and
+				r.isContainer then 'none' else
+				'invis' endif endif,
+			minlen <- thisModule.MinimumArcLength(),
+			headlabel <- ArcHeadLabel,
+			constraint <- (r.isContainer 
+				and (thisModule.DiagramType() = 'Composition' or
+				thisModule.DiagramType() = 'None'))
+		),
+		ArcHeadLabel : DOT!SimpleLabel (
+			content <-  r.name + r.getMultiplicity() + if r.isOrdered then
+					'{ordered}'
+				else
+					''
+				endif
+		),
+		arrowHeadShape: DOT!ArrowShape (
+			name <- 'vee',
+			isPlain <- false,
+			clipping <- 'none'
+		),
+		arrowTailShape: DOT!ArrowShape (
+			name <- if r.isContainer then 'diamond' else 'none' endif,
+			isPlain <- false,
+			clipping <- 'none'
+		)
+}
+
+	-- Reference2Arc
+	-- Transforms a bidirectional reference into a bidirectional arc, with its
+	-- roles, multiplicities and arrowshapes.
+rule Reference2Arc {
+	from
+		r: KM3!Reference (
+			if not(r.opposite.oclIsUndefined()) then
+				thisModule.relationsList->includes(
+					Tuple{ref = r, opposite = r.opposite}) and
+					(thisModule.Invisible() or 
+					(if r.isContainer or r.opposite.isContainer then
+						thisModule.DiagramMode('Composition')
+					else
+						thisModule.DiagramMode('Reference')
+					endif
+					or thisModule.DiagramMode('All')))
+			else
+				false
+			endif
+		)
+	to
+		out: DOT!DirectedArc (
+			fromNode <- r.owner,
+			toNode <- r.type,
+			group <- r.type.name,
+			minlen <- thisModule.MinimumArcLength(),
+			arrowHead <- arrowHeadShape,
+			arrowTail <- arrowTailShape,
+			taillabel <- ArcTailLabel,
+			style <- if thisModule.DiagramMode('All') or
+			thisModule.DiagramMode('Reference') then 'none' else
+				if thisModule.DiagramMode('Composition') 
+				and (r.isContainer or r.opposite.isContainer) then 'none' else
+				'invis' endif endif,
+			constraint <- ((r.isContainer or r.opposite.isContainer) and 
+				(thisModule.DiagramType() = 'Composition' or
+				thisModule.DiagramType() = 'None')),
+			headlabel <- ArcHeadLabel
+		),
+		ArcHeadLabel : DOT!SimpleLabel (
+			content <- r.name + r.getMultiplicity() + if r.isOrdered then
+					'{ordered}'
+				else
+					''
+				endif
+		),
+		ArcTailLabel : DOT!SimpleLabel (
+			content <- r.opposite.name + r.opposite.getMultiplicity() + 
+				if r.opposite.isOrdered then
+					'{ordered}'
+				else
+					''
+				endif	
+		),
+		arrowHeadShape: DOT!ArrowShape (
+			name <- if r.opposite.isContainer then 'diamond' else 'none' endif,
+			isPlain <- false,
+			clipping <- 'none'
+		),
+		arrowTailShape: DOT!ArrowShape (
+			name <- if r.isContainer then 'diamond' else 'none' endif,
+			isPlain <- false,
+			clipping <- 'none'
+		)
+}
+
+-- END RULES

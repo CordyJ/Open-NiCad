@@ -1,0 +1,99 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<definitions
+   name="AnimalSearchWSv2"
+   targetNamespace="http://com/clarkston/cts/webservice/animal/search/AnimalSearchWSv2.wsdl"
+   xmlns="http://schemas.xmlsoap.org/wsdl/"
+   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+   xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+   xmlns:tns="http://com/clarkston/cts/webservice/animal/search/AnimalSearchWSv2.wsdl"
+   xmlns:ns1="http://com.clarkston.cts.webservice.animal.search/IAnimalSearchWSv2.xsd">
+   <types>
+      <schema
+         targetNamespace="http://com.clarkston.cts.webservice.animal.search/IAnimalSearchWSv2.xsd"
+         xmlns="http://www.w3.org/2001/XMLSchema"
+         xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/">
+         <complexType name="com_clarkston_cts_webservice_animal_search_value_AnimalSearchCriteriaWSValue" jdev:packageName="com.clarkston.cts.webservice.animal.search.value" xmlns:jdev="http://xmlns.oracle.com/jdeveloper/webservices">
+            <all>
+               <element name="tagRangeList" type="ns1:ArrayOfcom_clarkston_cts_webservice_value_TagRangeWSValue"/>
+               <element name="publicAccountId" type="string"/>
+            </all>
+         </complexType>
+         <complexType name="com_clarkston_cts_webservice_value_TagRangeWSValue" jdev:packageName="com.clarkston.cts.webservice.value" xmlns:jdev="http://xmlns.oracle.com/jdeveloper/webservices">
+            <all>
+               <element name="tagType" type="string"/>
+               <element name="endTag" type="string"/>
+               <element name="startTag" type="string"/>
+            </all>
+         </complexType>
+         <complexType name="ArrayOfcom_clarkston_cts_webservice_value_TagRangeWSValue" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+            <complexContent>
+               <restriction base="SOAP-ENC:Array">
+                  <attribute ref="SOAP-ENC:arrayType" wsdl:arrayType="ns1:com_clarkston_cts_webservice_value_TagRangeWSValue[]"/>
+               </restriction>
+            </complexContent>
+         </complexType>
+         <complexType name="com_clarkston_cts_webservice_animal_search_value_AnimalSearchResultWSValue" jdev:packageName="com.clarkston.cts.webservice.animal.search.value" xmlns:jdev="http://xmlns.oracle.com/jdeveloper/webservices">
+            <all>
+               <element name="status" type="string"/>
+               <element name="msgs" type="ns1:ArrayOfString"/>
+               <element name="searchResults" type="ns1:ArrayOfcom_clarkston_cts_webservice_animal_search_value_AnimalWSValue"/>
+            </all>
+         </complexType>
+         <complexType name="ArrayOfString" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+            <complexContent>
+               <restriction base="SOAP-ENC:Array">
+                  <attribute ref="SOAP-ENC:arrayType" wsdl:arrayType="xsd:string[]"/>
+               </restriction>
+            </complexContent>
+         </complexType>
+         <complexType name="com_clarkston_cts_webservice_animal_search_value_AnimalWSValue" jdev:packageName="com.clarkston.cts.webservice.animal.search.value" xmlns:jdev="http://xmlns.oracle.com/jdeveloper/webservices">
+            <all>
+               <element name="sex" type="string"/>
+               <element name="dateOfBirthMethod" type="string"/>
+               <element name="birthDate" type="string"/>
+               <element name="pinSource" type="string"/>
+               <element name="tag" type="string"/>
+               <element name="age" type="long"/>
+            </all>
+         </complexType>
+         <complexType name="ArrayOfcom_clarkston_cts_webservice_animal_search_value_AnimalWSValue" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+            <complexContent>
+               <restriction base="SOAP-ENC:Array">
+                  <attribute ref="SOAP-ENC:arrayType" wsdl:arrayType="ns1:com_clarkston_cts_webservice_animal_search_value_AnimalWSValue[]"/>
+               </restriction>
+            </complexContent>
+         </complexType>
+      </schema>
+   </types>
+   <message name="executeSearch0Request">
+      <part name="criteria" type="ns1:com_clarkston_cts_webservice_animal_search_value_AnimalSearchCriteriaWSValue"/>
+   </message>
+   <message name="executeSearch0Response">
+      <part name="return" type="ns1:com_clarkston_cts_webservice_animal_search_value_AnimalSearchResultWSValue"/>
+   </message>
+   <portType name="AnimalSearchWSv2PortType">
+      <operation name="executeSearch">
+         <input name="executeSearch0Request" message="tns:executeSearch0Request"/>
+         <output name="executeSearch0Response" message="tns:executeSearch0Response"/>
+      </operation>
+   </portType>
+   <binding name="AnimalSearchWSv2Binding" type="tns:AnimalSearchWSv2PortType">
+      <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+      <operation name="executeSearch">
+         <soap:operation soapAction="" style="rpc"/>
+         <input name="executeSearch0Request">
+            <soap:body use="encoded" namespace="AnimalSearchWSv2" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+         </input>
+         <output name="executeSearch0Response">
+            <soap:body use="encoded" namespace="AnimalSearchWSv2" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+         </output>
+      </operation>
+   </binding>
+   <service name="AnimalSearchWSv2">
+      <documentation>Provides the Service Endpoint (busines logic) for the AnimalSearchWSv1 web service.
+</documentation>
+      <port name="AnimalSearchWSv2Port" binding="tns:AnimalSearchWSv2Binding">
+         <soap:address location="https://www.clia.livestockid.ca/CLTS/AnimalSearchWSv2"/>
+      </port>
+   </service>
+</definitions>

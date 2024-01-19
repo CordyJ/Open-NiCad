@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+
+<!-- WSDL description Flash-db's Flash Bar Chart. -->
+<!-- Generates Interleaved 2 of 5 type Barcodes for any number -->
+<!-- Service by:  Jeff Hill (Flash-db.com)        -->
+<definitions name="urn:BarCodes"
+             targetNamespace="urn:BarCodes"
+             xmlns:typens="urn:BarCodes"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
+             xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+             xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+  <!-- Results expected.. -->
+
+  <types>
+    <xsd:schema xmlns="http://www.w3.org/2001/XMLSchema" 
+                targetNamespace="urn:BarCodes">
+            
+      <xsd:complexType name="BarCodesResult">
+        <xsd:all>
+          <xsd:element name="barcode"		  type="xsd:base64Binary"/>
+        </xsd:all>
+      </xsd:complexType>
+
+    </xsd:schema>
+  </types> 
+
+
+
+  <!-- Messages for Bar Codes Service - doBarCodes. -->
+
+  <message name="doBarCodes">
+    <part name="username"       	type="xsd:string"/>
+    <part name="password"       	type="xsd:string"/>
+    <part name="num"		       	type="xsd:string"/>
+    <part name="imgtype"       		type="xsd:string"/>
+  </message>
+
+  <message name="doBarCodesResponse">
+    <part name="return" 		type="xsd:base64Binary"/>            
+  </message>
+
+
+
+  <!-- Port for Bar Codes Service -->
+
+  <portType name="BarCodesPort">
+
+    <operation name="doBarCodes">
+      <input message="typens:doBarCodes"/>
+      <output message="typens:doBarCodesResponse"/>
+    </operation>
+
+  </portType>
+
+
+
+
+  <!-- Binding for Bar Codes Service -->
+
+  <binding name="BarCodesBinding" type="typens:BarCodesPort">
+    <soap:binding style="rpc"
+                  transport="http://schemas.xmlsoap.org/soap/http"/>
+
+    <operation name="doBarCodes">
+      <soap:operation soapAction="urn:BarCodesAction"/>
+      <input>
+        <soap:body use="encoded"
+                   namespace="urn:BarCodes"
+                   encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </input>
+      <output>
+        <soap:body use="encoded"
+                   namespace="urn:BarCodes"
+                   encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </output>
+    </operation>
+  </binding>
+
+  <!-- Endpoint for Bar Codes Service -->
+  <service name="BarCodesService">
+    <port name="BarCodesPort" binding="typens:BarCodesBinding">
+      <soap:address location="http://www.flash-db.com/services/ws/barCodes.php"/>
+    </port>
+  </service>
+
+</definitions>

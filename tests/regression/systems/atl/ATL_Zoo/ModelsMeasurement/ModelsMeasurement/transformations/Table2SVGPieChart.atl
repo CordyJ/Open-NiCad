@@ -1,0 +1,457 @@
+--@atlcompiler	atl2006
+--@name			Table2SVGPieChart
+--@version		2.1
+--@domains		Table, SVG, pie chart
+--@authors		Eric Vepa (evepa <at> sodius.com) for SODIUS (www.sodius.com)
+--@date			2007/08/28
+--@description	This transformation is used to transform generic tables into SVG pie charts. A pie chart is produced for a table with values (excluding the header row and the first cell of each other row, and at least 3 columns).
+--@see			Scalable Vector Graphics 1.1, World Wide Web Consortium, http://www.w3.org/TR/SVG11/
+
+module Table2SVGPieChart; -- Module Template
+create OUT : SVG from IN : Table;
+
+uses TableHelpers;
+
+--@comments ===================================
+--@comments Values used for the SVG rendering =
+--@comments ===================================
+
+--@begin attribute helper scale
+--@comments The 'scale' value used in the SVG document.
+helper def : scale : Real = 1;
+--@end attribute helper scale
+
+--@begin attribute helper radius
+--@comments The radius value used in the SVG document for a pie chart.
+helper def : radius : Real = 100 * thisModule.scale;
+--@end attribute helper radius
+
+--@begin attribute helper fill
+--@comments The 'fill' value used in the SVG document.
+helper def : fill : String = 'none';
+--@end attribute helper fill
+
+--@begin attribute helper stroke
+--@comments The 'stroke' value used in the SVG document.
+helper def : stroke : String = 'black';
+--@end attribute helper stroke
+
+--@begin attribute helper margin
+--@comments The margin value used in the SVG document between charts.
+helper def : margin : Real = 10;
+--@end attribute helper margin
+
+--@begin attribute helper titleFontSize
+--@comments The 'fontSize' value used for titles in the SVG document.
+helper def : titleFontSize : Real = thisModule.radius * 0.2;
+--@end attribute helper titleFontSize
+
+--@begin attribute helper fontSize
+--@comments The 'fontSize' value used in the SVG document.
+helper def : fontSize : Real = thisModule.titleFontSize * 0.8;
+--@end attribute helper fontSize
+
+--@begin attribute helper caption
+--@comments The value used in the SVG document the caption of one sector.
+helper def : caption : Real = thisModule.fontSize;
+--@end attribute helper caption
+
+--@begin attribute helper svgFile
+--@comments The unique SVG file element.
+helper def : svgFile : SVG!SvgFile = OclUndefined;
+--@end attribute helper svgFile
+
+
+--@comments ===============================
+--@comments Helpers for the SVG rendering =
+--@comments ===============================
+
+--@begin helper maxSizeName
+--@comments Returns the maximal size for a name of the cells of the header row (adds 7 characters for the display of the value).
+helper context Table!Table
+def : maxSizeName() : Real =
+	(self.rows.seqWithoutFirst()->iterate(r; maxSize : Integer = 0|
+		if r.cells->first().content->size() > maxSize
+			then r.cells->first().content->size()
+			else maxSize
+		endif) + 7 * 2) * (thisModule.fontSize / 2);
+--@end helper maxSizeName
+
+--@begin helper boundingBoxWidth
+--@comments Returns the width of the bouding box computed for a table.
+helper context Table!Table
+def : boundingBoxWidth() : Real =
+	self.captionBoxWidth() + 2 * thisModule.radius + 3 * thisModule.margin;
+--@end helper boundingBoxWidth
+
+--@begin attribute helper prevAngle
+--@comments The previous rotation angle of the last sector generated.
+helper def : prevAngle : Real = 0;
+--@end attribute helper prevAngle
+
+--@begin attribute helper prevWidth
+--@comments The previous width of all the charts generated.
+helper def : prevWidth : Real = 0;
+--@end attribute helper prevWidth
+
+--@begin helper captionBoxWidth
+--@comments Returns the width of the caption box for a table.
+helper context Table!Table
+def : captionBoxWidth() : Real =
+	self.maxSizeName() + thisModule.caption + 3 * thisModule.margin;
+--@end helper captionBoxWidth
+
+--@begin helper captionBoxHeight
+--@comments Returns the height of the caption box for a table.
+helper context Table!Table
+def : captionBoxHeight() : Real =
+	self.rows->size() * (thisModule.caption + thisModule.margin / 2) -
+		thisModule.margin / 2;
+--@end helper captionBoxHeight
+
+--@begin helper computeColor
+--@comments Computes a RGB color with the number of the element and the total number of colors to compute.
+helper def : computeColor(idx : Integer, nbColor : Integer) : String =
+	let value : Integer =
+		(idx * 6 * 255 / nbColor).floor() in
+	if value < 255
+		then 'rgb(255,255,' + (255 - value).toString() + ')'
+		else if value < 2 * 255
+				then 'rgb(' + (2 * 255 - value).toString() + ',255,0)'
+				else if value < 3 * 255
+						then 'rgb(0,255,' + (255 - (3 * 255 - value)).toString() + ')'
+						else if value < 4 * 255
+								then 'rgb(0,' + (4 * 255 - value).toString() + ',255)'
+								else if value < 5 * 255
+										then 'rgb(' + (255 - (5 * 255 - value)).toString() + ',0,255)'
+										else 'rgb(255,0,' + (6 * 255 - value).toString() + ')'
+									endif
+							endif
+					endif
+			endif
+	endif;
+--@end helper computeColor
+
+--@begin helper ColorByElementName
+--@comments Color used by sectors and captions of pie charts for each element.
+helper def : ColorByElementName : Map(String,String) = Map{};
+--@end helper ColorByElementName
+
+
+--@begin entrypoint rule SvgFile
+--@comments Creates the SVG file with one svg tag.
+entrypoint rule SvgFile() {
+	using {
+		width : Real =
+			thisModule.allValidTables->iterate(t; sum : Real = 0|
+				sum + (t.captionBoxWidth() +
+					2 * thisModule.radius + 4 * thisModule.margin) *
+						(t.rows->first().cells->size() - 1)) +
+							thisModule.margin;
+		height : Real =
+			let heightWithoutCaption : Real =
+				2 * (thisModule.radius + 2 * thisModule.margin +
+					thisModule.titleFontSize) in
+			let heightWithCaption : Real =
+				thisModule.allValidTables->iterate(t; max : Real = 0|
+					t.captionBoxHeight()->max(max)) + 4 * thisModule.margin in
+			heightWithoutCaption->max(heightWithCaption);
+	}
+	to
+		svgFile : SVG!SvgFile (
+			tag <- svg
+		),
+		svg : SVG!Svg (
+			size <- svgSize,
+			namespace <- 'http://www.w3.org/2000/svg',
+			version <- '1.1'
+		),
+		svgSize : SVG!Dimension (
+			width <- width,
+			height <- height
+		)
+	do {
+		if (thisModule.allValidTables->size() > 0) {
+			thisModule.svgFile <- svgFile;
+			thisModule.svgFile.tag.viewBox <- '0 0 ' +
+				width.toString() + ' ' + height.toString();
+
+			for (table in thisModule.allValidTables) {
+				for (elmtName in table.rows->seqWithoutFirst()->
+					collect(r|r.cells->first().content)->sortedBy(n|n)) {
+					thisModule.ColorByElementName <-
+						thisModule.ColorByElementName.including(elmtName,
+							thisModule.computeColor(table.rows->seqWithoutFirst()->
+								collect(r|r.cells->first().content)->
+									sortedBy(n|n)->indexOf(elmtName),
+										table.rows->seqWithoutFirst()->
+											collect(r|r.cells->first().content)->
+												sortedBy(n|n)->size()));
+				}
+				
+				for (cell in table.rows->first().cells->seqWithoutFirst()) {
+					thisModule.Table2PieChart(table,
+						table.rows->first().cells->indexOf(cell));
+				}
+			}
+		}
+	}
+}
+--@end entrypoint rule SvgFile
+
+--@begin lazy rule Table2PieChart
+--@comments Creates a pie chart (SVG group) for the metric which column index is given.
+lazy rule Table2PieChart {
+	from
+		table : Table!Table,
+		idx : Integer
+	using {
+		valuesSum : Real =
+			table.rows->seqWithoutFirst()->iterate(row; acc : Real = 0|
+				acc + row.cells->at(idx).realValue());
+	}
+	to
+		g : SVG!G (
+			attribute <- boundingBoxTransl,
+			groupContent <- boundingBox,
+			groupContent <- textTitle,
+			groupContent <-
+				if table.rows->seqWithoutFirst()->
+					collect(r|r.cells->at(idx))->
+						select(c|c.valueNotNull())->size() = 1
+					then thisModule.Table2Circle(table,idx)
+					else thisModule.Table2Sectors(table,idx,valuesSum)
+				endif,
+			groupContent <- thisModule.Table2Captions(table,idx,valuesSum)
+		),
+		boundingBox : SVG!Rect (
+			size <- boundingBoxSize,
+			position <- boundingBoxCoord,
+			fill <- thisModule.fill,
+			stroke <- thisModule.stroke
+		),
+		boundingBoxSize : SVG!Dimension (
+			width <- table.boundingBoxWidth(),
+			height <- thisModule.svgFile.tag.size.height -
+				2 * thisModule.margin
+		),
+		boundingBoxCoord : SVG!AbsoluteCoord (
+			x <- 0 - boundingBoxSize.width / 2,
+			y <- 0 - boundingBoxSize.height / 2
+		),
+		boundingBoxTransl : SVG!Translate (
+			tx <- thisModule.prevWidth + boundingBoxSize.width / 2 +
+				thisModule.margin,
+			ty <- thisModule.svgFile.tag.size.height / 2
+		),
+		textTitle : SVG!Text (
+			position <- textTitleCoord,
+			stroke <- thisModule.stroke,
+			fontSize <- thisModule.titleFontSize.toString(),
+			--@comments text-anchor value strored in lengthAdjust attribute
+			lengthAdjust <- 'middle',
+			content <- table.rows->first().cells->at(idx).content
+		),
+		textTitleCoord : SVG!AbsoluteCoord (
+			x <- 0 - (table.captionBoxWidth() + thisModule.margin) / 2,
+			y <- (boundingBoxSize.height - thisModule.titleFontSize -
+				thisModule.margin) / 2
+		)
+	do {
+		thisModule.prevWidth <-
+			thisModule.prevWidth + boundingBoxSize.width + thisModule.margin;
+		thisModule.svgFile.tag.children <- g;
+		--@comments initialise rotation angle
+		thisModule.prevAngle <- 0;
+	}
+}
+--@end lazy rule Table2PieChart
+
+--@begin lazy rule Table2Circle
+--@comments Creates a complete pie (SVG Circle) for the metric at index given.
+lazy rule Table2Circle {
+	from
+		table : Table!Cell,
+		idx : Integer
+	to
+		g : SVG!G (
+			attribute <- pieTransl,
+			groupContent <- pie
+		),
+		pieTransl : SVG!Translate (
+			tx <- 0 - (table.captionBoxWidth() + thisModule.margin) / 2,
+			ty <- 0 - thisModule.titleFontSize
+		),
+		pie : SVG!Circle (
+			size <- pieSize,
+			position <- pieCoord,
+			fill <- thisModule.ColorByElementName.get(table.rows->
+				seqWithoutFirst()->select(r|r.cells->at(idx).valueNotNull())->
+					first().cells->first().content),
+			stroke <- thisModule.stroke
+		),
+		pieSize : SVG!Dimension (
+			width <- thisModule.radius,
+			height <- pieSize.width
+		),
+		pieCoord : SVG!AbsoluteCoord (
+			x <- 0,
+			y <- 0
+		)
+}
+--@end lazy rule Table2Circle
+
+--@begin lazy rule Table2Sectors
+--@comments Creates a pie with sectors (SVG paths) for the metric at index given.
+lazy rule Table2Sectors {
+	from
+		table : Table!Table,
+		idx : Integer,
+		valuesSum : Real
+	to
+		g : SVG!G (
+			attribute <- sectorsTransl,
+			groupContent <- table.rows->seqWithoutFirst()->
+				collect(row|thisModule.Row2Sector(row,
+					table.rows->indexOf(row),idx,valuesSum))
+		),
+		sectorsTransl : SVG!Translate (
+			tx <- 0 - (table.captionBoxWidth() + thisModule.margin) / 2,
+			ty <- 0 - thisModule.titleFontSize
+		)
+}
+--@end lazy rule Table2Sectors
+
+--@begin lazy rule Row2Sector
+--@comments Creates a sector (SVG path) for the cell at index given.
+lazy rule Row2Sector {
+	from
+		row : Table!Row,
+		rowIdx : Integer,
+		cellIdx : Integer,
+		valuesSum : Real
+	using {
+		value : Real =
+			if valuesSum = 0
+				then 0
+				else row.cells->at(cellIdx).realValue() / valuesSum * 100
+			endif;
+		x : Real =
+			thisModule.radius * (value * 3.6).toRadians().cos();
+		y : Real =
+			thisModule.radius * (value * 3.6).toRadians().sin();
+	}
+	to
+		g : SVG!G (
+			attribute <- sectorRotate,
+			groupContent <- sector
+		),
+		sectorRotate : SVG!Rotate (
+			angle <- thisModule.prevAngle
+		),
+		sector : SVG!Path (
+			d <- 'M0,0 L' + thisModule.radius.toString() + ',0 ' +
+				'A' + thisModule.radius.toString() + ',' +
+					thisModule.radius.toString() + ' 0 ' +
+						if 3.6 * value < 180
+							then '0,1 '
+							else '1,1 '
+						endif +	x.toString() + ',' + y.toString() + ' z',
+			fill <- thisModule.ColorByElementName.get(row.cells->
+				first().content),
+			stroke <- thisModule.stroke
+		)
+	do {
+		--@comments Adds the angle value of the new sector.
+		thisModule.prevAngle <- sectorRotate.angle + 3.6 * value;
+	}
+}
+--@end lazy rule Row2Sector
+
+--@begin lazy rule Table2Captions
+--@comments Creates captions (SVG rect) for a table.
+lazy rule Table2Captions {
+	from
+		table : Table!Cell,
+		idx : Integer,
+		valuesSum : Real
+	to
+		g : SVG!G (
+			groupContent <- captionBox,
+			groupContent <- table.rows.seqWithoutFirst()->
+				collect(row|thisModule.Table2Caption(table,
+					table.rows->indexOf(row),idx,valuesSum))
+		),
+		captionBox : SVG!Rect (
+			size <- captionBoxSize,
+			position <- captionBoxCoord,
+			fill <- thisModule.fill,
+			stroke <- thisModule.stroke
+		),
+		captionBoxSize : SVG!Dimension (
+			width <- table.captionBoxWidth(),
+			height <- table.captionBoxHeight()
+		),
+		captionBoxCoord : SVG!AbsoluteCoord (
+			x <- thisModule.radius -
+				(captionBoxSize.width - thisModule.margin) / 2,
+			y <- 0 - captionBoxSize.height / 2
+		)
+}
+--@end lazy rule Table2Captions
+
+--@begin lazy rule Table2Caption
+--@comments Creates a caption (SVG rect + text) for the cell at index given.
+lazy rule Table2Caption {
+	from
+		table : Table!Table,
+		rowIdx : Integer,
+		cellIdx : Integer,
+		valuesSum : Real
+	using {
+		value : String =
+			let realValue : Real =
+				if valuesSum = 0
+					then 0
+					else table.rows->at(rowIdx).cells->at(cellIdx).realValue() /
+						valuesSum * 100
+				endif in
+			realValue.toString().value() + '%';
+	}
+	to
+		g : SVG!G (
+			groupContent <- caption,
+			groupContent <- textCaption
+		),
+		caption : SVG!Rect (
+			size <- captionSize,
+			position <- captionCoord,
+			fill <- thisModule.ColorByElementName.get(table.rows->
+				at(rowIdx).cells->first().content),
+			stroke <- thisModule.stroke
+		),
+		captionSize : SVG!Dimension (
+			width <- thisModule.caption,
+			height <- thisModule.caption
+		),
+		captionCoord : SVG!AbsoluteCoord (
+			x <- (table.boundingBoxWidth() + thisModule.margin) / 2 -
+				thisModule.margin - table.captionBoxWidth(),
+			y <- (0 - table.captionBoxHeight()) / 2 - thisModule.margin +
+				(rowIdx - 1) * (thisModule.caption + thisModule.margin / 2)
+		),
+		textCaption : SVG!Text (
+			position <- textCaptionCoord,
+			stroke <- thisModule.stroke,
+			fontSize <- thisModule.fontSize.toString(),
+			content <- '(' + value + ') ' +
+				table.rows->at(rowIdx).cells->first().content +	' (' +
+					table.rows->at(rowIdx).cells->at(cellIdx).value() +	')'
+		),
+		textCaptionCoord : SVG!AbsoluteCoord (
+			x <- captionCoord.x + thisModule.caption + thisModule.fontSize,
+			y <- captionCoord.y + thisModule.caption -
+				thisModule.fontSize * 0.1
+		)
+}
+--@end lazy rule Table2Caption

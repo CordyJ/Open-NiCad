@@ -1,0 +1,36 @@
+% NiCad generic blind renaming for potential clones
+% Jim Cordy, May 2010
+
+% Rev 19.5.20 JRC - Added language-dependent literal renaming
+
+define source_unit  
+    [xml_source_coordinate]
+        [potential_clone]		% supplied by language plugin
+    [end_xml_source_coordinate]
+end define
+
+redefine program
+    [repeat source_unit]
+end redefine
+
+% Main program
+
+rule main
+    skipping [source_unit]
+    replace $ [source_unit]
+	BeginXML [xml_source_coordinate]
+	    PC [potential_clone]
+	EndXML [end_xml_source_coordinate]
+    by
+	BeginXML 
+	    PC [renameIds]
+               [renameLiterals]		% supplied by language plugin
+	EndXML 
+end rule
+
+rule renameIds
+    replace $ [id]
+        _ [id]
+    by
+	'x
+end rule

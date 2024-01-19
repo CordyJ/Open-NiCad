@@ -1,0 +1,1339 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="Traverseenrollservice" targetNamespace="http://webservices.traverse/wsdl" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:typens="Traverseenrollservice" xmlns:types="http://webservices.traverse" xmlns:wsdlns="http://webservices.traverse/wsdl" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+  <types>
+    <xsd:schema targetNamespace="http://webservices.traverse" xmlns="http://www.w3.org/2001/XMLSchema">
+      <xsd:element name="Lms804sEnrollmentService">
+      <xsd:complexType>
+         <xsd:choice>
+
+          <xsd:element name="request">
+           <xsd:complexType>
+            <xsd:sequence>
+             <xsd:element name="ImportProgram">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element minOccurs="0" name="Identifier">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="3"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ImportMemberAccount">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element minOccurs="0" name="FkProgramEnrollmentSourceCd">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="5"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ImportCustomer">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element minOccurs="0" name="FkCustomerNamePrefixCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="2"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="FirstName">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="25"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="MiddleName">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="25"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="LastName">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="30"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="FkCustomerNameSuffixCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="2"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="GenderCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="1"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="FkLanguageCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="3"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="MerchandisingIndicator">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="1"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ImportCustomerProfile">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element minOccurs="0" name="BirthDate">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:integer">
+                   <xsd:totalDigits value="8"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="CompanyName">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="50"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="JobTitle">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="50"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ImportPrimaryAddressIefSupplied">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element minOccurs="0" name="SelectChar">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="1"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ImportBusinessAddressFields">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element minOccurs="0" name="MailTypeCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="1"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="StreetAddressLine1Text">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="50"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="StreetAddressLine2Text">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="50"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="StreetAddressLine3Text">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="50"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="StreetAddressLine4Text">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="50"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="CityName">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="30"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="StateProvinceName">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="20"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="FkCountryCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="2"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="PostalCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="10"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ImportHomeAddressFields">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element minOccurs="0" name="MailTypeCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="1"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="StreetAddressLine1Text">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="50"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="StreetAddressLine2Text">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="50"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="StreetAddressLine3Text">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="50"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="StreetAddressLine4Text">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="50"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="CityName">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="30"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="StateProvinceName">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="20"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="PostalCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="10"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="FkCountryCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="2"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ImportPrimaryPhoneIefSupplied">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element minOccurs="0" name="SelectChar">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="1"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ImportBusinessCustomerTelephone">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element minOccurs="0" name="FkCountryCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="2"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="AreaCityCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="5"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="TelephoneNumber">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="10"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="ExtensionNumber">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="5"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ImportHomeCustomerTelephone">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element minOccurs="0" name="FkCountryCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="2"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="AreaCityCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="5"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="TelephoneNumber">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="10"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="ExtensionNumber">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="5"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ImportCellCustomerTelephone">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element minOccurs="0" name="FkCountryCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="2"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="AreaCityCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="5"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="TelephoneNumber">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="10"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="ExtensionNumber">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="5"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ImportFaxCustomerTelephone">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element minOccurs="0" name="FkCountryCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="2"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="AreaCityCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="5"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="TelephoneNumber">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="10"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="ExtensionNumber">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="5"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ImportCustomerEmailAddress">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element minOccurs="0" name="AddressText">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="150"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="GroupImport">
+              <xsd:complexType>
+               <xsd:sequence>
+                <xsd:element maxOccurs="10" minOccurs="0" name="row">
+                 <xsd:complexType>
+                  <xsd:sequence>
+                   <xsd:element name="RepeatImportEnrollmentPotentialAttribute">
+                    <xsd:complexType>
+                     <xsd:sequence>
+
+                      <xsd:element minOccurs="0" name="Name">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                         <xsd:maxLength value="20"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                      <xsd:element minOccurs="0" name="Domain">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                         <xsd:maxLength value="1"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                      <xsd:element minOccurs="0" name="TypeCode">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                         <xsd:maxLength value="1"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                     </xsd:sequence>
+                    </xsd:complexType>
+                   </xsd:element>
+                   <xsd:element name="RepeatImportAnswersMemberAttribute">
+                    <xsd:complexType>
+                     <xsd:sequence>
+
+                      <xsd:element minOccurs="0" name="TextAttributeValue">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                         <xsd:maxLength value="45"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                      <xsd:element minOccurs="0" name="DateAttributeValue">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:integer">
+                         <xsd:totalDigits value="8"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                      <xsd:element minOccurs="0" name="NumericAttributeValue">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:integer">
+                         <xsd:totalDigits value="11"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                     </xsd:sequence>
+                    </xsd:complexType>
+                   </xsd:element>
+                  </xsd:sequence>
+                 </xsd:complexType>
+                </xsd:element>
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ImportFutureUseAtmSupplied">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element minOccurs="0" name="GenericText">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="254"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+            </xsd:sequence>
+
+            <xsd:attribute name="command" type="xsd:string"/>
+            <xsd:attribute name="clientId" type="xsd:string"/>
+            <xsd:attribute name="clientPassword" type="xsd:string"/>
+            <xsd:attribute name="nextLocation" type="xsd:string"/>
+            <xsd:attribute name="exitState" type="xsd:integer"/>
+            <xsd:attribute name="dialect" type="xsd:string"/>
+            <xsd:attribute name="comCfg" type="xsd:string"/>
+            <xsd:attribute name="serverLocation" type="xsd:string"/>
+            <xsd:attribute name="servletPath" type="xsd:string"/>
+            <xsd:attribute name="fileEncoding" type="xsd:string"/>
+            <xsd:attribute name="tracing" type="xsd:boolean"/>
+
+           </xsd:complexType>
+          </xsd:element>
+
+          <xsd:element name="response">
+           <xsd:complexType>
+            <xsd:sequence>
+             <xsd:element name="ExportProgram">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element name="Identifier">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="3"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ExportMemberAccount">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element name="Identifier">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="16"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="FkProgramEnrollmentSourceCd">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="5"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ExportPasswordMemberAttribute">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element name="TextAttributeValue">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="45"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ExportCustomerEmailAddress">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element name="AddressText">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="150"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ExportCustomer">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element name="FkCustomerNamePrefixCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="2"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="FirstName">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="25"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="MiddleName">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="25"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="LastName">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="30"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="FkCustomerNameSuffixCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="2"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="GenderCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="1"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="FkLanguageCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="3"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="MerchandisingIndicator">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="1"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="DrvdDisplayName">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="50"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ExportCustomerProfile">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element name="BirthDate">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:integer">
+                   <xsd:totalDigits value="8"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="CompanyName">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="50"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="JobTitle">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="50"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ExportPrimaryAddressIefSupplied">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element minOccurs="0" name="Flag">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="1"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ExportBusinessAddressFields">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element name="MailTypeCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="1"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="StreetAddressLine1Text">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="50"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="StreetAddressLine2Text">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="50"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="StreetAddressLine3Text">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="50"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="StreetAddressLine4Text">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="50"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="CityName">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="30"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="StateProvinceName">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="20"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="FkCountryCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="2"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="PostalCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="10"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ExportHomeAddressFields">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element name="MailTypeCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="1"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="StreetAddressLine1Text">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="50"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="StreetAddressLine2Text">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="50"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="StreetAddressLine3Text">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="50"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="StreetAddressLine4Text">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="50"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="CityName">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="30"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="StateProvinceName">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="20"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="PostalCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="10"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="FkCountryCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="2"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ExportPrimaryPhoneIefSupplied">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element minOccurs="0" name="Flag">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="1"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>                
+                
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ExportBusinessCustomerTelephone">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element name="AreaCityCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="5"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="ExtensionNumber">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="5"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="TelephoneNumber">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="10"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="FkCountryCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="2"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ExportHomeCustomerTelephone">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element name="AreaCityCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="5"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="ExtensionNumber">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="5"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="TelephoneNumber">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="10"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="FkCountryCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="2"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ExportCellCustomerTelephone">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element name="AreaCityCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="5"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="ExtensionNumber">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="5"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="TelephoneNumber">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="10"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="FkCountryCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="2"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ExportFaxCustomerTelephone">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element name="AreaCityCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="5"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="ExtensionNumber">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="5"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="TelephoneNumber">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="10"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="FkCountryCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="2"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="GroupExport">
+              <xsd:complexType>
+               <xsd:sequence>
+                <xsd:element maxOccurs="10" minOccurs="0" name="row">
+                 <xsd:complexType>
+                  <xsd:sequence>
+                   <xsd:element name="RepeatExportEnrollmentPotentialAttribute">
+                    <xsd:complexType>
+                     <xsd:sequence>
+
+                      <xsd:element name="Name">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                         <xsd:maxLength value="20"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                      <xsd:element name="Domain">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                         <xsd:maxLength value="1"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                      <xsd:element name="Description">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                         <xsd:maxLength value="50"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                      <xsd:element name="TypeCode">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                         <xsd:maxLength value="1"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                     </xsd:sequence>
+                    </xsd:complexType>
+                   </xsd:element>
+                   <xsd:element name="RepeatExportMemberAttribute">
+                    <xsd:complexType>
+                     <xsd:sequence>
+
+                      <xsd:element name="TextAttributeValue">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                         <xsd:maxLength value="45"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                      <xsd:element name="DateAttributeValue">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:integer">
+                         <xsd:totalDigits value="8"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                      <xsd:element name="NumericAttributeValue">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:integer">
+                         <xsd:totalDigits value="11"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                     </xsd:sequence>
+                    </xsd:complexType>
+                   </xsd:element>
+                  </xsd:sequence>
+                 </xsd:complexType>
+                </xsd:element>
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="GroupExportMessages">
+              <xsd:complexType>
+               <xsd:sequence>
+                <xsd:element maxOccurs="30" minOccurs="0" name="row">
+                 <xsd:complexType>
+                  <xsd:sequence>
+                   <xsd:element name="RepeatExportSystemMessages">
+                    <xsd:complexType>
+                     <xsd:sequence>
+
+                      <xsd:element name="ExitStateName">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                         <xsd:maxLength value="32"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                      <xsd:element name="ExitStateMessage">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                         <xsd:maxLength value="80"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                     </xsd:sequence>
+                    </xsd:complexType>
+                   </xsd:element>
+                  </xsd:sequence>
+                 </xsd:complexType>
+                </xsd:element>
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ExportFutureUseAtmSupplied">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element name="GenericText">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="254"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+            </xsd:sequence>
+
+            <xsd:attribute name="command" type="xsd:string"/>
+            <xsd:attribute name="exitState" type="xsd:integer"/>
+            <xsd:attribute name="exitStateType">
+             <xsd:simpleType>
+              <xsd:restriction base="xsd:string">
+               <xsd:enumeration value="OK"/>
+               <xsd:enumeration value="Informational"/>
+               <xsd:enumeration value="Warning"/>
+               <xsd:enumeration value="Error"/>
+              </xsd:restriction>
+             </xsd:simpleType>
+            </xsd:attribute>
+            <xsd:attribute name="exitStateMsg" type="xsd:string"/>
+
+           </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="error">
+           <xsd:complexType>
+            <xsd:sequence>
+             <xsd:element minOccurs="0" name="number" type="xsd:string"/>
+             <xsd:element minOccurs="0" name="type" type="xsd:string"/>
+             <xsd:element minOccurs="0" name="description" type="xsd:string"/>
+             <xsd:element minOccurs="0" name="trace" type="xsd:string"/>
+            </xsd:sequence>
+           </xsd:complexType>
+          </xsd:element>
+         </xsd:choice>
+      </xsd:complexType>
+      </xsd:element>
+    </xsd:schema>
+  </types>
+
+  <message name="Lms804sEnrollmentServiceIn">
+    <part element="types:Lms804sEnrollmentService" name="Lms804sEnrollmentService"/>
+  </message>
+  <message name="Lms804sEnrollmentServiceOut">
+    <part element="types:Lms804sEnrollmentService" name="Lms804sEnrollmentService"/>
+  </message>
+
+
+  <portType name="TraverseenrollservicePort">
+    <operation name="Lms804sEnrollmentService">
+      <input message="wsdlns:Lms804sEnrollmentServiceIn"/>
+      <output message="wsdlns:Lms804sEnrollmentServiceOut"/>
+    </operation>
+
+  </portType>
+
+  <binding name="TraverseenrollserviceBinding" type="wsdlns:TraverseenrollservicePort">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="Lms804sEnrollmentService">
+      <soap:operation soapAction="Traverseenrollservice"/>
+      <input>
+        <soap:body namespace="https://emergo2.sabre.com/traverseWS/services/Traverseenrollservice" use="literal"/>
+      </input>
+      <output>
+        <soap:body namespace="https://emergo2.sabre.com/traverseWS/services/Traverseenrollservice" use="literal"/>
+      </output>
+    </operation>
+  </binding>
+
+  <service name="Traverseenrollservice">
+    <documentation>
+Traverse Enroll Service
+    </documentation>
+    <port binding="wsdlns:TraverseenrollserviceBinding" name="TraverseenrollservicePort">
+      <soap:address location="https://emergo2.sabre.com/traverseWS/services/Traverseenrollservice"/>
+    </port>
+  </service>
+</definitions>

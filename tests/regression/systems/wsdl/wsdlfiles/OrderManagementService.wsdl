@@ -1,0 +1,1410 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions targetNamespace="http://echo.nasa.gov/echo/v9"
+  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+  xmlns:echo="http://echo.nasa.gov/echo/v9"
+  xmlns:echofaults="http://echo.nasa.gov/echo/v9/faults"
+  xmlns="http://schemas.xmlsoap.org/wsdl/">
+  <documentation>
+    <p xmlns="">
+      The Order Management Service has been designed with input from
+      both the OGC Catalog Interface Implementation Specification 1.0
+      and from portions of the Catalog Interoperability Protocol (CIP)
+      Specification, Release B. It allows ECHO users and guests to build
+      and submit orders for earth science data from data providers
+      registered in ECHO. Client applications build an order using the
+      Order Management Service in a similar fashion to that of using a
+      shopping cart at typical retail website.
+    </p>
+    <h3 xmlns="">Creating and Submitting an Order</h3>
+    <p xmlns="">
+      An order is created via the
+      <em>CreateOrder</em>
+      operation. Then items are added to the order using the
+      <em>AddOrderItems</em>
+      operation. The items added can be for any provider.Items in the
+      order can be removed or updated through the
+      <em>RemoveOrderItems</em>
+      and
+      <em>UpdateOrderItems</em>
+      operations respectively.
+    </p>
+    <p xmlns="">
+      An Order is divided by provider orders with one provider order for
+      each provider that there are items for in the order. When an order
+      is retrieved from ECHO all of the provider orders are retrieved
+      with it. Any quote and receipt information are contained in the
+      provider orders. Because an order may contain thousands of items,
+      order items are retrieved by separate operations.
+    </p>
+    <p xmlns="">
+      Before quoting or submitting an order the user information must be
+      set. This is done by the operation
+      <em>SetUserInformationForOrder</em>
+      . Validation checks that this information has been set.
+    </p>
+    <p xmlns="">
+      Orders may be optionally validated before they are submitted or
+      quoted. Validating the order checks that the order is in a valid
+      state to be quoted or submitted. When an order is submitted or
+      quoted the order will be revalidated even if it was just validated
+      because the state of the items referred in the order may have
+      changed.
+    </p>
+    <p xmlns="">
+      After the order has been created and has items it can be
+      optionally quoted. Quoting the order sends each provider order to
+      the provider for a price quote. A provider may not support
+      quoting.
+    </p>
+    <p xmlns="">
+      Orders are submitted by calling the operation
+      <em>SubmitOrder</em>
+      . This sends each provider order in the order to provider for
+      processing. The provider will decide whether it accepts the order
+      or not and then fulfill the order.
+    </p>
+    <p xmlns="">
+      Orders can be cancelled using the
+      <em>CancelOrder</em>
+      operation. When a provider accepts an order they indicate what the
+      last date that an order can be cancelled is. The order can be
+      cancelled up to that date if the provider supports cancelling
+      orders.
+    </p>
+    <p xmlns="">
+      Quote, Submit, and Cancel are all asynchronous operations. After
+      calling each operation the order must be repeatedly retrieved to
+      check the status of the order to see if the operation has
+      completed.
+    </p>
+    <p xmlns="">
+      The user will be notified as the order is processed. The amount of
+      notifications is determined by the notification level set in the
+      order. With any notification level choice, the user can always
+      come back to ECHO and check the status of the order through this
+      service. In case the user does not specify any notification level,
+      for a registered user&apos;s order, the user&apos;s preference
+      value will be used; for a guest user&apos;s order or if no
+      preference value is set for a registered user, the value is set to
+      be the default of INFO. The emails received are defined in the
+      following table:
+    </p>
+
+    <table xmlns="" cellpadding="2" border="1">
+      <tr>
+        <th>Event</th>
+        <th>VERBOSE</th>
+        <th>DETAIL</th>
+        <th>INFO</th>
+        <th>CRITICAL</th>
+        <th>NONE</th>
+      </tr>
+      <tr>
+        <td>Failure Provider Order State Change (3)</td>
+        <td>X</td>
+        <td>X</td>
+        <td>X</td>
+        <td>X</td>
+        <td />
+      </tr>
+      <tr>
+        <td>Success Provider Order States (2)</td>
+        <td>X</td>
+        <td>X</td>
+        <td>X</td>
+        <td />
+        <td />
+      </tr>
+      <tr>
+        <td>Intermediate Provider Order States (1)</td>
+        <td>X</td>
+        <td>X</td>
+        <td />
+        <td />
+        <td />
+      </tr>
+      <tr>
+        <td>Provider Order Status Update</td>
+        <td>X</td>
+        <td />
+        <td />
+        <td />
+        <td />
+      </tr>
+    </table>
+
+    <p>
+      The order states that trigger an email are:
+      <ol>
+        <li>PROCESSING</li>
+        <li>QUOTED, CLOSED</li>
+        <li>
+          QUOTE_FAILED, QUOTE_REJECTED, SUBMIT_FAILED, SUBMIT_REJECTED,
+          CANCELLED
+        </li>
+      </ol>
+    </p>
+
+    <h3 xmlns="">Performance Considerations</h3>
+    <p xmlns="">
+      Creating, validating, and submitting an order can take a long time
+      if a large number of items have been added to the order. It is
+      reccommended that you use the following guidelines when possible
+      to increase the speed of which your order can be created and
+      submitted.
+      <ul>
+        <li>
+          Create and submit the order using the
+          <em>CreateAndSubmitOrder</em>
+          operation. This operation combines creating the order, adding
+          order items, setting user information, validation, and
+          submitting the order into one call. This reduces the number of
+          roundtrips of xml calls and the overhead of calling many
+          operations
+        </li>
+        <li>
+          Add order items when creating the order. The
+          <em>CreateOrder</em>
+          operation can take order items to add to the created order.
+          This is another way to reduce web service calls.
+        </li>
+        <li>
+          Let
+          <em>SubmitOrder</em>
+          and
+          <em>QuoteOrder</em>
+          do the validation for you. The
+          <em>ValidateOrder</em>
+          operation is added as a convenience. Most of the time it is
+          not necessary to call it because submit and quote will
+          validate the order for you.
+        </li>
+      </ul>
+    </p>
+  </documentation>
+  <types>
+    <xs:schema elementFormDefault="qualified"
+      xmlns:xs="http://www.w3.org/2001/XMLSchema"
+      targetNamespace="http://echo.nasa.gov/echo/v9">
+      <xs:import schemaLocation="EchoExceptions.xsd"
+        namespace="http://echo.nasa.gov/echo/v9/faults" />
+      <xs:include schemaLocation="OrderManagementServiceMessages.xsd" />
+    </xs:schema>
+  </types>
+  <message name="AddOrderItems">
+    <part name="parameters" element="echo:AddOrderItems" />
+  </message>
+  <message name="AddOrderItemsResponse">
+    <part name="parameters" element="echo:AddOrderItemsResponse" />
+  </message>
+  <message name="CreateOrder">
+    <part name="parameters" element="echo:CreateOrder" />
+  </message>
+  <message name="CreateOrderResponse">
+    <part name="parameters" element="echo:CreateOrderResponse" />
+  </message>
+  <message name="RemoveOrders">
+    <part name="parameters" element="echo:RemoveOrders" />
+  </message>
+  <message name="RemoveOrdersResponse">
+    <part name="parameters" element="echo:RemoveOrdersResponse" />
+  </message>
+  <message name="RemoveOrderItems">
+    <part name="parameters" element="echo:RemoveOrderItems" />
+  </message>
+  <message name="RemoveOrderItemsResponse">
+    <part name="parameters" element="echo:RemoveOrderItemsResponse" />
+  </message>
+  <message name="RemoveProviderOrders">
+    <part name="parameters" element="echo:RemoveProviderOrders" />
+  </message>
+  <message name="RemoveProviderOrdersResponse">
+    <part name="parameters" element="echo:RemoveProviderOrdersResponse" />
+  </message>
+  <message name="GetCatalogItemOrderInformation">
+    <part name="parameters"
+      element="echo:GetCatalogItemOrderInformation" />
+  </message>
+  <message name="GetCatalogItemOrderInformationResponse">
+    <part name="parameters"
+      element="echo:GetCatalogItemOrderInformationResponse" />
+  </message>
+  <message name="CancelOrder">
+    <part name="parameters" element="echo:CancelOrder" />
+  </message>
+  <message name="CancelOrderResponse">
+    <part name="parameters" element="echo:CancelOrderResponse" />
+  </message>
+  <message name="CancelProviderOrder">
+    <part name="parameters" element="echo:CancelProviderOrder" />
+  </message>
+  <message name="CancelProviderOrderResponse">
+    <part name="parameters" element="echo:CancelProviderOrderResponse" />
+  </message>
+  <message name="GetOrders">
+    <part name="parameters" element="echo:GetOrders" />
+  </message>
+  <message name="GetOrdersResponse">
+    <part name="parameters" element="echo:GetOrdersResponse" />
+  </message>
+  <message name="QuoteOrder">
+    <part name="parameters" element="echo:QuoteOrder" />
+  </message>
+  <message name="QuoteOrderResponse">
+    <part name="parameters" element="echo:QuoteOrderResponse" />
+  </message>
+  <message name="SetAuthenticationKey">
+    <part name="parameters" element="echo:SetAuthenticationKey" />
+  </message>
+  <message name="SetAuthenticationKeyResponse">
+    <part name="parameters" element="echo:SetAuthenticationKeyResponse" />
+  </message>
+  <message name="SetUserInformationForOrder">
+    <part name="parameters" element="echo:SetUserInformationForOrder" />
+  </message>
+  <message name="SetUserInformationForOrderResponse">
+    <part name="parameters"
+      element="echo:SetUserInformationForOrderResponse" />
+  </message>
+  <message name="SubmitOrder">
+    <part name="parameters" element="echo:SubmitOrder" />
+  </message>
+  <message name="SubmitOrderResponse">
+    <part name="parameters" element="echo:SubmitOrderResponse" />
+  </message>
+  <message name="UpdateOrderItems">
+    <part name="parameters" element="echo:UpdateOrderItems" />
+  </message>
+  <message name="UpdateOrderItemsResponse">
+    <part name="parameters" element="echo:UpdateOrderItemsResponse" />
+  </message>
+  <message name="ValidateOrder">
+    <part name="parameters" element="echo:ValidateOrder" />
+  </message>
+  <message name="ValidateOrderResponse">
+    <part name="parameters" element="echo:ValidateOrderResponse" />
+  </message>
+  <message name="GetOrderGuidsByStateAndOwner">
+    <part name="parameters" element="echo:GetOrderGuidsByStateAndOwner" />
+  </message>
+  <message name="GetOrderGuidsByStateAndOwnerResponse">
+    <part name="parameters"
+      element="echo:GetOrderGuidsByStateAndOwnerResponse" />
+  </message>
+  <message name="GetOrderItemNamesByOrder">
+    <part name="parameters" element="echo:GetOrderItemNamesByOrder" />
+  </message>
+  <message name="GetOrderItemNamesByOrderResponse">
+    <part name="parameters"
+      element="echo:GetOrderItemNamesByOrderResponse" />
+  </message>
+  <message name="GetOrderItemNamesByProviderOrder">
+    <part name="parameters"
+      element="echo:GetOrderItemNamesByProviderOrder" />
+  </message>
+  <message name="GetOrderItemNamesByProviderOrderResponse">
+    <part name="parameters"
+      element="echo:GetOrderItemNamesByProviderOrderResponse" />
+  </message>
+  <message name="GetOrderItems">
+    <part name="parameters" element="echo:GetOrderItems" />
+  </message>
+  <message name="GetOrderItemsResponse">
+    <part name="parameters" element="echo:GetOrderItemsResponse" />
+  </message>
+  <message name="CreateAndSubmitOrder">
+    <part name="parameters" element="echo:CreateAndSubmitOrder" />
+  </message>
+  <message name="CreateAndSubmitOrderResponse">
+    <part name="parameters" element="echo:CreateAndSubmitOrderResponse" />
+  </message>
+  <message name="GetProviderOrderGuidsByStateAndOwner">
+    <part name="parameters"
+      element="echo:GetProviderOrderGuidsByStateAndOwner" />
+  </message>
+  <message name="GetProviderOrderGuidsByStateAndOwnerResponse">
+    <part name="parameters"
+      element="echo:GetProviderOrderGuidsByStateAndOwnerResponse" />
+  </message>
+  <message name="GetProviderOrderGuidsByStateAndProvider">
+    <part name="parameters"
+      element="echo:GetProviderOrderGuidsByStateAndProvider" />
+  </message>
+  <message name="GetProviderOrderGuidsByStateAndProviderResponse">
+    <part name="parameters"
+      element="echo:GetProviderOrderGuidsByStateAndProviderResponse" />
+  </message>
+  <message name="InternalFault">
+    <part name="parameters" element="echofaults:InternalFault" />
+  </message>
+  <message name="AuthorizationFault">
+    <part name="parameters" element="echofaults:AuthorizationFault" />
+  </message>
+  <message name="DuplicateIdFault">
+    <part name="parameters" element="echofaults:DuplicateIdFault" />
+  </message>
+  <message name="DataSizeLimitFault">
+    <part name="parameters" element="echofaults:DataSizeLimitFault" />
+  </message>
+  <message name="InvalidArgumentFault">
+    <part name="parameters" element="echofaults:InvalidArgumentFault" />
+  </message>
+  <message name="InvalidStateFault">
+    <part name="parameters" element="echofaults:InvalidStateFault" />
+  </message>
+  <message name="ItemNotFoundFault">
+    <part name="parameters" element="echofaults:ItemNotFoundFault" />
+  </message>
+  <message name="ParseFault">
+    <part name="parameters" element="echofaults:ParseFault" />
+  </message>
+  <message name="RemovalFault">
+    <part name="parameters" element="echofaults:RemovalFault" />
+  </message>
+  <message name="UnsupportedFeatureFault">
+    <part name="parameters"
+      element="echofaults:UnsupportedFeatureFault" />
+  </message>
+  <message name="ValidationFault">
+    <part name="parameters" element="echofaults:ValidationFault" />
+  </message>
+  <message name="InvalidURLFault">
+    <part name="parameters" element="echofaults:InvalidURLFault" />
+  </message>
+  <portType name="OrderManagementServicePort">
+    <operation name="AddOrderItems">
+      <documentation>
+        <p xmlns="">
+          Adds order items to an order. Each order item consists of
+          information about a catalog item that is intended to be
+          ordered. You cannot use this operation to update an already
+          existing order item in the specified order. To update an order
+          item within an order, use the operation
+          <em>UpdateOrderItems</em>
+          . The operation will fail if any selected items are not
+          permitted to order or have been deleted by the provider. In
+          this case, these items can not be added into the order.
+        </p>
+        <p xmlns="">
+          The following fields are ignored in the order items when they
+          are added
+          <ul>
+            <li>Guid</li>
+            <li>ProviderOrderGuid</li>
+            <li>OrderItemState</li>
+          </ul>
+        </p>
+        <p>
+          The option selection on the order items is optional when
+          adding the item. The selection will be validated if present;
+          however it will be ignored if it is not present. When the
+          order is validated, any order items missing a required option
+          selection will be rejected.
+        </p>
+        <p>
+          The item guids returned from this operation will
+          <em>not</em>
+          be in any particular order; therefore a client should not
+          assume that the guids are in the same order as the items that
+          were added. A client can use the
+          <em>GetOrderItemNamesByOrder</em>
+          operation to retrieve the pairing of catalog item guids to
+          order item guids.
+        </p>
+      </documentation>
+      <input message="echo:AddOrderItems" />
+      <output message="echo:AddOrderItemsResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+      <fault name="DuplicateIdFault" message="echo:DuplicateIdFault" />
+      <fault name="InvalidStateFault" message="echo:InvalidStateFault" />
+      <fault name="ValidationFault" message="echo:ValidationFault" />
+    </operation>
+    <operation name="CreateOrder">
+      <documentation>
+        <p xmlns="">
+          Creates an order. Items may also be added to the newly created
+          order with this call.
+        </p>
+        <p xmlns="">
+          The following fields are ignored in the order items when they
+          are added
+          <ul>
+            <li>Guid</li>
+            <li>ProviderOrderGuid</li>
+            <li>OrderItemState</li>
+          </ul>
+        </p>
+        <p>
+          The option selection on the order items is optional when
+          creating the item. The selection will be validated if present;
+          however it will be ignored if it is not present. When the
+          order is validated, any order items missing a required option
+          selection will be rejected.
+        </p>
+      </documentation>
+      <input message="echo:CreateOrder" />
+      <output message="echo:CreateOrderResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+      <fault name="DuplicateIdFault" message="echo:DuplicateIdFault" />
+    </operation>
+    <operation name="RemoveOrders">
+      <documentation>
+        <p xmlns="">
+          Removes orders. This deletes the entire order, including all
+          associated provider orders. To delete a specific provider
+          order(s), a user should use the
+          <em>RemoveProviderOrders</em>
+          operation.
+        </p>
+        <p xmlns="">
+          Only owners of the order or administrators can remove it.
+        </p>
+      </documentation>
+      <input message="echo:RemoveOrders" />
+      <output message="echo:RemoveOrdersResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="InvalidStateFault" message="echo:InvalidStateFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+    </operation>
+    <operation name="RemoveOrderItems">
+      <documentation>
+        Removes one or more order items from a their order. If multiple
+        order items are specified, and just one of them either does not
+        exist in the order or is invalid in some way, then none of the
+        order line items will be deleted, and a fault will be returned.
+      </documentation>
+      <input message="echo:RemoveOrderItems" />
+      <output message="echo:RemoveOrderItemsResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+      <fault name="RemovalFault" message="echo:RemovalFault" />
+    </operation>
+    <operation name="RemoveProviderOrders">
+      <documentation>
+        Removes provider orders. It will only delete the specified
+        provider order (and thus all of the order line items associated
+        with that provider) from the bigger order. All other
+        non-specified provider sub-orders will stay intact.
+      </documentation>
+      <input message="echo:RemoveProviderOrders" />
+      <output message="echo:RemoveProviderOrdersResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+    </operation>
+    <operation name="GetCatalogItemOrderInformation">
+      <documentation>
+        Returns information about one or more catalog items. This
+        includes the information available for a catalog item including
+        the type and description of the item, which provider owns it,
+        its price (if any) and a list of the options for the item. These
+        options may include shipping and packaging options, or the
+        information necessary for the fulfillment of a service.
+      </documentation>
+      <input message="echo:GetCatalogItemOrderInformation" />
+      <output message="echo:GetCatalogItemOrderInformationResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+    </operation>
+    <operation name="CancelOrder">
+      <documentation>
+        Requests the cancellation of an order that has been submitted
+        and has not yet been fulfilled. There may be a cost associated
+        with cancelling the order which will be determined by the
+        particular providers. If a provider does not support cancelling,
+        the provider order will continue to be processing while other
+        providers that do support cancelling will be cancelled. A single
+        provider can also be cancelled directly using another operation.
+        Only a user owns the order can cancel their provider order with
+        this operation.
+      </documentation>
+      <input message="echo:CancelOrder" />
+      <output message="echo:CancelOrderResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+      <fault name="InvalidStateFault" message="echo:InvalidStateFault" />
+      <fault name="ValidationFault" message="echo:ValidationFault" />
+    </operation>
+    <operation name="CancelProviderOrder">
+      <documentation>
+        Cancels a single provider order. A provider may not support this
+        operation. Only orders that have been submitted but not yet
+        fulfilled can be cancelled. Only a user owns the order can
+        cancel their provider order with this operation. If the provider
+        does not support cancelling, this operation will raise a fault.
+      </documentation>
+      <input message="echo:CancelProviderOrder" />
+      <output message="echo:CancelProviderOrderResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+      <fault name="InvalidStateFault" message="echo:InvalidStateFault" />
+      <fault name="UnsupportedFeatureFault"
+        message="echo:UnsupportedFeatureFault" />
+    </operation>
+    <operation name="GetOrders">
+      <documentation>
+        <p xmlns="">
+          Gets orders. This returns orders with the provider orders. The
+          order items are retrieved with separate calls.
+        </p>
+        <p xmlns="">
+          Regular users can call this to get orders they own. A user
+          acting as a provider can call this to get orders they own and
+          orders with provider orders for the provider they are acting
+          as. If the user does not own the order the other provider
+          orders will be removed from the returned object.
+        </p>
+      </documentation>
+      <input message="echo:GetOrders" />
+      <output message="echo:GetOrdersResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+    </operation>
+    <operation name="QuoteOrder">
+      <documentation>
+        Sends each provider order of the order to the provider for a
+        quote. A quoted order provides a binding price for the order as
+        a whole. A quote request is an asynchronous call, as the binding
+        quote response from each of the necessary providers may take a
+        day or more to receive. No changes may be made to an order while
+        it is in the quoting process. Also, a change to the order
+        subsequent to the receipt of a quote may invalidate the quoted
+        price. Validation is performed internally prior to quotation to
+        make sure the items are not deleted and orderable.
+      </documentation>
+      <input message="echo:QuoteOrder" />
+      <output message="echo:QuoteOrderResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+      <fault name="InvalidStateFault" message="echo:InvalidStateFault" />
+      <fault name="ValidationFault" message="echo:ValidationFault" />
+    </operation>
+    <operation name="SetAuthenticationKey">
+      <documentation>
+        Sets the authentication key for a provider order. The
+        authentication key is created in the user service based on a
+        template structure defined by the provider. This operation is
+        only available for registered ECHO users.
+      </documentation>
+      <input message="echo:SetAuthenticationKey" />
+      <output message="echo:SetAuthenticationKeyResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+      <fault name="ValidationFault" message="echo:ValidationFault" />
+    </operation>
+    <operation name="SetUserInformationForOrder">
+      <documentation>
+        <p xmlns="">
+          Sets the user&apos;s shipping, billing and contact information
+          for a particular order. The email address specified in the
+          contact information will be used to notify the user of any
+          order status update including provider contact information.
+          Any existing data will be overridden.
+        </p>
+        <p xmlns="">
+          All addresses must contain a city name. The user domain and
+          region cannot be set to unspecified.
+        </p>
+      </documentation>
+      <input message="echo:SetUserInformationForOrder" />
+      <output message="echo:SetUserInformationForOrderResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+    </operation>
+    <operation name="SubmitOrder">
+      <documentation>
+        Submits an order. The order is validated first, the operation
+        returns, and then the order is processed asynchronously. Each
+        provider order in the order is sent to the provider for
+        processing. If the provider order is accepted by the provider,
+        it is assumed that the provider order will be fulfilled, and if
+        necessary payment will be received. The user can set
+        notification level which defines conditions that email
+        notification will be sent upon order status changes. The status
+        can be checked by retrieving the order periodically.
+      </documentation>
+      <input message="echo:SubmitOrder" />
+      <output message="echo:SubmitOrderResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+      <fault name="InvalidStateFault" message="echo:InvalidStateFault" />
+      <fault name="ValidationFault" message="echo:ValidationFault" />
+    </operation>
+    <operation name="UpdateOrderItems">
+      <documentation>
+        <p>Updates existing order items in an order.</p>
+        <p>
+          The option selection on the order items is optional when
+          updating the item. The selection will be validated if present;
+          however it will be ignored if it is not present. When the
+          order is validated, any order items missing a required option
+          selection will be rejected.
+        </p>
+      </documentation>
+      <input message="echo:UpdateOrderItems" />
+      <output message="echo:UpdateOrderItemsResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+      <fault name="DuplicateIdFault" message="echo:DuplicateIdFault" />
+      <fault name="InvalidStateFault" message="echo:InvalidStateFault" />
+    </operation>
+    <operation name="ValidateOrder">
+      <documentation>
+        <p xmlns="">
+          Validates an order. This is convenience method is not
+          necessary to call to submit or quote an order.
+        </p>
+        <p xmlns="">
+          The order is valid if all of the required options for each
+          order line item, provider order, or order are specified, and
+          the user has provided adequate contact information. If this
+          operation is successful, it will change the order&apos;s state
+          to VALIDATED.
+        </p>
+        <p xmlns="">
+          This fails if any items in the order are no longer permitted
+          to order due to permission/restriction changes by the provider
+          or have been deleted by the provider. In this case, these
+          items must be removed from the order.
+        </p>
+      </documentation>
+      <input message="echo:ValidateOrder" />
+      <output message="echo:ValidateOrderResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+      <fault name="InvalidStateFault" message="echo:InvalidStateFault" />
+      <fault name="ValidationFault" message="echo:ValidationFault" />
+    </operation>
+    <operation name="GetOrderGuidsByStateAndOwner">
+      <documentation>
+        Returns all the order guids that are in one of the states given.
+        This applies only to orders created by the current user.
+      </documentation>
+      <input message="echo:GetOrderGuidsByStateAndOwner" />
+      <output message="echo:GetOrderGuidsByStateAndOwnerResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+    </operation>
+    <operation name="GetOrderItemNamesByOrder">
+      <documentation>
+        Returns the order item guids and the catalog item guids of all
+        the order items in the specified order if the user who owns the
+        order is calling this. If the user is acting as a provider and
+        does not own the order then the items from the provider order
+        will be returned.
+      </documentation>
+      <input message="echo:GetOrderItemNamesByOrder" />
+      <output message="echo:GetOrderItemNamesByOrderResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+    </operation>
+    <operation name="GetOrderItemNamesByProviderOrder">
+      <documentation>
+        Returns the order item guids and the catalog item guids of all
+        the order items in the specified provider orders.
+      </documentation>
+      <input message="echo:GetOrderItemNamesByProviderOrder" />
+      <output message="echo:GetOrderItemNamesByProviderOrderResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+    </operation>
+    <operation name="GetOrderItems">
+      <documentation>
+        Gets order items by their guids. This method can be called by a
+        user who owns the order or a user acting as a provider with
+        items in the provider order for that provider.
+      </documentation>
+      <input message="echo:GetOrderItems" />
+      <output message="echo:GetOrderItemsResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+    </operation>
+    <operation name="CreateAndSubmitOrder">
+      <documentation>
+        <p xmlns="">
+          This is a convenience method that creates the order, adds
+          items, sets user information, and submits the order all in one
+          call.
+        </p>
+        <p xmlns="">
+          The following fields are ignored in the order items when they
+          are added to the order
+          <ul>
+            <li>Guid</li>
+            <li>ProviderOrderGuid</li>
+            <li>OrderItemState</li>
+          </ul>
+        </p>
+      </documentation>
+      <input message="echo:CreateAndSubmitOrder" />
+      <output message="echo:CreateAndSubmitOrderResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+      <fault name="DuplicateIdFault" message="echo:DuplicateIdFault" />
+      <fault name="ValidationFault" message="echo:ValidationFault" />
+    </operation>
+    <operation name="GetProviderOrderGuidsByStateAndOwner">
+      <documentation>
+        Returns all of the provider guids that are in one of the given
+        states owned by the current user.
+      </documentation>
+      <input message="echo:GetProviderOrderGuidsByStateAndOwner" />
+      <output
+        message="echo:GetProviderOrderGuidsByStateAndOwnerResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+    </operation>
+    <operation name="GetProviderOrderGuidsByStateAndProvider">
+      <documentation>
+        <p xmlns="">
+          Returns all of the provider guids that are in one of the given
+          states for the provider being acted as. Only users acting as
+          providers can access this operation.
+        </p>
+        <p xmlns="">
+          In ECHO v9 only the following provider order states can be
+          searched by providers
+        </p>
+        <ul xmlns="">
+          <li>PROCESSING</li>
+          <li>CANCELLING</li>
+          <li>SUBMIT_FAILED</li>
+          <li>SUBMIT_REJECTED</li>
+          <li>CANCELLED</li>
+          <li>CLOSED</li>
+        </ul>
+      </documentation>
+      <input message="echo:GetProviderOrderGuidsByStateAndProvider" />
+      <output
+        message="echo:GetProviderOrderGuidsByStateAndProviderResponse" />
+      <fault name="InternalFault" message="echo:InternalFault" />
+      <fault name="AuthorizationFault"
+        message="echo:AuthorizationFault" />
+      <fault name="ItemNotFoundFault" message="echo:ItemNotFoundFault" />
+      <fault name="InvalidArgumentFault"
+        message="echo:InvalidArgumentFault" />
+    </operation>
+  </portType>
+  <binding name="OrderManagementServicePort"
+    type="echo:OrderManagementServicePort">
+    <soap:binding style="document"
+      transport="http://schemas.xmlsoap.org/soap/http" />
+    <operation name="AddOrderItems">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+      <fault name="DuplicateIdFault">
+        <soap:fault name="DuplicateIdFault" use="literal" />
+      </fault>
+      <fault name="InvalidStateFault">
+        <soap:fault name="InvalidStateFault" use="literal" />
+      </fault>
+      <fault name="ValidationFault">
+        <soap:fault name="ValidationFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="CreateOrder">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+      <fault name="DuplicateIdFault">
+        <soap:fault name="DuplicateIdFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="RemoveOrders">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InvalidStateFault">
+        <soap:fault name="InvalidStateFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="RemoveOrderItems">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+      <fault name="RemovalFault">
+        <soap:fault name="RemovalFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="RemoveProviderOrders">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="GetCatalogItemOrderInformation">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="CancelOrder">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+      <fault name="InvalidStateFault">
+        <soap:fault name="InvalidStateFault" use="literal" />
+      </fault>
+      <fault name="ValidationFault">
+        <soap:fault name="ValidationFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="CancelProviderOrder">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+      <fault name="InvalidStateFault">
+        <soap:fault name="InvalidStateFault" use="literal" />
+      </fault>
+      <fault name="UnsupportedFeatureFault">
+        <soap:fault name="UnsupportedFeatureFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="GetOrders">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="QuoteOrder">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+      <fault name="InvalidStateFault">
+        <soap:fault name="InvalidStateFault" use="literal" />
+      </fault>
+      <fault name="ValidationFault">
+        <soap:fault name="ValidationFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="SetAuthenticationKey">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+      <fault name="ValidationFault">
+        <soap:fault name="ValidationFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="SetUserInformationForOrder">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="SubmitOrder">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+      <fault name="InvalidStateFault">
+        <soap:fault name="InvalidStateFault" use="literal" />
+      </fault>
+      <fault name="ValidationFault">
+        <soap:fault name="ValidationFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="UpdateOrderItems">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+      <fault name="DuplicateIdFault">
+        <soap:fault name="DuplicateIdFault" use="literal" />
+      </fault>
+      <fault name="InvalidStateFault">
+        <soap:fault name="InvalidStateFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="ValidateOrder">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+      <fault name="InvalidStateFault">
+        <soap:fault name="InvalidStateFault" use="literal" />
+      </fault>
+      <fault name="ValidationFault">
+        <soap:fault name="ValidationFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="GetOrderGuidsByStateAndOwner">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="GetOrderItemNamesByOrder">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="GetOrderItemNamesByProviderOrder">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="GetOrderItems">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="CreateAndSubmitOrder">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+      <fault name="DuplicateIdFault">
+        <soap:fault name="DuplicateIdFault" use="literal" />
+      </fault>
+      <fault name="ValidationFault">
+        <soap:fault name="ValidationFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="GetProviderOrderGuidsByStateAndOwner">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="GetProviderOrderGuidsByStateAndProvider">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+    </operation>
+  </binding>
+  <service name="OrderManagementService">
+    <port name="OrderManagementServicePort"
+      binding="echo:OrderManagementServicePort">
+      <soap:address
+        location="https://api.echo.nasa.gov:443/echo-v9/OrderManagementServicePortImpl" />
+    </port>
+  </service>
+</definitions>

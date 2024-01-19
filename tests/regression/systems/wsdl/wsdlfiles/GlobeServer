@@ -1,0 +1,3866 @@
+<?xml version="1.0" encoding="utf-8"?>
+<definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:e="http://www.esri.com/schemas/ArcGIS/9.3" xmlns="http://schemas.xmlsoap.org/wsdl/" targetNamespace="http://www.esri.com/schemas/ArcGIS/9.3">
+  <types>
+    <xs:schema targetNamespace="http://www.esri.com/schemas/ArcGIS/9.3" xmlns="http://www.esri.com/schemas/ArcGIS/9.3">
+      <xs:element name="GetVersion">
+        <xs:complexType />
+      </xs:element>
+      <xs:element name="GetVersionResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Result" type="xs:decimal" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetLayerCount">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="ParentID" type="xs:int" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetLayerCountResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Result" type="xs:int" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Find">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="LayerID" type="xs:int" />
+            <xs:element name="SearchString" type="xs:string" />
+            <xs:element name="Contains" type="xs:boolean" />
+            <xs:element name="SearchFields" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="FindResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Result" type="ArrayOfGlobeServerFindResult" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Identify">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="LayerID" type="xs:int" />
+            <xs:element name="OID" type="xs:int" />
+            <xs:element name="SearchShape" type="Geometry" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="IdentifyResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Result" type="ArrayOfGlobeServerIdentifyResult" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetLayerInfos">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="ParentID" type="xs:int" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetLayerInfosResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Result" type="ArrayOfGlobeLayerInfo" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetLegendInfos">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="LayerIDs" type="ArrayOfInt" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetLegendInfosResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Result" type="ArrayOfGlobeLegendInfo" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetConfig">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="LayerID" type="xs:int" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetConfigResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Result" type="xs:base64Binary" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetMQT">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="LayerID" type="xs:int" />
+            <xs:element name="Face" type="xs:int" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetMQTResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Result" type="xs:base64Binary" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetConfiguration">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="LayerID" type="xs:int" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetConfigurationResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Result" type="xs:base64Binary" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetTile">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="LayerID" type="xs:int" />
+            <xs:element name="Face" type="xs:int" />
+            <xs:element name="Level" type="xs:int" />
+            <xs:element name="Row" type="xs:int" />
+            <xs:element name="Column" type="xs:int" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetTileResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Result" type="xs:base64Binary" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetSymbols">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="LayerID" type="xs:int" />
+            <xs:element name="SymbolIDs" type="ArrayOfInt" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetSymbolsResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Result" type="xs:base64Binary" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetTextures">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="LayerID" type="xs:int" />
+            <xs:element name="TextureIDs" type="ArrayOfInt" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetTexturesResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Result" type="xs:base64Binary" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetAnimation">
+        <xs:complexType />
+      </xs:element>
+      <xs:element name="GetAnimationResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Result" type="xs:base64Binary" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetVirtualCacheDirectory">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="LayerID" type="xs:int" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetVirtualCacheDirectoryResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Result" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetCacheControlInfo">
+        <xs:complexType>
+          <xs:sequence />
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetCacheControlInfoResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Result" type="CacheControlInfo" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:complexType name="GlobeLayerInfo">
+        <xs:annotation>
+          <xs:documentation>The Globe Layer Info object provides information about a globe layer.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element name="LayerID" type="xs:int" />
+          <xs:element name="Name" type="xs:string">
+            <xs:annotation>
+              <xs:documentation>The name of the layer.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="Description" type="xs:string">
+            <xs:annotation>
+              <xs:documentation>The description of the layer. This property is set in the General tab of the Layer Properties dialog.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="Visible" type="xs:boolean">
+            <xs:annotation>
+              <xs:documentation>Indicates if the layer is visible.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="LayerType" type="xs:string" />
+          <xs:element minOccurs="0" name="Extent" type="Envelope">
+            <xs:annotation>
+              <xs:documentation>The geographic extent of the layer.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="Fields" type="Fields">
+            <xs:annotation>
+              <xs:documentation>Array of attribute fields contained in the layer.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="DisplayField" type="xs:string">
+            <xs:annotation>
+              <xs:documentation>Primary display field.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="Transparency" type="xs:int">
+            <xs:annotation>
+              <xs:documentation>The transparency percentage of the layer.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="IsComposite" type="xs:boolean">
+            <xs:annotation>
+              <xs:documentation>Indicates if the layer is a composite layer.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="IsGroup" type="xs:boolean">
+            <xs:annotation>
+              <xs:documentation>Indicates if the layer is a group layer.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="ParentLayerID" type="xs:int">
+            <xs:annotation>
+              <xs:documentation>The parent layer ID if it's a member of a composite layer.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="DataType" type="esriGlobeDataType">
+            <xs:annotation>
+              <xs:documentation>The globe data type.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="MaxDistance" type="xs:decimal" />
+          <xs:element name="MinDistance" type="xs:decimal" />
+          <xs:element name="PerTileVisibility" type="xs:boolean">
+            <xs:annotation>
+              <xs:documentation>Inidicates if visibility is checked for each tile.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="Use16BitsColor" type="xs:boolean" />
+          <xs:element name="Use16BitsElevation" type="xs:boolean" />
+          <xs:element name="LossyCompression" type="xs:boolean">
+            <xs:annotation>
+              <xs:documentation>Indicates if lossy compression is used.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="CompressionQuality" type="xs:int">
+            <xs:annotation>
+              <xs:documentation>The compression quality used.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="HasOIDs" type="xs:boolean">
+            <xs:annotation>
+              <xs:documentation>Indicates if the feature data has object IDs.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="Scale3DSymbols" type="xs:boolean">
+            <xs:annotation>
+              <xs:documentation>Indicates if the the 3D symbols will be scaled with the distance.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="Priority" type="xs:int" />
+          <xs:element name="FloatingOrder" type="xs:int" />
+          <xs:element name="SamplingMode" type="esriGlobeImageSamplingMode" />
+          <xs:element name="MinCellSize" type="xs:decimal" />
+          <xs:element name="Rasterized" type="xs:boolean" />
+          <xs:element name="MetersPerPoint" type="xs:decimal" />
+          <xs:element name="Extruded" type="xs:boolean" />
+          <xs:element name="FeatureLOD" type="xs:int" />
+          <xs:element name="ConsolidatedParent" type="xs:boolean" />
+          <xs:element name="CatalogCrossoverLOD" type="xs:int" />
+          <xs:element name="BaseID" type="xs:int" />
+          <xs:element name="BaseOption" type="esriGlobeLayerBaseOption">
+            <xs:annotation>
+              <xs:documentation>The base option.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="ElevationExpression" type="xs:string">
+            <xs:annotation>
+              <xs:documentation>The elevation expression string for features, in globe units.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="Offset" type="xs:decimal">
+            <xs:annotation>
+              <xs:documentation>The constant elevation offset in meters.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="ZFactor" type="xs:decimal">
+            <xs:annotation>
+              <xs:documentation>The z factor.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="HasElevation" type="xs:boolean" />
+          <xs:element name="UseElevation" type="xs:boolean" />
+          <xs:element name="ExtrusionType" type="esriExtrusionType">
+            <xs:annotation>
+              <xs:documentation>The extrusion type.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="ExtrusionExpression" type="xs:string">
+            <xs:annotation>
+              <xs:documentation>The extrusion expression string.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="Illuminate" type="xs:boolean">
+            <xs:annotation>
+              <xs:documentation>The illumination option.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="Smooth" type="xs:boolean" />
+          <xs:element name="CullMode" type="esri3DFaceCulling" />
+          <xs:element minOccurs="0" name="GraphicsLayer" type="GlobeGraphicsLayer">
+            <xs:annotation>
+              <xs:documentation>The embedded Graphics Layer.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="CopyrightText" type="xs:string">
+            <xs:annotation>
+              <xs:documentation>Copyright information associated with the layer.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="MinLOD" type="xs:int">
+            <xs:annotation>
+              <xs:documentation>The minimum LOD of the Layer.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="MaxLOD" type="xs:int">
+            <xs:annotation>
+              <xs:documentation>The minimum LOD of the Layer.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="RasterTileSize" type="xs:int">
+            <xs:annotation>
+              <xs:documentation>Rasterized vector tile size.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="RasterTileLogSize" type="xs:int">
+            <xs:annotation>
+              <xs:documentation>Rasterized vector logarithm tile size.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="TextureDownsamplingFactor" type="xs:double">
+            <xs:annotation>
+              <xs:documentation>The texture down-sampling factor for textured multipatches.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="TextureCompressionType" type="xs:int">
+            <xs:annotation>
+              <xs:documentation>The current texture compression type.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="TextureDisplayType" type="xs:int">
+            <xs:annotation>
+              <xs:documentation>The current texture display type.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ArrayOfGlobeLayerInfo">
+        <xs:annotation>
+          <xs:documentation>The Globe Layer Info object collection.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="GlobeLayerInfo" type="GlobeLayerInfo" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="GlobeLegendInfo">
+        <xs:annotation>
+          <xs:documentation>The Globe Legend Info object provides information about a globe layer.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element name="LayerID" type="xs:int">
+            <xs:annotation>
+              <xs:documentation>The layer ID.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="Name" type="xs:string" />
+          <xs:element minOccurs="0" name="LegendGroups" type="ArrayOfLegendGroup">
+            <xs:annotation>
+              <xs:documentation>A collection of legend group objects.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ArrayOfGlobeLegendInfo">
+        <xs:annotation>
+          <xs:documentation>The Globe Legend Info collection object.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="GlobeLegendInfo" type="GlobeLegendInfo" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="GlobeServerIdentifyResult">
+        <xs:annotation>
+          <xs:documentation>The Globe Server Identify Result object provides information about an 'identify result'.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element name="Name" type="xs:string">
+            <xs:annotation>
+              <xs:documentation>The name of the identified feature.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="ObjectID" type="xs:int">
+            <xs:annotation>
+              <xs:documentation>The ID of the identified feature.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="Shape" type="Geometry">
+            <xs:annotation>
+              <xs:documentation>The geometry of the identified feature.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="Properties" type="PropertySet">
+            <xs:annotation>
+              <xs:documentation>A set of name-value pairs for the identified features's field names and values.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ArrayOfGlobeServerIdentifyResult">
+        <xs:annotation>
+          <xs:documentation>The Globe server identify result collection.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="GlobeServerIdentifyResult" type="GlobeServerIdentifyResult" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="GlobeServerFindResult">
+        <xs:annotation>
+          <xs:documentation>The Globe Server Find Result object provides information about a 'find result'.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element name="Value" type="xs:string">
+            <xs:annotation>
+              <xs:documentation>The found value.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="FieldName" type="xs:string">
+            <xs:annotation>
+              <xs:documentation>The field name.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="ObjectID" type="xs:int">
+            <xs:annotation>
+              <xs:documentation>The ID of the found feature.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="Shape" type="Geometry">
+            <xs:annotation>
+              <xs:documentation>The geometry of the found feature.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="Properties" type="PropertySet">
+            <xs:annotation>
+              <xs:documentation>A set of name-value pairs for the found features's field names and values.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ArrayOfGlobeServerFindResult">
+        <xs:annotation>
+          <xs:documentation>The Globe server find result collection.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="GlobeServerFindResult" type="GlobeServerFindResult" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:simpleType name="esriGlobeDataType">
+        <xs:annotation>
+          <xs:documentation>Types of internal globe data.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="esriGlobeDataInvalid">
+            <xs:annotation>
+              <xs:documentation>Invalid data type for Globe.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriGlobeDataTexture">
+            <xs:annotation>
+              <xs:documentation>Texture (image) internal data type.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriGlobeDataElevation">
+            <xs:annotation>
+              <xs:documentation>Elevation (surface) internal data type.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriGlobeDataVector">
+            <xs:annotation>
+              <xs:documentation>Vector internal data type.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriGlobeDataText">
+            <xs:annotation>
+              <xs:documentation>Text internal data type.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriGlobeDataObject">
+            <xs:annotation>
+              <xs:documentation>3D object internal data type.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriGlobeDataPoint">
+            <xs:annotation>
+              <xs:documentation>Point internal data type.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType name="esriGlobeImageSamplingMode">
+        <xs:annotation>
+          <xs:documentation>Sampling/display modes for images.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="esriGlobeImageSamplingNearest">
+            <xs:annotation>
+              <xs:documentation>Nearest neighbor image sampling mode.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriGlobeImageSamplingSmooth">
+            <xs:annotation>
+              <xs:documentation>Smooth image sampling mode.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType name="esriGlobeLayerBaseOption">
+        <xs:annotation>
+          <xs:documentation>Base Options for Globe Layers.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="esriGlobeLayerBaseGlobe">
+            <xs:annotation>
+              <xs:documentation>Use the base globe (for any type of globe layer).</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriGlobeLayerBaseExpression">
+            <xs:annotation>
+              <xs:documentation>Calculate height from expression (globe image or feature layers).</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriGlobeLayerBaseLayer">
+            <xs:annotation>
+              <xs:documentation>Use a surface layer (for image or feature layers).</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriGlobeLayerBaseSelf">
+            <xs:annotation>
+              <xs:documentation>Use its own geometry (for surface or feature layers).</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType name="esriExtrusionType">
+        <xs:annotation>
+          <xs:documentation>The ESRI extrusion type options.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="esriExtrusionNone">
+            <xs:annotation>
+              <xs:documentation>No extrusion.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriExtrusionMinZ">
+            <xs:annotation>
+              <xs:documentation>Add to the minimum z value of a feature.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriExtrusionMaxZ">
+            <xs:annotation>
+              <xs:documentation>Add to the maximum z value of a feature.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriExtrusionBase">
+            <xs:annotation>
+              <xs:documentation>Add to the base height.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriExtrusionAbsolute">
+            <xs:annotation>
+              <xs:documentation>Use as an absolute value.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType name="esri3DFaceCulling">
+        <xs:annotation>
+          <xs:documentation>The ESRI face culling options.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="esriFaceCullingNone">
+            <xs:annotation>
+              <xs:documentation>No culling, both faces are rendered.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriFaceCullingFront">
+            <xs:annotation>
+              <xs:documentation>Cull the front facing polygons.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriFaceCullingBack">
+            <xs:annotation>
+              <xs:documentation>Cull the back facing polygons.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:complexType name="ArrayOfGlobeGraphicsElementProps">
+        <xs:annotation>
+          <xs:documentation />
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="GlobeGraphicsElementProps" type="GlobeGraphicsElementProperties" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="GlobeGraphicsLayer">
+        <xs:annotation>
+          <xs:documentation>The Globe Graphics Layer.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element name="UseAssocLayer" type="xs:boolean" />
+          <xs:element minOccurs="0" name="AssocLayerName" type="xs:string" />
+          <xs:element name="Hide" type="xs:boolean" />
+          <xs:element name="Elements" type="ArrayOfGraphicElement" />
+          <xs:element name="ElementProperties" type="ArrayOfGlobeGraphicsElementProps" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:simpleType name="esriGlobeGraphicsOrientation">
+        <xs:annotation>
+          <xs:documentation>The orientation modes for globe graphics layer elements.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="esriGlobeGraphicsOrientationDefault">
+            <xs:annotation>
+              <xs:documentation>Default orientation.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriGlobeGraphicsOrientationBillboard">
+            <xs:annotation>
+              <xs:documentation>Billboard orientation (face always the observer).</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriGlobeGraphicsOrientationLocal">
+            <xs:annotation>
+              <xs:documentation>Local globe orientation (fixed position relative to globe surface).</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:complexType name="GlobeGraphicsElementProperties">
+        <xs:annotation>
+          <xs:documentation>The Globe Graphics Element Properties.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element name="ElementSelected" type="xs:boolean" />
+          <xs:element name="ElementIlluminate" type="xs:boolean" />
+          <xs:element name="ElementFixedSize" type="xs:boolean" />
+          <xs:element name="ElementOrientation" type="esriGlobeGraphicsOrientation" />
+          <xs:element name="ElementRasterized" type="xs:boolean" />
+          <xs:element name="ElementDraped" type="xs:boolean" />
+          <xs:element name="ElementDrapeMaxRes" type="xs:boolean" />
+          <xs:element name="ElementZOffset" type="xs:double" />
+          <xs:element name="ElementDensDist" type="xs:double" />
+          <xs:element name="ElementCallout" type="xs:boolean" />
+          <xs:element name="ElementCallOffX" type="xs:double" />
+          <xs:element name="ElementCallOffY" type="xs:double" />
+          <xs:element name="ElementCallOffZ" type="xs:double" />
+          <xs:element name="ElementCallLineR" type="xs:unsignedByte" />
+          <xs:element name="ElementCallLineG" type="xs:unsignedByte" />
+          <xs:element name="ElementCallLineB" type="xs:unsignedByte" />
+          <xs:element name="ElementCallLineA" type="xs:unsignedByte" />
+          <xs:element name="ElementCallWidth" type="xs:double" />
+          <xs:element name="ElementTransformed" type="xs:boolean" />
+          <xs:element name="ElementTransX" type="xs:double" />
+          <xs:element name="ElementTransY" type="xs:double" />
+          <xs:element name="ElementTransZ" type="xs:double" />
+          <xs:element name="ElementScaleX" type="xs:double" />
+          <xs:element name="ElementScaleY" type="xs:double" />
+          <xs:element name="ElementScaleZ" type="xs:double" />
+          <xs:element name="ElementRotateX" type="xs:double" />
+          <xs:element name="ElementRotateY" type="xs:double" />
+          <xs:element name="ElementRotateZ" type="xs:double" />
+          <xs:element name="ElementGroup" type="xs:boolean" />
+          <xs:element name="ElementDrapeDone" type="xs:boolean" />
+          <xs:element name="ElementCallPosX" type="xs:double" />
+          <xs:element name="ElementCallPosY" type="xs:double" />
+          <xs:element name="ElementCallPosZ" type="xs:double" />
+          <xs:element name="ElementImmediate" type="xs:boolean" />
+          <xs:element name="ElementPosX" type="xs:double" />
+          <xs:element name="ElementPosY" type="xs:double" />
+          <xs:element name="ElementPosZ" type="xs:double" />
+          <xs:element name="ElementPosLon" type="xs:double" />
+          <xs:element name="ElementPosLat" type="xs:double" />
+          <xs:element name="ElementPosAlt" type="xs:double" />
+          <xs:element name="ElementHasOwnScale" type="xs:boolean" />
+          <xs:element name="ElementOwnScale" type="xs:double" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="AreaPatch">
+        <xs:annotation>
+          <xs:documentation>Classs implements an Area legend patch.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Patch" />
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="ArrayOfGraphicElement">
+        <xs:annotation>
+          <xs:documentation>The Graphic Elements collection Object.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="GraphicElement" type="GraphicElement" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="LegendClass">
+        <xs:annotation>
+          <xs:documentation>The legend/TOC entry for a single renderer class.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Symbol" type="Symbol">
+            <xs:annotation>
+              <xs:documentation>Legend class symbol.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="Label" type="xs:string">
+            <xs:annotation>
+              <xs:documentation>Legend class label.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="Description" type="xs:string">
+            <xs:annotation>
+              <xs:documentation>Legend class description.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="LegendClassFormat" type="LegendClassFormat" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="LegendClassFormat">
+        <xs:annotation>
+          <xs:documentation>Formatting information for the legend/TOC entry of a renderer class.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element minOccurs="0" name="LabelSymbol" type="Symbol">
+            <xs:annotation>
+              <xs:documentation>Text symbol used to draw the legend group labels.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="DescriptionSymbol" type="Symbol">
+            <xs:annotation>
+              <xs:documentation>Text symbol used to draw legend group descriptions.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="LinePatch" type="LinePatch">
+            <xs:annotation>
+              <xs:documentation>The line patch. (Optional. If non-null, this overrides default line patch specified by ILegend.LegendFormat).</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="AreaPatch" type="AreaPatch">
+            <xs:annotation>
+              <xs:documentation>The area patch. (Optional.  If non-null, this overrides default area patch specified by ILegend.LegendFormat).</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="PatchWidth" type="xs:double">
+            <xs:annotation>
+              <xs:documentation>Width of the patch in points.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="PatchHeight" type="xs:double">
+            <xs:annotation>
+              <xs:documentation>Height of the patch in points.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="LinePatch">
+        <xs:annotation>
+          <xs:documentation>Class implements a Line legend patch.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Patch" />
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="Shadow" abstract="true">
+        <xs:annotation>
+          <xs:documentation>Frame drop shadows.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence />
+      </xs:complexType>
+      <xs:complexType name="Background" abstract="true">
+        <xs:annotation>
+          <xs:documentation>Frame Background.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence />
+      </xs:complexType>
+      <xs:complexType name="SymbolBackground">
+        <xs:annotation>
+          <xs:documentation>Background drawn using a symbol.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Background">
+            <xs:sequence>
+              <xs:element name="HorizontalGap" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>Horizontal offset or gap between the decoration and the subject in points.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="CornerRounding" type="xs:short">
+                <xs:annotation>
+                  <xs:documentation>Amount of corner rounding.  0 = fully square.  100 = fully round.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="VerticalGap" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>Vertical offset or gap between the decoration and the subject in points.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Symbol" type="FillSymbol">
+                <xs:annotation>
+                  <xs:documentation>Symbol used to draw the background.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="Border" abstract="true">
+        <xs:annotation>
+          <xs:documentation>Frame border used by this element.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence />
+      </xs:complexType>
+      <xs:complexType name="SymbolBorder">
+        <xs:annotation>
+          <xs:documentation>Border drawn using a symbol.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Border">
+            <xs:sequence>
+              <xs:element name="HorizontalGap" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>Horizontal offset or gap between the decoration and the subject in points.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="CornerRounding" type="xs:short">
+                <xs:annotation>
+                  <xs:documentation>Amount of corner rounding.  0 = fully square.  100 = fully round.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="VerticalGap" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>Vertical offset or gap between the decoration and the subject in points.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Symbol" type="LineSymbol">
+                <xs:annotation>
+                  <xs:documentation>Symbol used to draw the border.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="SymbolShadow">
+        <xs:annotation>
+          <xs:documentation>Shadow drawn using a symbol.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Shadow">
+            <xs:sequence>
+              <xs:element minOccurs="0" name="Symbol" type="LineSymbol">
+                <xs:annotation>
+                  <xs:documentation>Symbol used to draw the shadow.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="CornerRounding" type="xs:short">
+                <xs:annotation>
+                  <xs:documentation>Amount of corner rounding.  0 = fully square.  100 = fully round.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="HorizontalOffset" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>Horizontal offset or gap between the decoration and the subject in points.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="VerticalOffset" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>Vertical offset or gap between the decoration and the subject in points.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="Element" abstract="true">
+        <xs:annotation>
+          <xs:documentation>Element.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence />
+      </xs:complexType>
+      <xs:complexType name="GraphicElement" abstract="true">
+        <xs:annotation>
+          <xs:documentation>Graphic Element Obejct.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Element">
+            <xs:sequence />
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="LineElement">
+        <xs:annotation>
+          <xs:documentation>The Graphic Element to display lines.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="GraphicElement">
+            <xs:sequence>
+              <xs:element minOccurs="0" name="Name" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>Name of the element.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Type" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>Type of the element.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="AutoTransform" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>Indicates if transform is applied to symbols and other parts of element. False = only apply transform to geometry.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="ReferenceScale" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>Reference scale of the element.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Symbol" type="Symbol">
+                <xs:annotation>
+                  <xs:documentation>Line symbol this element uses to draw itself.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="Line" type="Geometry">
+                <xs:annotation>
+                  <xs:documentation>Shape of the element as a geometry, in this case it is a PolyLine.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Locked" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>Indicates if the element is in a read-only state.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="FixedAspectRatio" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>Indicates if the bounds has a fixed aspect ratio.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="CircleElement">
+        <xs:annotation>
+          <xs:documentation>The Graphic Element to display Circles.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="GraphicElement">
+            <xs:sequence>
+              <xs:element name="Rectangle" type="Geometry">
+                <xs:annotation>
+                  <xs:documentation>Shape of the element as a geometry, in this case it is a Polygon or an Envelope.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Locked" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>Indicates if the element is in a read-only state.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="FixedAspectRatio" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>Indicates if the bounds has a fixed aspect ratio.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Name" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>Name of the element.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Type" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>Type of the element.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="AutoTransform" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>Indicates if transform is applied to symbols and other parts of element. False = only apply transform to geometry.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="ReferenceScale" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>Reference scale of the element.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Symbol" type="Symbol">
+                <xs:annotation>
+                  <xs:documentation>Fill symbol this element uses to draw itself.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="EllipseElement">
+        <xs:annotation>
+          <xs:documentation>The Graphic Element to display Ellipses.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="GraphicElement">
+            <xs:sequence>
+              <xs:element name="Rectangle" type="Geometry">
+                <xs:annotation>
+                  <xs:documentation>Shape of the element as a geometry, in this case it is a Polygon or an Envelope.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Locked" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>Indicates if the element is in a read-only state.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="FixedAspectRatio" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>Indicates if the bounds has a fixed aspect ratio.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Name" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>Name of the element.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Type" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>Type of the element.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="AutoTransform" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>Indicates if transform is applied to symbols and other parts of element. False = only apply transform to geometry.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="ReferenceScale" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>Reference scale of the element.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Symbol" type="Symbol">
+                <xs:annotation>
+                  <xs:documentation>Fill symbol this element uses to draw itself.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="GroupElement">
+        <xs:annotation>
+          <xs:documentation>The Group Graphic Element to display a group of graphic elements.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Element">
+            <xs:sequence>
+              <xs:element minOccurs="0" name="Name" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>Name of the element.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Type" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>Type of the element.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="AutoTransform" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>Indicates if transform is applied to symbols and other parts of element. False = only apply transform to geometry.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="ReferenceScale" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>Reference scale of the element.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="Elements" type="ArrayOfGraphicElement">
+                <xs:annotation>
+                  <xs:documentation>Elements in the group.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Rectangle" type="Geometry">
+                <xs:annotation>
+                  <xs:documentation>Shape of the element as a geometry.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Locked" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>Indicates if the element is in a read-only state.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="FixedAspectRatio" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>Indicates if the bounds has a fixed aspect ratio.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Border" type="Border">
+                <xs:annotation>
+                  <xs:documentation>Frame border used by this element.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Background" type="Background">
+                <xs:annotation>
+                  <xs:documentation>Frame background used by this element.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="DraftMode" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>Indicates if this element is in draft mode, i.e., draws fast.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Shadow" type="Shadow">
+                <xs:annotation>
+                  <xs:documentation>Frame shadow used by this element.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="MarkerElement">
+        <xs:annotation>
+          <xs:documentation>The Graphic Element to display markers.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="GraphicElement">
+            <xs:sequence>
+              <xs:element minOccurs="0" name="Name" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>Name of the element.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Type" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>Type of the element.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="AutoTransform" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>Indicates if transform is applied to symbols and other parts of element. False = only apply transform to geometry.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="ReferenceScale" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>Reference scale of the element.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Symbol" type="Symbol">
+                <xs:annotation>
+                  <xs:documentation>Marker symbol this element uses to draw itself.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="Point" type="Point">
+                <xs:annotation>
+                  <xs:documentation>Shape of the element as a geometry, in this case it is a Point.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Locked" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>Indicates if the element is in a read-only state.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="ParagraphTextElement">
+        <xs:annotation>
+          <xs:documentation>The Graphic Element to display text which flows into an area geometry.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="GraphicElement">
+            <xs:sequence>
+              <xs:element minOccurs="0" name="Name" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>Name of the element.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Type" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>Type of the element.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="AutoTransform" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>Indicates if transform is applied to symbols and other parts of element. False = only apply transform to geometry.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="ReferenceScale" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>Reference scale of the element.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Text" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>Text being displayed by this element.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Scale" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>Should have been boolean type. Indicates if the text scales with the map.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Symbol" type="Symbol">
+                <xs:annotation>
+                  <xs:documentation>Text symbol this element uses to draw itself.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="TextGeometry" type="Geometry">
+                <xs:annotation>
+                  <xs:documentation>Shape of the element as a geometry, in this case it is a .</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Locked" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>Indicates if the element is in a read-only state.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="FrameBorder" type="Border">
+                <xs:annotation>
+                  <xs:documentation>Frame border used by this element.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="FrameBackground" type="Background">
+                <xs:annotation>
+                  <xs:documentation>Frame background used by this element.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="FrameShadow" type="Shadow">
+                <xs:annotation>
+                  <xs:documentation>"Frame shadow used by this element.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="ColumnGap" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>Gap between columns in points.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="ColumnCount" type="xs:int">
+                <xs:annotation>
+                  <xs:documentation>Number of columns.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Margin" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>Value for the margin.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="PolygonElement">
+        <xs:annotation>
+          <xs:documentation>The Graphic Element to display polygons.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="GraphicElement">
+            <xs:sequence>
+              <xs:element minOccurs="0" name="Name" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>Name of the element.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Type" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>Type of the element.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="AutoTransform" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>Indicates if transform is applied to symbols and other parts of element. False = only apply transform to geometry.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="ReferenceScale" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>Reference scale of the element.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Symbol" type="Symbol">
+                <xs:annotation>
+                  <xs:documentation>Fill symbol this element uses to draw itself.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="Polygon" type="Geometry">
+                <xs:annotation>
+                  <xs:documentation>Shape of the element as a geometry, in this case it is a Polygon.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Locked" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>Indicates if the element is in a read-only state.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="FixedAspectRatio" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>Indicates if the bounds has a fixed aspect ratio.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="RectangleElement">
+        <xs:annotation>
+          <xs:documentation>The Graphic Element to display rectangles.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="GraphicElement">
+            <xs:sequence>
+              <xs:element name="Rectangle" type="Geometry">
+                <xs:annotation>
+                  <xs:documentation>Shape of the element as a geometry, in this case it is a Polygon.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Locked" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>Indicates if the element is in a read-only state.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="FixedAspectRatio" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>Indicates if the bounds has a fixed aspect ratio.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Name" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>Name of the element.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Type" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>Type of the element.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="AutoTransform" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>Indicates if transform is applied to symbols and other parts of element. False = only apply transform to geometry.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="ReferenceScale" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>Reference scale of the element.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Symbol" type="Symbol">
+                <xs:annotation>
+                  <xs:documentation>Fill symbol this element uses to draw itself.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="TextElement">
+        <xs:annotation>
+          <xs:documentation>The Graphic Element to display text.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="GraphicElement">
+            <xs:sequence>
+              <xs:element minOccurs="0" name="Name" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>Name of the element.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Type" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>Type of the element.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="AutoTransform" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>Indicates if transform is applied to symbols and other parts of element. False = only apply transform to geometry.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="ReferenceScale" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>Reference scale of the element.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Text" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>Text being displayed by this element.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Scale" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>Indicates if the text scales with the map.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Symbol" type="Symbol">
+                <xs:annotation>
+                  <xs:documentation>Text symbol this element uses to draw itself.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="TextGeometry" type="Geometry" />
+              <xs:element minOccurs="0" name="Locked" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>Indicates if the element is in a read-only state.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="Patch">
+        <xs:annotation>
+          <xs:documentation>legend patch.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Name" type="xs:string">
+            <xs:annotation>
+              <xs:documentation>Name of the patch.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="PreserveAspectRatio" type="xs:boolean">
+            <xs:annotation>
+              <xs:documentation>Indicates if aspect ratio of patch is preserved.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="Geometry" type="Geometry">
+            <xs:annotation>
+              <xs:documentation>Patch geometry sized to fit the specified bounds.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ArrayOfLegendClass">
+        <xs:annotation>
+          <xs:documentation>A collection of LegendClass objects.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="LegendClass" type="LegendClass" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="LegendGroup">
+        <xs:annotation>
+          <xs:documentation>The collection of legend classes provided by a renderer.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element name="Visible" type="xs:boolean">
+            <xs:annotation>
+              <xs:documentation>Indicates if the group is displayed.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="Editable" type="xs:boolean">
+            <xs:annotation>
+              <xs:documentation>Indicates if the group can be edited. Default is editable.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="Heading" type="xs:string">
+            <xs:annotation>
+              <xs:documentation>String heading.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="LegendClasses" type="ArrayOfLegendClass" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ArrayOfLegendGroup">
+        <xs:annotation>
+          <xs:documentation>A collection of LegendGroup objects.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="LegendGroup" type="LegendGroup" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="CacheControlInfo">
+        <xs:annotation>
+          <xs:documentation>Cache control info object.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element name="ClientCachingAllowed" type="xs:boolean">
+            <xs:annotation>
+              <xs:documentation>Indicates if client caching is allowed.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="Color" abstract="true">
+        <xs:annotation>
+          <xs:documentation />
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element minOccurs="0" name="UseWindowsDithering" type="xs:boolean">
+            <xs:annotation>
+              <xs:documentation>Indicates if colors should be dithered to simulate colors that aren't supported by the display.  This only applies on displays that have 256 or fewer colors.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="AlphaValue" type="xs:unsignedByte">
+            <xs:annotation>
+              <xs:documentation>The Alpha Blending value. (0 for transparent, 255 for opaque).</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="GrayColor">
+        <xs:annotation>
+          <xs:documentation>A color in the grayscale color system.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Color">
+            <xs:sequence>
+              <xs:element name="GrayLevel" type="xs:unsignedByte" />
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="RgbColor">
+        <xs:annotation>
+          <xs:documentation>A color in the RGB(Red Green Blue) color system.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Color">
+            <xs:sequence>
+              <xs:element name="Red" type="xs:unsignedByte">
+                <xs:annotation>
+                  <xs:documentation>The red component of an IRgbColor (0-255).</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="Green" type="xs:unsignedByte">
+                <xs:annotation>
+                  <xs:documentation>The green component of an IRgbColor (0-255).</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="Blue" type="xs:unsignedByte">
+                <xs:annotation>
+                  <xs:documentation>The blue component of an IRgbColor (0-255).</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="CmykColor">
+        <xs:annotation>
+          <xs:documentation>A color in the CMYK(Cyan Magenta Yellow, Black) color system.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Color">
+            <xs:sequence>
+              <xs:element name="Cyan" type="xs:unsignedByte">
+                <xs:annotation>
+                  <xs:documentation>The cyan component of an ICmykColor (0-255).</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="Magenta" type="xs:unsignedByte">
+                <xs:annotation>
+                  <xs:documentation>The magenta component of an ICmykColor (0-255).</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="Yellow" type="xs:unsignedByte">
+                <xs:annotation>
+                  <xs:documentation>The yellow component of an ICmykColor (0-255).</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="Black" type="xs:unsignedByte">
+                <xs:annotation>
+                  <xs:documentation>The black component of an ICmykColor (0-255).</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="Overprint" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>Indicates if the color overprints.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="IsSpot" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>Indicates if the color is a spot color.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="SpotDescription" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>The description of the spot plate.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="SpotPercent" type="xs:short">
+                <xs:annotation>
+                  <xs:documentation>The saturation of the spot plate.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="HlsColor">
+        <xs:annotation>
+          <xs:documentation>A color in the HLS(Hue, Luminance, Saturation) color system.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Color">
+            <xs:sequence>
+              <xs:element name="Hue" type="xs:short">
+                <xs:annotation>
+                  <xs:documentation>The hue component of an IHlsColor (0-360).</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="Lightness" type="xs:unsignedByte">
+                <xs:annotation>
+                  <xs:documentation>The lightness component of an IHlsColor (0-100).</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="Saturation" type="xs:unsignedByte">
+                <xs:annotation>
+                  <xs:documentation>The saturation component of an HlslColor (0-100).</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="HsvColor">
+        <xs:annotation>
+          <xs:documentation>A color in the HSV (Hue, Saturation, Value) color system.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Color">
+            <xs:sequence>
+              <xs:element name="Hue" type="xs:short">
+                <xs:annotation>
+                  <xs:documentation>The hue component of an IhsvColor (0-360).</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="Saturation" type="xs:unsignedByte">
+                <xs:annotation>
+                  <xs:documentation>The saturation component of an IhsvColor (0-100).</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="Value" type="xs:unsignedByte">
+                <xs:annotation>
+                  <xs:documentation>The value component of an IhsvColor (0-100).</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="Symbol" abstract="true">
+        <xs:annotation>
+          <xs:documentation />
+        </xs:annotation>
+        <xs:sequence />
+      </xs:complexType>
+      <xs:simpleType name="esriSimpleFillStyle">
+        <xs:annotation>
+          <xs:documentation>Simple fill symbol styles.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="esriSFSSolid">
+            <xs:annotation>
+              <xs:documentation>Solid fill.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriSFSNull">
+            <xs:annotation>
+              <xs:documentation>Empty fill.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriSFSHorizontal">
+            <xs:annotation>
+              <xs:documentation>Horizontal hatch fill ------.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriSFSVertical">
+            <xs:annotation>
+              <xs:documentation>Vertical hatch fill ||||||.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriSFSForwardDiagonal">
+            <xs:annotation>
+              <xs:documentation>45-degree downward, left-to-right hatch fill  \\\.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriSFSBackwardDiagonal">
+            <xs:annotation>
+              <xs:documentation>45-degree upward, left-to-right hatch fill //////.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriSFSCross">
+            <xs:annotation>
+              <xs:documentation>Horizontal and vertical crosshatch ++++++.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriSFSDiagonalCross">
+            <xs:annotation>
+              <xs:documentation>45-degree crosshatch xxxxxx.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType name="esriSimpleLineStyle">
+        <xs:annotation>
+          <xs:documentation>Simple line symbol styles.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="esriSLSSolid">
+            <xs:annotation>
+              <xs:documentation>The line is solid.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriSLSDash">
+            <xs:annotation>
+              <xs:documentation>The line is dashed -------.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriSLSDot">
+            <xs:annotation>
+              <xs:documentation>The line is dotted .......</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriSLSDashDotDot">
+            <xs:annotation>
+              <xs:documentation>The line has alternating dashes and double dots _.._.._.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriSLSNull">
+            <xs:annotation>
+              <xs:documentation>The line is invisible.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriSLSInsideFrame">
+            <xs:annotation>
+              <xs:documentation>The line will fit into it's bounding rectangle, if any.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType name="esriSimpleMarkerStyle">
+        <xs:annotation>
+          <xs:documentation>Simple marker symbol styles.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="esriSMSCircle">
+            <xs:annotation>
+              <xs:documentation>The marker is a circle.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriSMSSquare">
+            <xs:annotation>
+              <xs:documentation>The marker is a square.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriSMSCross">
+            <xs:annotation>
+              <xs:documentation>The marker is a cross.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriSMSX">
+            <xs:annotation>
+              <xs:documentation>The marker is an X.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriSMSDiamond">
+            <xs:annotation>
+              <xs:documentation>The marker is a diamond.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType name="esriTextHorizontalAlignment">
+        <xs:annotation>
+          <xs:documentation>Horizontal text alignment options.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="esriTHALeft">
+            <xs:annotation>
+              <xs:documentation>The text is left justified.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriTHACenter">
+            <xs:annotation>
+              <xs:documentation>The text is center justified.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriTHARight">
+            <xs:annotation>
+              <xs:documentation>The text is right justified.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriTHAFull">
+            <xs:annotation>
+              <xs:documentation>The text is fully justified.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType name="esriTextVerticalAlignment">
+        <xs:annotation>
+          <xs:documentation>Vertical text alignment options.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="esriTVATop">
+            <xs:annotation>
+              <xs:documentation>The text is aligned at the top.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriTVACenter">
+            <xs:annotation>
+              <xs:documentation>The text is aligned at the center.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriTVABaseline">
+            <xs:annotation>
+              <xs:documentation>The text is aligned at the baseline.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriTVABottom">
+            <xs:annotation>
+              <xs:documentation>The text is aligned at the bottom.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType name="esriTextPosition">
+        <xs:annotation>
+          <xs:documentation>Text symbol position options.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="esriTPNormal">
+            <xs:annotation>
+              <xs:documentation>The text draws normally.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriTPSuperscript">
+            <xs:annotation>
+              <xs:documentation>The text draws as superscript text.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriTPSubscript">
+            <xs:annotation>
+              <xs:documentation>The text draws as subscript text.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType name="esriTextCase">
+        <xs:annotation>
+          <xs:documentation>Text symbol case options.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="esriTCNormal">
+            <xs:annotation>
+              <xs:documentation>The text draws normally.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriTCLowercase">
+            <xs:annotation>
+              <xs:documentation>The text draws as all lowercase.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriTCAllCaps">
+            <xs:annotation>
+              <xs:documentation>The text draws as all capitals.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriTCSmallCaps">
+            <xs:annotation>
+              <xs:documentation>The text draws as small capitals.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType name="esriTextDirection">
+        <xs:annotation>
+          <xs:documentation>Text symbol direction options.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="esriTDHorizontal">
+            <xs:annotation>
+              <xs:documentation>The text draws horizontally.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriTDAngle">
+            <xs:annotation>
+              <xs:documentation>The text draws along an angle.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriTDVertical">
+            <xs:annotation>
+              <xs:documentation>The text draws vertically.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType name="esriMaskStyle">
+        <xs:annotation>
+          <xs:documentation>Text symbol mask styles.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="esriMSNone">
+            <xs:annotation>
+              <xs:documentation>No mask.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriMSHalo">
+            <xs:annotation>
+              <xs:documentation>The text mask style is halo.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:complexType name="SimpleFillSymbol">
+        <xs:annotation>
+          <xs:documentation>A fill symbol comprised from a predefined set of styles.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="FillSymbol">
+            <xs:sequence>
+              <xs:element name="Style" type="esriSimpleFillStyle">
+                <xs:annotation>
+                  <xs:documentation>Fill style.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="SimpleLineSymbol">
+        <xs:annotation>
+          <xs:documentation>A line symbol comprised of a predefined set of styles.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="LineSymbol">
+            <xs:sequence>
+              <xs:element name="Style" type="esriSimpleLineStyle">
+                <xs:annotation>
+                  <xs:documentation>The style of the line symbol.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="SimpleMarkerSymbol">
+        <xs:annotation>
+          <xs:documentation>A marker symbol comprised of a predefined set of styles.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="MarkerSymbol">
+            <xs:sequence>
+              <xs:element name="Outline" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>Indicates if the symbol outline will draw.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="OutlineSize" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>Outline diameter.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="OutlineColor" type="Color">
+                <xs:annotation>
+                  <xs:documentation>Outline color.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="Style" type="esriSimpleMarkerStyle">
+                <xs:annotation>
+                  <xs:documentation>Marker style.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="TextSymbol">
+        <xs:annotation>
+          <xs:documentation>A symbol that controls how text is displayed.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Symbol">
+            <xs:sequence>
+              <xs:element minOccurs="0" name="Color" type="Color">
+                <xs:annotation>
+                  <xs:documentation>Text color."</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="BreakCharIndex" type="xs:int">
+                <xs:annotation>
+                  <xs:documentation>Character to be interpreted as text line end.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="VerticalAlignment" type="esriTextVerticalAlignment">
+                <xs:annotation>
+                  <xs:documentation>Vertical alignment style.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="HorizontalAlignment" type="esriTextHorizontalAlignment">
+                <xs:annotation>
+                  <xs:documentation>Horizontal alignment style.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="Clip" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>Indicates if the text will be clipped per geometry.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="RightToLeft" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>Indicates if the text is drawn from right to left.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="Angle" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>Text baseline angle.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="XOffset" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>Text offset along X-axis.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="YOffset" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>Text offset along Y-axis.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="ShadowColor" type="Color">
+                <xs:annotation>
+                  <xs:documentation>The shadow color.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="ShadowXOffset" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>The shadow X offset.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="ShadowYOffset" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>The shadow Y offset.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="TextPosition" type="esriTextPosition">
+                <xs:annotation>
+                  <xs:documentation>The text position.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="TextCase" type="esriTextCase">
+                <xs:annotation>
+                  <xs:documentation>The text case.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="CharacterSpacing" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>The character spacing.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element default="100.0" name="CharacterWidth" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>The character width.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element default="100.0" name="WordSpacing" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>The word spacing.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="Kerning" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>Indicates if kerning is on.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="Leading" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>The character leading.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="TextDirection" type="esriTextDirection">
+                <xs:annotation>
+                  <xs:documentation>The text direction.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="FlipAngle" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>The flip angle.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="TypeSetting" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>Indicates if typesetting is used.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="TextPathClass" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>Path of text baseline.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="FillSymbol" type="Symbol">
+                <xs:annotation>
+                  <xs:documentation>The fill symbol.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="Text" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>Text to draw.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="Size" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>Text size.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="MaskStyle" type="esriMaskStyle">
+                <xs:annotation>
+                  <xs:documentation>The mask style.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="MaskSize" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>The mask size.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="MaskSymbol" type="Symbol">
+                <xs:annotation>
+                  <xs:documentation>The mask symbol.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="FontName" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>The name of the font family.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="FontItalic" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>Indicates whether the font is italicized.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="FontUnderline" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>Indicates whether the font is underlined.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="FontStrikethrough" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>
+                Indicates whether the font is strikethrough.
+              </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="FontWeight" type="xs:int">
+                <xs:annotation>
+                  <xs:documentation>
+                The boldness or weight of the font.
+              </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="FontCharset" type="xs:int">
+                <xs:annotation>
+                  <xs:documentation>
+                The character set used in the font, such as ANSI_CHARSET, DEFAULT_CHARSET, or SYMBOL_CHARSET.
+              </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="FontSizeHi" type="xs:int">
+                <xs:annotation>
+                  <xs:documentation>
+                Point size of the font expressed in a 64-bit CY variable whose upper 32-bits contains the integer point size.
+              </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="FontSizeLo" type="xs:int">
+                <xs:annotation>
+                  <xs:documentation>
+                Point size of the font expressed in a 64-bit CY variable whose lower 32-bits contains the fractional point size.
+              </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="TextParserClass" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>Text Parser Class ID</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="CharacterMarkerSymbol">
+        <xs:annotation>
+          <xs:documentation>A marker symbol based on a character from a font.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="CartographicMarkerSymbol">
+            <xs:sequence>
+              <xs:element name="CharacterIndex" type="xs:int">
+                <xs:annotation>
+                  <xs:documentation>Character index within font.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="FontName" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>
+                The name of the font family.
+              </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="FontItalic" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>
+                Indicates whether the font is italicized.
+              </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="FontUnderline" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>
+                Indicates whether the font is underlined.
+              </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="FontStrikethrough" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>
+                Indicates whether the font is strikethrough.
+              </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="FontWeight" type="xs:int">
+                <xs:annotation>
+                  <xs:documentation>
+                The boldness or weight of the font.
+              </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="FontCharset" type="xs:int">
+                <xs:annotation>
+                  <xs:documentation>
+                The character set used in the font, such as ANSI_CHARSET, DEFAULT_CHARSET, or SYMBOL_CHARSET.
+              </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="FontSizeHi" type="xs:int">
+                <xs:annotation>
+                  <xs:documentation>
+                Point size of the font expressed in a 64-bit CY variable whose upper 32-bits contains the integer point size.
+              </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="FontSizeLo" type="xs:int">
+                <xs:annotation>
+                  <xs:documentation>
+                Point size of the font expressed in a 64-bit CY variable whose lower 32-bits contains the fractional point size.
+              </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="PictureMarkerSymbol">
+        <xs:annotation>
+          <xs:documentation>A marker symbol based on either a BMP or an EMF picture.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="CartographicMarkerSymbol">
+            <xs:sequence>
+              <xs:element minOccurs="0" name="BgColor" type="Color">
+                <xs:annotation>
+                  <xs:documentation>
+                Background color of the picture for 1 bit images.
+              </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="BitmapTransColor" type="Color">
+                <xs:annotation>
+                  <xs:documentation>
+                Color within bitmap indicating transparency.
+              </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Picture" type="xs:base64Binary">
+                <xs:annotation>
+                  <xs:documentation>Picture used for marker symbol.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="FgColor" type="Color">
+                <xs:annotation>
+                  <xs:documentation>
+                Foreground color of the picture for 1 bit images.
+              </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Swap1BitColor" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>
+                Indicates if foreground and background colors are swapped on 1 Bit Images Only.
+              </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="PictureFillSymbol">
+        <xs:annotation>
+          <xs:documentation>A fill symbol based on either a BMP or an EMF picture.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="FillSymbol">
+            <xs:sequence>
+              <xs:element name="Picture" type="xs:base64Binary">
+                <xs:annotation>
+                  <xs:documentation>Picture used for fill.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="BgColor" type="Color">
+                <xs:annotation>
+                  <xs:documentation>
+                Fill background color.
+              </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="FgColor" type="Color">
+                <xs:annotation>
+                  <xs:documentation>
+                Fill foreground color.
+              </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="BitmapTransColor" type="Color">
+                <xs:annotation>
+                  <xs:documentation>
+                Color within bitmap indicating transparency.
+              </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="XSeparation" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>Fill element separation along X-axis.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="YSeparation" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>Fill element separation along Y-axis.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Swap1BitColor" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>
+                Indicates if the foreground and background colors are swapped on 1 Bit Images Only.
+              </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Angle" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>Angle of picture fill.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="XOffset" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>Fill offset along X-axis.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="YOffset" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>Fill offset along Y-axis.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" default="1.0" name="XScale" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>Scale of picture fill along X-axis.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" default="1.0" name="YScale" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>Scale of picture fill along Y-axis.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="FillSymbol" abstract="true">
+        <xs:annotation>
+          <xs:documentation>
+        Fill Sybmol Properties.
+      </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Symbol">
+            <xs:sequence>
+              <xs:element minOccurs="0" name="Color" type="Color">
+                <xs:annotation>
+                  <xs:documentation>
+                Fill color.
+              </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Outline" type="LineSymbol">
+                <xs:annotation>
+                  <xs:documentation>
+                Line symbol of fill outline.
+              </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="LineSymbol" abstract="true">
+        <xs:annotation>
+          <xs:documentation>
+        Line Symbol properties.
+      </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Symbol">
+            <xs:sequence>
+              <xs:element minOccurs="0" name="Color" type="Color">
+                <xs:annotation>
+                  <xs:documentation>
+                Line symbol color.
+              </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="Width" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>
+                Line symbol width.
+              </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="MarkerSymbol" abstract="true">
+        <xs:annotation>
+          <xs:documentation>
+        Marker Symbol Properties.
+      </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Symbol">
+            <xs:sequence>
+              <xs:element name="Angle" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>
+                Marker symbol angle.
+              </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Color" type="Color">
+                <xs:annotation>
+                  <xs:documentation>
+                Marker symbol color.
+              </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="Size" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>
+                Marker symbol size.
+              </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="XOffset" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>
+                Symbol X-axis offset from point location.
+              </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="YOffset" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>
+                Symbol Y-axis offset from point location.
+              </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="CartographicMarkerSymbol" abstract="true">
+        <xs:annotation>
+          <xs:documentation>
+        Cartographic marker symbol properties.
+      </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="MarkerSymbol">
+            <xs:sequence>
+              <xs:element default="1.0" name="XScale" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>Symbol scale along X-axis.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element default="1.0" name="YScale" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>Symbol scale along Y-axis.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="XMLBinarySymbol">
+        <xs:annotation>
+          <xs:documentation>XML shim class for symbols that don't implement IXMLSerialize.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Symbol">
+            <xs:sequence>
+              <xs:element name="Data" type="XMLPersistedObject" />
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="XMLBinaryFillSymbol">
+        <xs:annotation>
+          <xs:documentation>XML shim class for fill symbols that don't implement IXMLSerialize.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="FillSymbol">
+            <xs:sequence>
+              <xs:element name="Data" type="XMLPersistedObject" />
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:simpleType name="esriFieldType">
+        <xs:annotation>
+          <xs:documentation>Field Types.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="esriFieldTypeInteger">
+            <xs:annotation>
+              <xs:documentation>Long Integer.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriFieldTypeSmallInteger">
+            <xs:annotation>
+              <xs:documentation>Integer.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriFieldTypeDouble">
+            <xs:annotation>
+              <xs:documentation>Double-precision floating-point number.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriFieldTypeSingle">
+            <xs:annotation>
+              <xs:documentation>Single-precision floating-point number.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriFieldTypeString">
+            <xs:annotation>
+              <xs:documentation>Character string.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriFieldTypeDate">
+            <xs:annotation>
+              <xs:documentation>Date.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriFieldTypeGeometry">
+            <xs:annotation>
+              <xs:documentation>Geometry.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriFieldTypeOID">
+            <xs:annotation>
+              <xs:documentation>Long Integer representing an object identifier.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriFieldTypeBlob">
+            <xs:annotation>
+              <xs:documentation>Binary Large Object.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriFieldTypeGlobalID">
+            <xs:annotation>
+              <xs:documentation>ESRI Global ID.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriFieldTypeRaster">
+            <xs:annotation>
+              <xs:documentation>Raster.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriFieldTypeGUID">
+            <xs:annotation>
+              <xs:documentation>Globally Unique Identifier.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriFieldTypeXML">
+            <xs:annotation>
+              <xs:documentation>XML Document</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:complexType name="GeometryDef">
+        <xs:annotation>
+          <xs:documentation>ESRI Geometry Definition Object.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element name="AvgNumPoints" type="xs:int">
+            <xs:annotation>
+              <xs:documentation>Estimated average number of points per feature.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="GeometryType" type="esriGeometryType">
+            <xs:annotation>
+              <xs:documentation>The enumerated geometry type.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="HasM" type="xs:boolean">
+            <xs:annotation>
+              <xs:documentation>Indicates if the feature class has measure (M) values.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="HasZ" type="xs:boolean">
+            <xs:annotation>
+              <xs:documentation>Indicates if the featureClass has Z values.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="SpatialReference" type="SpatialReference">
+            <xs:annotation>
+              <xs:documentation>The spatial reference for the dataset.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="GridSize0" type="xs:double" />
+          <xs:element minOccurs="0" name="GridSize1" type="xs:double" />
+          <xs:element minOccurs="0" name="GridSize2" type="xs:double" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:simpleType name="esriMergePolicyType">
+        <xs:annotation>
+          <xs:documentation>Merge policy types.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="esriMPTSumValues">
+            <xs:annotation>
+              <xs:documentation>Sum the values merge policy.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriMPTAreaWeighted">
+            <xs:annotation>
+              <xs:documentation>Area weighted merge policy.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriMPTDefaultValue">
+            <xs:annotation>
+              <xs:documentation>Default value merge policy.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType name="esriSplitPolicyType">
+        <xs:annotation>
+          <xs:documentation>Split policy types.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="esriSPTGeometryRatio">
+            <xs:annotation>
+              <xs:documentation>Geometry-ratioed split policy.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriSPTDuplicate">
+            <xs:annotation>
+              <xs:documentation>Duplicate split policy.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriSPTDefaultValue">
+            <xs:annotation>
+              <xs:documentation>Default value split policy.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:complexType name="Domain" abstract="true">
+        <xs:annotation>
+          <xs:documentation>
+        Domain Properties control and their merge split policies control.
+      </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element name="DomainName" type="xs:string">
+            <xs:annotation>
+              <xs:documentation>
+            The ID of the domain.
+          </xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="FieldType" type="esriFieldType">
+            <xs:annotation>
+              <xs:documentation>The field type of the field.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="MergePolicy" type="esriMergePolicyType">
+            <xs:annotation>
+              <xs:documentation>The merge policy.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="SplitPolicy" type="esriSplitPolicyType">
+            <xs:annotation>
+              <xs:documentation>The split policy.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="Description" type="xs:string">
+            <xs:annotation>
+              <xs:documentation>The description of the domain.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="Owner" type="xs:string">
+            <xs:annotation>
+              <xs:documentation>The owner of the domain.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="Field">
+        <xs:annotation>
+          <xs:documentation>ESRI Field Object.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element name="Name" type="xs:string">
+            <xs:annotation>
+              <xs:documentation>The name of the field.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="Type" type="esriFieldType">
+            <xs:annotation>
+              <xs:documentation>The type of the field.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="IsNullable" type="xs:boolean">
+            <xs:annotation>
+              <xs:documentation>Indicates if the field can contain null values.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="Length" type="xs:int">
+            <xs:annotation>
+              <xs:documentation>The maximum length, in bytes, for values described by the field.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="Precision" type="xs:int">
+            <xs:annotation>
+              <xs:documentation>The precision for field values.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="Scale" type="xs:int">
+            <xs:annotation>
+              <xs:documentation>The scale for field values.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="Required" type="xs:boolean">
+            <xs:annotation>
+              <xs:documentation>Indicates if the field is required.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="Editable" type="xs:boolean">
+            <xs:annotation>
+              <xs:documentation>Indicates if the field is editable.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="DomainFixed" type="xs:boolean">
+            <xs:annotation>
+              <xs:documentation>Indicates if the field's domain is fixed.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="GeometryDef" type="GeometryDef">
+            <xs:annotation>
+              <xs:documentation>The geometry definition for the field if IsGeometry is TRUE.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="AliasName" type="xs:string">
+            <xs:annotation>
+              <xs:documentation>The alias name of the field.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="ModelName" type="xs:string">
+            <xs:annotation>
+              <xs:documentation>The model name of the field.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="DefaultValue" type="xs:anyType">
+            <xs:annotation>
+              <xs:documentation>The default value of the field.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="Domain" type="Domain">
+            <xs:annotation>
+              <xs:documentation>The default domain of the field.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="RasterDef" type="RasterDef">
+            <xs:annotation>
+              <xs:documentation>The raster column definition.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ArrayOfField">
+        <xs:annotation>
+          <xs:documentation>ESRI FieldArray object.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="Field" type="Field" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="Fields">
+        <xs:annotation>
+          <xs:documentation>ESRI Fields Object.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element name="FieldArray" type="ArrayOfField" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="RangeDomain">
+        <xs:annotation>
+          <xs:documentation>ESRI Range Domain object.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Domain">
+            <xs:sequence>
+              <xs:element name="MaxValue" type="xs:anyType">
+                <xs:annotation>
+                  <xs:documentation>The maximum value for the associated attribute.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="MinValue" type="xs:anyType">
+                <xs:annotation>
+                  <xs:documentation>The minimum value for the associated attribute.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="CodedValue">
+        <xs:annotation>
+          <xs:documentation>
+        ESRI Attribute set constraint object.
+      </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element name="Name" type="xs:string" />
+          <xs:element name="Code" type="xs:anyType" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ArrayOfCodedValue">
+        <xs:annotation>
+          <xs:documentation />
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="CodedValue" type="CodedValue" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="CodedValueDomain">
+        <xs:annotation>
+          <xs:documentation>ESRI Attribute set constraint object.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Domain">
+            <xs:sequence>
+              <xs:element name="CodedValues" type="ArrayOfCodedValue" />
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="BitMaskCodedValueDomain">
+        <xs:annotation>
+          <xs:documentation>ESRI Attribute bitmask constraint object.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="CodedValueDomain" />
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="RasterDef">
+        <xs:annotation>
+          <xs:documentation>Raster Column Definition Class.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Description" type="xs:string">
+            <xs:annotation>
+              <xs:documentation>The raster column description.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="IsByRef" type="xs:boolean">
+            <xs:annotation>
+              <xs:documentation>
+            Indicates if the Raster column value is to be managed by GeoDatabase.
+          </xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="SpatialReference" type="SpatialReference">
+            <xs:annotation>
+              <xs:documentation>The SpatialReference of the raster.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="PropertySetProperty">
+        <xs:annotation>
+          <xs:documentation>ESRI PropertySet Property object.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element name="Key" type="xs:string" />
+          <xs:element minOccurs="0" name="Value" nillable="true" type="xs:anyType" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ArrayOfPropertySetProperty">
+        <xs:annotation>
+          <xs:documentation>ESRI PropertySet Property Array object.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="PropertySetProperty" type="PropertySetProperty" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="PropertySet">
+        <xs:annotation>
+          <xs:documentation>ESRI Property Set object.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element name="PropertyArray" type="ArrayOfPropertySetProperty" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="XMLPersistedObject">
+        <xs:annotation>
+          <xs:documentation>Object to serialize objects to XML.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element name="Bytes" type="xs:base64Binary" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ArrayOfInt">
+        <xs:annotation>
+          <xs:documentation>An object for holding a Long array.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="Int" type="xs:int" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:simpleType name="esriGeometryType">
+        <xs:annotation>
+          <xs:documentation>The available kinds of geometry objects.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="esriGeometryPoint">
+            <xs:annotation>
+              <xs:documentation>A single zero dimensional geometry.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriGeometryMultipoint">
+            <xs:annotation>
+              <xs:documentation>An ordered collection of points.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriGeometryPolyline">
+            <xs:annotation>
+              <xs:documentation>An ordered collection of paths.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriGeometryPolygon">
+            <xs:annotation>
+              <xs:documentation>A collection of rings ordered by their containment relationship.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="esriGeometryMultiPatch">
+            <xs:annotation>
+              <xs:documentation>A collection of surface patches.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:complexType name="SpatialReference" abstract="true">
+        <xs:annotation>
+          <xs:documentation />
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element minOccurs="0" name="WKT" type="xs:string" />
+          <xs:element minOccurs="0" name="XOrigin" type="xs:double" />
+          <xs:element minOccurs="0" name="YOrigin" type="xs:double" />
+          <xs:element minOccurs="0" name="XYScale" type="xs:double" />
+          <xs:element minOccurs="0" name="ZOrigin" type="xs:double" />
+          <xs:element minOccurs="0" name="ZScale" type="xs:double" />
+          <xs:element minOccurs="0" name="MOrigin" type="xs:double" />
+          <xs:element minOccurs="0" name="MScale" type="xs:double" />
+          <xs:element minOccurs="0" name="XYTolerance" type="xs:double">
+            <xs:annotation>
+              <xs:documentation>The xy tolerance used to control point coalescing in the X and Y dimensions.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="ZTolerance" type="xs:double">
+            <xs:annotation>
+              <xs:documentation>The tolerance used to control point coalescing strictly along the Z axis.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="MTolerance" type="xs:double">
+            <xs:annotation>
+              <xs:documentation>The tolerance used to determine equality of M values.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="HighPrecision" type="xs:boolean" />
+          <xs:element minOccurs="0" name="LeftLongitude" type="xs:double" />
+          <xs:element minOccurs="0" name="WKID" type="xs:int" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ProjectedCoordinateSystem">
+        <xs:annotation>
+          <xs:documentation>Creates a projected coordinate system.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="SpatialReference" />
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="GeographicCoordinateSystem">
+        <xs:annotation>
+          <xs:documentation>Creates a geographic coordinate system.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="SpatialReference" />
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="UnknownCoordinateSystem">
+        <xs:annotation>
+          <xs:documentation>Creates an unknown coordinate system.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="SpatialReference" />
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="Geometry">
+        <xs:annotation>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:complexType>
+      <xs:complexType name="Curve" abstract="true">
+        <xs:annotation>
+          <xs:documentation />
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Geometry" />
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="Segment" abstract="true">
+        <xs:annotation>
+          <xs:documentation />
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Curve">
+            <xs:sequence>
+              <xs:element name="FromPoint" type="Point" />
+              <xs:element name="ToPoint" type="Point" />
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="Polycurve" abstract="true">
+        <xs:annotation>
+          <xs:documentation />
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Curve" />
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="Envelope" abstract="true">
+        <xs:annotation>
+          <xs:documentation>A rectangle with sides parallel to a coordinate system defining the extent of another geometry; optionally has min and max measure, height and ID attributes.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Geometry" />
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="EnvelopeN">
+        <xs:annotation>
+          <xs:documentation>A rectangle with sides parallel to a coordinate system defining the extent of another geometry; optionally has min and max measure, height and ID attributes.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Envelope">
+            <xs:sequence>
+              <xs:element name="XMin" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>The position of the left side.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="YMin" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>The position of the bottom.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="XMax" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>The position of the right side.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="YMax" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>The position of the top.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="ZMin" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>The minimum Z value in the area of the envelope.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="ZMax" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>The maximum Z value in the area of the envelope.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="MMin" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>The minimum measure value in the area of the envelope.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="MMax" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>The maximum measure value in the area of the envelope.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="SpatialReference" type="SpatialReference">
+                <xs:annotation>
+                  <xs:documentation>The spatial reference associated with this geometry.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="EnvelopeB">
+        <xs:annotation>
+          <xs:documentation>A rectangle with sides parallel to a coordinate system defining the extent of another geometry; optionally has min and max measure, height and ID attributes.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Envelope">
+            <xs:sequence>
+              <xs:element name="Bytes" type="xs:base64Binary" />
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="Point" abstract="true">
+        <xs:annotation>
+          <xs:documentation>A two dimensional point, optionally with measure, height, and ID attributes.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Geometry" />
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="PointN">
+        <xs:annotation>
+          <xs:documentation>A two dimensional point, optionally with measure, height, and ID attributes.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Point">
+            <xs:sequence>
+              <xs:element name="X" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>The X coordinate.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="Y" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>The Y coordinate.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="M" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>The measure attribute.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="Z" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>The Z attribute.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="ID" type="xs:int">
+                <xs:annotation>
+                  <xs:documentation>The Point ID attribute.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" name="SpatialReference" type="SpatialReference">
+                <xs:annotation>
+                  <xs:documentation>The spatial reference associated with this geometry.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="PointB">
+        <xs:annotation>
+          <xs:documentation>A two dimensional point, optionally with measure, height, and ID attributes.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Point">
+            <xs:sequence>
+              <xs:element name="Bytes" type="xs:base64Binary" />
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="Multipoint" abstract="true">
+        <xs:annotation>
+          <xs:documentation>An ordered collection of points; optionally has measure, height and ID attributes.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Geometry" />
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="MultipointB">
+        <xs:annotation>
+          <xs:documentation>An ordered collection of points; optionally has measure, height and ID attributes.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Multipoint">
+            <xs:sequence>
+              <xs:element name="Bytes" type="xs:base64Binary" />
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="MultipointN">
+        <xs:annotation>
+          <xs:documentation>An ordered collection of points; optionally has measure, height and ID attributes.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Multipoint">
+            <xs:sequence>
+              <xs:element name="HasID" type="xs:boolean" />
+              <xs:element name="HasZ" type="xs:boolean" />
+              <xs:element name="HasM" type="xs:boolean" />
+              <xs:element minOccurs="0" name="Extent" type="Envelope" />
+              <xs:element minOccurs="0" name="PointArray" type="ArrayOfPoint" />
+              <xs:element minOccurs="0" name="SpatialReference" type="SpatialReference">
+                <xs:annotation>
+                  <xs:documentation>The spatial reference associated with this geometry.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="Line">
+        <xs:annotation>
+          <xs:documentation>XML shim class for Line.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Segment" />
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="EllipticArc">
+        <xs:annotation>
+          <xs:documentation>XML shim class for EllipticArc.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Segment">
+            <xs:sequence>
+              <xs:element name="EllipseStd" type="xs:boolean" />
+              <xs:element name="CenterPoint" type="Point" />
+              <xs:element name="Rotation" type="xs:double" />
+              <xs:element name="MinorMajorRatio" type="xs:double" />
+              <xs:element name="IsCounterClockWise" type="xs:boolean" />
+              <xs:element name="IsMinor" type="xs:boolean" />
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="CircularArc">
+        <xs:annotation>
+          <xs:documentation>XML shim class for CircularArc.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Segment">
+            <xs:sequence>
+              <xs:element name="CenterPoint" type="Point" />
+              <xs:element minOccurs="0" name="FromAngle" type="xs:double" />
+              <xs:element minOccurs="0" name="ToAngle" type="xs:double" />
+              <xs:element name="IsCounterClockwise" type="xs:boolean" />
+              <xs:element name="IsMinor" type="xs:boolean" />
+              <xs:element name="IsLine" type="xs:boolean" />
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="BezierCurve">
+        <xs:annotation>
+          <xs:documentation>XML shim class for BezierCurve.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Segment">
+            <xs:sequence>
+              <xs:element name="Degree" type="xs:int" />
+              <xs:element name="ControlPointArray" type="ArrayOfPoint" />
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="Path">
+        <xs:annotation>
+          <xs:documentation>A sequence of connected segments.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Curve">
+            <xs:sequence>
+              <xs:element minOccurs="0" name="PointArray" type="ArrayOfPoint" />
+              <xs:element minOccurs="0" name="SegmentArray" type="ArrayOfSegment" />
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="Ring">
+        <xs:annotation>
+          <xs:documentation>An area bounded by one, closed sequence of connected segments; optionally has measure, height and ID attributes at each vertex.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Path" />
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="Polygon" abstract="true">
+        <xs:annotation>
+          <xs:documentation>A collection of rings ordered by their containment relationship; optionally has measure, height and ID attributes.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Polycurve" />
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="PolygonN">
+        <xs:annotation>
+          <xs:documentation>A collection of rings ordered by their containment relationship; optionally has measure, height and ID attributes.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Polygon">
+            <xs:sequence>
+              <xs:element name="HasID" type="xs:boolean" />
+              <xs:element name="HasZ" type="xs:boolean" />
+              <xs:element name="HasM" type="xs:boolean" />
+              <xs:element minOccurs="0" name="Extent" type="Envelope" />
+              <xs:element name="RingArray" type="ArrayOfRing" />
+              <xs:element minOccurs="0" name="SpatialReference" type="SpatialReference">
+                <xs:annotation>
+                  <xs:documentation>The spatial reference associated with this geometry.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="PolygonB">
+        <xs:annotation>
+          <xs:documentation>A collection of rings ordered by their containment relationship; optionally has measure, height and ID attributes.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Polygon">
+            <xs:sequence>
+              <xs:element name="Bytes" type="xs:base64Binary" />
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="Polyline" abstract="true">
+        <xs:annotation>
+          <xs:documentation>An ordered collection of paths; optionally has measure, height and ID attributes.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Polycurve" />
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="PolylineN">
+        <xs:annotation>
+          <xs:documentation>An ordered collection of paths; optionally has measure, height and ID attributes.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Polyline">
+            <xs:sequence>
+              <xs:element name="HasID" type="xs:boolean" />
+              <xs:element name="HasZ" type="xs:boolean" />
+              <xs:element name="HasM" type="xs:boolean" />
+              <xs:element minOccurs="0" name="Extent" type="Envelope" />
+              <xs:element name="PathArray" type="ArrayOfPath" />
+              <xs:element minOccurs="0" name="SpatialReference" type="SpatialReference">
+                <xs:annotation>
+                  <xs:documentation>The spatial reference associated with this geometry.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="PolylineB">
+        <xs:annotation>
+          <xs:documentation>An ordered collection of paths; optionally has measure, height and ID attributes.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Polyline">
+            <xs:sequence>
+              <xs:element name="Bytes" type="xs:base64Binary" />
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="ArrayOfPoint">
+        <xs:annotation>
+          <xs:documentation />
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="Point" type="Point" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ArrayOfPath">
+        <xs:annotation>
+          <xs:documentation />
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="Path" type="Path" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ArrayOfRing">
+        <xs:annotation>
+          <xs:documentation />
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="Ring" type="Ring" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ArrayOfSegment">
+        <xs:annotation>
+          <xs:documentation />
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="Segment" type="Segment" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="MultiPatch" abstract="true">
+        <xs:annotation>
+          <xs:documentation>A collection of surface patches.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Geometry" />
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="MultiPatchB">
+        <xs:annotation>
+          <xs:documentation>A collection of surface patches.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="MultiPatch">
+            <xs:sequence>
+              <xs:element name="Bytes" type="xs:base64Binary" />
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="MultiPatchN">
+        <xs:annotation>
+          <xs:documentation>A collection of surface patches.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="MultiPatch">
+            <xs:sequence>
+              <xs:element name="HasID" type="xs:boolean" />
+              <xs:element name="HasZ" type="xs:boolean" />
+              <xs:element name="HasM" type="xs:boolean" />
+              <xs:element name="Extent" type="Envelope" />
+              <xs:element name="SurfacePatchArray" type="ArrayOfSurfacePatch" />
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="ArrayOfSurfacePatch">
+        <xs:annotation>
+          <xs:documentation />
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="SurfacePatch" type="Geometry" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="TriangleFan">
+        <xs:annotation>
+          <xs:documentation>A continuous 3D fan of triangles, where each triangle after the first shares an edge with the preceding triangle, and all triangles share a common pivot point.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Geometry">
+            <xs:sequence>
+              <xs:element minOccurs="0" name="PointArray" type="ArrayOfPoint" />
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="TriangleStrip">
+        <xs:annotation>
+          <xs:documentation>A continuous 3D strip of triangles, where each triangle after the first shares an edge with the preceding triangle.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent mixed="false">
+          <xs:extension base="Geometry">
+            <xs:sequence>
+              <xs:element minOccurs="0" name="PointArray" type="ArrayOfPoint" />
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+    </xs:schema>
+  </types>
+  <message name="GetTexturesIn">
+    <part name="parameters" element="e:GetTextures" />
+  </message>
+  <message name="GetTexturesOut">
+    <part name="parameters" element="e:GetTexturesResponse" />
+  </message>
+  <message name="GetTileIn">
+    <part name="parameters" element="e:GetTile" />
+  </message>
+  <message name="GetTileOut">
+    <part name="parameters" element="e:GetTileResponse" />
+  </message>
+  <message name="GetConfigurationIn">
+    <part name="parameters" element="e:GetConfiguration" />
+  </message>
+  <message name="GetConfigurationOut">
+    <part name="parameters" element="e:GetConfigurationResponse" />
+  </message>
+  <message name="GetCacheControlInfoIn">
+    <part name="parameters" element="e:GetCacheControlInfo" />
+  </message>
+  <message name="GetCacheControlInfoOut">
+    <part name="parameters" element="e:GetCacheControlInfoResponse" />
+  </message>
+  <message name="GetVirtualCacheDirectoryIn">
+    <part name="parameters" element="e:GetVirtualCacheDirectory" />
+  </message>
+  <message name="GetVirtualCacheDirectoryOut">
+    <part name="parameters" element="e:GetVirtualCacheDirectoryResponse" />
+  </message>
+  <message name="GetMQTIn">
+    <part name="parameters" element="e:GetMQT" />
+  </message>
+  <message name="GetMQTOut">
+    <part name="parameters" element="e:GetMQTResponse" />
+  </message>
+  <message name="GetVersionIn">
+    <part name="parameters" element="e:GetVersion" />
+  </message>
+  <message name="GetVersionOut">
+    <part name="parameters" element="e:GetVersionResponse" />
+  </message>
+  <message name="GetLayerCountIn">
+    <part name="parameters" element="e:GetLayerCount" />
+  </message>
+  <message name="GetLayerCountOut">
+    <part name="parameters" element="e:GetLayerCountResponse" />
+  </message>
+  <message name="GetLayerInfosIn">
+    <part name="parameters" element="e:GetLayerInfos" />
+  </message>
+  <message name="GetLayerInfosOut">
+    <part name="parameters" element="e:GetLayerInfosResponse" />
+  </message>
+  <message name="GetConfigIn">
+    <part name="parameters" element="e:GetConfig" />
+  </message>
+  <message name="GetConfigOut">
+    <part name="parameters" element="e:GetConfigResponse" />
+  </message>
+  <message name="GetSymbolsIn">
+    <part name="parameters" element="e:GetSymbols" />
+  </message>
+  <message name="GetSymbolsOut">
+    <part name="parameters" element="e:GetSymbolsResponse" />
+  </message>
+  <message name="FindIn">
+    <part name="parameters" element="e:Find" />
+  </message>
+  <message name="FindOut">
+    <part name="parameters" element="e:FindResponse" />
+  </message>
+  <message name="GetLegendInfosIn">
+    <part name="parameters" element="e:GetLegendInfos" />
+  </message>
+  <message name="GetLegendInfosOut">
+    <part name="parameters" element="e:GetLegendInfosResponse" />
+  </message>
+  <message name="GetAnimationIn">
+    <part name="parameters" element="e:GetAnimation" />
+  </message>
+  <message name="GetAnimationOut">
+    <part name="parameters" element="e:GetAnimationResponse" />
+  </message>
+  <message name="IdentifyIn">
+    <part name="parameters" element="e:Identify" />
+  </message>
+  <message name="IdentifyOut">
+    <part name="parameters" element="e:IdentifyResponse" />
+  </message>
+  <portType name="GlobeServerPort">
+    <documentation>A Globe Server class that serves Globe Tiles.</documentation>
+    <operation name="GetTextures">
+      <documentation>Gets the textures with given IDs.</documentation>
+      <input message="e:GetTexturesIn" />
+      <output message="e:GetTexturesOut" />
+    </operation>
+    <operation name="GetTile">
+      <documentation>Gets a tile for a given tile location from a given layer.</documentation>
+      <input message="e:GetTileIn" />
+      <output message="e:GetTileOut" />
+    </operation>
+    <operation name="GetConfiguration">
+      <documentation>Gets all the configuration and MQT files from a given layer.</documentation>
+      <input message="e:GetConfigurationIn" />
+      <output message="e:GetConfigurationOut" />
+    </operation>
+    <operation name="GetCacheControlInfo">
+      <documentation>Gets the cache control information of a Globe Service.</documentation>
+      <input message="e:GetCacheControlInfoIn" />
+      <output message="e:GetCacheControlInfoOut" />
+    </operation>
+    <operation name="GetVirtualCacheDirectory">
+      <documentation>Gets the virtual cache directory for a given layer.</documentation>
+      <input message="e:GetVirtualCacheDirectoryIn" />
+      <output message="e:GetVirtualCacheDirectoryOut" />
+    </operation>
+    <operation name="GetMQT">
+      <documentation>Gets the MQT for a given face from a given layer.</documentation>
+      <input message="e:GetMQTIn" />
+      <output message="e:GetMQTOut" />
+    </operation>
+    <operation name="GetVersion">
+      <documentation>The Globe Server version number.</documentation>
+      <input message="e:GetVersionIn" />
+      <output message="e:GetVersionOut" />
+    </operation>
+    <operation name="GetLayerCount">
+      <documentation>The number of layers in the server under a certain parent.</documentation>
+      <input message="e:GetLayerCountIn" />
+      <output message="e:GetLayerCountOut" />
+    </operation>
+    <operation name="GetLayerInfos">
+      <documentation>A collection of Globe Layer Info objects.</documentation>
+      <input message="e:GetLayerInfosIn" />
+      <output message="e:GetLayerInfosOut" />
+    </operation>
+    <operation name="GetConfig">
+      <documentation>Gets the configuration file from a given layer.</documentation>
+      <input message="e:GetConfigIn" />
+      <output message="e:GetConfigOut" />
+    </operation>
+    <operation name="GetSymbols">
+      <documentation>Gets the symbols with given IDs.</documentation>
+      <input message="e:GetSymbolsIn" />
+      <output message="e:GetSymbolsOut" />
+    </operation>
+    <operation name="Find">
+      <documentation>Returns a Globe Server Find Result object that contain the given search string.</documentation>
+      <input message="e:FindIn" />
+      <output message="e:FindOut" />
+    </operation>
+    <operation name="GetLegendInfos">
+      <documentation>Returns a collection of Globe Legend Info objects for the specified layers. If layerIDs is Nothing/Null or empty, legend information for all layers is returned.</documentation>
+      <input message="e:GetLegendInfosIn" />
+      <output message="e:GetLegendInfosOut" />
+    </operation>
+    <operation name="GetAnimation">
+      <documentation>Gets the animation stream.</documentation>
+      <input message="e:GetAnimationIn" />
+      <output message="e:GetAnimationOut" />
+    </operation>
+    <operation name="Identify">
+      <documentation>Returns a Globe Server Identify Result object at the given location.</documentation>
+      <input message="e:IdentifyIn" />
+      <output message="e:IdentifyOut" />
+    </operation>
+  </portType>
+  <binding name="GlobeServerBinding" type="e:GlobeServerPort">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+    <operation name="GetTextures">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="GetTile">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="GetConfiguration">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="GetCacheControlInfo">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="GetVirtualCacheDirectory">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="GetMQT">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="GetVersion">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="GetLayerCount">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="GetLayerInfos">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="GetConfig">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="GetSymbols">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="Find">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="GetLegendInfos">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="GetAnimation">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="Identify">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+  </binding>
+  <service name="ESRI_StreetMap_World_GlobeServer">
+    <port name="GlobeServerPort" binding="e:GlobeServerBinding">
+      <soap:address location="http://globe4.arcwebservices.com/ArcGIS/services/ESRI_StreetMap_World/GlobeServer" />
+    </port>
+  </service>
+</definitions>

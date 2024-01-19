@@ -1,0 +1,166 @@
+--@atlcompiler	atl2006
+--@name			MOOD4UML2
+--@version		1.0
+--@domains		UML2, MOOD, MOOD2, metrics
+--@authors		Eric Vepa (evepa <at> sodius.com) for SODIUS (www.sodius.com)
+--@date			2007/06/05
+--@description	This library provides MOOD (Metrics for Object-Oriented Design) and MOOD2 metrics suites on UML2 models (from Eclipse UML2 Project). The models have been extracted from Jar files using the Eclipse plug-in Jar2UML. Only the metrics that fit to UML2 models have been implemented.
+--@see			Baroni, A.L.: Formal Definition of Object-Oriented Design Metrics. Master Thesis, Vrije University, Brussel, Belgium, 2002.
+
+library MOOD4UML2; -- Library Template
+
+-- ============================================================
+-- MOOD and MOOD2 Metrics : Intra-Specification Level Metrics =
+-- ============================================================
+
+--@begin helper MOOD::AIF
+--@comments Attributes Inheritance Factor
+--@comments Quotient between the number of inherited Properties in all Classes of the Package and the number of available Properties (locally defined plus inherited) for all Classes of the current Package.
+--@comments The pre-condition states that the package must have available Properties.
+--@comments AIF() = 0 means that there is no effective Property inheritance (either there are no inheritance hierarchies or all inherited Properties are redefined).
+helper context UML2!Package
+def : AIF() : Real =
+	if self.PAAN() > 0
+		then self.PIAN() / self.PAAN()
+		else 0
+	endif;
+--@end helper MOOD::AIF
+
+--@begin helper MOOD::OIF
+--@comments Operations Inheritance Factor
+--@comments Quotient between the number of inherited Operations in all Classes of the Package and the number of available Operations (locally defined plus inherited) for all Classes of the current Package.
+--@comments The pre-condition states that the package must have available Operations.
+--@comments OIF() = 0 means that there is no effective Operation inheritance (either there are no inheritance hierarchies or all inherited Operations are redefined).
+helper context UML2!Package
+def : OIF() : Real =
+	if self.PAON() > 0
+		then self.PION() / self.PAON()
+		else 0
+	endif;
+--@end helper MOOD::OIF
+
+--@begin helper MOOD2::IIF
+--@comments Internal Inheritance Factor
+--@comments Quotient between the number of inheritance links where both the base and derived Classes belong to the current Package and the total number of inheritance links originating in the current Package.
+--@comments The pre-condition states that the package must have some inheritance links defined on it.
+--@comments Inheritance links originating in the current package are those where the derived Class belongs to it.
+--@comments The inheritance link is directed from the derived Class to the base one.
+helper context UML2!Package
+def : IIF() : Real =
+	if self.IILN > 0
+		then self.IILN / self.PILN(self)
+		else 0
+	endif;
+--@end helper MOOD2::IIF
+
+--@begin helper MOOD::AHF
+--@comments Attributes Hiding Factor
+--@comments Quotient between the sum of the invisibilities of all Properties defined in all Classes in the current Package and the total number of Properties defined in the Package.
+--@comments The invisibility of an Property is the percentage of the Classes in the package from which this Properties is not visible and is given by 1-APV( self ), where self is the current Package.
+--@comments If all Properties are private, the numerator is 0 and as such, AHF() = 0.
+--@comments If all Properties are public, the numerator is 0 and as such, AHF() = 1.
+--@comments The pre-condition regarding the number of Classes is required for calculating the Properties visibility (the package must have some Classes).
+--@comments The second pre-condition means that Properties are necessary for calculating the metric.
+helper context UML2!Package
+def : AHF() : Real =
+	if self.CN() > 1
+		then if self.PDAN() > 0
+				then self.definedAttributes->iterate(a; acc : Real = 0|
+					acc + 1 - self.APV(a)) / self.PDAN()
+				else 0
+			endif
+		else 0
+	endif;
+--@end helper MOOD::AHF
+
+--@begin helper MOOD::OHF
+--@comments Operations Hiding Factor
+--@comments Quotient between the sum of the invisibilities of all Operations defined in all Classes in the current Package and the total number of Operations defined in the Package.
+--@comments The invisibility of an Operation is the percentage of the total Classes in the package from which this Operation is not visible and is given by 1-OPV( self ), where self is the current package.
+--@comments If all Operations are public the numerator equals the denominator and then OHF() = 1.
+--@comments Otherwise, if all Operations are private, OHF() = 0.
+--@comments The pre-condition regarding the number of Classes is required for calculating the Operations visibility (the package must have some Classes).
+--@comments The second pre-condition means that Operations are necessary for calculating the metric.
+helper context UML2!Package
+def : OHF() : Real =
+	if self.CN() > 1
+		then if self.PDON() > 0
+				then self.definedOperations->iterate(o; acc : Real = 0|
+					acc + 1 - self.OPV(o)) / self.PDON()
+				else 0
+			endif
+		else 0
+	endif;
+--@end helper MOOD::OHF
+
+--@begin helper MOOD2::AHEF
+--@comments Attributes Hiding Effectiveness Factor
+--@comments Quotient between the cumulative number of the Package Classes that do access the Package Properties and the cumulative number of the Package Classes that can access the Package Properties.
+helper context UML2!Package
+def : AHEF() : Real =
+	let avnSum : Integer =
+		self.allAttributes->iterate(a; acc : Integer = 0|
+			acc + self.AVN(a)) in
+	if avnSum > 0
+		then self.allAttributes->iterate(a; acc : Integer = 0|
+			acc + a.AUN()) / avnSum
+		else 0
+	endif;
+--@end helper MOOD2::AHEF
+
+--@begin helper MOOD2::OHEF
+--@comments Operations Hiding Effectiveness Factor 
+--@comments Quotient between the cumulative number of the Package Classes that do access the Package Operations and the cumulative number of the Package Classes that can access the Package Operations.
+helper context UML2!Package
+def : OHEF() : Real =
+	let ovnSum : Integer =
+		self.allOperations->iterate(op; acc : Integer = 0|
+			acc + self.OVN(op)) in
+	if ovnSum > 0
+		then self.allOperations->iterate(op; acc : Integer = 0|
+			acc + op.OUN()) / ovnSum
+		else 0
+	endif;
+--@end helper MOOD2::OHEF
+
+--@begin helper MOOD::BPF
+--@comments Behavioral Polymorphism Factor
+--@comments Quotient between the actual number of possible different polymorphic situations within the current Package and the maximum number of possible distinct polymorphic situations (due to inheritance).
+--@comments An Operation in a Class Ci can have as many shapes ("morphos" in ancient Greek) as the number of times it is overridden (in Ci descendants).
+--@comments This represents the actual number of, possible different, polymorphic situations for that Class (For this metric, the overriding of Operations is considered only when defined in the current package).
+--@comments The maximum number of possible distinct polymorphic situations for Class Ci occurs if all new Operations defined in it are overridden in all of their derived Classes.
+helper context UML2!Package
+def : BPF() : Real =
+	if self.PAON() > 0
+		then self.POON() / self.PAON()
+		else 0
+	endif;
+--@end helper MOOD::BPF
+
+--@begin helper MOOD::CCF
+--@comments Parametric Polymorphism Factor
+--@comments Quotient between the actual number of coupled class-pairs within the Package and the maximum possible number of class-pair couplings in the Package. This coupling is the one not imputable to inheritance.
+--@comments In a coupled class-pair one Class is the client and the other is the supplier.
+--@comments These clientsupplier relations can have several shapes; see the function Class::CoupledClasses for details.
+--@comments The pre-condition states that, with only one Class, there are no couplings within the package.
+--@comments The square root counteracts for the fact that the couplings grow quadratically with the number of Classes.
+helper context UML2!Package
+def : CCF() : Real =
+	if self.CN() > 1
+		then (self.ICLN() / (self.CN() * self.CN() - self.CN())).sqrt()
+		else 0
+	endif;
+--@end helper MOOD::CCF
+
+--@begin helper MOOD::ICF
+--@comments Internal Coupling Factor
+--@comments Quotient between the number of coupling links where both the client and supplier Classes belong to the current Package and the total number of coupling links originating in the current Package.
+--@comments Coupling links originating in the current Package are those where the client Class belongs to it.
+--@comments The coupling link is directed from the client Class to the supplier one.
+helper context UML2!Package
+def : ICF() : Real =
+	if self.ICLN() > 0
+		then self.ICLN() / self.PCLN(self)
+		else 0
+	endif;
+--@end helper MOOD::ICF

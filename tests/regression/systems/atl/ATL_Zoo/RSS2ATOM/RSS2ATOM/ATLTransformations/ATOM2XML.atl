@@ -1,0 +1,651 @@
+module ATOM2XML;
+create OUT : XML from IN : ATOM;
+
+
+ --Begin rule ATOM to Root
+ 
+ rule ATOM2Root{
+	 from i : ATOM!ATOM
+	 
+	 to 
+	 
+		 o : XML!Root(
+		 	
+			 name <- 'ATOM',
+			 children <- Sequence {title,id,subtitle,rights,lastUpdate,links,icon,logo,authors,entrie,generator,categories,contributors}--,contributors}
+		 ),
+	 
+		 title : XML!Element(
+		 	
+				 name <- 'title',
+				 children <- the_title
+		 ), 
+		 
+		 the_title : XML!Text(
+		 	
+			 name <- 'the_title',
+			 value <- i.title
+		 ),
+		 
+		 id : XML!Element(
+		 	
+			 name <- 'id',
+			 children <- the_id
+		 ),
+		 
+		 the_id : XML!Text(
+		 	
+			 name <- 'the_id',
+			 value <- if i.id.oclIsUndefined() then '' else i.id endif
+		 ),
+		 
+		 subtitle : XML!Element(
+		 	
+			 name <- 'subtitle',
+			 children <- the_subtitle
+		 ),
+		 
+		 the_subtitle : XML!Text(
+		 	
+			 name <- 'the_subtitle',
+			 value <- if i.subtitle.oclIsUndefined() then '' else i.subtitle endif
+		 ),
+		 
+		 rights : XML!Element(
+		 	
+			 name <- 'rights',
+			 children <- therights
+		 ),
+		 
+		 
+		 therights : XML!Text(
+		 	
+			 name <- 'therights',
+			 value <- if i.rights.oclIsUndefined() then '' else i.rights endif
+		 
+		 ),
+		 
+		 
+		 lastUpdate : XML!Element(
+		 	
+			 name <- 'lastUpdate',
+			 children <- thelastUpdate
+		 ),
+		 
+		 thelastUpdate : XML!Text(
+		 	
+			 name <- 'thelastUpdate',
+			 value <- if i.lastUpdate.oclIsUndefined() then '' else i.lastUpdate endif
+		 ),
+		 
+		 icon : XML!Element(
+		 	
+			 name <- 'icon',
+			 children <- theicon
+		 ),
+		 
+		 theicon : XML!Text(
+		 	
+			 name <- 'theicon',
+			 value <- if i.icon.oclIsUndefined() then '' else i.icon endif
+		 ),
+		 
+		 logo : XML!Element(
+		 	
+			 name <- 'logo',
+			 children <- thelogo
+		 ),
+		 
+		 
+		 thelogo : XML!Text(
+		 	
+			 name <- 'thelogo',
+			 value <- if i.logo.oclIsUndefined() then '' else i.logo endif
+		 ),
+		 
+		 links : XML!Element(
+		 	
+			 name <- 'links',
+			 children <- i.links->asSequence()
+		 ),
+		 
+		 generator : XML!Element(
+		 	
+			 name <- 'generator',
+			 children <- i.generator->asSequence()
+		 ),
+		 
+		 authors : XML!Element(
+		 	
+			 name <- 'authors',
+			 children <- i.authors->asSequence()
+		 ),
+		 
+		 categories : XML!Element(
+		 	
+			 name <- 'categories',
+			 children <- i.categories->asSequence()
+		 ),
+		 
+		 contributors : XML!Element(
+		 	
+			 name <- 'contributors',
+			 children <- i.contributors->asSequence()
+		 ),
+		 
+		 entrie : XML!Element(
+		 	
+			 name <- 'entrie',
+			 children <- i.entrie->asSequence()
+		 )
+ 
+ }-- End rule ATOM to Root
+ 
+-- Begin rule Category to Element
+ rule Category2Element{
+ 	
+	 from i : ATOM!Category
+	 
+	 to 
+	 
+	 o : XML!Element(
+	 	
+		 name <- 'category',
+		 children <- Sequence {term,scheme,label}
+	 ),
+	 
+	 term : XML!Element(
+	 	
+		 name <- 'term',
+		 children <- theterm
+	 ),
+	 
+	 theterm : XML!Text(
+	 	
+		 name <- 'theterm',
+		 value <-  i.term
+	 ),
+	 
+	 scheme : XML!Element(
+	 	
+		 name <- 'scheme',
+		 children <- thescheme
+	 ),
+	 
+	 thescheme : XML!Text(
+	 	
+		 name <- 'thescheme',
+		 value <- if i.scheme.oclIsUndefined() then '' else i.scheme endif
+	 ),
+	 
+	 label : XML!Element(
+	 	
+		 name <- 'label',
+		 children <- thelabel
+	 ),
+	 
+	 thelabel : XML!Text(
+	 	
+		 name <- 'thelabel',
+		 value <- if i.label.oclIsUndefined() then '' else i.label endif
+	 )
+ } --End rule Category to Element
+ 
+  --Begin rule Author to Element  
+ rule Author2Element{
+	 from i : ATOM!Author
+	 
+	 to 
+	 
+	 o : XML!Element(
+	 	
+		 name <- 'Author',
+		 children <- Sequence {name,uri,email}
+	 ),
+	 
+	 name : XML!Element(
+	 	
+		 name <- 'name',
+		 children <- thename
+	 ),
+	 
+	 thename : XML!Text(
+	 	
+		 name <- 'thename',
+		 value <-  i.name
+	 ),
+	 
+	 uri : XML!Element(
+	 	
+		 name <- 'uri',
+		 children <- theuri
+	 ),
+	 
+	 theuri : XML!Text(
+	 	
+		 name <- 'theuri',
+		 value <- if i.uri.oclIsUndefined() then '' else i.uri endif
+	 ),
+	 
+	 email : XML!Element(
+	 	
+		 name <- 'email',
+		 children <- theemail
+	 ),
+	 
+	 theemail : XML!Text(
+	 	
+		 name <- 'theemail',
+		 value <- if i.email.oclIsUndefined() then '' else i.email endif
+	 )
+ }--End rule Author to Element
+ 
+ --Begin rule Contributor to Element
+ rule Contributor2Element{
+ 	
+	 from i : ATOM!Contributor
+	 
+	 to 
+	 
+	 o : XML!Element(
+	 	
+		 name <- 'Contributor',
+		 children <- Sequence {name,uri,email}
+	 ),
+	 
+	 name : XML!Element(
+	 	
+		 name <- 'name',
+		 children <- thename
+	 ),
+	 
+	 thename : XML!Text(
+	 	
+		 name <- 'thename',
+		 value <-  i.name
+	 ),
+	 
+	 uri : XML!Element(
+	 	
+		 name <- 'uri',
+		 children <- theuri
+	 ),
+	 
+	 theuri : XML!Text(
+	 	
+		 name <- 'theuri',
+		 value <- if i.uri.oclIsUndefined() then '' else i.uri endif
+	 ),
+	 
+	 email : XML!Element(
+	 	
+		 name <- 'email',
+		 children <- theemail
+	 ),
+	 
+	 theemail : XML!Text(
+	 	
+		 name <- 'theemail',
+		 value <- if i.email.oclIsUndefined() then '' else i.email endif
+	 )
+ }--End rule Contributor to Element
+ 
+ --Begin rule Link to Element
+ rule Link2Element{
+ 	
+	 from i : ATOM!Link
+	 
+	 to 
+	 
+	 o : XML!Element(
+	 	
+		 name <- 'Link',
+		 children <- Sequence {rel,hrefl,type,hreflang,title,lenght}
+	 ),
+	 rel : XML!Element(
+	 	
+		 name <- 'rel',
+		 children <- therel
+	 ),
+	 
+	 therel : XML!Text(
+	 	
+		 name <- 'therel',
+		 value <-  if i.rel.oclIsUndefined() then '' else i.rel endif
+	 ),
+	 
+	 hrefl : XML!Element(
+	 	
+		 name <- 'hrefl',
+		 children <- thehrefl
+	 ),
+	 
+	 thehrefl : XML!Text(
+	 	
+		 name <- 'thehrefl',
+		 value <- if i.hrefl.oclIsUndefined() then '' else i.hrefl endif
+	 ),
+	 
+	 type : XML!Element(
+	 	
+		 name <- 'type',
+		 children <- thetype
+	 ),
+	 
+	 thetype : XML!Text(
+	 	
+		 name <- 'thetype',
+		 value <- if i.type.oclIsUndefined() then '' else i.type endif
+	 ),
+	 
+	 hreflang : XML!Element(
+	 	
+		 name <- 'hreflang',
+		 children <- thehreflang
+	 ),
+	 
+	 thehreflang : XML!Text(
+	 	
+		 name <- 'thehreflang',
+		 value <-  if i.hreflang.oclIsUndefined() then '' else i.hreflang endif
+	 ),
+	 
+	 title : XML!Element(
+	 	
+		 name <- 'title',
+		 children <- thetitle
+	 ),
+	 
+	 thetitle : XML!Text(
+	 	
+		 name <- 'thetitle',
+		 value <-  if i.title.oclIsUndefined() then '' else i.title endif
+	 ),
+	 
+	 lenght : XML!Element(
+	 	
+		 name <- 'lenght',
+		 children <- thelenght
+	 ),
+	 
+	 thelenght : XML!Text(
+	 	
+		 name <- 'thelenght',
+		 value <-  if i.lenght.oclIsUndefined() then '' else i.lenght endif
+	 ) 
+ }--End rule Link to Element
+ 
+ --Begin rule Entry to Element
+ rule Entry2Element{
+	 from i : ATOM!Entry
+	 
+	 to 
+	 
+	 o : XML!Element(
+	 	
+		 name <- 'Entry',
+		 children <- Sequence {title,id,rights,summary,published,lastUpdate,links,categories,content,contributors}
+	 ),
+	 
+	 title : XML!Element(
+	 	
+		 name <- 'title',
+		 children <- thetitle
+	 ),
+	 
+	 thetitle : XML!Text(
+	 	
+		 name <- 'thetitle',
+		 value <-  if i.title.oclIsUndefined() then '' else i.title endif
+	 ),
+	 
+	 id : XML!Element(
+	 	
+		 name <- 'id',
+		 children <- theid
+	 ),
+	 
+	 theid : XML!Text(
+	 	
+		 name <- 'theid',
+		 value <- if i.id.oclIsUndefined() then '' else i.id endif
+	 ),
+	 
+	 rights : XML!Element(
+	 	
+		 name <- 'rights',
+		 children <- therights
+	 ),
+	 
+	 therights : XML!Text(
+	 	
+		 name <- 'therights',
+		 value <- if i.rights.oclIsUndefined() then '' else i.rights endif
+	 ),
+	 
+	 summary : XML!Element(
+	 	
+		 name <- 'summary',
+		 children <- thesummary
+	 ),
+	 
+	 thesummary : XML!Text(
+	 	
+		 name <- 'thesummary',
+		 value <-  if i.summary.oclIsUndefined() then '' else i.summary endif
+	 ),
+	 
+	 published : XML!Element(
+	 	
+		 name <- 'published',
+		 children <- thepublished
+	 ),
+	 
+	 thepublished : XML!Text(
+	 	
+		 name <- 'thepublished',
+		 value <-  if i.published.oclIsUndefined() then '' else i.published endif
+	 ),
+	 
+	 lastUpdate : XML!Element(
+	 	
+		 name <- 'lastUpdate',
+		 children <- thelastUpdate
+	 ),
+	 
+	 thelastUpdate : XML!Text(
+	 	
+		 name <- 'thelastUpdate',
+		 value <-  if i.lastUpdate.oclIsUndefined() then '' else i.lastUpdate endif
+	 ),
+	 
+	 links : XML!Element(
+	 	
+		 name <- 'links',
+		 children <- i.links->asSequence()
+	 ),
+	 
+	 categories : XML!Element(
+	 	
+		 name <- 'categories',
+		 children <- i.categories->asSequence()
+	 ),
+	 
+	 contributors : XML!Element(
+	 	
+		 name <- 'contributors',
+		 children <- i.contributors->asSequence()
+	 ),
+	 
+	 content : XML!Element(
+	 	
+		 name <- 'content',
+		 children <- i.content->asSequence()
+	 )
+ }--End rule Entry to Element
+ 
+ --Begin rule Content to Element
+ rule Content2Element{
+	 from i : ATOM!Content
+	 
+	 to o : XML!Element(
+	 	
+		 name <- 'Content',
+		 children <- Sequence {type,mode,text}
+	 ),
+	 
+	 type : XML!Element(
+	 	
+		 name <- 'type',
+		 children <- thetype
+	 ),
+	 
+	 thetype : XML!Text(
+	 	
+		 name <- 'thetype',
+		 value <- if i.type.oclIsUndefined() then '' else i.type endif
+	 ),
+	 
+	 mode : XML!Element(
+	 	
+		 name <- 'mode',
+		 children <- themode
+	 ),
+	 
+	 themode : XML!Text(
+	 	
+		 name <- 'themode',
+		 value <-  if i.mode.oclIsUndefined() then '' else i.mode endif
+	 ),
+	 
+	 text : XML!Element(
+	 	
+		 name <- 'text',
+		 children <- thepublished
+	 ),
+	 
+	 thepublished : XML!Text(
+	 	
+		 name <- 'thepublished',
+		 value <-  if i.text.oclIsUndefined() then '' else i.text endif
+	 )
+ }--End rule Content to Element
+ 
+ --Begin rule Source to Element
+ rule Source2Element{
+	 from i : ATOM!Source
+	 
+	 to o : XML!Element(
+	 	
+		 name <- 'ATOM',
+		 children <- Sequence {id,subtitle,rights
+		 ,lastUpdate,links,author,icon,logo,generator,categories,contributors}--,contributors}
+	 ),
+	 
+	 id : XML!Element(
+	 	
+		 name <- 'id',
+		 children <- theid
+	 ),
+	 
+	 theid : XML!Text(
+	 	
+		 name <- 'theid',
+		 value <- if i.id.oclIsUndefined() then '' else i.id endif
+	 ),
+	 
+	 subtitle : XML!Element(
+	 	
+		 name <- 'subtitle',
+		 children <- thesubtitle
+	 ),
+	 
+	 thesubtitle : XML!Text(
+	 	
+		 name <- 'thesubtitle',
+		 value <- if i.subtitle.oclIsUndefined() then '' else i.subtitle endif
+	 ),
+	 
+	 rights : XML!Element(
+	 	
+		 name <- 'rights',
+		 children <- therights
+	 ),
+	 
+	 
+	 therights : XML!Text(
+	 	
+		 name <- 'therights',
+		 value <- if i.rights.oclIsUndefined() then '' else i.rights endif
+	 ),
+	 
+	 
+	 lastUpdate : XML!Element(
+	 	
+		 name <- 'lastUpdate',
+		 children <- thelastUpdate
+	 ),
+	 
+	 thelastUpdate : XML!Text(
+	 	
+		 name <- 'thelastUpdate',
+		 value <- if i.lastUpdate.oclIsUndefined() then '' else i.lastUpdate endif
+	 ),
+	 
+	 icon : XML!Element(
+	 	
+		 name <- 'icon',
+		 children <- theicon
+	 ),
+	 
+	 theicon : XML!Text(
+	 	
+		 name <- 'theicon',
+		 value <- if i.icon.oclIsUndefined() then '' else i.icon endif
+	 ),
+	 
+	 logo : XML!Element(
+	 	
+		 name <- 'logo',
+		 children <- thelogo
+	 ),
+	 
+	 
+	 thelogo : XML!Text(
+	 	
+		 name <- 'thelogo',
+		 value <- if i.logo.oclIsUndefined() then '' else i.logo endif
+	 ),
+	 
+	 links : XML!Element(
+	 	
+		 name <- 'links',
+		 children <- i.links->asSequence()
+	 ),
+	 
+	 generator : XML!Element(
+	 	
+		 name <- 'generator',
+		 children <- i.generator->asSequence()
+	 ),
+	 
+	 author : XML!Element(
+	 	
+		 name <- 'author',
+		 children <- i.author->asSequence()
+	 ),
+	 
+	 categories : XML!Element(
+	 	
+		 name <- 'categories',
+		 children <- i.categories->asSequence()
+	 ),
+	 
+	 contributors : XML!Element(
+	 	
+		 name <- 'contributors',
+		 children <- i.contributors->asSequence()
+	 )
+ 
+ }--End rule Source to Element
+ 

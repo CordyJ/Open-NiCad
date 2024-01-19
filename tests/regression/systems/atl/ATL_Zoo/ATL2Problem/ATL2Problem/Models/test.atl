@@ -1,0 +1,75 @@
+module test;
+create OUT : Problem from IN : ATL;
+ 
+
+-------------------------------------------------------------------------------
+-- HELPERS --------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+helper def: f(A : Integer, B:Integer, A:String) : Integer = 0;
+
+helper def: collectionTypes : Set(ATL!CollectionType) =
+	ATL!CollectionType.allInstances();
+
+helper def: popo : Set(ATL!CollectionType) =
+	thisModule.collectionTypes->select(m, m | true)
+		->iterate(res; res : Set(ATL!CollectionType) = Set{} | res);
+
+helper def: baba : Integer =
+	thisModule.resolveTemp(self, 'test');
+
+helper context ATL!Element def: collectionTypes : Set(String) =
+	let x : Integer = 3 in
+	let x : String = 'g' in
+	Set{};
+
+helper context Set(ATL!Element) def: pouet : String =
+	let self1 : Integer = 3 in
+	let thisModule1 : String = 'bah' in
+	let b : Integer = 2 in
+	'pouet';
+
+
+-------------------------------------------------------------------------------
+-- RULES ----------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+rule R1 {
+	from
+		s : ATL!OclModel (
+			let b : Integer = 0 in
+			thisModule.allModels->exists(e | e.name = s.name and e <> s)
+		)
+	using {
+			a : Integer = 0;
+			b : String = let a : Boolean = false in 'kjfg';
+	}
+	to
+		t : Problem!Problem (
+			a <- #error,
+			b <- s.location,
+			c <- 'model \'' + s.name + '\' already defined'
+		),
+		
+		u : Problem!Problem (
+			a <- self
+		),
+		
+		v : Problem!Problem (
+			x <- let a : Integer = 3 in 'pouet'
+		)
+}
+
+rule R2 {
+	from
+		s : ATL!OclModel (
+			thisModule.resolveTemp(s, 'pouet')
+		)
+	to
+		t : Problem!Problem (
+			severity <- #error,
+			location <- s.location,
+			description <- 'model \'' + s.name + '\' already defined'
+		)
+}

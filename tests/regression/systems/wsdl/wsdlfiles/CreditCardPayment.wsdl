@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.    
+-->
+<wsdl:definitions name="CreditCardPayment" 
+                  targetNamespace="http://www.example.org/CreditCardPayment/"
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+                  xmlns:tns="http://www.example.org/CreditCardPayment/" 
+                  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+                  xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+                  xmlns:plnk="http://schemas.xmlsoap.org/ws/2004/03/partner-link/">
+    <wsdl:types>
+        <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+                    targetNamespace="http://www.example.org/CreditCardPayment/"
+                    xmlns:tns="http://www.example.org/CreditCardPayment/">
+            
+            <xsd:element name="authorize" type="tns:AuthorizeType"/>
+            <xsd:complexType name="AuthorizeType">
+                <xsd:sequence>
+                    <xsd:element name="CreditCard" type="tns:CreditCardDetailsType"></xsd:element>
+                    <xsd:element name="Amount" type="xsd:float"></xsd:element>
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:element name="authorizeResponse" type="tns:AuthorizeResponseType"/>
+            <xsd:complexType name="AuthorizeResponseType">
+                <xsd:sequence>
+                    <xsd:element name="Status" type="xsd:string"></xsd:element>
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:complexType name="CreditCardDetailsType">
+                <xsd:sequence>
+                    <xsd:element name="CreditCardType" type="tns:CreditCardTypeType" minOccurs="0" />
+                    <xsd:element name="CreditCardNumber" type="xsd:string" minOccurs="0" />
+                    <xsd:element name="ExpMonth" type="xsd:int" minOccurs="0" />
+                    <xsd:element name="ExpYear" type="xsd:int" minOccurs="0" />
+                    <xsd:element name="CardOwner" type="tns:PayerType" minOccurs="0" />
+                    <xsd:element name="CVV2" type="xsd:string" minOccurs="0" />
+                </xsd:sequence>
+            </xsd:complexType>
+            <xsd:simpleType name="CreditCardTypeType">
+                <xsd:restriction base="xsd:token">
+                    <xsd:enumeration value="Visa" />
+                    <xsd:enumeration value="MasterCard" />
+                    <xsd:enumeration value="Discover" />
+                    <xsd:enumeration value="Amex" />
+                </xsd:restriction>
+            </xsd:simpleType>
+            <xsd:complexType name="PayerType">
+                <xsd:sequence>
+                    <xsd:element name="Name" type="xsd:string" />
+                    <xsd:element name="Address" type="tns:AddressType" />
+                </xsd:sequence>
+            </xsd:complexType>
+            <xsd:complexType name="AddressType">
+                <xsd:sequence>
+                    <xsd:element name="Street" type="xsd:string" />
+                    <xsd:element name="City" type="xsd:string" />
+                    <xsd:element name="State" type="xsd:string" />
+                    <xsd:element name="ZipCode" type="xsd:string" />
+                    <xsd:element name="HomePhone" type="xsd:string" />
+                </xsd:sequence>
+            </xsd:complexType>
+        </xsd:schema>
+    </wsdl:types>
+    <wsdl:message name="AuthorizeRequest">
+        <wsdl:part name="parameters" element="tns:authorize"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="AuthorizeResponse">
+        <wsdl:part name="parameters" element="tns:authorizeResponse"></wsdl:part>
+    </wsdl:message>
+    <wsdl:portType name="CreditCardPayment">
+        <wsdl:operation name="authorize">
+            <wsdl:input message="tns:AuthorizeRequest"></wsdl:input>
+            <wsdl:output message="tns:AuthorizeResponse"></wsdl:output>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="CreditCardPaymentBinding" type="tns:CreditCardPayment">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+        <wsdl:operation name="authorize">
+            <soap:operation soapAction="http://www.example.org/CreditCardPayment/authorize" />
+            <wsdl:input>
+                <soap:body use="literal" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" />
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="CreditCardPaymentService">
+        <wsdl:port name="CreditCardPaymentPort" binding="tns:CreditCardPaymentBinding">
+            <soap:address location="http://localhost:8080/CreditCardPayment" />
+        </wsdl:port>
+    </wsdl:service>
+    
+    <plnk:partnerLinkType name="CreditCardPaymentLinkType">
+        <plnk:role name="forward" portType="tns:CreditCardPayment"/>
+    </plnk:partnerLinkType>    
+</wsdl:definitions>

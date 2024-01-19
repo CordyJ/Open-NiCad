@@ -1,0 +1,50 @@
+--@name RefineAndMergeMeasure
+--@version 1.0
+--@domains measurement data, metrics, metamodel, merged data
+--@authors Eric Vepa (eric.vepa <at> gmail.com)
+--@date 2006/08/06
+--@description This transformation is used to refine and merge measurement data on metamodels. We refine the first input model of measures by keeping only MetamodelMeasureSet. Next, we merge these sets of measure with the existing ones in the second input model. The result measurement data are for severals metamodels.
+
+module RefineAndMergeMeasure; -- Module Template
+create OUT : Measure from IN1 : Measure, IN2 : Measure;
+
+--@begin rule RefineMetamodelMeasureSet
+rule RefineMetamodelMeasureSet {
+	from
+		mmMeasSet:Measure!MetamodelMeasureSet
+	to
+		refinedMmMeasSet:Measure!MetamodelMeasureSet (
+			elementType <- mmMeasSet.elementType,
+			elementName <- mmMeasSet.elementName,
+			measures <- mmMeasSet.measures->
+				select(meas|meas.oclIsTypeOf(Measure!SimpleMeasure))->
+					iterate(meas; acc:Sequence(Measure!SimpleMeasure)=Sequence{}|
+						acc->append(thisModule.CopySimpleMeasure(meas)))
+		)
+}
+--@end rule RefineMetamodelMeasureSet
+
+--@begin lazy rule CopySimpleMeasure
+lazy rule CopySimpleMeasure {
+	from
+		meas:Measure!SimpleMeasure
+	to
+		copyMeas:Measure!SimpleMeasure (
+			metric <- thisModule.CopyMetric(meas.metric),
+			unit <- meas.unit,
+			value <- meas.value
+		)
+}
+--@end lazy rule CopySimpleMeasure
+
+--@begin lazy rule CopyMetric
+lazy rule CopyMetric {
+	from
+		metric:Measure!Metric
+	to
+		copyMetric:Measure!Metric (
+			shortName <- metric.shortName,
+			name <- metric.name
+		)
+}
+--@end lazy rule CopyMetric

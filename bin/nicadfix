@@ -1,0 +1,73 @@
+#!/bin/bash
+# NiCad 7.0 system preparation utility -
+# Fix strange characters in directory and file names so NiCad can process a system
+
+# Version 5.0 - 1.10.18
+
+if [ "$1" = "" ]
+then
+    echo "Usage: nicadfix system-source-dir"
+    exit 99
+else
+    echo "Warning: this will modify directory and file names in $1"
+    echo -n "Are you certain you want to do this (y/n)? "
+    read yesno
+    if [ "${yesno}" != "y" ]
+    then
+        exit
+    fi
+fi
+
+while [ 1=1 ]
+do
+
+# Find all the directories and files with strange characters in them, bottom up
+find "$1" | grep -e "\[" -e "\]" -e "(" -e ")" -e "\\$" > /tmp/fix$$
+
+if [ ! -s /tmp/fix$$ ]
+then
+    echo "Done."
+    break
+fi
+
+# Quote original versions
+ex -s /tmp/fix$$ << EOF
+v/^[^ ]*[ \[\]()\\$][^\/]*\$/d
+1,\$s/.*/\'&'/
+w
+q
+EOF
+
+cp /tmp/fix$$ /tmp/nfix$$
+
+# Make underscore versions
+ex -s /tmp/nfix$$ << EOF2
+g/\[/s//_/g
+g/\]/s//_/g
+g/(/s//_/g
+g/)/s//_/g
+g/\\$/s//_/g
+w
+q
+EOF2
+
+# Concatenate the two and turn them into move commands
+pr -m -t -w 1000 /tmp/fix$$ /tmp/nfix$$ > /tmp/cfix$$
+
+ex -s /tmp/cfix$$ << EOF3
+1,\$s/^/\/bin\/mv /
+1,\$s/[ 	][ 	][ 	]*/ /
+w
+q
+EOF3
+
+# Run the move commands
+cat /tmp/cfix$$ | sed -e "s/   */ /"
+sh /tmp/cfix$$
+
+done
+
+# Clean up
+/bin/rm -f /tmp/fix$$ /tmp/nfix$$ /tmp/cfix$$
+
+# Rev 15.1.24

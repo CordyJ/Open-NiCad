@@ -1,0 +1,73 @@
+-- @name		Remove redundant inheritance
+-- @version		1.0
+-- @domains		Catalogue of Model Transformations
+-- @authors		Baudry Julien (jul.baudry<at>gmail.com)
+-- @date		2006/08/02
+-- @description	The purpose of this transformation is to remove redundant inheritance.
+-- @see http://www.dcs.kcl.ac.uk/staff/kcl/tcat.pdf   
+-- @see section 2.3, page 15
+-- @see author of article : K. Lano
+
+module RedundantInheritance; 
+create OUT : KM3target from IN : KM3;
+
+-- helper getSuperTypes
+-- OUT : Sequence(KM3!Class)
+-- Corresponds to all the direct or indirect supertypes of the class. 
+-- If a class inherit from another class by two different ways, it appears two times in the sequence.
+helper context KM3!Class def : getSuperTypes : Sequence(KM3!Class) =
+	self.supertypes->iterate(a; acc:Sequence(KM3!Class)=Sequence{}|
+						if self.getAllSuperTypes->count(a)>1											
+						then acc->union(Sequence{})
+						else acc->append(a)
+						endif 
+	);
+
+-- helper getAllSuperTypes
+helper context KM3!Class def: getAllSuperTypes : Sequence(KM3!Class) =
+	if self.supertypes->isEmpty()
+		then Sequence{}	
+	else 		self.supertypes->select(c | c.supertypes->notEmpty())
+					->iterate(a; acc : Sequence(KM3!Class)=Sequence{} |(acc->including(a.getSuperTypes)))
+					->union(
+					self.supertypes->iterate(a; acc : Sequence(KM3!Class)=Sequence{} | acc->including(a))
+			).flatten()
+	endif;
+	
+--@begin rule Metamodel
+rule Metamodel {
+	from
+		inputMm:KM3!Metamodel
+	to
+		outputMm:KM3target!Metamodel (
+			location <- inputMm.location,
+			contents <- inputMm.contents
+		)
+}
+--@end rule Metamodel
+
+--@begin rule Package
+rule Package {
+	from
+		inputPkg:KM3!Package
+	to
+		outputPkg:KM3target!Package (
+			name <- inputPkg.name,
+			contents <- inputPkg.contents
+		)
+}
+--@end rule Package
+
+--@begin rule Class
+rule Class {
+	from
+		inputA:KM3!Class 
+	to
+		outputA:KM3target!Class (
+			name <- inputA.name,
+			isAbstract <- inputA.isAbstract,
+			structuralFeatures <- inputA.structuralFeatures,
+			supertypes <- inputA.getSuperTypes
+		)
+}
+--@end rule Class

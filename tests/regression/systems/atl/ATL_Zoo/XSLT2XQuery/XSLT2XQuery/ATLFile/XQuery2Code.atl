@@ -1,0 +1,94 @@
+-- @path XML=/XSLT2XQuery/XML/XML.ecore
+-- @path XQuery=/XSLT2XQuery/XQuery/XQuery.ecore
+-- @path XSLT=/XSLT2XQuery/XSLT/XSLT.ecore
+
+query XQuery2Code = XQuery!XQueryProgram.allInstances()->collect(e | e.toString().
+	writeTo('/XSLT2XQuery/out_test.xquery'));
+
+-- please change the path name in the writeTo expression above
+
+helper context XQuery!XQueryProgram def: toString() : String =
+	self.expressions->iterate(e; acc : String = '' |
+		acc + e.toString() + '\n'
+	);
+
+helper context XQuery!FunctionDeclaration def: toString() : String =
+		'define function ' + self.name + '(' +
+		'$paramVar' +	-- TODO: make arguments part of the XQuery metamodel
+		')' + '\n' +
+		'{\n' +
+		self.expression->iterate(e; acc : String = '' |
+			acc + e.toString()		
+		) +
+		'}';
+
+helper context XQuery!FLWOR def: toString() : String =
+	if not self."for".oclIsUndefined() then
+		self."for".toString() + '\n'
+	else
+		''
+	endif +
+	if not self."let".oclIsUndefined() then
+		self."let".toString() + '\n'
+	else
+		''
+	endif +
+	if not self.where.oclIsUndefined() then
+		self.where.toString() + '\n'
+	else
+		''
+	endif +
+	if not self.orderBy.oclIsUndefined() then
+		self.orderBy.toString() + '\n'
+	else
+		''
+	endif +
+	if not self.return.oclIsUndefined() then
+		self.return.toString()
+	else
+		''
+	endif;
+
+helper context XQuery!For def: toString() : String =
+	'for ' + self.var + ' in ' + self.expression.toString();
+
+helper context XQuery!Let def: toString() : String =
+	'let ' + self.var + ' := ' + self.expression.toString();
+
+helper context XQuery!Where def: toString() : String =
+	'where ' + self.expression.toString();
+
+--helper context XQuery!OrderBy def: toString() : String =
+--	'let ' + self.var + ' := ' + self.expression.toString();
+
+helper context XQuery!Return def: toString() : String =
+	'return\n' +
+	self.expressions->iterate(e; acc : String = '' |
+		acc + e.toString()
+	) + '\n';
+
+helper context XQuery!XPath def: toString() : String =
+	self.value;
+
+helper context XQuery!ReturnXPath def: toString() : String =
+	'{' + self.value + '}';
+
+helper context XQuery!BooleanExp def: toString() : String =
+	self.value;
+	
+helper context XQuery!FunctionCall def: toString() : String =
+	'{' + self.name + '(' + self.parameters->iterate(e; acc : String = '' |
+		acc + if acc = '' then '' else ', ' endif + e.toString()
+	) + ')}';
+
+helper context XQuery!ElementNode def: toString() : String =
+	'<' + self.name +
+	if self.nodes->size() > 0 then
+		'>' +
+			self.nodes->iterate(e; acc : String = '' |
+				acc + e.toString()
+			) +
+		'</' + self.name + '>'
+	else
+		'/>'
+	endif;

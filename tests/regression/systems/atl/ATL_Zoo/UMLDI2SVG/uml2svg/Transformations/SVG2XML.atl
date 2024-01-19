@@ -1,0 +1,474 @@
+module SVG2XML;
+create OUT : XML from IN : SVG;
+
+-- HELPERS
+helper context SVG!Element def : hasAttribute(attrName : String) : Boolean =
+	if not self.attribute->isEmpty() then
+		self.attribute->exists( e | e.oclIsKindOf(attrName))
+	else
+		false
+	endif;
+
+--helper context SVG!Element def : getAttribute(attrName : String) : SVG!Element =
+--		self.attribute->select( e | e.oclIsKindOf(SVG!attrName))->first();
+
+-- End HELPERS
+
+rule SVG2Root {
+	from
+		s : SVG!Svg
+	to
+		out : XML!Root (
+			name <- 'svg',
+			children <- Sequence {namespace, x, y, s.children}->flatten() 
+		),
+		namespace : XML!Attribute (
+			name <- 'xmlns',
+			value <- s.namespace
+		),
+		x : XML!Attribute (
+			name <- 'x',
+			value <- s.position.x.toString()
+		),
+		y : XML!Attribute (
+			name <- 'y',
+			value <- s.position.y.toString()
+		)
+}
+
+rule Groups {
+	from
+		g : SVG!G (
+			g.drawsMarker.oclIsUndefined()	
+		)
+	to
+		out : XML!Element (
+			name <- 'g',
+			children <- g.groupContent
+		)
+}
+
+rule MarkerGroups {
+	from
+		g : SVG!G (
+			not(g.drawsMarker.oclIsUndefined())
+		)
+	to
+		out : XML!Element (
+			name <- 'g',
+			children <- g.groupContent,
+			parent <- g.drawsMarker
+		)
+}
+
+rule defs {
+	from
+		d : SVG!Defs
+	to
+		out : XML!Element (
+			name <- 'defs',
+			children <- d.groupContent
+		)
+}
+
+rule Marker {
+	from
+		m : SVG!Marker
+	to
+		out : XML!Element (
+			name <- 'marker',
+			children <- Sequence {RefX, RefY, id, markerWidth, markerHeight, orient, fill, viewBox}
+		),
+			RefX : XML!Attribute (
+				name <- 'refX',
+				value <- m.refX.toString()
+			),
+			RefY : XML!Attribute (
+				name <- 'refY',
+				value <- m.refY.toString()
+			),
+			id : XML!Attribute (
+				name <- 'id',
+				value <- m.identifier
+			),
+			markerWidth : XML!Attribute (
+				name <- 'markerWidth',
+				value <- m.markerWidth.toString()
+			),
+			markerHeight : XML!Attribute (
+				name <- 'markerHeight',
+				value <- m.markerHeight.toString()
+			),
+			orient : XML!Attribute (
+				name <- 'orient',
+				value <- m.orient
+			),
+			fill : XML!Attribute (
+				name <- 'fill',
+				value <- m.fill
+			),
+			viewBox : XML!Attribute (
+				name <- 'viewBox',
+				value <- m.viewBox
+			)
+}
+
+rule Rect {
+	from
+		r : SVG!Rect
+	to
+		out : XML!Element (
+			name <- 'rect',
+			children <- Sequence {x,y,width,height,fill, stroke}
+		),
+		x : XML!Attribute (
+			name <- 'x',
+			value <- r.position.x.toString()
+		),
+		y : XML!Attribute (
+			name <- 'y',
+			value <- r.position.y.toString()
+		),
+		width : XML!Attribute (
+			name <- 'width',
+			value <- r.size.width.toString()
+		),
+		height : XML!Attribute (
+			name <- 'height',
+			value <- r.size.height.toString()
+		),
+		fill : XML!Attribute (
+			name <- 'fill',
+			value <- r.fill
+		),
+		stroke : XML!Attribute (
+			name <- 'stroke',
+			value <- r.stroke
+		)
+}
+
+rule Line {
+	from
+		l : SVG!Line
+	to
+		out : XML!Element (
+			name <- 'line',
+			children <- Sequence {x1, y1, x2, y2, stroke}
+		),
+		x1 : XML!Attribute (
+			name <- 'x1',
+			value <- l.between.first().position.x.toString()
+		),
+		y1 : XML!Attribute (
+			name <- 'y1',
+			value <- l.between.first().position.y.toString()
+		),
+		x2 : XML!Attribute (
+			name <- 'x2',
+			value <- l.between.last().position.x.toString()
+		),
+		y2 : XML!Attribute (
+			name <- 'y2',
+			value <- l.between.last().position.y.toString()
+		),
+		stroke : XML!Attribute (
+			name <- 'stroke',
+			value <- l.stroke
+		)
+}
+
+helper context SVG!Polyline def : toPoints() : String =
+	self.waypoints->iterate( e; acc : String = '' |
+	acc + e.position.x.toString() + ',' + e.position.y.toString() + ' ');
+
+rule PlainUnmarkedPolyline {
+	from
+		p : SVG!Polyline (
+			p.strokeDashArray.oclIsUndefined() and p.markerEnd.oclIsUndefined()
+		)
+	to
+		out : XML!Element (
+			name <- 'polyline',
+			children <- Sequence {points, stroke, fill}
+		),
+		points : XML!Attribute (
+			name <- 'points',
+			value <- p.toPoints()
+		),
+		stroke : XML!Attribute (
+			name <- 'stroke',
+			value <- p.stroke
+		),
+		fill : XML!Attribute (
+			name <- 'fill',
+			value <- p.fill
+		)
+}
+
+rule DashedUnmarkedPolyline {
+	from
+		p : SVG!Polyline (
+			not p.strokeDashArray.oclIsUndefined() and p.markerEnd.oclIsUndefined()
+		)
+	to
+		out : XML!Element (
+			name <- 'polyline',
+			children <- Sequence {points, stroke, fill, dashArray}
+		),
+		points : XML!Attribute (
+			name <- 'points',
+			value <- p.toPoints()
+		),
+		stroke : XML!Attribute (
+			name <- 'stroke',
+			value <- p.stroke
+		),
+		fill : XML!Attribute (
+			name <- 'fill',
+			value <- p.fill
+		),
+		dashArray : XML!Attribute (
+			name <- 'stroke-dasharray',
+			value <- p.strokeDashArray
+		)
+}
+
+rule PlainMarkedESPolyline {
+	from
+		p : SVG!Polyline (
+			p.strokeDashArray.oclIsUndefined() and not(p.markerEnd.oclIsUndefined()) and not(p.markerStart.oclIsUndefined())
+		)
+	to
+		out : XML!Element (
+			name <- 'polyline',
+			children <- Sequence {points, stroke, fill, markerE, markerS}
+		),
+		points : XML!Attribute (
+			name <- 'points',
+			value <- p.toPoints()
+		),
+		stroke : XML!Attribute (
+			name <- 'stroke',
+			value <- p.stroke
+		),
+		fill : XML!Attribute (
+			name <- 'fill',
+			value <- p.fill
+		),
+		markerE : XML!Attribute (
+			name <- 'marker-end',
+			value <- p.markerEnd
+		),
+		markerS : XML!Attribute (
+			name <- 'marker-start',
+			value <- p.markerStart
+		)
+}
+
+rule DashedMarkedPolyline {
+	from
+		p : SVG!Polyline (
+			not p.strokeDashArray.oclIsUndefined() and not(p.markerEnd.oclIsUndefined())
+		)
+	to
+		out : XML!Element (
+			name <- 'polyline',
+			children <- Sequence {points, stroke, fill, dashArray, marker}
+		),
+		points : XML!Attribute (
+			name <- 'points',
+			value <- p.toPoints()
+		),
+		stroke : XML!Attribute (
+			name <- 'stroke',
+			value <- p.stroke
+		),
+		fill : XML!Attribute (
+			name <- 'fill',
+			value <- p.fill
+		),
+		dashArray : XML!Attribute (
+			name <- 'stroke-dasharray',
+			value <- p.strokeDashArray
+		),
+		marker : XML!Attribute (
+			name <- 'marker-end',
+			value <- p.markerEnd
+		)
+}
+
+
+
+helper context SVG!Text def: isBold() : Boolean =
+	if self.hasAttribute(SVG!FontWeight) then
+		self.attribute->select( e | e.oclIsKindOf(SVG!FontWeight))->first().bold
+	else
+		false
+	endif;
+	
+helper context SVG!Text def: isItalic() : Boolean =
+	if self.hasAttribute(SVG!FontStyle) then
+		self.attribute->select( e | e.oclIsKindOf(SVG!FontStyle))->first().italic
+	else
+		false
+	endif;
+
+rule TextNotBoldNotItalic {
+	from
+		t : SVG!Text (
+			not(t.isBold()) and not(t.isItalic())
+		)
+	to
+		out : XML!Element (
+			name <- 'text',
+			children <- Sequence {x, y, text, fill, fontSize}
+		),
+		x : XML!Attribute (
+			name <- 'x',
+			value <- t.position.x.toString()
+		),
+		y : XML!Attribute (
+			name <- 'y',
+			value <- t.position.y.toString()
+		),
+		text : XML!Text (
+			value <- t.content
+		),
+		fill : XML!Attribute (
+			name <- 'fill',
+			value <- t.fill
+		),
+		fontSize : XML!Attribute (
+			name <- 'font-size',
+			value <- t.fontSize
+		)
+}
+
+rule TextNotBoldItalic {
+	from
+		t : SVG!Text (
+			not(t.isBold()) and t.isItalic()
+		)
+	to
+		out : XML!Element (
+			name <- 'text',
+			children <- Sequence {x, y, text, fill, fontSize, fontStyle}
+		),
+		x : XML!Attribute (
+			name <- 'x',
+			value <- t.position.x.toString()
+		),
+		y : XML!Attribute (
+			name <- 'y',
+			value <- t.position.y.toString()
+		),
+		text : XML!Text (
+			value <- t.content
+		),
+		fill : XML!Attribute (
+			name <- 'fill',
+			value <- t.fill
+		),
+		fontSize : XML!Attribute (
+			name <- 'font-size',
+			value <- t.fontSize
+		),
+		fontStyle : XML!Attribute (
+			name <- 'font-style',
+			value <- 'italic'
+		)
+}
+
+rule TextBoldItalic {
+	from
+		t : SVG!Text (
+			t.isBold() and t.isItalic()
+		)
+	to
+		out : XML!Element (
+			name <- 'text',
+			children <- Sequence {x, y, text, fill, fontSize, fontWeight, fontStyle}
+		),
+		x : XML!Attribute (
+			name <- 'x',
+			value <- t.position.x.toString()
+		),
+		y : XML!Attribute (
+			name <- 'y',
+			value <- t.position.y.toString()
+		),
+		text : XML!Text (
+			value <- t.content
+		),
+		fill : XML!Attribute (
+			name <- 'fill',
+			value <- t.fill
+		),
+		fontSize : XML!Attribute (
+			name <- 'font-size',
+			value <- t.fontSize
+		),
+		fontWeight : XML!Attribute (
+			name <- 'font-weight',
+			value <- 'bold'
+		),
+		fontStyle : XML!Attribute (
+			name <- 'font-style',
+			value <- 'italic'
+		)
+}
+
+rule TextBoldNotItalic {
+	from
+		t : SVG!Text (
+			t.isBold() and not(t.isItalic())
+		)
+	to
+		out : XML!Element (
+			name <- 'text',
+			children <- Sequence {x, y, text, fill, fontSize, fontWeight}
+		),
+		x : XML!Attribute (
+			name <- 'x',
+			value <- t.position.x.toString()
+		),
+		y : XML!Attribute (
+			name <- 'y',
+			value <- t.position.y.toString()
+		),
+		text : XML!Text (
+			value <- t.content
+		),
+		fill : XML!Attribute (
+			name <- 'fill',
+			value <- t.fill
+		),
+		fontSize : XML!Attribute (
+			name <- 'font-size',
+			value <- t.fontSize
+		),
+		fontWeight : XML!Attribute (
+			name <- 'font-weight',
+			value <- 'bold'
+		)
+}
+
+
+rule Path {
+	from
+		p : SVG!Path
+	to
+		out : XML!Element (
+			name <- 'path',
+			parent <- p.group,
+			children <- Sequence {data, strok}
+		),
+			data : XML!Attribute (
+				name <- 'd',
+				value <- p.d
+			),
+			strok : XML!Attribute (
+				name <- 'stroke',
+				value <- p.stroke
+			)
+}

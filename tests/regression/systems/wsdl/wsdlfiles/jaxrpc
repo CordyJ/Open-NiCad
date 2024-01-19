@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?><definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://sscweb.gsfc.nasa.gov/WS/ssc/SSCWS" xmlns:ns2="http://sscweb.gsfc.nasa.gov/WS/ssc/types/SSCWS" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="SSCWS" targetNamespace="http://sscweb.gsfc.nasa.gov/WS/ssc/SSCWS">
+  <types>
+    <schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://sscweb.gsfc.nasa.gov/WS/ssc/types/SSCWS" xmlns:soap11-enc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" targetNamespace="http://sscweb.gsfc.nasa.gov/WS/ssc/types/SSCWS">
+      <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+      <complexType name="ArrayOfArrayOfstring">
+        <complexContent>
+          <restriction base="soap11-enc:Array">
+            <attribute ref="soap11-enc:arrayType" wsdl:arrayType="tns:ArrayOfstring[]"/></restriction></complexContent></complexType>
+      <complexType name="ArrayOfstring">
+        <complexContent>
+          <restriction base="soap11-enc:Array">
+            <attribute ref="soap11-enc:arrayType" wsdl:arrayType="string[]"/></restriction></complexContent></complexType>
+      <complexType name="GraphOptions">
+        <sequence>
+          <element name="combined" type="boolean"/>
+          <element name="xrView" type="boolean"/>
+          <element name="xyView" type="boolean"/>
+          <element name="xzView" type="boolean"/>
+          <element name="yzView" type="boolean"/></sequence></complexType>
+      <complexType name="ArrayOfSatelliteLocation">
+        <complexContent>
+          <restriction base="soap11-enc:Array">
+            <attribute ref="soap11-enc:arrayType" wsdl:arrayType="tns:SatelliteLocation[]"/></restriction></complexContent></complexType>
+      <complexType name="SatelliteLocation">
+        <sequence>
+          <element name="beginTime" type="dateTime"/>
+          <element name="coordinateSystem" type="string"/>
+          <element name="coordinates" type="tns:ArrayOfArrayOfdouble"/>
+          <element name="endTime" type="dateTime"/>
+          <element name="satelliteName" type="string"/></sequence></complexType>
+      <complexType name="ArrayOfArrayOfdouble">
+        <complexContent>
+          <restriction base="soap11-enc:Array">
+            <attribute ref="soap11-enc:arrayType" wsdl:arrayType="tns:ArrayOfdouble[]"/></restriction></complexContent></complexType>
+      <complexType name="ArrayOfdouble">
+        <complexContent>
+          <restriction base="soap11-enc:Array">
+            <attribute ref="soap11-enc:arrayType" wsdl:arrayType="double[]"/></restriction></complexContent></complexType>
+      <complexType name="ArrayOfdateTime">
+        <complexContent>
+          <restriction base="soap11-enc:Array">
+            <attribute ref="soap11-enc:arrayType" wsdl:arrayType="dateTime[]"/></restriction></complexContent></complexType></schema></types>
+  <message name="SatelliteSituationCenter_getAllSatellites"/>
+  <message name="SatelliteSituationCenter_getAllSatellitesResponse">
+    <part name="result" type="ns2:ArrayOfArrayOfstring"/></message>
+  <message name="SatelliteSituationCenter_getSatelliteGraphs">
+    <part name="arrayOfString_1" type="ns2:ArrayOfstring"/>
+    <part name="String_2" type="xsd:string"/>
+    <part name="int_3" type="xsd:int"/>
+    <part name="Date_4" type="xsd:dateTime"/>
+    <part name="Date_5" type="xsd:dateTime"/>
+    <part name="GraphOptions_6" type="ns2:GraphOptions"/></message>
+  <message name="SatelliteSituationCenter_getSatelliteGraphsResponse">
+    <part name="result" type="ns2:ArrayOfstring"/></message>
+  <message name="SatelliteSituationCenter_getSatelliteLocation">
+    <part name="arrayOfString_1" type="ns2:ArrayOfstring"/>
+    <part name="String_2" type="xsd:string"/>
+    <part name="int_3" type="xsd:int"/>
+    <part name="Date_4" type="xsd:dateTime"/>
+    <part name="Date_5" type="xsd:dateTime"/></message>
+  <message name="SatelliteSituationCenter_getSatelliteLocationResponse">
+    <part name="result" type="ns2:ArrayOfSatelliteLocation"/></message>
+  <message name="SatelliteSituationCenter_getSatelliteLocationCDF">
+    <part name="arrayOfString_1" type="ns2:ArrayOfstring"/>
+    <part name="String_2" type="xsd:string"/>
+    <part name="int_3" type="xsd:int"/>
+    <part name="Date_4" type="xsd:dateTime"/>
+    <part name="Date_5" type="xsd:dateTime"/></message>
+  <message name="SatelliteSituationCenter_getSatelliteLocationCDFResponse">
+    <part name="result" type="ns2:ArrayOfstring"/></message>
+  <message name="SatelliteSituationCenter_getSatelliteResolution">
+    <part name="String_1" type="xsd:string"/></message>
+  <message name="SatelliteSituationCenter_getSatelliteResolutionResponse">
+    <part name="result" type="xsd:int"/></message>
+  <message name="SatelliteSituationCenter_getSatelliteTime">
+    <part name="String_1" type="xsd:string"/></message>
+  <message name="SatelliteSituationCenter_getSatelliteTimeResponse">
+    <part name="result" type="ns2:ArrayOfdateTime"/></message>
+  <portType name="SatelliteSituationCenter">
+    <operation name="getAllSatellites">
+      <input message="tns:SatelliteSituationCenter_getAllSatellites"/>
+      <output message="tns:SatelliteSituationCenter_getAllSatellitesResponse"/></operation>
+    <operation name="getSatelliteGraphs" parameterOrder="arrayOfString_1 String_2 int_3 Date_4 Date_5 GraphOptions_6">
+      <input message="tns:SatelliteSituationCenter_getSatelliteGraphs"/>
+      <output message="tns:SatelliteSituationCenter_getSatelliteGraphsResponse"/></operation>
+    <operation name="getSatelliteLocation" parameterOrder="arrayOfString_1 String_2 int_3 Date_4 Date_5">
+      <input message="tns:SatelliteSituationCenter_getSatelliteLocation"/>
+      <output message="tns:SatelliteSituationCenter_getSatelliteLocationResponse"/></operation>
+    <operation name="getSatelliteLocationCDF" parameterOrder="arrayOfString_1 String_2 int_3 Date_4 Date_5">
+      <input message="tns:SatelliteSituationCenter_getSatelliteLocationCDF"/>
+      <output message="tns:SatelliteSituationCenter_getSatelliteLocationCDFResponse"/></operation>
+    <operation name="getSatelliteResolution" parameterOrder="String_1">
+      <input message="tns:SatelliteSituationCenter_getSatelliteResolution"/>
+      <output message="tns:SatelliteSituationCenter_getSatelliteResolutionResponse"/></operation>
+    <operation name="getSatelliteTime" parameterOrder="String_1">
+      <input message="tns:SatelliteSituationCenter_getSatelliteTime"/>
+      <output message="tns:SatelliteSituationCenter_getSatelliteTimeResponse"/></operation></portType>
+  <binding name="SatelliteSituationCenterBinding" type="tns:SatelliteSituationCenter">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="rpc"/>
+    <operation name="getAllSatellites">
+      <soap:operation soapAction=""/>
+      <input>
+        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" use="encoded" namespace="http://sscweb.gsfc.nasa.gov/WS/ssc/SSCWS"/></input>
+      <output>
+        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" use="encoded" namespace="http://sscweb.gsfc.nasa.gov/WS/ssc/SSCWS"/></output></operation>
+    <operation name="getSatelliteGraphs">
+      <soap:operation soapAction=""/>
+      <input>
+        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" use="encoded" namespace="http://sscweb.gsfc.nasa.gov/WS/ssc/SSCWS"/></input>
+      <output>
+        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" use="encoded" namespace="http://sscweb.gsfc.nasa.gov/WS/ssc/SSCWS"/></output></operation>
+    <operation name="getSatelliteLocation">
+      <soap:operation soapAction=""/>
+      <input>
+        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" use="encoded" namespace="http://sscweb.gsfc.nasa.gov/WS/ssc/SSCWS"/></input>
+      <output>
+        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" use="encoded" namespace="http://sscweb.gsfc.nasa.gov/WS/ssc/SSCWS"/></output></operation>
+    <operation name="getSatelliteLocationCDF">
+      <soap:operation soapAction=""/>
+      <input>
+        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" use="encoded" namespace="http://sscweb.gsfc.nasa.gov/WS/ssc/SSCWS"/></input>
+      <output>
+        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" use="encoded" namespace="http://sscweb.gsfc.nasa.gov/WS/ssc/SSCWS"/></output></operation>
+    <operation name="getSatelliteResolution">
+      <soap:operation soapAction=""/>
+      <input>
+        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" use="encoded" namespace="http://sscweb.gsfc.nasa.gov/WS/ssc/SSCWS"/></input>
+      <output>
+        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" use="encoded" namespace="http://sscweb.gsfc.nasa.gov/WS/ssc/SSCWS"/></output></operation>
+    <operation name="getSatelliteTime">
+      <soap:operation soapAction=""/>
+      <input>
+        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" use="encoded" namespace="http://sscweb.gsfc.nasa.gov/WS/ssc/SSCWS"/></input>
+      <output>
+        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" use="encoded" namespace="http://sscweb.gsfc.nasa.gov/WS/ssc/SSCWS"/></output></operation></binding>
+  <service name="SSCWS">
+    <port name="SatelliteSituationCenterPort" binding="tns:SatelliteSituationCenterBinding">
+      <soap:address location="http://sscweb.gsfc.nasa.gov:80/WS/ssc/jaxrpc" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"/></port></service></definitions>

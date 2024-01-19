@@ -1,0 +1,64 @@
+module KM32SimpleClass; -- Module Template
+
+create OUT : SimpleClass from IN : KM3;
+
+rule Class {
+	from
+		s : KM3!Class
+	to
+		t : SimpleClass!Class (
+			name <- s.name,
+			attrs <- s.structuralFeatures->select(sf | 
+				         sf.oclIsKindOf(KM3!Attribute) and
+						 sf.name <> 'persistent'
+					 ),
+			parent <- s.supertypes->first(),
+			is_persistent<-s.structuralFeatures->exists(sf | sf.name='persistent')
+		)
+}
+
+rule Attribute {
+    from
+	   s : KM3!Attribute (
+	   	s.name <> 'persistent'
+	   )
+	using {
+		is_primary : Boolean = if s.name->size() > 8 
+		           		then s.name->substring(s.name->size()-7,
+		           	       		               s.name->size())='_primary'
+				   		else false
+				   		endif;
+
+		name : String = if is_primary 
+		         then s.name->substring(1, s.name->size()-8)
+				 else s.name
+				 endif;
+	}
+
+	to
+	   t : SimpleClass!Attribute(
+	       name<-name,
+		   type<-s.type,
+		   is_primary<-is_primary
+	   )
+}
+
+rule PrimitiveTypes {
+	 from
+	 	s : KM3!DataType
+	 to 
+	      t : SimpleClass!PrimitiveDataType (
+	        name<-s.name	
+	      )
+}
+
+rule Reference {
+	from ref : KM3!Reference
+	to
+	     assoc : SimpleClass!Association(
+	     	        name<-ref.name,
+					src<-ref.owner,
+					dest<-ref.type
+	             )
+}
+

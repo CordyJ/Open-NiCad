@@ -1,0 +1,201 @@
+-- @name		Removal of many-many associations (with only the  elements necessary for the example context)
+-- @version		1.0
+-- @domains		Catalogue of Model Transformations
+-- @authors		SIMON Eric(simon.eric3<at>gmail.com)
+-- @date		2006/08/02
+-- @description	The purpose of this transformation is to substitute a many-many association by an introduction of class with two many-one associations.
+-- @see http://www.dcs.kcl.ac.uk/staff/kcl/tcat.pdf   
+-- @see section 1.2, page 2
+-- @see author of article : K. Lano
+
+module Removing; -- Module Template
+create OUT : KM3Target from IN : KM3;
+
+-- @comment this helper allows to know if a reference oswn the properties necessary for the rule association  
+helper context KM3!Reference def: isManyToManyNotContainer : Boolean =
+	self.lower = 0 and self.upper < 0 and not self.isContainer
+	;
+-- @comment this helper create a Map which uses in the rule isAlreadyConsidered. 
+helper def: assoMap : Map(KM3!Reference, Sequence(KM3!Reference)) = Map{};
+-- @comment this rule allows to know if a pair of element is already considered. E.g.: {A,B} and {B,A} => {A,B}. 
+rule isAlreadyConsidered(ref1 : KM3!Reference, ref2 : KM3!Reference) {
+
+	do {
+		if (not thisModule.assoMap.get(ref2).oclIsUndefined()) {
+			if (thisModule.assoMap.get(ref2)->includes(ref1)) {
+				true;
+			}
+			else {
+			    if (not thisModule.assoMap.get(ref1).oclIsUndefined()) {
+					thisModule.assoMap <- thisModule.assoMap.including(ref1,thisModule.assoMap.get(ref1)->including(ref2));
+					false;
+			    }
+				else {
+					thisModule.assoMap <- thisModule.assoMap.including(ref1, Sequence{ref2});
+					false;
+				}
+			}
+		}
+		else  {
+				if (not thisModule.assoMap.get(ref1).oclIsUndefined()) {
+					thisModule.assoMap <- thisModule.assoMap.including(ref1,thisModule.assoMap.get(ref1)->including(ref2));
+					false;
+			    }
+				else {	
+					thisModule.assoMap <- thisModule.assoMap.including(ref1, Sequence{ref2});
+					false;
+				}
+		}
+		
+	}
+}
+
+-- @begin rule Metamodel
+rule Metamodel {
+	from
+		inputMm:KM3!Metamodel
+	to
+		outputMm:KM3Target!Metamodel (
+			location <- inputMm.location,
+			contents <- inputMm.contents
+		)
+}
+-- @end rule Metamodel
+
+-- @begin rule Package
+rule Package {
+	from
+		inputPkg:KM3!Package
+	to
+		outputPkg:KM3Target!Package (
+			name <- inputPkg.name,
+			contents <- inputPkg.contents
+		)
+}
+-- @end rule Package
+
+-- @begin rule Class
+rule Class {
+	from
+		inputC:KM3!Class
+		(not inputC.structuralFeatures->select(a|a.oclIsTypeOf(KM3!Reference))->exists(r| r.isManyToManyNotContainer and r.opposite.isManyToManyNotContainer))
+	to
+		outputC:KM3Target!Class (
+			isAbstract <- inputC.isAbstract,
+			supertypes <- inputC.supertypes,
+			name <- inputC.name,
+			location <- inputC.location,
+			package <- inputC.package,
+			structuralFeatures <- inputC.structuralFeatures
+		)
+}
+-- @end rule Class
+
+
+
+-- @begin rule Reference
+rule Reference {
+	from
+		inputRef : KM3!Reference
+			( not (inputRef.isManyToManyNotContainer and inputRef.opposite.isManyToManyNotContainer))
+	to
+		outputRef : KM3Target!Reference (
+			package <- inputRef.package,
+			name <- inputRef.name,
+			lower <- inputRef.lower,
+			upper <- inputRef.upper,
+			isOrdered <- inputRef.isOrdered,
+			isUnique <- inputRef.isUnique,
+			owner <- inputRef.owner,
+			type <- inputRef.type,
+			isContainer <- inputRef.isContainer,
+			opposite <- inputRef.opposite
+		)
+}
+-- @end rule Reference
+
+-- @comment This rule takes a pair of Reference and, if  these are not already considered, creates a class with two many-one association.
+-- @begin rule Association
+rule Association {
+	from
+		inputA : KM3!Reference,
+		inputB : KM3!Reference
+		(
+			inputA.opposite = inputB
+			and inputA.isManyToManyNotContainer
+			and inputB.isManyToManyNotContainer
+			--	and inputA <> inputB
+			and not thisModule.isAlreadyConsidered(inputA, inputB)
+		)
+
+
+	to
+		outputA : KM3Target!Class (
+			package <- inputA.owner.package,
+			name <- inputA.owner.name,
+			isAbstract <- inputA.owner.isAbstract,
+			structuralFeatures <- inputA.owner.structuralFeatures->select(b|b.oclIsTypeOf(KM3!Reference))->select(a| not a.isManyToManyNotContainer),
+			structuralFeatures <- inputA.owner.structuralFeatures->select(b|b.oclIsTypeOf(KM3!Attribute)),
+			structuralFeatures <- referenceAC
+		),
+		outputB : KM3Target!Class (
+			package <- inputB.owner.package,
+			name <- inputB.owner.name,
+			isAbstract <- inputB.owner.isAbstract,
+			structuralFeatures <- inputB.owner.structuralFeatures->select(b|b.oclIsTypeOf(KM3!Reference))->select(a| not a.isManyToManyNotContainer),
+			structuralFeatures <- inputB.owner.structuralFeatures->select(b|b.oclIsTypeOf(KM3!Attribute)),
+			structuralFeatures <- referenceBC
+		),
+		outputC : KM3Target!Class (
+			package <- inputA.owner.package,
+			name <- inputA.owner.name->concat(inputB.owner.name),
+			isAbstract <- false,
+			structuralFeatures <- referenceCA,
+			structuralFeatures <- referenceCB
+      		
+		),
+		referenceAC : KM3Target!Reference (
+			name <- inputA.name,
+			lower <- 1,
+			upper <- 1,
+			isOrdered <- false,
+			isUnique <- false,
+			owner <- outputA,
+			isContainer <- false,
+			opposite <- referenceCA
+		),
+		referenceCA : KM3Target!Reference (
+			name <- outputC.name->concat('1'),
+			lower <- 0,
+			upper <- 0-1,
+			isOrdered <- false,
+			isUnique <- false,
+			owner <- outputC,
+			isContainer <- false,
+			opposite <- referenceAC
+		),
+		referenceBC : KM3Target!Reference (
+			name <- inputB.name,
+			lower <- 1,
+			upper <- 1,
+			isOrdered <- false,
+			isUnique <- false,
+			owner <- outputB,
+			isContainer <- false,
+			opposite <- referenceCB
+		),
+		referenceCB : KM3Target!Reference (
+			name <- outputC.name->concat('2'),
+			lower <- 0,
+			upper <- 0-1,
+			isOrdered <- false,
+			isUnique <- false,
+			owner <- outputC,
+			isContainer <- false,
+			opposite <- referenceBC
+		)
+
+}
+--@end rule Association
+
+

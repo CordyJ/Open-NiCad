@@ -1,0 +1,239 @@
+module KM32ATL_KM22MM;
+create OUT : ATL from IN : KM3;
+
+-------------------------------------------------------------------------------------------
+-- HELPERS --------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------
+
+-- This helper contains KM3!Metamodel
+-- CONTEXT: ThisModule
+-- RETURN: KM3!Metamodel
+helper def: metamodel : KM3!Metamodel = KM3!Metamodel.allInstances()->asSequence()->first();
+
+-- This helper contains the name of the KM3!Package that is not PrimitiveTypes package
+-- CONTEXT: ThisModule
+-- RETURN: String
+helper def: km3PackageName : String = 
+	KM3!Package.allInstances()->select( e | e.name <> 'PrimitiveTypes' )->first().name;
+
+-- This helper returns a Set that contains all structural features of a KM3!Class 
+-- including those in its supertypes
+-- CONTEXT: KM3!Class
+-- RETURN: Set(KM3!StructuralFeature)
+helper context KM3!Class def: allStructuralFeatures() : Set(KM3!StructuralFeature) =
+	self.supertypes->iterate(e; acc : Set(KM3!StructuralFeature) = 
+		self.structuralFeatures | acc->union(e.allStructuralFeatures()) );
+
+-- This helper returns a Sequence of KM3!Reference without their opposite
+-- CONTEXT: ThisModule
+-- RETURN: Sequence(KM3!Reference)
+helper def: usedReferences : Sequence(KM3!Reference) =
+	KM3!Reference.allInstances()->iterate(e;acc : Sequence(KM3!Reference) = Sequence{} |
+		if acc->includes(e.opposite) 
+			then acc
+			else if e.isOrdered and e.opposite.isContainer 
+					then acc
+					else if e.isOrdered and (e.upper = 0-1 or e.upper > 1)
+							then acc->including(e)
+							else if e.isContainer 
+									then acc->including(e)
+									else acc
+								endif
+						endif
+				endif
+		endif );
+ 
+-- This helper returns the name of the corresponding helper in KM2Tools library
+-- CONTEXT: KM3!Attribute
+-- RETURN: String
+helper context KM3!Attribute def: getOperationName() : String =
+	if self.type.name = 'String' 
+		then 'getStringProperty'
+		else if self.type.name = 'Integer' 
+				then 'getIntegerProperty'
+				else if self.type.name = 'Boolean' 
+						then 'getBooleanProperty'
+						else ''
+					 endif
+			 endif
+	endif;
+------------------------------------------------------------------------------------------
+-- RULES ---------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------
+
+rule Metamodel {
+	from
+		m : KM3!Metamodel
+	to
+		t : ATL!Module (
+			name <- 'KM22' + thisModule.km3PackageName,
+			outModels <- tm,
+			inModels <- sm,
+			elements <-
+				Sequence{
+					KM3!Class.allInstances()
+						->select(e | e.package.name <> 'PrimitiveTypes')
+						->asSequence()
+				},
+			libraries <- Sequence{lib},
+			isRefining <- false
+		),
+		sm : ATL!OclModel (
+			name <- 'IN',
+			metamodel <- mm1
+		),
+		tm : ATL!OclModel (
+			name <- 'OUT',
+			metamodel <- mm2
+		),
+		mm1 : ATL!OclModel (
+			name <- 'KM2'
+		),
+		mm2 : ATL!OclModel (
+			name <- thisModule.km3PackageName
+		),
+		lib : ATL!LibraryRef (
+			name <- 'KM2Tools',
+			unit <- t
+		)
+}
+
+rule Class {
+	from
+		c : KM3!Class (
+			c.package.name <> 'PrimitiveTypes'
+		)
+	using {
+		allSfs : Set(KM3!StructuralFeature) = c.allStructuralFeatures();
+		allRefs : Set(KM3!Reference) =  allSfs->select(e | e.oclIsTypeOf(KM3!Reference) );
+		allAttr : Set(KM3!Attribute) = 	allSfs->select(e | e.oclIsTypeOf(KM3!Attribute) );
+	}
+	to
+		atl : ATL!MatchedRule (
+			name <- c.name,
+			inPattern <- inPat,
+			outPattern <- outPat,
+			isRefining <- false,
+			isAbstract <- false
+		),
+		-- InPattern
+		inPat : ATL!InPattern (
+			elements <- elementin,
+			filter <- oc
+		),
+		-- Filter	
+		oc : ATL!OperatorCallExp (
+			operationName <- '=',
+			source <- noac,
+			arguments <- Sequence{s}				
+		),
+		noac : ATL!NavigationOrAttributeCallExp (
+			name <- 'name',
+			source <-fv
+		),
+		fv : ATL!VariableExp (
+			name <- 'me',
+			referredVariable <- elementin
+		),
+		s : ATL!StringExp (
+			stringSymbol <- c.name
+		),
+			
+		elementin : ATL!SimpleInPatternElement(
+			id <- 'me0',
+			varName <- 'me',
+			type <- intype
+		),
+		intype : ATL!OclModelElement (
+			name <- 'ModelElement',
+			model <- thisModule.resolveTemp(thisModule.metamodel,'mm1')
+		),
+	
+		-- OutPattern
+		outPat : ATL!OutPattern (
+			elements <- elementout
+		),
+		elementout : ATL!SimpleOutPatternElement (
+			varName <- 'c',
+			type <- outtype,
+			bindings <-
+				Sequence{
+					allRefs->select(e | thisModule.usedReferences->includes(e)),
+					allAttr
+				}
+		),
+		outtype : ATL!OclModelElement (
+			name <- c.name,
+			model <- thisModule.resolveTemp(thisModule.metamodel,'mm2')
+		)
+}
+
+rule Attribute {
+	from
+		a : KM3!Attribute
+	to
+		b : ATL!Binding (
+			propertyName <- a.name,
+			value <- oc
+		),
+		oc : ATL!OperationCallExp (
+			operationName <- a.getOperationName(),
+			source <- fv,
+			arguments <- Sequence {s}
+		),
+		fv : ATL!VariableExp (
+			name <- 'me',
+			referredVariable <- thisModule.resolveTemp(a.owner,'elementin')
+		),
+		s : ATL!StringExp (
+			stringSymbol <- a.name
+		)
+}
+
+rule ReferenceMultiple {
+	from
+		r : KM3!Reference (
+			thisModule.usedReferences->includes(r) and r.upper = 0-1 
+		)
+	to
+		b : ATL!Binding (
+			propertyName <- r.name,
+			value <- oc
+		),
+		oc : ATL!OperationCallExp (
+			operationName <- if r.isContainer then 'getSet' else 'getRefSet' endif,
+			source <- fv,
+			arguments <- Sequence {s}
+		),
+		fv : ATL!VariableExp (
+			name <- 'me',
+			referredVariable <- thisModule.resolveTemp(r.owner,'elementin')
+		),
+		s : ATL!StringExp (
+			stringSymbol <- r.name
+		)
+}
+
+rule Reference {
+	from
+		r : KM3!Reference (
+			thisModule.usedReferences->includes(r) and not (r.upper = 0-1)
+		)
+	to
+		b : ATL!Binding (
+			propertyName <- r.name,
+			value <- oc
+		),
+		oc : ATL!OperationCallExp (
+			operationName <- 'get',
+			source <- fv,
+			arguments <- Sequence {s}
+		),
+		fv : ATL!VariableExp (
+			name <- 'me',
+			referredVariable <- thisModule.resolveTemp(r.owner,'elementin')
+		),
+		s : ATL!StringExp (
+			stringSymbol <- r.name
+		)
+}

@@ -1,0 +1,75 @@
+--
+-- Written in January 2005 by Peter Rosenthal
+--
+
+library GeometryLib;
+
+helper def: PIDiv180 : Real = 0.017453292519943295769236907684886;
+	
+helper def : rotate( rotationAngle : TupleType(x : Real, y : Real, z : Real),
+					pointOfOrigin : TupleType(x : Real, y : Real, z : Real), 
+					rotationPoint : TupleType(x : Real, y : Real, z : Real))
+					: TupleType(x : Real, y : Real, z : Real) =
+	
+	let rotationPointO : TupleType(x : Real, y : Real, z : Real) = 
+		rotationPoint in
+--		thisModule.moveBackward(rotationPoint, pointOfOrigin ) in
+	let XRadAng : Real = rotationAngle.x * thisModule.PIDiv180 in
+	let YRadAng : Real = rotationAngle.y * thisModule.PIDiv180 in
+	let ZRadAng : Real = rotationAngle.z * thisModule.PIDiv180 in
+  
+	let SinX : Real = XRadAng.sin() in
+	let SinY : Real = YRadAng.sin() in
+	let SinZ : Real = ZRadAng.sin() in
+
+	let CosX : Real = XRadAng.cos() in
+	let CosY : Real = YRadAng.cos() in
+	let CosZ : Real = ZRadAng.cos() in
+
+	let TempY : Real = rotationPointO.y * CosY - rotationPointO.z * SinY in
+	let TempZ : Real = rotationPointO.y * SinY + rotationPointO.z * CosY in
+	let TempX : Real = rotationPointO.x * CosX - TempZ * SinX in
+
+	let Nz : Real = rotationPointO.x * SinX + TempZ * CosX in
+	let Nx : Real = TempX * CosZ - TempY * SinZ in
+	let Ny : Real = TempX * SinZ + TempY * CosZ in
+ 
+	let rotated : TupleType(x : Real, y : Real, z : Real) = 
+		Tuple {x = Nx, y = Ny, z = Nz} in
+--		thisModule.moveForward(Tuple {x = Nx, y = Ny, z = Nz}, pointOfOrigin) in
+	rotated;
+
+
+helper def : moveForward(	a : TupleType(x : Real, y : Real, z : Real),
+				 		b : TupleType(x : Real, y : Real, z : Real)) :
+				 	 		TupleType(x : Real, y : Real, z : Real) =
+
+	Tuple {
+		x = a.x + b.x,
+		y = a.y + b.y,
+		z = a.z + b.z
+	};
+
+helper def : moveBackward(	a : TupleType(x : Real, y : Real, z : Real),
+				 	b : TupleType(x : Real, y : Real, z : Real)) :
+				 		TupleType(x : Real, y : Real, z : Real) =
+
+	Tuple {
+		x = a.x - b.x,
+		y = a.y - b.y,
+		z = a.z - b.z
+	};	
+
+helper def: sign(s : Real): Real =	-- returns absolute value
+	if ( s < 0.0) then 
+		0-1.0 
+	else
+		1.0
+	endif;
+
+helper def : explode( explosionFactor : Real, e : TupleType(x : Real, y : Real, z : Real) ) : TupleType(x : Real, y : Real, z : Real) =
+	Tuple {
+		x = e.x * (1 + explosionFactor / ( e.x +  thisModule.sign(e.x)) * thisModule.sign(e.x)),
+		y = e.y * (1 + explosionFactor / ( e.y +  thisModule.sign(e.y)) * thisModule.sign(e.y)),		
+		z = e.z * (1 + explosionFactor / ( e.z +  thisModule.sign(e.z)) * thisModule.sign(e.z))	
+	};

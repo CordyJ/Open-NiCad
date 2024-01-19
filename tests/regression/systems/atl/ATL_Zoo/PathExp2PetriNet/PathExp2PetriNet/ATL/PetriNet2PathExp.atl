@@ -1,0 +1,71 @@
+module PetriNet2PathExp;
+create OUT : PathExp from IN : PetriNet;
+
+
+-------------------------------------------------------------------------------
+-- RULES ----------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- Rule 'Main'
+-- This rule generates a PathExp from the input PetriNet element.
+-- Name of the generated PathExp is copied from the PetriNet one.
+-- Its set of states and transitions respectively correspond to the elements
+-- that are generated for the input Places and Transitions.
+rule Main {
+	from
+        pn : PetriNet!PetriNet
+	to 
+		pe : PathExp!PathExp (
+			name <- pn.name,
+			states <- pn.places,
+			transitions <- pn.transitions
+		)
+}
+
+
+-- Rule 'Place'
+-- This rule generates State for each input Place element.
+-- The set of incoming transitions of the generated Place corresponds to the
+-- elements generated for Transitions that are source of the incoming
+-- PetriNet!Arc.
+-- The set of outgoing transitions of the generated Place corresponds to the
+-- elements generated for Transitions that are tagret of the outgoing
+-- PetriNet!Arc.
+rule Place {
+	from
+        pn_p : PetriNet!Place
+	to 
+		pe_s : PathExp!State (
+			incoming <- pn_p.incoming
+							->collect(e | e.source)
+							->flatten(),
+			outgoing <- pn_p.outgoing
+							->collect(e | e.target)
+							->flatten()
+		)
+}
+
+
+-- Rule 'Transition'
+-- This rule generates a PathExp!Transition for each PetriNet!Transition.
+-- Source of the generated Transition corresponds to the element generated for
+-- the Place that is the source of the incoming PetriNet!Arc.
+-- Target of the generated Transition corresponds to the element generated for
+-- the Place that is the target of the outgoing PetriNet!Arc.
+rule Transition {
+	from
+        pn_t : PetriNet!Transition
+	to 
+		pe_t : PathExp!Transition (
+			name <- '',
+			source <- pn_t.incoming
+						->collect(e | e.source)
+						->flatten()
+						->first(),
+			target <- pn_t.outgoing
+						->collect(e | e.target)
+						->flatten()
+						->first()
+		)
+}
+

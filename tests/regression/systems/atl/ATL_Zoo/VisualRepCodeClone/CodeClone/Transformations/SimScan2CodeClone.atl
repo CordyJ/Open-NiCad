@@ -1,0 +1,68 @@
+--@atlcompiler	atl2006
+--@name			SimScan2CodeClone
+--@version		1.0
+--@domains		SimScan, CodeClone
+--@authors		Yu Sun
+--@email        yusun@cis.uab.edu
+--@date			2007/11/02
+--@description	This transformation is used to transform the output of SimScan into generic Code Clone DSL model.
+
+
+module SimScan2CodeClone; -- Module Template
+create OUT : CodeClone from IN : SimScan, IN2 : FileInfo;
+
+helper context SimScan!SSUnit
+def : getFile() : CodeClone!File = 
+	(
+			CodeClone!File.allInstances() -> flatten() -> select(e | e.fileName = self.drive + ':\\' + self.fileName) -> first()
+	);
+
+rule FileInfo2FileList {
+	from 
+		fi : FileInfo!FileInfo
+	to
+		fl : CodeClone!FileList (
+			files <- fi.file
+		)
+}
+
+rule File2File {
+	from 
+		f : FileInfo!File
+	to
+		ff : CodeClone!File (
+			fileName <- f.name,
+			totalFileLines <- f.totallines
+		)
+}
+
+rule SimScan2CodeClone {
+	from
+		ss : SimScan!SimScan
+	to
+		codeClone : CodeClone!CodeClone (
+			sourceToolName <- 'SimScan',
+			groups <- ss.groups
+		)
+}
+
+rule SSGroup2CloneGroup {
+	from
+		ssg : SimScan!SSGroup
+	to
+		cloneGroup : CodeClone!CloneGroup (
+			totalUnits <- ssg.units -> size(),
+			units <- ssg.units
+		)
+}
+
+rule SSUnit2CloneUnit {
+	from
+		ssu : SimScan!SSUnit
+	to
+		cloneUnit : CodeClone!CloneUnit (
+			startLine <- ssu.startLine,
+			endLine <- ssu.endLine,
+			file <- ssu.getFile()
+		)
+}

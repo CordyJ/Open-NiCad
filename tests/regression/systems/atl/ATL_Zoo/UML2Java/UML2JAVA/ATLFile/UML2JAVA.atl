@@ -1,0 +1,81 @@
+module UML2JAVA;
+create OUT : JAVA from IN : UML;
+
+-- Please note that this ATL program serves only for demonstration purposes.
+-- The rules and functions in this program may not be complete.
+
+helper context UML!ModelElement def: isPublic() : Boolean =
+	self.visibility = #vk_public;
+
+helper context UML!Feature def: isStatic() : Boolean =
+	self.ownerScope = #sk_static;
+
+helper context UML!Attribute def: isFinal() : Boolean =
+	self.changeability = #ck_frozen;
+
+helper context UML!Namespace def: getExtendedName() : String =
+	if self.namespace.oclIsUndefined() then
+		''
+	else if self.namespace.oclIsKindOf(UML!Model) then
+		''
+	else
+		self.namespace.getExtendedName() + '.'
+	endif endif + self.name;
+
+rule P2P {
+	from e : UML!Package (e.oclIsTypeOf(UML!Package))
+	to out : JAVA!Package (
+		name <- e.getExtendedName()
+	)
+}
+
+rule C2C {
+	from e : UML!Class
+	to out : JAVA!JavaClass (
+		name <- e.name,
+		isAbstract <- e.isAbstract,
+		isPublic <- e.isPublic(),
+		package <- e.namespace
+	)
+}
+
+rule D2P {
+	from e : UML!DataType
+	to out : JAVA!PrimitiveType (
+		name <- e.name,
+		package <- e.namespace
+	)
+}
+
+rule A2F {
+	from e : UML!Attribute
+	to out : JAVA!Field (
+		name <- e.name,
+		isStatic <- e.isStatic(),
+		isPublic <- e.isPublic(),
+		isFinal <- e.isFinal(),
+		owner <- e.owner,
+		type <- e.type
+	)
+}
+
+rule O2M {
+	from e : UML!Operation
+	to out : JAVA!Method (
+		name <- e.name,
+		isStatic <- e.isStatic(),
+		isPublic <- e.isPublic(),
+		owner <- e.owner,
+		type <- e.parameter->select(x|x.kind=#pdk_return)->asSequence()->first().type,
+		parameters <- e.parameter->select(x|x.kind<>#pdk_return)->asSequence()
+	)
+}
+
+rule P2F {
+	from e : UML!Parameter (e.kind <> #pdk_return)
+	to out : JAVA!FeatureParameter (
+		name <- e.name,
+		type <- e.type
+	)
+}
+

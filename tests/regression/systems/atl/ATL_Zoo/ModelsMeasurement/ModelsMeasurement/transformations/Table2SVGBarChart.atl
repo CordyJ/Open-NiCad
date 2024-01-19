@@ -1,0 +1,271 @@
+--@atlcompiler	atl2006
+--@name			Table2SVGBarChart
+--@version		2.0
+--@domains		Table, SVG, bar chart
+--@authors		Eric Vepa (evepa <at> sodius.com) for SODIUS (www.sodius.com)
+--@date			2007/08/28
+--@description	This transformation is used to transform generic tables into SVG bar charts. A bar chart is produced for a table with values (excluding the header row and the first cell of each other row).
+
+module Table2SVGBarChart; -- Module Template
+create OUT : SVG from IN : Table;
+
+uses TableHelpers;
+
+--@comments ===================================
+--@comments Values used for the SVG rendering =
+--@comments ===================================
+
+--@begin attribute helper scale
+--@comments The 'scale' value used in the SVG document.
+helper def : scale : Real = 1;
+--@end attribute helper scale
+
+--@begin attribute helper barPattern
+--@comments The 'fill' value used by bar in the SVG document.
+helper def : barPattern : String = 'grey';
+--@end attribute helper barPattern
+
+--@begin attribute helper barMaxWidth
+--@comments Returns the max width of a bar of the chart.
+helper def : barMaxWidth : Real = 150 * thisModule.scale;
+--@end attribute helper barWidth
+
+--@begin attribute helper fill
+--@comments The 'fill' value used in the SVG document.
+helper def : fill : String = 'none';
+--@end attribute helper fill
+
+--@begin attribute helper stroke
+--@comments The 'stroke' value used in the SVG document.
+helper def : stroke : String = 'black';
+--@end attribute helper stroke
+
+--@begin attribute helper margin
+--@comments The margin value used in the SVG document between charts.
+helper def : margin : Real = 10;
+--@end attribute helper margin
+
+--@begin attribute helper titleFontSize
+--@comments The 'fontSize' value used for titles in the SVG document.
+helper def : titleFontSize : Real =  thisModule.barMaxWidth * 0.1;
+--@end attribute helper titleFontSize
+
+--@begin attribute helper fontSize
+--@comments The 'fontSize' value used in the SVG document.
+helper def : fontSize : Real = thisModule.titleFontSize * 0.85;
+--@end attribute helper fontSize
+
+--@begin attribute helper barHeight
+--@comments Returns height of a bar of the chart.
+helper def : barHeight : Real = thisModule.fontSize;
+--@end attribute helper barHeight
+
+--@begin attribute helper svgFile
+--@comments The unique SVG file element.
+helper def : svgFile : SVG!SvgFile = OclUndefined;
+--@end attribute helper svgFile
+
+
+--@comments ===============================
+--@comments Helpers for the SVG rendering =
+--@comments ===============================
+
+--@begin helper maxSizeName
+--@comments Returns the maximal size for a name of a table.
+helper context Table!Table
+def : maxSizeName() : Real =
+	(self.rows.seqWithoutFirst()->iterate(r; maxSize : Integer = 0|
+		if r.cells->first().content->size() > maxSize
+			then r.cells->first().content->size()
+			else maxSize
+		endif) + 7) * (thisModule.fontSize / 2);
+--@end helper maxSizeName
+
+--@begin helper boundingBoxWidth
+--@comments Returns the width of the bouding box computed for a table.
+helper context Table!Table
+def : boundingBoxWidth() : Real =
+	self.maxSizeName() + thisModule.barMaxWidth +
+		thisModule.barHeight + 3 * thisModule.margin;
+--@end helper boundingBoxWidth
+
+--@begin helper boundingBoxHeight
+--@comments Returns the height of the bouding box computed for a table.
+helper context Table!Table
+def : boundingBoxHeight() : Real =
+	(self.rows->size() - 1) * thisModule.barHeight +
+		2 * thisModule.margin +	2 * thisModule.titleFontSize;
+--@end helper boundingBoxHeight
+
+--@begin attribute helper prevWidth
+--@comments The previous width of all the charts generated.
+helper def : prevWidth : Real = 0;
+--@end attribute helper prevWidth
+
+--@begin helper scaleFactor
+--@comments The scale factor for adjusting bar width for the column which index is given.
+helper context Table!Table
+def : scaleFactor(idx : Integer) : Real =	
+	let max : Real =
+		self.rows->seqWithoutFirst()->
+			iterate(r; max : Real = 0|
+				let value : Real =
+					r.cells->at(idx).realValue() in
+				value->max(max)) in
+	if max = 0
+		then 1
+		else thisModule.barMaxWidth / max
+	endif;
+--@end helper scaleFactor
+
+--@begin entrypoint rule SvgFile
+--@comments Creates the SVG file with one svg tag.
+entrypoint rule SvgFile() {
+	using {
+		width : Real =
+			thisModule.allValidTables->iterate(table; sum : Integer = 0|
+				sum + (table.boundingBoxWidth() +
+					thisModule.margin) *
+						(table.rows->first().cells->size() - 1)) +
+							thisModule.margin;
+		height : Real =
+			thisModule.allValidTables->iterate(table; max : Integer = 0|
+				table.boundingBoxHeight()->max(max)) +
+					2 * thisModule.titleFontSize;
+	}
+	to
+		svgFile : SVG!SvgFile (
+			tag <- svg
+		),
+		svg : SVG!Svg (
+			size <- svgSize,
+			namespace <- 'http://www.w3.org/2000/svg',
+			version <- '1.1'
+		),
+		svgSize : SVG!Dimension (
+			width <- width,
+			height <- height
+		)
+	do {					
+		if (thisModule.allValidTables->size() > 0) {
+			thisModule.svgFile <- svgFile;
+			thisModule.svgFile.tag.viewBox <- '0 0 ' +
+				width.toString() + ' ' + height.toString();			
+					
+			for (table in thisModule.allValidTables) {
+				for (cell in table.rows->first().cells->seqWithoutFirst()) {
+					thisModule.Table2BarChart(table,
+						table.rows->first().cells->indexOf(cell));
+				}
+			}
+		}
+	}
+}
+--@end entrypoint rule SvgFile
+
+--@begin lazy rule Table2BarChart
+--@comments Creates a bar chart (SVG group) for the metric which column index is given.
+lazy rule Table2BarChart {
+	from
+		table : Table!Table,
+		idx : Integer
+	to
+		g : SVG!G (
+			attribute <- boundingBoxTransl,
+			groupContent <- boundingBox,
+			groupContent <- textTitle,
+			groupContent <- axis,
+			groupContent <- table.rows->seqWithoutFirst()->
+				iterate(row; acc : Sequence(SVG!G) = Sequence{}|
+					acc->including(thisModule.Row2Bar(row,
+						table.rows->indexOf(row),idx,table.scaleFactor(idx))))
+		),
+		boundingBox : SVG!Rect (
+			size <- boundingBoxSize,
+			position <- boundingBoxCoord,
+			fill <- thisModule.fill,
+			stroke <- thisModule.stroke
+		),
+		boundingBoxSize : SVG!Dimension (
+			width <- table.boundingBoxWidth(),
+			height <- table.boundingBoxHeight()
+		),
+		boundingBoxCoord : SVG!AbsoluteCoord (
+			x <- 0 - table.maxSizeName() - 2 * thisModule.margin,
+			y <- 0 - thisModule.margin
+		),
+		boundingBoxTransl : SVG!Translate (
+			tx <- thisModule.prevWidth + 3 * thisModule.margin +
+				table.maxSizeName(),
+			ty <- 2 * thisModule.margin
+		),
+		textTitle : SVG!Text (
+			position <- textTitleCoord,
+			stroke <- thisModule.stroke,
+			fontSize <- thisModule.titleFontSize.toString(),
+			--@comments text-anchor value strored in lengthAdjust attribute
+			lengthAdjust <- 'middle',
+			content <- table.rows->first().cells->at(idx).content
+		),
+		textTitleCoord : SVG!AbsoluteCoord (
+			x <- boundingBoxSize.width / 2 - table.maxSizeName(),
+			y <- boundingBoxSize.height - 2 * thisModule.margin
+		),
+		axis : SVG!Path (
+			d <- 'M' + (thisModule.barMaxWidth +
+				thisModule.barHeight).toString() + ',0 H0 V' +
+					(table.rows->size() *
+						thisModule.barHeight).toString() + ',0 z',
+			fill <- thisModule.fill,
+			stroke <- thisModule.stroke
+		)	
+	do {
+		thisModule.prevWidth <- thisModule.prevWidth +
+			thisModule.margin +	boundingBoxSize.width;
+		thisModule.svgFile.tag.children <- g;
+	}
+}
+--@end lazy rule Table2BarChart
+
+--@begin lazy rule Row2Bar
+--@comments Creates a bar (SVG line) for the cell at index given and with a scale factor.
+lazy rule Row2Bar {
+	from
+		row : Table!Row,
+		rowIdx : Integer,
+		cellIdx : Integer,
+		scaleFactor : Real
+	to
+		g : SVG!G (
+			groupContent <- bar,
+			groupContent <- textCaption
+		),
+		bar : SVG!Rect (
+			size <- barSize,
+			position <- barCoord,
+			fill <- thisModule.barPattern,
+			stroke <- thisModule.stroke
+		),
+		barSize : SVG!Dimension (
+			width <- row.cells->at(cellIdx).realValue() * scaleFactor,
+			height <- thisModule.barHeight
+		),
+		barCoord : SVG!AbsoluteCoord (
+			x <- 0,
+			y <- (rowIdx - 2) * barSize.height 
+		),
+		textCaption : SVG!Text (
+			position <- textCaptionCoord,
+			stroke <- thisModule.stroke,
+			fontSize <- thisModule.fontSize.toString(),
+			--@comments text-anchor value strored in lengthAdjust attribute
+			lengthAdjust <- 'end',
+			content <- row.cells->first().content +
+				' (' +	row.cells->at(cellIdx).value() + ')'
+		),
+		textCaptionCoord : SVG!AbsoluteCoord (
+			x <- 0 - thisModule.margin,
+			y <- barCoord.y + barSize.height
+		)
+}
+--@end lazy rule Row2Bar

@@ -1,0 +1,333 @@
+-- @atlcompiler atl2006
+
+-- ******************************************************************************
+-- Copyright (c) 2009 INRIA. 
+-- All rights reserved. This program and the accompanying materials 
+-- are made available under the terms of the Eclipse Public License v1.0 
+-- which accompanies this distribution, and is available at
+-- http://www.eclipse.org/legal/epl-v10.html
+-- 
+-- Contributors: 
+-- 	INRIA - Initial implementation
+--  
+-- ******************************************************************************
+
+--@author Mathias Kleiner (mathias.kleiner@inria.fr)
+
+module Syntax2SimpleSBVR; -- Module Template
+create  OUT : SimpleSBVR from IN : Syntax;
+
+-- =============================================================================
+-- Syntax2UML
+-- Version 1.0
+-- Release date : 16/03/2009
+-- Author : Mathias Kleiner (mathias.kleiner@inria.fr)
+-- =============================================================================
+	
+-- NounConcepts
+
+abstract rule NounConcept2NounConcept {
+	
+	from
+		s : Syntax!NounConcept
+	to
+		t : SimpleSBVR!NounConcept (
+		
+			objectName <- s.objectName
+		)
+		
+}
+-- ObjectTypes
+
+rule ObjectType2ObjectType extends NounConcept2NounConcept {
+	
+	from
+		s : Syntax!ObjectType
+	to
+		t : SimpleSBVR!ObjectType (
+		
+		)
+		
+}
+
+-- DataTypes
+
+abstract rule DataType2DataType extends NounConcept2NounConcept {
+	
+	from
+		s : Syntax!DataType
+	to
+		t : SimpleSBVR!DataType (
+		
+		)
+}
+
+rule NonNegativeInteger2NonNegativeInteger extends DataType2DataType {
+	
+	from
+		s : Syntax!NonNegativeInteger
+	to
+		t : SimpleSBVR!NonNegativeInteger (
+		
+			value <- s.expressedBy->first().word.baseDesignation.objectName.toInteger()
+		)
+}
+
+rule NonEmptyString2NonEmptyString extends DataType2DataType {
+	
+	from
+		s : Syntax!NonEmptyString
+	to
+		t : SimpleSBVR!NonEmptyString (
+		
+			value <- s.expressedBy->first().word.baseDesignation.objectName.toString()
+		)
+}
+
+-- Designations
+
+rule Designation2Designation {
+	
+	from
+		s : Syntax!Designation
+	to
+		t : SimpleSBVR!Designation (
+			
+			objectName <- s.objectName,
+			text <- text,
+			meaning <- s.meaning
+		),
+		text : SimpleSBVR!Text (
+			
+			objectName <- s.objectName,
+			value <- s.objectName
+		)
+}
+
+-- FactTypes
+
+abstract rule FactType2FactType {
+	
+	from
+		s : Syntax!FactType
+	to
+		t : SimpleSBVR!FactType (
+		
+			objectName <- s.objectName
+		)
+}
+
+-- BinaryFactTypes
+
+abstract rule BinaryFactType2BinaryFactType extends FactType2FactType {
+	
+	from
+		s : Syntax!BinaryFactType
+	to
+		t : SimpleSBVR!BinaryFactType (
+			
+			role1 <- role1,
+			role2 <- role2
+		),
+		role1 : SimpleSBVR!FactTypeRole (
+			
+			nounConcept <- if(s.expressedBy->first().passive = true) then s.expressedBy->first().directObject.head.expresses
+						   else s.expressedBy->first().subject.head.expresses
+						   endif
+		),
+		role2 : SimpleSBVR!FactTypeRole (
+			
+			nounConcept <- if(s.expressedBy->first().passive = true) then s.expressedBy->first().subject.head.expresses
+						   else s.expressedBy->first().directObject.head.expresses
+						   endif
+		)
+}
+
+-- AssociativeFactType
+
+rule AssociativeFactType2AssociativeFactType extends BinaryFactType2BinaryFactType {
+	
+	from
+		s : Syntax!AssociativeFactType
+	to
+		t : SimpleSBVR!AssociativeFactType ()
+}
+
+-- IsPropertyOfFactType
+
+rule IsPropertyOfFactType2IsPropertyOfFactType extends BinaryFactType2BinaryFactType {
+	
+	from
+		s : Syntax!IsPropertyOfFactType
+	to
+		t : SimpleSBVR!IsPropertyOfFactType ()
+}
+
+-- CategorizationFactType
+
+rule CategorizationFactType2CategorizationFactType extends BinaryFactType2BinaryFactType {
+	
+	from
+		s : Syntax!CategorizationFactType
+	to
+		t : SimpleSBVR!CategorizationFactType ()
+}
+
+-- ObjectificationFactType
+
+rule ObjectificationFactType2ObjectificationFactType extends BinaryFactType2BinaryFactType {
+	
+	from
+		s : Syntax!ObjectificationFactType
+	to
+		t : SimpleSBVR!ObjectificationFactType ()
+}
+
+-- AtomicFormulations
+-- AFs are created upon necessity, we thus use a unique lazy rule
+
+unique lazy abstract rule FactType2AtomicFormulation {
+	
+	from
+		s : Syntax!FactType
+	to
+		t : SimpleSBVR!AtomicFormulation (
+			
+			isBasedOn <- s
+		)
+}
+
+-- BinaryAtomicFormulations have 2 identified role bindings
+
+unique lazy rule BinaryFactType2BinaryAtomicFormulation extends FactType2AtomicFormulation {
+	
+	from
+		s : Syntax!BinaryFactType
+	to
+		t : SimpleSBVR!BinaryAtomicFormulation (
+			
+			--isBasedOn <- s,
+			roleBinding1 <- roleBinding1,
+			roleBinding2 <- roleBinding2
+		),
+		roleBinding1 : SimpleSBVR!RoleBinding (
+			
+			bindsTo <- if(s.expressedBy->first().passive = true) then thisModule.NounConcept2Variable(s.expressedBy->first().directObject.head.expresses)
+					   else thisModule.NounConcept2Variable(s.expressedBy->first().subject.head.expresses)
+					   endif,
+			isOf <- thisModule.resolveTemp(s,'role1'),
+			occursIn <- t
+		),
+		roleBinding2 : SimpleSBVR!RoleBinding (
+			
+			bindsTo <- if(s.expressedBy->first().passive = true) then thisModule.NounConcept2Variable(s.expressedBy->first().subject.head.expresses)
+					   else thisModule.NounConcept2Variable(s.expressedBy->first().directObject.head.expresses)
+					   endif,
+			isOf <- thisModule.resolveTemp(s,'role2'),
+			occursIn <- t
+		)
+}
+
+-- Variables
+-- Variables are created upon necessity, we thus use a unique lazy rule
+
+unique lazy rule NounConcept2Variable {
+	
+	from
+		s : Syntax!NounConcept
+	to
+		t : SimpleSBVR!Variable (
+			
+			rangesOver <- s
+		)
+}
+-- Quantifications
+-- The quantification scopes over an AtomicFormulation, which can be retrieved through the VP of the Quantifier's sentence
+-- The quantification introduces a variable that is shared with the AtomicFormulation. We can retrieve it with the corresponding unique lazy rule
+	
+abstract rule Quantification2Quantification {
+	
+	from
+		s : Syntax!Quantification
+	to
+		t : SimpleSBVR!Quantification (
+			
+			introducedVariable <- thisModule.NounConcept2Variable(s.expressedBy->first().object.expresses),
+			scopesOver <- thisModule.FactType2AtomicFormulation(s.expressedBy->first().np.getVPFromNP().expresses)
+		)
+}
+
+-- Concrete rules for each quantification type
+
+rule UniversalQuantification2UniversalQuantification extends Quantification2Quantification {
+	
+	from
+		s : Syntax!UniversalQuantification
+		
+	to
+		t : SimpleSBVR!UniversalQuantification (
+		
+		)
+}
+
+rule AtMostNQuantification2AtMostNQuantification extends Quantification2Quantification {
+	
+	from
+		s : Syntax!AtMostNQuantification
+		
+	to
+		t : SimpleSBVR!AtMostNQuantification (
+		
+			maxCardinality <- s.expressedBy->first().value.expresses
+		)
+}
+
+rule AtLeastNQuantification2AtLeastNQuantification extends Quantification2Quantification {
+	
+	from
+		s : Syntax!AtLeastNQuantification
+		
+	to
+		t : SimpleSBVR!AtLeastNQuantification (
+		
+			minCardinality <- s.expressedBy->first().value.expresses
+		)
+}
+
+rule ExactlyNQuantification2ExactlyNQuantification extends Quantification2Quantification {
+	
+	from
+		s : Syntax!ExactlyNQuantification
+		
+	to
+		t : SimpleSBVR!ExactlyNQuantification (
+		
+			cardinality <- s.expressedBy->first().value.expresses
+		)
+}
+
+-- Helpers
+
+-- This helper retrieves the VP from a NP that is either its subject or its directObject
+
+helper context Syntax!NPCat def : getVPFromNP() : Syntax!VPCat =
+	
+	if(self.isSubject()) then self.isSubjectOf
+	else 
+		if (self.isDirectObject()) then self.isDirectObjectOf
+		else OclUndefined
+		endif
+	endif;
+
+-- Those helpers indicate whether a NP is a subject or a directObject
+
+helper context Syntax!NPCat def : isSubject() : Boolean = 
+	if(not self.isSubjectOf.oclIsUndefined()) then true
+	else false
+	endif;
+
+helper context Syntax!NPCat def : isDirectObject() : Boolean = 
+	if(not self.isDirectObjectOf.oclIsUndefined()) then true
+	else false
+	endif;
+	

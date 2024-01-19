@@ -1,0 +1,150 @@
+-- @name		Introducing Primary key
+-- @version		1.0
+-- @domains		Catalogue of Model Transformations
+-- @authors		Baudry Julien (jul.baudry<at>gmail.com)
+-- @date		2006/08/02
+-- @description	The purpose of this transformation is to introduce a primary key in each class
+-- @see http://www.dcs.kcl.ac.uk/staff/kcl/tcat.pdf   
+-- @see section 1.6, page 6
+-- @see author of article : K. Lano
+
+module PrimaryKey; 
+create OUT : KM3target from IN : KM3;
+
+----@begin rule Metamodel
+--entrypoint rule Metamodel() {
+--	do {
+--		KM3!Metamodel.allInstances().debug('metamodels');
+--		KM3!Package.allInstances().debug('packages');
+--		KM3!Class.allInstances().debug('classes');
+--		KM3!DataType.allInstances().debug('datatypes');
+--	}
+--}
+----@end rule Metamodel
+
+--@begin rule Metamodel
+rule Metamodel {
+	from
+		inputMm:KM3!Metamodel
+	to
+		outputMm:KM3target!Metamodel (
+			location <- inputMm.location,
+			contents <- inputMm.contents
+		)
+}
+--@end rule Metamodel
+
+--@begin rule Package
+rule Package {
+	from
+		inputPkg:KM3!Package
+	to
+		outputPkg:KM3target!Package (
+			name <- inputPkg.name,
+			contents <- inputPkg.contents
+		)
+}
+--@end rule Package
+
+--@begin rule Class
+rule Class {
+	from
+		inputA:KM3!Class 
+	to
+		outputA:KM3target!Class (
+			name <- inputA.name,
+			isAbstract <- inputA.isAbstract,
+			structuralFeatures <- inputA.structuralFeatures,
+			supertypes <- inputA.supertypes
+		),
+
+		key:KM3target!Attribute (
+			name <- inputA.name.toLower()+'Key',
+			isOrdered <- false,
+			isUnique <- false,
+			location <- '',
+			lower <- 1,
+			upper <- 1,
+			type <- KM3!DataType.allInstances()->select(a|a.name = 'Integer')->first(),
+			owner <- outputA
+		)
+}
+--@end rule Class
+
+--@begin rule attribute 
+rule attribute {
+	from
+		inputAtt:KM3!Attribute 
+	to
+		outputAtt:KM3target!Attribute(
+			name <- inputAtt.name,
+			isOrdered <- inputAtt.isOrdered,
+			isUnique <- inputAtt.isUnique,
+			location <- inputAtt.location,
+			lower <- inputAtt.lower,
+			upper <- inputAtt.upper,
+			type <- inputAtt.type,
+			owner <- inputAtt.owner
+			
+		)
+}
+--@end rule attribute
+
+--@begin rule DataType
+rule DataType {
+from
+		inputData:KM3!DataType
+	to
+		outputData:KM3target!DataType(
+			name <- inputData.name,
+			location <- inputData.location
+		)
+}
+--@end rule DataType
+
+--@begin reference
+rule reference {
+	from
+		inputRef:KM3!Reference 
+	to
+		outputRef:KM3target!Reference (
+			name <- inputRef.name,
+			isOrdered <- inputRef.isOrdered,
+			isUnique <- inputRef.isUnique,
+			location <- inputRef.location,
+			lower <- inputRef.lower,
+			upper <- inputRef.upper,
+			type <- inputRef.type,
+			owner <- inputRef.owner,
+			opposite <- inputRef.opposite
+		)
+}
+--@end reference
+
+--@begin enumeration
+rule enumeration {
+	from
+		inputEnum:KM3!Enumeration 
+	to
+		outputEnum:KM3target!Enumeration (
+			location <- inputEnum.location,
+			name  <- inputEnum.name,
+			package  <- inputEnum.package
+		)
+
+}
+--@end enumeration
+
+--@begin literal
+rule literal {
+	from
+		inputEnum:KM3!EnumLiteral
+	to
+		outputEnum:KM3target!EnumLiteral (
+			location <- inputEnum.location,
+			name  <- inputEnum.name,
+			enum  <- inputEnum.enum
+		)
+
+}
+--@end literal

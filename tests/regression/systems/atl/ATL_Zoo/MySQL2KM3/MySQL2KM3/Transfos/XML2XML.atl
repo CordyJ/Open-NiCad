@@ -1,0 +1,105 @@
+-- @path XML=/MySQL2KM3/Metamodels/XML.ecore
+-- @path MySQL=/MySQL2KM3/Metamodels/MySQL.ecore
+-- @path KM3=/MySQL2KM3/Metamodels/KM3.ecore
+
+module XML2XML;
+create OUT : XML from IN : XML;
+
+
+-------------------------------------------------------------------------------
+-- HELPERS --------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- HELPER:	toKeep
+-- Returns a boolean stating whether the contextual Node has to be copied from
+-- the input to the output XML model.
+-- CONTEXT:	XML!Node
+-- OUT:		Boolean
+helper context XML!Node def: toKeep : Boolean =
+	if self.oclIsTypeOf(XML!Text)
+	then
+		self.value.trim() <> ''
+	else
+		false
+	endif;
+
+
+-------------------------------------------------------------------------------
+-- RULES ----------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- Rule 'Attribute'
+-- Copies the input Attribute to the out one.
+rule Attribute {
+	from
+        i : XML!Attribute
+	to
+		o : XML!Attribute (
+			startLine <- i.startLine,
+			endLine <- i.endLine,
+			startColumn <- i.startColumn,
+			endColumn <- i.endColumn,
+			name <- i.name,
+			value <- i.value,
+			parent <- i.parent
+	)
+}
+
+-- Rule 'Text'
+-- Copies a Text that is not composed of only blank characters.
+rule Text {
+	from
+        i : XML!Text (
+			i.value.trim() <> ''
+		)
+	to
+		o : XML!Text (
+			startLine <- i.startLine,
+			endLine <- i.endLine,
+			startColumn <- i.startColumn,
+			endColumn <- i.endColumn,
+			name <- i.name,
+			value <- i.value,
+			parent <- i.parent
+	)
+}
+
+-- Rule 'Element'
+-- Copies the input Element to the out one. Children of the generated Element
+-- are filtered using the toKeep helper.
+rule Element {
+	from
+        i : XML!Element (
+        	i.oclIsTypeOf(XML!Element)
+        )
+	to
+		o : XML!Element (
+			startLine <- i.startLine,
+			endLine <- i.endLine,
+			startColumn <- i.startColumn,
+			endColumn <- i.endColumn,
+			name <- i.name,
+			value <- i.value,
+			parent <- i.parent,
+			children <- i.children->select(e | e.toKeep)
+	)
+}
+
+-- Rule 'Root'
+-- Copies the input Root to the out one. Children of the generated Element
+-- are filtered using the toKeep helper.
+rule Root {
+	from
+        i : XML!Root
+	to
+		o : XML!Root (
+			startLine <- i.startLine,
+			endLine <- i.endLine,
+			startColumn <- i.startColumn,
+			endColumn <- i.endColumn,
+			name <- i.name,
+			value <- i.value,
+			parent <- i.parent,
+			children <- i.children->select(e | e.toKeep)
+	)
+}

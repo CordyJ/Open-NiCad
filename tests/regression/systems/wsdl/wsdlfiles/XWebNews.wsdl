@@ -1,0 +1,321 @@
+<definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:tns="urn:ws-xwebservices-com:XWebNews:News:v2" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:import0="urn:ws-xwebservices-com:XWebNews:News:v2:Messages" targetNamespace="urn:ws-xwebservices-com:XWebNews:News:v2" name="XWebNews" xmlns="http://schemas.xmlsoap.org/wsdl/">
+  <types>
+    <xsd:schema>
+      <xsd:import schemaLocation="XWebNews.xsd" namespace="urn:ws-xwebservices-com:XWebNews:News:v2:Messages" />
+    </xsd:schema>
+  </types>
+  <message name="loadArticleIn">
+    <part name="messagePart" element="import0:LoadArticleRequest" />
+  </message>
+  <message name="loadArticleOut">
+    <part name="messagePart" element="import0:LoadArticleResponse" />
+  </message>
+  <message name="loadArticlesIn">
+    <part name="messagePart" element="import0:LoadArticlesRequest" />
+  </message>
+  <message name="loadArticlesOut">
+    <part name="messagePart" element="import0:LoadArticlesResponse" />
+  </message>
+  <message name="loadArticlesBySourceIn">
+    <part name="messagePart" element="import0:LoadArticlesBySourceRequest" />
+  </message>
+  <message name="loadArticlesBySourceOut">
+    <part name="messagePart" element="import0:LoadArticlesBySourceResponse" />
+  </message>
+  <message name="loadArticlesByDateRangeIn">
+    <part name="messagePart" element="import0:LoadArticlesByDateRangeRequest" />
+  </message>
+  <message name="loadArticlesByDateRangeOut">
+    <part name="messagePart" element="import0:LoadArticlesByDateRangeResponse" />
+  </message>
+  <message name="loadArticlesBySourceAndDateRangeIn">
+    <part name="messagePart" element="import0:LoadArticlesBySourceAndDateRangeRequest" />
+  </message>
+  <message name="loadArticlesBySourceAndDateRangeOut">
+    <part name="messagePart" element="import0:LoadArticlesBySourceAndDateRangeResponse" />
+  </message>
+  <message name="loadArticlesPagedIn">
+    <part name="messagePart" element="import0:LoadArticlesPagedRequest" />
+  </message>
+  <message name="loadArticlesPagedOut">
+    <part name="messagePart" element="import0:LoadArticlesPagedResponse" />
+  </message>
+  <message name="loadArticlesBySourcePagedIn">
+    <part name="messagePart" element="import0:LoadArticlesBySourcePagedRequest" />
+  </message>
+  <message name="loadArticlesBySourcePagedOut">
+    <part name="messagePart" element="import0:LoadArticlesBySourcePagedResponse" />
+  </message>
+  <message name="loadArticlesByDateRangePagedIn">
+    <part name="messagePart" element="import0:LoadArticlesByDateRangePagedRequest" />
+  </message>
+  <message name="loadArticlesByDateRangePagedOut">
+    <part name="messagePart" element="import0:LoadArticlesByDateRangePagedResponse" />
+  </message>
+  <message name="loadArticlesBySourceAndDateRangePagedIn">
+    <part name="messagePart" element="import0:LoadArticlesBySourceAndDateRangePagedRequest" />
+  </message>
+  <message name="loadArticlesBySourceAndDateRangePagedOut">
+    <part name="messagePart" element="import0:LoadArticlesBySourceAndDateRangePagedResponse" />
+  </message>
+  <message name="getNewArticleIDIn">
+    <part name="messagePart" element="import0:GetNewArticleIDRequest" />
+  </message>
+  <message name="getNewArticleIDOut">
+    <part name="messagePart" element="import0:GetNewArticleIDResponse" />
+  </message>
+  <message name="addArticleIn">
+    <part name="messagePart" element="import0:AddArticleRequest" />
+  </message>
+  <message name="addArticleOut">
+    <part name="messagePart" element="import0:AddArticleResponse" />
+  </message>
+  <message name="updateArticleIn">
+    <part name="messagePart" element="import0:UpdateArticleRequest" />
+  </message>
+  <message name="updateArticleOut">
+    <part name="messagePart" element="import0:UpdateArticleResponse" />
+  </message>
+  <message name="deleteArticleIn">
+    <part name="messagePart" element="import0:DeleteArticleRequest" />
+  </message>
+  <message name="deleteArticleOut">
+    <part name="messagePart" element="import0:DeleteArticleResponse" />
+  </message>
+  <message name="personalizeIn">
+    <part name="messagePart" element="import0:PersonalizeRequest" />
+  </message>
+  <message name="personalizeOut">
+    <part name="messagePart" element="import0:PersonalizeResponse" />
+  </message>
+  <message name="loadPersonalizedArticlesIn">
+    <part name="messagePart" element="import0:LoadPersonalizedArticlesRequest" />
+  </message>
+  <message name="loadPersonalizedArticlesOut">
+    <part name="messagePart" element="import0:LoadPersonalizedArticlesResponse" />
+  </message>
+  <message name="processArticleIn">
+    <part name="messagePart" element="import0:ProcessArticleRequest" />
+  </message>
+  <message name="processArticleOut">
+    <part name="messagePart" element="import0:ProcessArticleResponse" />
+  </message>
+  <portType name="XWebNewsInterface">
+    <operation name="LoadArticle">
+      <input message="tns:loadArticleIn" />
+      <output message="tns:loadArticleOut" />
+    </operation>
+    <operation name="LoadArticles">
+      <input message="tns:loadArticlesIn" />
+      <output message="tns:loadArticlesOut" />
+    </operation>
+    <operation name="LoadArticlesBySource">
+      <input message="tns:loadArticlesBySourceIn" />
+      <output message="tns:loadArticlesBySourceOut" />
+    </operation>
+    <operation name="LoadArticlesByDateRange">
+      <input message="tns:loadArticlesByDateRangeIn" />
+      <output message="tns:loadArticlesByDateRangeOut" />
+    </operation>
+    <operation name="LoadArticlesBySourceAndDateRange">
+      <input message="tns:loadArticlesBySourceAndDateRangeIn" />
+      <output message="tns:loadArticlesBySourceAndDateRangeOut" />
+    </operation>
+    <operation name="LoadArticlesPaged">
+      <input message="tns:loadArticlesPagedIn" />
+      <output message="tns:loadArticlesPagedOut" />
+    </operation>
+    <operation name="LoadArticlesBySourcePaged">
+      <input message="tns:loadArticlesBySourcePagedIn" />
+      <output message="tns:loadArticlesBySourcePagedOut" />
+    </operation>
+    <operation name="LoadArticlesByDateRangePaged">
+      <input message="tns:loadArticlesByDateRangePagedIn" />
+      <output message="tns:loadArticlesByDateRangePagedOut" />
+    </operation>
+    <operation name="LoadArticlesBySourceAndDateRangePaged">
+      <input message="tns:loadArticlesBySourceAndDateRangePagedIn" />
+      <output message="tns:loadArticlesBySourceAndDateRangePagedOut" />
+    </operation>
+    <operation name="GetNewArticleID">
+      <input message="tns:getNewArticleIDIn" />
+      <output message="tns:getNewArticleIDOut" />
+    </operation>
+    <operation name="AddArticle">
+      <input message="tns:addArticleIn" />
+      <output message="tns:addArticleOut" />
+    </operation>
+    <operation name="UpdateArticle">
+      <input message="tns:updateArticleIn" />
+      <output message="tns:updateArticleOut" />
+    </operation>
+    <operation name="DeleteArticle">
+      <input message="tns:deleteArticleIn" />
+      <output message="tns:deleteArticleOut" />
+    </operation>
+    <operation name="Personalize">
+      <input message="tns:personalizeIn" />
+      <output message="tns:personalizeOut" />
+    </operation>
+    <operation name="LoadPersonalizedArticles">
+      <input message="tns:loadPersonalizedArticlesIn" />
+      <output message="tns:loadPersonalizedArticlesOut" />
+    </operation>
+    <operation name="ProcessArticle">
+      <input message="tns:processArticleIn" />
+      <output message="tns:processArticleOut" />
+    </operation>
+  </portType>
+  <binding name="XWebNews" type="tns:XWebNewsInterface">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document" />
+    <operation name="LoadArticle">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebNews:News:v2:loadArticleIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="LoadArticles">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebNews:News:v2:loadArticlesIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="LoadArticlesBySource">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebNews:News:v2:loadArticlesBySourceIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="LoadArticlesByDateRange">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebNews:News:v2:loadArticlesByDateRangeIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="LoadArticlesBySourceAndDateRange">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebNews:News:v2:loadArticlesBySourceAndDateRangeIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="LoadArticlesPaged">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebNews:News:v2:loadArticlesPagedIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="LoadArticlesBySourcePaged">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebNews:News:v2:loadArticlesBySourcePagedIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="LoadArticlesByDateRangePaged">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebNews:News:v2:loadArticlesByDateRangePagedIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="LoadArticlesBySourceAndDateRangePaged">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebNews:News:v2:loadArticlesBySourceAndDateRangePagedIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="GetNewArticleID">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebNews:News:v2:getNewArticleIDIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="AddArticle">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebNews:News:v2:addArticleIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="UpdateArticle">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebNews:News:v2:updateArticleIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="DeleteArticle">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebNews:News:v2:deleteArticleIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="Personalize">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebNews:News:v2:personalizeIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="LoadPersonalizedArticles">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebNews:News:v2:loadPersonalizedArticlesIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="ProcessArticle">
+      <soap:operation soapAction="urn:ws-xwebservices-com:XWebNews:News:v2:processArticleIn" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+  </binding>
+  <service name="News">
+    <port name="News" binding="tns:XWebNews">
+      <soap:address location="http://ws.xwebservices.com/XWebNews/V2/News.asmx" />
+    </port>
+  </service>
+</definitions>

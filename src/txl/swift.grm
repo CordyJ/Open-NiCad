@@ -1,0 +1,2283 @@
+% TXL grammar for the Swift programming language
+% J.R. Cordy, Queen's University
+% Version 1.0, 4 May 2020
+
+% Copyright 2020, James R. Cordy
+
+% Permission to copy and use this grammar for any purpose whatsoever is hereby granted, PROVIDED:
+%  (1) This copyright notice is preserved in any work including, using, or derived from this grammar;
+%  (2) Proper acknowledgement of use, including authorship, is cited in any work including, using, 
+%      or derived from this grammar.
+
+% This grammar was derived from:
+% The Swift Programming Language, Swift 5.2
+% Copyright 2020 Apple Inc. 
+% https://docs.swift.org/swift-book/ReferenceManual/zzSummaryOfTheGrammar.html
+
+define program
+	[top_level_declaration]
+end define
+
+% Comments
+
+% comment -> // comment-text line-break
+% multiline-comment -> /* multiline-comment-text */
+tokens
+	% Swift allows but ignores ASCII form-feed and page-feed characters
+	ignore	...
+	    |	""
+	    |	""
+		% Also ignore Linux executable leader lines
+	    |	"\#!/#n*"
+
+	% Swift allows for both single-line and nested multi-line comments
+	comment	"//#n*"
+	    |	"/\*[(/\*[(/\*#(\*/)*\*/)#(\*/)]*\*/)#(\*/)]*\*/"
+end tokens
+
+% Identifiers
+
+% identifier -> identifier-head identifier-characters opt
+% identifier -> ` identifier-head identifier-characters opt `
+% identifier -> implicit-parameter-name
+% identifier -> property-wrapper-projection
+% identifier-head -> Upper- or lowercase letter A through Z
+% identifier-head -> _
+% identifier-character -> Digit 0 through 9
+% identifier-character -> identifier-head
+% implicit-parameter-name -> $ decimal-digits
+% property-wrapper-projection -> $ identifier-characters
+% identifier-list -> identifier | identifier , identifier-list
+tokens
+	% Includes: European (8-bit) foreign language identifiers and some common 16-bit Greek symbols
+	% To do: 16- and 32-bit (Asian, Cyrillic, ...) foreign language identifiers
+			
+	id	"[_\aÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿŠŽ™šžŸ¡µ(α)(ε)(𝛁)(π)(℠)(ç)(С)][_\a\dÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿŠŽ™šžŸ¡µ(α)(ε)(𝛁)(π)(℠)(ç)(С)]*"
+	    |	"`[_\aÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿŠŽ™šžŸ¡µ(α)(ε)(𝛁)(π)(℠)(ç)(С)]+`?"
+	    |	"$\d\d*"
+	    |	"$[_\aÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ\dŠŽ™šžŸ¡µ(α)(ε)(𝛁)(π)(℠)(ç)(С)]+"
+	    |	"\#[\aÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿŠŽ™šžŸ¡µ(α)(ε)(𝛁)(π)(℠)(ç)(С)]+\#?"
+end tokens
+
+define identifier
+	[id]
+    |	[not 'inout] [not 'var] [not 'let] [key] 
+end define
+
+define identifier_list
+	[list identifier+]
+end define
+
+% Keywords
+keys
+	% Swift treats keywords as context-dependent, which means that most of them can also
+	% be used as identifiers in most contexts.
+	% We adapt to this in TXL by allowing almost all of them as [identifier]s,
+	% and using [not] guards in contexts where it matters that they are not. 
+
+	'associatedtype 'class 'deinit 'enum 'extension 'fileprivate 'func 'import 'init 
+	'inout 'internal 'let 'open 'operator 'private 'protocol 'public 'rethrows 'static 
+	'struct 'subscript 'typealias 'var
+	'break 'case 'continue 'default 'defer 'do 'else 'fallthrough 'for 'guard 'if 'in 
+	'repeat 'return 'switch 'where 'while
+	'as 'Any 'catch 'false 'is 'nil 'super 'self 'Self 'throw 'throws 'true 'try
+	'_
+	'#available '#colorLiteral '#column '#else '#elseif '#endif '#error '#file '#fileLiteral 
+	'#function '#if '#imageLiteral '#line '#selector '#sourceLocation '#warning
+end keys
+
+% Literals
+
+% literal -> numeric-literal | string-literal | boolean-literal | nil-literal
+define literal
+	[numeric_literal] | [string_literal] | [boolean_literal] | [nil_literal]
+end define
+
+% numeric-literal -> -opt integer-literal | -opt floating-point-literal
+define numeric_literal
+	['- ?] [integer_literal] | ['- ?] [floating_point_literal]
+end define
+
+% boolean-literal -> true | false
+define boolean_literal
+	'true | 'false
+end define
+
+% nil-literal -> nil
+define nil_literal
+	'nil
+end define
+
+% integer-literal -> binary-literal
+% integer-literal -> octal-literal
+% integer-literal -> decimal-literal
+% integer-literal -> hexadecimal-literal
+define integer_literal
+	[binary_literal] | [octal_literal] | [decimal_literal] | [hexadecimal_literal]
+end define
+
+% binary-literal -> 0b binary-digit binary-literal-characters opt
+% binary-digit -> Digit 0 or 1
+% binary-literal-character -> binary-digit | _
+% binary-literal-characters -> binary-literal-character binary-literal-characters opt
+tokens
+	binary_literal	"0b[01][_01]*"
+end tokens
+
+% octal-literal -> 0o octal-digit octal-literal-characters opt
+% octal-digit -> Digit 0 through 7
+% octal-literal-character -> octal-digit | _
+% octal-literal-characters -> octal-literal-character octal-literal-characters opt
+tokens
+	octal_literal	"0o[01234567][_01234567]*"
+end tokens
+
+% hexadecimal-literal -> 0x hexadecimal-digit hexadecimal-literal-characters opt
+% hexadecimal-digit -> Digit 0 through 9, a through f, or A through F
+% hexadecimal-literal-character -> hexadecimal-digit | _
+% hexadecimal-literal-characters -> hexadecimal-literal-character hexadecimal-literal-characters opt
+tokens
+	hexadecimal_literal	"0x[\dabcdefABCDEF][_\dabcdefABCDEF]*"
+end tokens
+
+% floating-point-literal -> decimal-literal decimal-fraction opt decimal-exponent opt
+% floating-point-literal -> hexadecimal-literal hexadecimal-fraction opt hexadecimal-exponent
+% decimal-fraction -> . decimal-literal
+% decimal-exponent -> floating-point-e sign opt decimal-literal
+% hexadecimal-fraction -> . hexadecimal-digit hexadecimal-literal-characters opt
+% hexadecimal-exponent -> floating-point-p sign opt decimal-literal
+% floating-point-e -> e | E
+% floating-point-p -> p | P
+% sign -> + | -
+tokens
+	decimal_floating_point_literal	"\d[_\d]*(.\d[_\d]*)([eE][-+]?\d[_\d]*)?"
+				    |	"\d[_\d]*(.\d[_\d]*)?([eE][-+]?\d[_\d]*)"
+	hexadecimal_floating_point_literal	"0x[\dabcdefABCDEF][_[\dabcdefABCDEF]]*(.[\dabcdefABCDEF][_[\dabcdefABCDEF]]*)([eE][-+]?[\dabcdefABCDEF][_[\dabcdefABCDEF]]*)?"
+	    			    |	"0x[\dabcdefABCDEF][_[\dabcdefABCDEF]]*(.[\dabcdefABCDEF][_[\dabcdefABCDEF]]*)?([eE][-+]?[\dabcdefABCDEF][_[\dabcdefABCDEF]]*)"
+end tokens
+
+define floating_point_literal
+	[decimal_floating_point_literal] | [hexadecimal_floating_point_literal]
+end define
+
+% decimal-literal -> decimal-digit decimal-literal-characters opt
+% decimal-digit -> Digit 0 through 9
+% decimal-digits -> decimal-digit decimal-digits opt
+% decimal-literal-character -> decimal-digit | _
+% decimal-literal-characters -> decimal-literal-character decimal-literal-characters opt
+tokens
+	decimal_literal	"\d[_\d]*"
+end tokens
+
+% string-literal -> static-string-literal | interpolated-string-literal
+% string-literal-opening-delimiter -> extended-string-literal-delimiter opt "
+% string-literal-closing-delimiter -> " extended-string-literal-delimiter opt
+% static-string-literal -> string-literal-opening-delimiter quoted-text opt string-literal-closing-delimiter
+% static-string-literal -> multiline-string-literal-opening-delimiter multiline-quoted-text opt multiline-string-literal-closing-delimiter
+% multiline-string-literal-opening-delimiter -> extended-string-literal-delimiter """
+% multiline-string-literal-closing-delimiter -> """ extended-string-literal-delimiter
+% extended-string-literal-delimiter -> # extended-string-literal-delimiter opt
+% quoted-text -> quoted-text-item quoted-text opt
+% quoted-text-item -> escaped-character
+% quoted-text-item -> Any Unicode scalar value except ", \, U+000A, or U+000D
+% multiline-quoted-text -> multiline-quoted-text-item multiline-quoted-text opt
+% multiline-quoted-text-item -> escaped-character
+% multiline-quoted-text-item -> Any Unicode scalar value except \
+% multiline-quoted-text-item -> escaped-newline
+% interpolated-string-literal -> string-literal-opening-delimiter interpolated-text opt string-literal-closing-delimiter
+% interpolated-string-literal -> multiline-string-literal-opening-delimiter interpolated-text opt multiline-string-literal-closing-delimiter
+% interpolated-text -> interpolated-text-item interpolated-text opt
+% interpolated-text-item -> \( expression ) | quoted-text-item
+% multiline-interpolated-text -> multiline-interpolated-text-item multiline-interpolated-text opt
+% multiline-interpolated-text-item -> \( expression ) | multiline-quoted-text-item
+% escape-sequence -> \ extended-string-literal-delimiter
+% escaped-character -> escape-sequence 0 | escape-sequence \ | escape-sequence t | escape-sequence n | escape-sequence r | escape-sequence " | escape-sequence '
+% escaped-character -> escape-sequence u { unicode-scalar-digits }
+% unicode-scalar-digits -> Between one and eight hexadecimal digits
+% escaped-newline -> escape-sequence whitespace opt line-break
+tokens 
+	multiline_string_literal	% Multiline string literals can be nested, 
+					% distinguished by number of closing # marks 
+					"\"\"\"[(\\\([(\(#\)*\))#\)]*\))(\\\")#(\"\"\")]*(\"\"\")?"
+				|	"\#\"\"\"[(\\\([(\(#\)*\))#\)]*\))#(\"\"\"\#)]*(\"\"\"\#)?"
+				|	"\#\#\"\"\"[(\\\([(\(#\)*\))#\)]*\))#(\"\"\"\#\#)]*(\"\"\"\#\#)?"
+				|	"\#\#\#\"\"\"[(\\\([(\(#\)*\))#\)]*\))#(\"\"\"\#\#\#)]*(\"\"\"\#\#\#)?"
+				|	"\#\#\#\#\"\"\"[(\\\([(\(#\)*\))#\)]*\))#(\"\"\"\#\#\#\#)]*(\"\"\"\#\#\#\#)?"
+				|	"\#\#\#\#\#\"\"\"[(\\\([(\(#\)*\))#\)]*\))#(\"\"\"\#\#\#\#\#)]*(\"\"\"\#\#\#\#\#)?"
+					% Undocumented but observed #""...""# string literals
+				|	"\#\"\"[(\\\([(\(#\)*\))#\)]*\))#(\"\"\#)]*(\"\"\#)?"
+				|	"\#\#\"\"[(\\\([(\(#\)*\))#\)]*\))#(\"\"\#\#)]*(\"\"\#\#)?"
+				|	"\#\#\#\"\"[(\\\([(\(#\)*\))#\)]*\))#(\"\"\#\#\#)]*(\"\"\#\#\#)?"
+				|	"\#\#\#\#\"\"[(\\\([(\(#\)*\))#\)]*\))#(\"\"\#\#\#\#)]*(\"\"\#\#\#\#)?"
+				|	"\#\#\#\#\#\"\"[(\\\([(\(#\)*\))#\)]*\))#(\"\"\#\#\#\#\#)]*(\"\"\#\#\#\#\#)?"
+
+	simple_string_literal		% String literals can also be nested,
+					% distinguished by number of closing # marks 
+					"\"[(\\\([(\(#\)*\))#\)]*\))(\\\c)#[\\\n\"]]*\""
+				|	"\#\"[(\\\([(\(#\)*\))#\)]*\))(\\\c)#[\\\n(\"\#)]]*\"\#"
+				|	"\#\#\"[(\\\([(\(#\)*\))#\)]*\))(\\\c)#[\\\n(\"\#\#)]]*\"\#\#"
+				|	"\#\#\#\"[(\\\([(\(#\)*\))#\)]*\))(\\\c)#[\\\n(\"\#\#\#)]]*\"\#\#\#"
+				|	"\#\#\#\#\"[(\\\([(\(#\)*\))#\)]*\))(\\\c)#[\\\n(\"\#\#\#\#)]]*\"\#\#\#\#"
+				|	"\#\#\#\#\#\"[(\\\([(\(#\)*\))#\)]*\))(\\\c)#[\\\n(\"\#\#\#\#\#)]]*\"\#\#\#\#\#"
+
+	stringlit			""	% disable default TXL stringlits
+end tokens
+
+define string_literal
+	[simple_string_literal] | [multiline_string_literal]
+end define
+
+% Operators
+
+% operator -> operator-head operator-characters opt
+% operator -> dot-operator-head dot-operator-characters
+% operator-head -> / | = | - | + | ! | * | % | < | > | & | | | ^ | ~ | ?
+% operator-head -> U+00A1–U+00A7
+% operator-head -> U+00A9 or U+00AB
+% operator-head -> U+00AC or U+00AE
+% operator-head -> U+00B0–U+00B1
+% operator-head -> U+00B6, U+00BB, U+00BF, U+00D7, or U+00F7
+% operator-head -> U+2016–U+2017
+% operator-head -> U+2020–U+2027
+% operator-head -> U+2030–U+203E
+% operator-head -> U+2041–U+2053
+% operator-head -> U+2055–U+205E
+% operator-head -> U+2190–U+23FF
+% operator-head -> U+2500–U+2775
+% operator-head -> U+2794–U+2BFF
+% operator-head -> U+2E00–U+2E7F
+% operator-head -> U+3001–U+3003
+% operator-head -> U+3008–U+3020
+% operator-head -> U+3030
+% operator-character -> operator-head
+% operator-character -> U+0300–U+036F
+% operator-character -> U+1DC0–U+1DFF
+% operator-character -> U+20D0–U+20FF
+% operator-character -> U+FE00–U+FE0F
+% operator-character -> U+FE20–U+FE2F
+% operator-character -> U+E0100–U+E01EF
+% operator-characters -> operator-character operator-characters opt
+% dot-operator-head -> .
+% dot-operator-character -> . | operator-character
+% dot-operator-characters -> dot-operator-character dot-operator-characters opt
+% binary-operator -> operator
+% prefix-operator -> operator
+% postfix-operator -> operator
+tokens 
+	% Operators in Swift are really tricky, because they are context-dependent.
+	%     For example, "<<" is allowed as an operator, but cannot be scanned as a single token
+	%     in case it appears in a context like this: "func <<GenericParameter>"
+	% For this reason, this grammar handles operators as a two-stage combination of scanned 
+	% operator tokens and parsed sequences of them.
+
+	% Includes both 8-bit (e.g., "•") and 16-bit (e.g., "⊆") operator symbols.
+
+	operator_token		% 16-bit Unicode symbols (must come first)
+				% must be specified in parentheses in TXL since they are multi-byte sequences
+			|	"[(∘)(∪)(∩)(⨁)(∈)(∉)(⊂)(⊄)(⊆)(⊈)(⊃)(⊅)(⊇)(⊉)(∖)]"
+			|	"[(ꝸ)(β)(𝔹)(🇦)(🇺)(각)(•)(⨉)]"
+				% 8-bit extended ASCII symbols
+			|	"[€‚ƒ„…†‡ˆ‰‹Œ‘’“”•–—˜›œ¢£¤¥¦§¨©ª«¬®¯°±²³´¶·¸¹º»¼½¾¿]"
+				% Regular operator symbols
+			|	"[%&\*\+-/=^|\\~][%&\*+-/=^|\\~]*"
+			|	"[<>\?!]"
+
+	dot_operator_token	% Spacing for dots is different
+			|	".[.%&\*+-/=^|\\~]*"
+end tokens
+
+define operator
+	[operator_token] [SPOFF] [operator_token*] [SPON]  
+    |	[SP] [dot_operator_token] [SPOFF] [dot_or_operator_token*] [SPON] 
+end define
+
+define dot_or_operator_token
+	[dot_operator_token] | [operator_token]
+end define
+
+define prefix_operator
+	[not '=] [operator]
+end define
+
+define postfix_operator
+	[not '.] [not '=] [SPOFF] [operator] [SPON]
+end define
+
+define binary_operator
+	[not '=] [operator]
+end define
+
+% Types
+
+% type -> function-type
+% type -> array-type
+% type -> dictionary-type
+% type -> type-identifier
+% type -> tuple-type
+% type -> optional-type
+% type -> implicitly-unwrapped-optional-type
+% type -> protocol-composition-type
+% type -> opaque-type
+% type -> metatype-type
+% type -> self-type
+% type -> Any
+% type -> ( type )
+define type
+	[primary_type] [type_tail*]
+end define
+
+define primary_type
+    	[function_type]
+    |	[array_type]
+    |	[dictionary_type]
+    |	[type_identifier]
+    |	[tuple_type]
+    |	[protocol_composition_type]
+    |	[opaque_type]
+    |	[self_type]
+    |	'Any
+    |	'( [type] ')
+end define
+
+define type_tail
+    	[optional_type_tail]
+    |	[implicitly_unwrapped_optional_type_tail]
+    |	[metatype_type_tail]
+    |	[array_type_tail]
+end define
+
+% type-annotation -> : attributes opt inoutopt type
+define type_annotation
+	': [attributes?] [type_annotation_modifier?] [type]
+end define
+
+define type_annotation_modifier
+	'inout
+    |	'__owned | '__shared 	% observed
+end define
+
+% type-identifier -> type-name generic-argument-clause opt | type-name generic-argument-clause opt . type-identifier
+define type_identifier
+	[type_name] [generic_argument_clause?] [dot_type_identifier?]
+end define
+
+define dot_type_identifier
+	'. [type_identifier]
+end define
+
+% type-name -> identifier
+define type_name
+	[identifier]
+end define
+
+% tuple-type -> ( ) | ( tuple-type-element , tuple-type-element-list )
+% tuple-type-element-list -> tuple-type-element | tuple-type-element , tuple-type-element-list
+% tuple-type-element -> element-name type-annotation | type
+% element-name -> identifier
+define tuple_type
+	'( [list tuple_type_element] ')
+end define
+
+define tuple_type_element
+	[element_name] [type_annotation] [initializer?]
+    |	[type]
+end define
+
+define element_name
+    	['_ ?] [identifier]
+end define
+
+% function-type -> attributes opt function-type-argument-clause throwsopt -> type
+% function-type-argument-clause -> ( )
+% function-type-argument-clause -> ( function-type-argument-list ...opt )
+% function-type-argument-list -> function-type-argument | function-type-argument , function-type-argument-list
+% function-type-argument -> attributes opt inoutopt type | argument-label type-annotation
+% argument-label -> identifier
+define function_type
+	[attributes?] '( [list function_type_argument] ['... ?] ') ['throws ?] '-> [type]
+end define
+
+define function_type_argument
+	[attributes?] [type_annotation_modifier?] [type]
+    |	[argument_label?] 	% observed - external name?
+  	['var ?] [argument_label] [type_annotation]
+end define
+
+define argument_label
+	[identifier]
+end define
+
+% array-type -> [ type ]
+define array_type
+	'[ [type] ']
+end define
+
+define array_type_tail
+	'[ [type?] ']
+end define
+
+% dictionary-type -> [ type : type ]
+define dictionary_type
+	'[ [type] ': [type] ']
+end define
+
+% optional-type -> type ?
+define optional_type_tail
+	% [type] 
+	[SPOFF] '? [SPON]
+end define
+
+% implicitly-unwrapped-optional-type -> type !
+define implicitly_unwrapped_optional_type_tail
+	% [type] 
+	[SPOFF] '! [SPON]
+end define
+
+% protocol-composition-type -> type-identifier & protocol-composition-continuation
+% protocol-composition-continuation -> type-identifier | protocol-composition-type
+define protocol_composition_type 
+	[type_identifier] [repeat and_type_identifier]
+end define
+
+define and_type_identifier
+	'& [type_identifier]
+end define
+
+% opaque-type -> some type
+define opaque_type
+	'some [type]
+end define
+
+% metatype-type -> type . Type | type . Protocol
+define metatype_type_tail
+	% [type] 
+	'. Type  
+    |	% [type] 
+	'. 'Protocol
+end define
+
+% self-type -> Self
+define self_type
+	'Self
+end define
+
+% type-inheritance-clause -> : type-inheritance-list
+% type-inheritance-list -> type-identifier | type-identifier , type-inheritance-list
+define type_inheritance_clause
+	': [list inheritance_type+]
+    |	': ( [list inheritance_type+] ')	% observed
+end define
+
+define inheritance_type
+	[type_identifier]
+    |	[protocol_composition_type]	% observed
+end define
+
+% Expressions
+
+% expression -> try-operator opt prefix-expression binary-expressions opt
+% expression-list -> expression | expression , expression-list
+define expression
+	[try_operator?] [prefix_expression] [binary_expressions?]
+end define
+
+% Swift's reference grammar has a deep ambiguity which confuses [code_block]s and [closure]s
+% [limited_expression] and its refinements use context to resolve this ambiguity
+define limited_expression
+	[try_operator?] [limited_prefix_expression] [limited_binary_expressions?]
+end define
+
+define expression_list
+	[list expression+]
+end define
+
+% prefix-expression -> prefix-operator opt postfix-expression
+% prefix-expression -> in-out-expression
+% in-out-expression -> & identifier
+define prefix_expression
+	[prefix_operator?] [postfix_expression]
+    |	[in_out_expression]
+end define
+
+define limited_prefix_expression
+	[prefix_operator?] [limited_postfix_expression]
+    |	[in_out_expression]
+end define
+
+define in_out_expression
+	'& [identifier]
+end define
+
+% try-operator -> try | try ? | try !
+define try_operator
+	'try  [question_or_bang?] 
+end define
+
+define question_or_bang
+	[SPOFF] '? [SPON]  
+    |	[SPOFF] '! [SPON]
+end define
+
+% binary-expression -> binary-operator prefix-expression
+% binary-expression -> assignment-operator try-operator opt prefix-expression
+% binary-expression -> conditional-operator try-operator opt prefix-expression
+% binary-expression -> type-casting-operator
+% binary-expressions -> binary-expression binary-expressions opt
+define binary_expression
+	[binary_operator] [prefix_expression]
+    |	[assignment_operator] [try_operator?] [prefix_expression]
+    |	[conditional_operator] [try_operator?] [prefix_expression]
+    |	[type_casting_operator]
+end define
+
+define binary_expressions
+	[binary_expression+]
+end define
+
+define limited_binary_expression
+	[binary_operator] [limited_prefix_expression]
+    |	[assignment_operator] [try_operator?] [limited_prefix_expression]
+    |	[conditional_operator] [try_operator?] [limited_prefix_expression]
+    |	[type_casting_operator]
+end define
+
+define limited_binary_expressions
+	[limited_binary_expression+]
+end define
+
+% assignment-operator -> =
+define assignment_operator
+	'=
+end define
+
+% conditional-operator -> ? expression :
+define conditional_operator
+	[SPOFF] '? [SPON] [expression] ':
+end define
+
+% type-casting-operator -> is type
+% type-casting-operator -> as type
+% type-casting-operator -> as ? type
+% type-casting-operator -> as ! type
+define type_casting_operator
+	'is [type]  |  'as [question_or_bang?] [type]  
+end define
+
+% primary-expression -> identifier generic-argument-clause opt
+% primary-expression -> literal-expression
+% primary-expression -> self-expression
+% primary-expression -> superclass-expression
+% primary-expression -> closure-expression
+% primary-expression -> parenthesized-expression
+% primary-expression -> tuple-expression
+% primary-expression -> implicit-member-expression
+% primary-expression -> wildcard-expression
+% primary-expression -> key-path-expression
+% primary-expression -> selector-expression
+% primary-expression -> key-path-string-expression
+define primary_expression
+	[attributes?]	% observed
+	[identifier] [generic_argument_clause?]
+    |	[literal_expression]
+    |	[self_expression]
+    |	[superclass_expression]
+    |	[closure_expression]
+    |	[parenthesized_or_tuple_expression]	
+    |	[implicit_member_expression]
+    |	[wildcard_expression]
+    |	[key_path_expression]
+    |	[selector_expression]
+    |	[key_path_string_expression]
+end define
+
+define limited_primary_expression
+	% [primary_expression] without closures
+	[not '{] [primary_expression]
+end define
+
+% literal-expression -> literal
+% literal-expression -> array-literal | dictionary-literal | playground-literal
+% literal-expression -> #file | #line | #column | #function | #dsohandle
+define literal_expression
+	[literal]
+    |	[array_literal] | [dictionary_literal] | [playground_literal]
+    |	'#file | '#line | '#column | '#function | '#dsohandle
+end define
+
+% array-literal -> [ array-literal-items opt ]
+% array-literal-items -> array-literal-item ,opt | array-literal-item , array-literal-items
+% array-literal-item -> expression
+define array_literal
+	'[ [array_literal_items?] ']
+end define
+
+define array_literal_items
+    	[list array_literal_item+] [', ?]
+end define
+
+define array_literal_item
+	[expression]
+    |	[type]		% observed
+end define
+
+% dictionary-literal -> [ dictionary-literal-items ] | [ : ]
+% dictionary-literal-items -> dictionary-literal-item ,opt | dictionary-literal-item , dictionary-literal-items
+% dictionary-literal-item -> expression : expression
+define dictionary_literal
+	'[ [dictionary_literal_items] ']
+    |	'[ ': ']
+end define
+
+define dictionary_literal_items
+	[list dictionary_literal_item+] [', ?]
+end define
+
+define dictionary_literal_item
+	[expression] ': [expression]
+end define
+
+% playground-literal -> #colorLiteral ( red : expression , green : expression , blue : expression , alpha : expression )
+% playground-literal -> #fileLiteral ( resourceName : expression )
+% playground-literal -> #imageLiteral ( resourceName : expression )
+define playground_literal
+	'#colorLiteral '( 'red ': [expression] , 'green ': [expression] , 'blue ': [expression] ', 'alpha ': [expression] ')
+    |	'#fileLiteral '( 'resourceName ': [expression] ')
+    |	'#imageLiteral '( 'resourceName ': [expression] ')
+end define
+
+% self-expression -> self | self-method-expression | self-subscript-expression | self-initializer-expression
+% self-method-expression -> self . identifier
+% self-subscript-expression -> self [ function-call-argument-list ]
+% self-initializer-expression -> self . init
+define self_expression 
+	'self 
+    | 	[self_method_expression] 
+    |	[self_subscript_expression] 
+    |	[self_initializer_expression]
+end define
+
+define self_method_expression
+	'self '. [identifier]
+end define
+
+define self_subscript_expression
+	'self '[ [function_call_argument_list?] ']
+end define
+
+define self_initializer_expression
+	'self '. 'init [parameter_clause?]	% observed
+end define
+
+% superclass-expression -> superclass-method-expression | superclass-subscript-expression | superclass-initializer-expression
+% superclass-method-expression -> super . identifier
+% superclass-subscript-expression -> super [ function-call-argument-list ]
+% superclass-initializer-expression -> super . init
+define superclass_expression 
+      	[superclass_method_expression] 
+    |	[superclass_subscript_expression] 
+    |	[superclass_initializer_expression]
+end define
+
+define superclass_method_expression
+	'super '. [identifier]
+end define
+
+define superclass_subscript_expression
+	'super '[ [function_call_argument_list?] ']
+end define
+
+define superclass_initializer_expression
+	'super '. 'init [parameter_clause?]	% observed
+end define
+
+% closure-expression -> { closure-signature opt statements opt }
+% closure-signature -> capture-list opt closure-parameter-clause throwsopt function-result opt in
+% closure-signature -> capture-list in
+% closure-parameter-clause -> ( ) | ( closure-parameter-list ) | identifier-list
+% closure-parameter-list -> closure-parameter | closure-parameter , closure-parameter-list
+% closure-parameter -> closure-parameter-name type-annotation opt
+% closure-parameter -> closure-parameter-name type-annotation ...
+% closure-parameter-name -> identifier
+% capture-list -> [ capture-list-items ]
+% capture-list-items -> capture-list-item | capture-list-item , capture-list-items
+% capture-list-item -> capture-specifier opt expression
+% capture-specifier -> weak | unowned | unowned(safe) | unowned(unsafe)
+define closure_expression
+	% '{ [closure_signature?] [limited_expression] '} |  % redundant and ambiguous, but could use for better formatting
+	'{ [NL][IN] [closure_signature?] [statements?] [EX] '}
+end define
+
+define closure_signature
+	[capture_list?] [closure_parameter_clause] ['throws ?] [function_result?] 'in
+    |	[capture_list] 'in
+end define
+
+define closure_parameter_clause
+	'( [closure_parameter_list?] ')
+    |	[identifier_list]
+end define
+
+define closure_parameter_list
+	[list closure_parameter+]
+end define
+
+define closure_parameter
+	[closure_parameter_name] [type_annotation?] ['... ?]
+end define
+
+define closure_parameter_name
+	['_ ?]		% observed
+	[identifier]
+end define
+
+define capture_list
+	'[ [capture_list_items] ']
+end define
+
+define capture_list_items
+	[list capture_list_item+]
+end define
+
+define capture_list_item
+	[capture_specifier] [expression?]
+    |	[capture_specifier?] [expression]
+end define
+
+define capture_specifier
+	'weak | 'unowned | 'unowned '( 'safe ') | 'unowned '( 'unsafe ')
+end define
+
+% implicit-member-expression -> . identifier
+define implicit_member_expression
+	'. [member_name]
+end define
+
+define member_name
+	[identifier]
+end define
+
+% parenthesized-expression -> ( expression )
+% tuple-expression -> ( ) | ( tuple-element , tuple-element-list )
+% tuple-element-list -> tuple-element | tuple-element , tuple-element-list
+% tuple-element -> expression | identifier : expression
+define parenthesized_or_tuple_expression
+	'( [tuple_element_list?] ')
+end define
+
+define tuple_element_list
+	[list tuple_element+]
+    |	[operator]	% observed
+end define
+
+define tuple_element
+	[attributes?] 	% observed
+	[identifier_colon?] [expression]
+end define
+
+% wildcard-expression -> _
+define wildcard_expression
+	'_
+end define
+
+% key-path-expression -> \ type opt . key-path-components
+% key-path-components -> key-path-component | key-path-component . key-path-components
+% key-path-component -> identifier key-path-postfixes opt | key-path-postfixes
+% key-path-postfixes -> key-path-postfix key-path-postfixes opt
+% key-path-postfix -> ? | ! | self | [ function-call-argument-list ]
+define key_path_expression
+	'\ [SPOFF] [type?] '. [SPON] [key_path_components]
+    |	'\ [SPOFF] [type?] [SPON] [key_path_postfixes]	% observed
+end define
+
+define key_path_components
+	[key_path_component] [dot_key_path_component*]
+end define
+
+define dot_key_path_component
+	'. [key_path_component]
+end define
+
+define key_path_component
+	[member_name] [key_path_postfixes?]
+    |	[key_path_postfixes]
+    |	[decimal_literal]
+end define
+
+define key_path_postfixes
+	[key_path_postfix+]
+end define
+
+define key_path_postfix
+	[SPOFF] '? [SPON] | [SPOFF] '! [SPON] | 'self 
+    |	'[ [function_call_argument_list?] ']
+end define
+
+% selector-expression -> #selector ( expression )
+% selector-expression -> #selector ( getter: expression )
+% selector-expression -> #selector ( setter: expression )
+define selector_expression
+	'#selector '( [getter_setter_colon?] [expression] ')
+end define
+
+define getter_setter_colon
+	'getter ': | 'setter ':
+end define
+
+% key-path-string-expression -> #keyPath ( expression )
+define key_path_string_expression
+	'#keyPath '( [expression] ')
+end define
+
+% postfix-expression -> primary-expression
+% postfix-expression -> postfix-expression postfix-operator
+% postfix-expression -> function-call-expression
+% postfix-expression -> initializer-expression
+% postfix-expression -> explicit-member-expression
+% postfix-expression -> postfix-self-expression
+% postfix-expression -> subscript-expression
+% postfix-expression -> forced-value-expression
+% postfix-expression -> optional-chaining-expression
+define postfix_expression
+	% left recursive cases above refactored into repeated tails for TXL
+     	[primary_expression] [postfix_tail*] [trailing_closure?]
+end define
+
+% [postfix_expression] without trailing closures
+define limited_postfix_expression
+     	[limited_primary_expression] [postfix_tail*] 
+end define
+
+define postfix_tail
+    	[postfix_operator]
+    |	[function_call_expression_tail]
+    |	[initializer_expression_tail]
+    |	[explicit_member_expression_tail]
+    |	[postfix_self_expression_tail]
+    |	[subscript_expression_tail]
+    |	[forced_value_expression_tail]
+    |	[optional_chaining_expression_tail]
+end define
+
+% function-call-expression -> postfix-expression function-call-argument-clause
+% function-call-expression -> postfix-expression function-call-argument-clause opt trailing-closure
+% function-call-argument-clause -> ( ) | ( function-call-argument-list )
+% function-call-argument-list -> function-call-argument | function-call-argument , function-call-argument-list
+% function-call-argument -> expression | identifier : expression
+% function-call-argument -> operator | identifier : operator
+% trailing-closure -> closure-expression
+define function_call_expression_tail
+	[function_call_argument_clause]
+	% [trailing_closure?] handled in [postfix_expression]
+end define
+
+define function_call_argument_clause
+	'( [function_call_argument_list?] ')
+end define
+
+define function_call_argument_list
+	[list function_call_argument+]
+end define
+
+define function_call_argument
+	[identifier_colon?] [expression_or_operator]
+    |	[identifier_colon+]	% observed
+end define
+
+define identifier_colon
+    	[identifier] ': 
+    |	'_	% observed
+end define
+
+define expression_or_operator
+    	[expression] | [operator]
+end define
+
+define trailing_closure
+	[closure_expression] [postfix_tail*] 
+	[trailing_closure?] 	% observed
+end define
+
+% initializer-expression -> postfix-expression . init
+% initializer-expression -> postfix-expression . init ( argument-names )
+define initializer_expression_tail
+	'. 'init [paren_argument_names?]
+end define
+
+define paren_argument_names
+	'( [argument_names] ')
+end define
+
+% explicit-member-expression -> postfix-expression . decimal-digits
+% explicit-member-expression -> postfix-expression . identifier generic-argument-clause opt
+% explicit-member-expression -> postfix-expression . identifier ( argument-names )
+% argument-names -> argument-name argument-names opt
+% argument-name -> identifier :
+define explicit_member_expression_tail
+	'. [decimal_literal]
+    |	'. [decimal_floating_point_literal]	% observed
+    |	'. [member_name] [generic_argument_clause?]
+    |	'. [member_name] '( [argument_names] ')
+end define
+
+define argument_names
+	[argument_name+]
+end define
+
+define argument_name
+	[identifier] ':
+end define
+
+% postfix-self-expression -> postfix-expression . self
+define postfix_self_expression_tail
+	'. 'self
+end define
+
+% subscript-expression -> postfix-expression [ function-call-argument-list ]
+define subscript_expression_tail
+	'[ [function_call_argument_list?] ']
+end define
+
+% forced-value-expression -> postfix-expression !
+define forced_value_expression_tail
+	[SPOFF] '! [SPON]
+end define
+
+% optional-chaining-expression -> postfix-expression ?
+define optional_chaining_expression_tail
+	[SPOFF] '? [SPON]
+end define
+
+% Statements
+
+% statement -> expression ;opt
+% statement -> declaration ;opt
+% statement -> loop-statement ;opt
+% statement -> branch-statement ;opt
+% statement -> labeled-statement ;opt
+% statement -> control-transfer-statement ;opt
+% statement -> defer-statement ;opt
+% statement -> do-statement ;opt
+% statement -> compiler-control-statement
+% statements -> statement statements opt
+define statement
+    	[declaration] [semi]
+    |	[not statement_key] [not declaration_key] [expression] [semi]
+    |	[loop_statement] [semi]
+    |	[branch_statement] [semi]
+    |	[labeled_statement] [semi]
+    |	[control_transfer_statement] [semi]
+    |	[defer_statement] [semi]
+    |	[do_statement] [semi]
+    |	[compiler_control_statement] [semi]
+end define
+
+define semi
+	['; ?] [NL]
+end define
+
+define statements
+	[statement+]
+end define
+
+define statement_key
+	'for | 'while | 'repeat
+    |	'if | 'else | 'guard | 'switch | 'case | 'default
+    |	'break | 'continue | 'fallthrough | 'return | 'throw
+    |	'defer | 'do | 'catch
+    | 	'#if | '#elseif | '#else | '#endif
+    | 	'#sourceLocation 
+    |	'#error | '#warning
+end define
+
+define declaration_key
+    	'import
+    |	'let | 'var | 'typealias | 'func
+    |	'indirect | 'enum | 'struct | 'class | 'protocol
+    |	'init |	'deinit
+    |	'extension | 'subscript | 'operator | 'precedencegroup
+    |	'private | 'public 
+end define
+
+% loop-statement -> for-in-statement
+% loop-statement -> while-statement
+% loop-statement -> repeat-while-statement
+define loop_statement
+	[for_in_statement]
+    |	[while_statement]
+    |	[_repeat_while_statement]
+end define
+
+% for-in-statement -> for caseopt pattern in expression where-clause opt code-block
+define for_in_statement
+	'for ['case ?] [pattern] 'in [limited_expression] [where_clause?] [code_block]
+end define
+
+% while-statement -> while condition-list code-block
+% condition-list -> condition | condition , condition-list
+% condition -> expression | availability-condition | case-condition | optional-binding-condition
+% case-condition -> case pattern initializer
+% optional-binding-condition -> let pattern initializer | var pattern initializer
+define while_statement
+	'while [condition_list] [code_block]
+end define
+
+define condition_list
+	[list condition+]
+end define
+
+define condition
+	[limited_expression] | [availability_condition] | [case_condition] | [optional_binding_condition]
+    |	'{ [expression] '} [function_call_expression_tail]
+end define
+
+define case_condition
+	'case [pattern] [limited_initializer]
+end define
+
+define optional_binding_condition
+	'let [pattern] [limited_initializer] 
+    |	'var [pattern] [limited_initializer]
+end define
+
+% repeat-while-statement -> repeat code-block while expression
+define _repeat_while_statement
+	'repeat [code_block] 'while [limited_expression]
+end define
+
+% branch-statement -> if-statement
+% branch-statement -> guard-statement
+% branch-statement -> switch-statement
+define branch_statement
+	[if_statement] | [guard_statement] | [switch_statement]
+end define
+
+% if-statement -> if condition-list code-block else-clause opt
+% else-clause -> else code-block | else if-statement
+define if_statement
+	'if [condition_list] [code_block] [else_clause?]
+end define
+
+define else_clause
+	'else [code_block]
+    |	'else [if_statement]
+end define
+
+% guard-statement -> guard condition-list else code-block
+define guard_statement
+	'guard [condition_list] 'else [code_block]
+end define
+
+% switch-statement -> switch expression { switch-cases opt }
+% switch-cases -> switch-case switch-cases opt
+% switch-case -> case-label statements
+% switch-case -> default-label statements
+% switch-case -> conditional-switch-case
+% case-label -> attributes opt case case-item-list :
+% case-item-list -> pattern where-clause opt | pattern where-clause opt , case-item-list
+% default-label -> attributes opt default :
+% where-clause -> where where-expression
+% where-expression -> expression
+% conditional-switch-case -> switch-if-directive-clause switch-elseif-directive-clauses opt switch-else-directive-clause opt endif-directive
+% switch-if-directive-clause -> if-directive compilation-condition switch-cases opt
+% switch-elseif-directive-clauses -> elseif-directive-clause switch-elseif-directive-clauses opt
+% switch-elseif-directive-clause -> elseif-directive compilation-condition switch-cases opt
+% switch-else-directive-clause -> else-directive switch-cases opt
+define switch_statement
+	'switch [limited_expression] '{ [NL][IN] [switch_cases?] [EX] '}
+end define
+
+define switch_cases
+	[switch_case+]
+end define
+
+define switch_case
+	[case_label] [NL][IN] [statements?] [EX]
+    |	[default_label] [NL][IN] [statements?] [EX]
+    |	[conditional_switch_case]
+end define
+
+define case_label
+	[attributes?] 'case [case_item_list] ':
+end define
+
+define case_item_list
+	[list case_item+]
+end define
+
+define case_item
+	[pattern] [where_clause?]
+end define
+
+define default_label
+	[attributes?] 'default ':
+end define
+
+define where_clause
+	'where [where_expression]
+end define
+
+define where_expression
+	[limited_expression]
+end define
+
+define conditional_switch_case
+	[switch_if_directive_clause] 
+    	[switch_elseif_directive_clauses?] 
+	[switch_else_directive_clause?] 
+	[endif_directive] [NL]
+end define
+
+define switch_if_directive_clause
+	[if_directive] [compilation_condition] [NL][IN] [switch_cases?] [EX]
+end define
+
+define switch_elseif_directive_clauses
+	[switch_elseif_directive_clause] [switch_elseif_directive_clauses?]
+end define
+
+define switch_elseif_directive_clause
+	[elseif_directive] [compilation_condition] [NL][IN] [switch_cases?] [EX]
+end define
+
+define switch_else_directive_clause 
+	[else_directive] [NL][IN] [switch_cases?] [EX]
+end define
+
+% labeled-statement -> statement-label loop-statement
+% labeled-statement -> statement-label if-statement
+% labeled-statement -> statement-label switch-statement
+% labeled-statement -> statement-label do-statement
+% statement-label -> label-name :
+% label-name -> identifier
+define labeled_statement
+	[statement_label] [labelable_statement]
+end define
+
+define labelable_statement
+	[loop_statement] | [if_statement] | [switch_statement] | [do_statement]
+end define
+
+define statement_label
+	[label_name] ':
+end define
+
+define label_name
+	[identifier]
+end define
+
+% control-transfer-statement -> break-statement
+% control-transfer-statement -> continue-statement
+% control-transfer-statement -> fallthrough-statement
+% control-transfer-statement -> return-statement
+% control-transfer-statement -> throw-statement
+define control_transfer_statement
+	[break_statement] | [continue_statement] | [fallthrough_statement] | [return_statement] | [throw_statement]
+end define
+
+% break-statement -> break label-name opt
+define break_statement
+	'break [label_name?]
+end define
+
+% continue-statement -> continue label-name opt
+define continue_statement
+	'continue [label_name?]
+end define
+
+% fallthrough-statement -> fallthrough
+define fallthrough_statement
+	'fallthrough
+end define
+
+% return-statement -> return expression opt
+define return_statement
+	'return [expression?]
+end define
+
+% throw-statement -> throw expression
+define throw_statement
+	'throw [expression]
+end define
+
+% defer-statement -> defer code-block
+define defer_statement
+	'defer [code_block]
+end define
+
+% do-statement -> do code-block catch-clauses opt
+% catch-clauses -> catch-clause catch-clauses opt
+% catch-clause -> catch pattern opt where-clause opt code-block
+define do_statement
+	'do [code_block] [catch_clauses?]
+end define
+
+define catch_clauses
+	[catch_clause+]
+end define
+
+define catch_clause
+	'catch [catch_pattern_list?] [code_block]
+end define
+
+define catch_pattern_list
+	[list catch_pattern+]
+end define
+
+define catch_pattern
+	[pattern] [where_clause?]
+    |	[where_clause]
+end define
+
+% Compiler Control Directives
+
+% compiler-control-statement -> conditional-compilation-block
+% compiler-control-statement -> line-control-statement
+% compiler-control-statement -> diagnostic-statement
+define compiler_control_statement
+    	[conditional_compilation_block]
+    |	[line_control_statement]
+    |	[diagnostic_statement]
+end define
+
+% conditional-compilation-block -> if-directive-clause elseif-directive-clauses opt else-directive-clause opt endif-directive
+% if-directive-clause -> if-directive compilation-condition statements opt
+% elseif-directive-clauses -> elseif-directive-clause elseif-directive-clauses opt
+% elseif-directive-clause -> elseif-directive compilation-condition statements opt
+% else-directive-clause -> else-directive statements opt
+% if-directive -> #if
+% elseif-directive -> #elseif
+% else-directive -> #else
+% endif-directive -> #endif
+% compilation-condition -> platform-condition
+% compilation-condition -> identifier
+% compilation-condition -> boolean-literal
+% compilation-condition -> ( compilation-condition )
+% compilation-condition -> ! compilation-condition
+% compilation-condition -> compilation-condition && compilation-condition
+% compilation-condition -> compilation-condition || compilation-condition
+% platform-condition -> os ( operating-system )
+% platform-condition -> arch ( architecture )
+% platform-condition -> swift ( >= swift-version ) | swift ( < swift-version )
+% platform-condition -> compiler ( >= swift-version ) | compiler ( < swift-version )
+% platform-condition -> canImport ( module-name )
+% platform-condition -> targetEnvironment ( environment )
+% operating-system -> macOS | iOS | watchOS | tvOS
+% architecture -> i386 | x86_64 | arm | arm64
+% swift-version -> decimal-digits swift-version-continuation opt
+% swift-version-continuation -> . decimal-digits swift-version-continuation opt
+% module-name -> identifier
+% environment -> simulator | macCatalyst
+define conditional_compilation_block  
+	[if_directive_clause] 
+	[elseif_directive_clauses?] 
+	[else_directive_clause?] 
+	[endif_directive]
+end define
+
+define if_directive_clause  
+	[if_directive] [compilation_condition] [IN][NL] [conditional_statements?] [EX]
+end define
+
+define elseif_directive_clauses  
+	[elseif_directive_clause] [elseif_directive_clauses?]
+end define
+
+define elseif_directive_clause  
+	[elseif_directive] [compilation_condition] [IN][NL] [conditional_statements?] [EX]
+end define
+
+define else_directive_clause  
+	[else_directive] [IN][NL] [conditional_statements?] [EX]
+end define
+
+define conditional_statements
+	[conditional_statement*]
+end define
+
+define conditional_statement
+	[statement]
+    |	[union_style_enum_member]
+    |	[raw_value_style_enum_member]
+end define
+
+define if_directive  
+	'#if
+end define
+
+define elseif_directive  
+	'#elseif
+end define
+
+define else_directive  
+	'#else
+end define
+
+define endif_directive  
+	'#endif
+end define
+
+define compilation_condition  
+	[platform_condition]
+    |	[identifier]
+    |	[boolean_literal]
+    |	'( [compilation_condition] ')
+    |	[SPOFF] '! [SPON] [compilation_condition]
+    |	[compilation_condition] '&& [compilation_condition]
+    |	[compilation_condition] '|| [compilation_condition]
+end define
+
+define platform_condition  
+	'os '( [operating_system] ')
+    |	'arch '( [architecture] ')
+    |	'swift '( '>= [swift_version] ') | swift '( '< [swift_version] ')
+    |	'compiler '( '>= [swift_version] ') | compiler '( '< [swift_version] ')
+    |	'canImport '( [module_name] ')
+    |	'targetEnvironment '( [environment] ')
+    |	'_runtime '( [runtime] ')
+end define
+
+define operating_system  
+	[id] 	% 'macOS | 'iOS | 'watchOS | 'tvOS
+end define
+
+define architecture  
+	[id] 	% 'i386 | 'x86_64 | 'arm | 'arm64
+end define
+
+define runtime  
+	[id] 	% '_ObjC
+end define
+
+define swift_version  
+	[decimal_floating_point_literal]
+end define
+
+define module_name  
+	[identifier]
+end define
+
+define environment  
+	'simulator | 'macCatalyst
+end define
+
+% line-control-statement -> #sourceLocation ( file: file-name , line: line-number )
+% line-control-statement -> #sourceLocation ( )
+% line-number -> A decimal integer greater than zero
+% file-name -> static-string-literal
+define line_control_statement
+	'#sourceLocation '( [file_and_line?] ')
+end define
+
+define file_and_line
+	'file ': [file_name] ', 'line ': [line_number]
+end define
+
+define line_number
+	[decimal_literal]
+end define
+
+define file_name
+	[string_literal]
+end define
+
+% diagnostic-statement -> #error ( diagnostic-message )
+% diagnostic-statement -> #warning ( diagnostic-message )
+% diagnostic-message -> static-string-literal
+define diagnostic_statement
+	'#error '( [diagnostic_message] ')
+    |	'#warning '( [diagnostic_message] ')
+end define
+
+define diagnostic_message
+	[string_literal]
+end define
+
+% availability-condition -> #available ( availability-arguments )
+% availability-arguments -> availability-argument | availability-argument , availability-arguments
+% availability-argument -> platform-name platform-version
+% availability-argument -> *
+% platform-name -> iOS | iOSApplicationExtension
+% platform-name -> macOS | macOSApplicationExtension
+% platform-name -> watchOS
+% platform-name -> tvOS
+% platform-version -> decimal-digits
+% platform-version -> decimal-digits . decimal-digits
+% platform-version -> decimal-digits . decimal-digits . decimal-digits
+define availability_condition
+	'#available '( [availability_arguments] ')
+end define
+
+define availability_arguments
+	[list availability_argument+]
+end define
+
+define availability_argument
+	[platform_name] [platform_version]
+    |	'*
+end define
+
+define platform_name
+	[id]	% 'iOS | 'iOSApplicationExtension | 'macOS | 'macOSApplicationExtension
+    		% | 'watchOS | 'tvOS | 'OSX
+end define
+
+define platform_version
+	[decimal_literal] | [decimal_floating_point_literal] [dot_decimal_literal?]
+end define
+
+define dot_decimal_literal
+	'. [decimal_literal]
+end define
+
+% Declarations
+
+% declaration -> import-declaration
+% declaration -> constant-declaration
+% declaration -> variable-declaration
+% declaration -> typealias-declaration
+% declaration -> function-declaration
+% declaration -> enum-declaration
+% declaration -> struct-declaration
+% declaration -> class-declaration
+% declaration -> protocol-declaration
+% declaration -> initializer-declaration
+% declaration -> deinitializer-declaration
+% declaration -> extension-declaration
+% declaration -> subscript-declaration
+% declaration -> operator-declaration
+% declaration -> precedence-group-declaration
+% declarations -> declaration declarations opt
+
+define declaration
+    	[import_declaration]
+    |	[constant_declaration]
+    |	[variable_declaration]
+    |	[typealias_declaration]
+    |	[function_declaration]
+    |	[enum_declaration]
+    |	[struct_declaration]
+    |	[class_declaration]
+    |	[protocol_declaration]
+    |	[initializer_declaration]
+    |	[deinitializer_declaration]
+    |	[extension_declaration]
+    |	[subscript_declaration]
+    |	[operator_declaration]
+    |	[precedence_group_declaration]
+	% generalize to subsume protocol members
+    |	[protocol_associated_type_declaration]
+end define
+
+define declarations
+	[declaration+]
+end define
+
+% top-level-declaration -> statements opt
+define top_level_declaration
+	[statements?]
+end define
+
+% code-block -> { statements opt }
+define code_block
+	'{ [NL][IN] [statements?] [EX] '}
+end define
+
+% import-declaration -> attributes opt import import-kind opt import-path
+% import-kind -> typealias | struct | class | enum | protocol | let | var | func
+% import-path -> import-path-identifier | import-path-identifier . import-path
+% import-path-identifier -> identifier | operator
+define import_declaration
+	[attributes?] 'import [import_kind?] [import_path]
+end define
+
+define import_kind
+	'typealias | 'struct | 'class | 'enum | 'protocol | 'let | 'var | 'func
+end define
+
+define import_path
+	[import_path_identifier] [dot_import_path?]
+end define
+
+define dot_import_path
+	'. [import_path]
+end define
+
+define import_path_identifier
+	[identifier] | [operator]
+end define
+
+% constant-declaration -> attributes opt declaration-modifiers opt let pattern-initializer-list
+% pattern-initializer-list -> pattern-initializer | pattern-initializer , pattern-initializer-list
+% pattern-initializer -> pattern initializer opt
+% initializer -> = expression
+define constant_declaration
+	[attributes?] [declaration_modifiers?] 'let [pattern_initializer_list]
+end define
+
+define pattern_initializer_list
+	[list pattern_initializer+]
+end define
+
+define pattern_initializer
+	[pattern] [initializer?]
+end define
+
+define initializer
+	'= [expression]
+end define
+
+define limited_initializer
+	'= [limited_expression]
+end define
+
+% variable-declaration -> variable-declaration-head pattern-initializer-list
+% variable-declaration -> variable-declaration-head variable-name type-annotation code-block
+% variable-declaration -> variable-declaration-head variable-name type-annotation getter-setter-block
+% variable-declaration -> variable-declaration-head variable-name type-annotation getter-setter-keyword-block
+% variable-declaration -> variable-declaration-head variable-name initializer willSet-didSet-block
+% variable-declaration -> variable-declaration-head variable-name type-annotation initializer opt willSet-didSet-block
+% variable-declaration-head -> attributes opt declaration-modifiers opt var
+% variable-name -> identifier
+define variable_declaration
+	[variable_declaration_head] [pattern_initializer_list]
+    |	[variable_declaration_head] [variable_name] [variable_declaration_tail]
+end define
+
+define variable_declaration_head
+	[attributes?] [declaration_modifiers?] 'var
+end define
+
+define variable_declaration_tail
+	[type_annotation] [initializer?] [variable_block]
+    |	[initializer] [variable_block]
+end define
+
+define variable_block
+	[getter_setter_block] | [getter_setter_keyword_block] | [willSet_didSet_block]
+    |	[code_block]
+end define
+
+define variable_name
+	[identifier]
+end define
+
+% getter-setter-block -> code-block
+% getter-setter-block -> { getter-clause setter-clause opt }
+% getter-setter-block -> { setter-clause getter-clause }
+% getter-clause -> attributes opt mutation-modifier opt get code-block
+% setter-clause -> attributes opt mutation-modifier opt set setter-name opt code-block
+% setter-name -> ( identifier )
+define getter_setter_block
+	% [code_block] alone already covered above
+	'{ [NL][IN] [getter_setter_clause] [getter_setter_clause?] [EX] '}
+end define
+
+define getter_setter_clause
+	[getter_clause] [semi] | [setter_clause] [semi]
+end define
+
+define getter_clause
+	[attributes?] [mutation_modifier?] 'get [code_block]
+end define
+
+define setter_clause
+	[attributes?] [mutation_modifier?] 'set [setter_name?] [code_block]
+end define
+
+define setter_name
+	'( [identifier] ')
+end define
+
+% getter-setter-keyword-block -> { getter-keyword-clause setter-keyword-clause opt }
+% getter-setter-keyword-block -> { setter-keyword-clause getter-keyword-clause }
+% getter-keyword-clause -> attributes opt mutation-modifier opt get
+% setter-keyword-clause -> attributes opt mutation-modifier opt set
+define getter_setter_keyword_block
+	'{ [IN] [getter_setter_keyword_clause] [getter_setter_keyword_clause?] [EX] '}
+end define
+
+define getter_setter_keyword_clause
+	[getter_keyword_clause] | [setter_keyword_clause]
+end define
+
+define getter_keyword_clause
+	[attributes?] [mutation_modifier?] 'get 
+end define
+
+define setter_keyword_clause
+	[attributes?] [mutation_modifier?] 'set 
+end define
+
+% willSet-didSet-block -> { willSet-clause didSet-clause opt }
+% willSet-didSet-block -> { didSet-clause willSet-clause opt }
+% willSet-clause -> attributes opt willSet setter-name opt code-block
+% didSet-clause -> attributes opt didSet setter-name opt code-block
+define willSet_didSet_block
+	'{ [NL][IN] [willSet_didSet_clause] [willSet_didSet_clause?] [EX] '}
+end define
+
+define willSet_didSet_clause
+	[willSet_clause] [semi] | [didSet_clause] [semi]
+end define
+
+define willSet_clause
+	[attributes?] 'willSet [setter_name?] [code_block]
+end define
+
+define didSet_clause
+	[attributes?] 'didSet [setter_name?] [code_block]
+end define
+
+% typealias-declaration -> attributes opt access-level-modifier opt typealias typealias-name generic-parameter-clause opt typealias-assignment
+% typealias-name -> identifier
+% typealias-assignment -> = type
+define typealias_declaration
+	[attributes?] [access_level_modifier?] 'typealias [typealias_name] [generic_parameter_clause?] [typealias_assignment]
+	    [generic_where_clause?]
+end define
+
+define typealias_name
+	[identifier]
+end define
+
+define typealias_assignment
+	'= [type] [and_type_identifier*]
+end define
+
+% function-declaration -> function-head function-name generic-parameter-clause opt function-signature generic-where-clause opt function-body opt
+% function-head -> attributes opt declaration-modifiers opt func
+% function-name -> identifier | operator
+% function-signature -> parameter-clause throwsopt function-result opt
+% function-signature -> parameter-clause rethrows function-result opt
+% function-result -> -> attributes opt type
+% function-body -> code-block
+define function_declaration
+	[NL] [function_header]
+	     [function_body?]
+end define
+
+define function_header
+	[function_head] [function_name] [generic_parameter_clause?] [function_signature] [generic_where_clause?] 
+end define
+
+define function_head
+	[attributes?] [declaration_modifiers?] 'func
+end define
+
+define function_name
+	[identifier] | [operator]
+end define
+
+define function_signature
+	[parameter_clause] [throws_or_rethrows?] [function_result?]
+end define
+
+define function_result
+	'-> [attributes?] [type]
+end define
+
+define function_body
+	[code_block]
+end define
+
+% parameter-clause -> ( ) | ( parameter-list )
+% parameter-list -> parameter | parameter , parameter-list
+% parameter -> external-parameter-name opt local-parameter-name type-annotation default-argument-clause opt
+% parameter -> external-parameter-name opt local-parameter-name type-annotation
+% parameter -> external-parameter-name opt local-parameter-name type-annotation ...
+% external-parameter-name -> identifier
+% local-parameter-name -> identifier
+% default-argument-clause -> = expression
+define parameter_clause
+	'( [parameter_list?] ')
+end define
+
+define parameter_list
+	[list parameter+]
+end define
+
+define parameter
+	[attributes?]	% observed
+	[external_parameter_name?] [local_parameter_name] [type_annotation] [default_argument_clause?] ['... ?]
+end define
+
+define external_parameter_name
+	[identifier]
+end define
+
+define local_parameter_name
+	[identifier] 
+end define
+
+define default_argument_clause
+	'= [expression]
+end define
+
+% enum-declaration -> attributes opt access-level-modifier opt union-style-enum
+% enum-declaration -> attributes opt access-level-modifier opt raw-value-style-enum
+define enum_declaration
+	[attributes?] [access_level_modifier?] [union_style_enum_or_raw_value_style_enum]
+end define
+
+define union_style_enum_or_raw_value_style_enum
+    	[union_style_enum] | [raw_value_style_enum]
+end define
+
+% union-style-enum -> indirectopt enum enum-name generic-parameter-clause opt type-inheritance-clause opt generic-where-clause opt { union-style-enum-members opt }
+% union-style-enum-members -> union-style-enum-member union-style-enum-members opt
+% union-style-enum-member -> declaration | union-style-enum-case-clause | compiler-control-statement
+% union-style-enum-case-clause -> attributes opt indirectopt case union-style-enum-case-list
+% union-style-enum-case-list -> union-style-enum-case | union-style-enum-case , union-style-enum-case-list
+% union-style-enum-case -> enum-case-name tuple-type opt
+% enum-name -> identifier
+% enum-case-name -> identifier
+define union_style_enum
+	['indirect ?] 'enum [enum_name] [generic_parameter_clause?] [type_inheritance_clause?] [generic_where_clause?] 
+	    '{ [NL][IN] [union_style_enum_members?] [EX] '}
+end define
+
+define union_style_enum_members
+	[union_style_enum_member+]
+end define
+
+define union_style_enum_member
+	[declaration] [semi] | [union_style_enum_case_clause] [semi] | [compiler_control_statement] [semi]
+end define
+
+define union_style_enum_case_clause
+	[attributes?] ['indirect ?] 'case [union_style_enum_case_list]
+end define
+
+define union_style_enum_case_list
+	[list union_style_enum_case+]
+end define
+
+define union_style_enum_case
+	[enum_case_name] [tuple_type?]
+end define
+
+define enum_name
+	[identifier]
+end define
+
+define enum_case_name
+	[identifier]
+end define
+
+% raw-value-style-enum -> enum enum-name generic-parameter-clause opt type-inheritance-clause generic-where-clause opt { raw-value-style-enum-members }
+% raw-value-style-enum-members -> raw-value-style-enum-member raw-value-style-enum-members opt
+% raw-value-style-enum-member -> declaration | raw-value-style-enum-case-clause | compiler-control-statement
+% raw-value-style-enum-case-clause -> attributes opt case raw-value-style-enum-case-list
+% raw-value-style-enum-case-list -> raw-value-style-enum-case | raw-value-style-enum-case , raw-value-style-enum-case-list
+% raw-value-style-enum-case -> enum-case-name raw-value-assignment opt
+% raw-value-assignment -> = raw-value-literal
+% raw-value-literal -> numeric-literal | static-string-literal | boolean-literal
+define raw_value_style_enum
+	['indirect ?] 'enum [enum_name] [generic_parameter_clause?] [type_inheritance_clause?] [generic_where_clause?] 
+	    '{ [NL][IN] [raw_value_style_enum_members?] [EX] '}
+end define
+
+define raw_value_style_enum_members
+	[raw_value_style_enum_member+]
+end define
+
+define raw_value_style_enum_member
+	[declaration] [semi] | [raw_value_style_enum_case_clause] [semi] | [compiler_control_statement] [semi]
+end define
+
+define raw_value_style_enum_case_clause
+	[attributes?] 'case [raw_value_style_enum_case_list]
+end define
+
+define raw_value_style_enum_case_list
+	[list raw_value_style_enum_case+]
+end define
+
+define raw_value_style_enum_case
+	[enum_case_name] [raw_value_assignment?]
+end define
+
+define raw_value_assignment
+	'= [raw_value_literal]
+end define
+
+define raw_value_literal
+	[numeric_literal] | [string_literal] | [boolean_literal]
+end define
+
+% struct-declaration -> attributes opt access-level-modifier opt struct struct-name generic-parameter-clause opt type-inheritance-clause opt generic-where-clause opt struct-body
+% struct-name -> identifier
+% struct-body -> { struct-members opt }
+% struct-members -> struct-member struct-members opt
+% struct-member -> declaration | compiler-control-statement
+define struct_declaration
+	[attributes?] [access_level_modifier?] 'struct [struct_name] [generic_parameter_clause?] [type_inheritance_clause?]
+	    [generic_where_clause?] [struct_body]
+end define
+
+define struct_name
+	[identifier]
+end define
+
+define struct_body
+	'{ [NL][IN] [struct_members?] [EX] '}
+end define
+
+define struct_members
+	[struct_member+]
+end define
+
+define struct_member
+	[declaration] [semi] | [compiler_control_statement] [semi]
+end define
+
+% class-declaration -> attributes opt access-level-modifier opt finalopt class class-name generic-parameter-clause opt type-inheritance-clause opt generic-where-clause opt class-body
+% class-declaration -> attributes opt final access-level-modifier opt class class-name generic-parameter-clause opt type-inheritance-clause opt generic-where-clause opt class-body
+% class-name -> identifier
+% class-body -> { class-members opt }
+% class-members -> class-member class-members opt
+% class-member -> declaration | compiler-control-statement
+define class_declaration
+	[NL] [attributes?] ['final ?]	% observed
+	    [access_level_modifier?] ['final ?] 'class [class_name] [generic_parameter_clause?] 
+	    [type_inheritance_clause?] [generic_where_clause?] [class_body]
+end define
+
+define class_name
+	[identifier]
+end define
+
+define class_body
+	'{ [NL][IN] [class_members?] [EX] '}
+end define
+
+define class_members
+	[class_member+]
+end define
+
+define class_member
+	[declaration] [semi] | [compiler_control_statement] [semi]
+end define
+
+% protocol-declaration -> attributes opt access-level-modifier opt protocol protocol-name type-inheritance-clause opt generic-where-clause opt protocol-body
+% protocol-name -> identifier
+% protocol-body -> { protocol-members opt }
+% protocol-members -> protocol-member protocol-members opt
+% protocol-member -> protocol-member-declaration | compiler-control-statement
+% protocol-member-declaration -> protocol-property-declaration
+% protocol-member-declaration -> protocol-method-declaration
+% protocol-member-declaration -> protocol-initializer-declaration
+% protocol-member-declaration -> protocol-subscript-declaration
+% protocol-member-declaration -> protocol-associated-type-declaration
+% protocol-member-declaration -> typealias-declaration
+
+define protocol_declaration
+	[attributes?] [access_level_modifier?] 'protocol [protocol_name] [type_inheritance_clause?]
+	    [generic_where_clause?] [protocol_body]
+end define
+
+define protocol_name
+	[identifier]
+end define
+
+define protocol_body
+	'{ [NL][IN] [protocol_members?] [EX] '}
+end define
+
+define protocol_members
+	[protocol_member+]
+end define
+
+define protocol_member
+	% generalized and merged with [declaration]
+	[declaration] [semi] | [compiler_control_statement] [semi]
+end define
+
+% protocol-property-declaration -> variable-declaration-head variable-name type-annotation getter-setter-keyword-block
+% protocol-method-declaration -> function-head function-name generic-parameter-clause opt function-signature generic-where-clause opt
+% protocol-initializer-declaration -> initializer-head generic-parameter-clause opt parameter-clause throwsopt generic-where-clause opt
+% protocol-initializer-declaration -> initializer-head generic-parameter-clause opt parameter-clause rethrows generic-where-clause opt
+% protocol-subscript-declaration -> subscript-head subscript-result generic-where-clause opt getter-setter-keyword-block
+% protocol-associated-type-declaration -> attributes opt access-level-modifier opt associatedtype typealias-name type-inheritance-clause opt typealias-assignment opt generic-where-clause opt
+
+define protocol_associated_type_declaration
+	[attributes?] [declaration_modifiers?] [access_level_modifier?] 'associatedtype [typealias_name] 
+	    [type_inheritance_clause?] [typealias_assignment?] [generic_where_clause?]
+end define
+
+% initializer-declaration -> initializer-head generic-parameter-clause opt parameter-clause throwsopt generic-where-clause opt initializer-body
+% initializer-declaration -> initializer-head generic-parameter-clause opt parameter-clause rethrows generic-where-clause opt initializer-body
+% initializer-head -> attributes opt declaration-modifiers opt init
+% initializer-head -> attributes opt declaration-modifiers opt init ?
+% initializer-head -> attributes opt declaration-modifiers opt init !
+% initializer-body -> code-block
+define initializer_declaration
+	[initializer_head] [generic_parameter_clause?] [parameter_clause] [throws_or_rethrows?] [generic_where_clause?] 
+	    [initializer_body?]
+end define
+
+define throws_or_rethrows
+	'throws | 'rethrows
+end define
+
+define initializer_head
+	[attributes?] [declaration_modifiers?] 'init [init_modifier?]
+end define
+
+define init_modifier
+	[SPOFF] '? [SPON] | [SPOFF] '! [SPON]
+end define
+
+define initializer_body
+	[code_block]
+end define
+
+% deinitializer-declaration -> attributes opt deinit code-block
+define deinitializer_declaration
+	[attributes?] [declaration_modifiers?] 'deinit [code_block]
+end define
+
+% extension-declaration -> attributes opt access-level-modifier opt extension type-identifier type-inheritance-clause opt generic-where-clause opt extension-body
+% extension-body -> { extension-members opt }
+% extension-members -> extension-member extension-members opt
+% extension-member -> declaration | compiler-control-statement
+define extension_declaration
+	[NL] [attributes?] [access_level_modifier?] 'extension [type_identifier?] [and_type_identifier*] [type_inheritance_clause?]
+	    [generic_where_clause?] [extension_body]
+end define
+
+define extension_body
+	'{ [NL][IN] [extension_members?] [EX] '}
+end define
+
+define extension_members
+	[extension_member+]
+end define
+
+define extension_member
+	[declaration] [semi] | [compiler_control_statement] [semi]
+end define
+
+% subscript-declaration -> subscript-head subscript-result generic-where-clause opt code-block
+% subscript-declaration -> subscript-head subscript-result generic-where-clause opt getter-setter-block
+% subscript-declaration -> subscript-head subscript-result generic-where-clause opt getter-setter-keyword-block
+% subscript-head -> attributes opt declaration-modifiers opt subscript generic-parameter-clause opt parameter-clause
+% subscript-result -> -> attributes opt type
+define subscript_declaration
+	[subscript_head] [subscript_result] [generic_where_clause?] [subscript_block]
+end define
+
+define subscript_head
+	[attributes?] [declaration_modifiers?] 'subscript [generic_parameter_clause?] [parameter_clause]
+end define
+
+define subscript_result
+	'-> [attributes?] [type]
+end define
+
+define subscript_block
+	[code_block] | [getter_setter_block] | [getter_setter_keyword_block]
+end define
+
+% operator-declaration -> prefix-operator-declaration | postfix-operator-declaration | infix-operator-declaration
+% prefix-operator-declaration -> prefix operator operator
+% postfix-operator-declaration -> postfix operator operator
+% infix-operator-declaration -> infix operator operator infix-operator-group opt
+% infix-operator-group -> : precedence-group-name
+define operator_declaration
+	[prefix_operator_declaration] | [postfix_operator_declaration] | [infix_operator_declaration]
+end define
+
+define prefix_operator_declaration
+	'prefix 'operator [operator] [infix_operator_group?] 	% observed
+end define
+
+define postfix_operator_declaration
+	'postfix 'operator [operator] [infix_operator_group?] 	% observed
+end define
+
+define infix_operator_declaration
+	'infix 'operator [operator] [infix_operator_group?]
+end define
+
+define infix_operator_group
+	': [list precedence_group_name+]
+end define
+
+% precedence-group-declaration -> precedencegroup precedence-group-name { precedence-group-attributes opt }
+% precedence-group-attributes -> precedence-group-attribute precedence-group-attributes opt
+% precedence-group-attribute -> precedence-group-relation
+% precedence-group-attribute -> precedence-group-assignment
+% precedence-group-attribute -> precedence-group-associativity
+% precedence-group-relation -> higherThan : precedence-group-names
+% precedence-group-relation -> lowerThan : precedence-group-names
+% precedence-group-assignment -> assignment : boolean-literal
+% precedence-group-associativity -> associativity : left
+% precedence-group-associativity -> associativity : right
+% precedence-group-associativity -> associativity : none
+% precedence-group-names -> precedence-group-name | precedence-group-name , precedence-group-names
+% precedence-group-name -> identifier
+define precedence_group_declaration
+	'precedencegroup [precedence_group_name] '{ [NL][IN] [precedence_group_attributes?] [EX] '}
+end define
+
+define precedence_group_attributes
+	[precedence_group_attribute+]
+end define
+
+define precedence_group_attribute
+	[precedence_group_relation] | [precedence_group_assignment] | [precedence_group_associativity]
+end define
+
+define precedence_group_relation
+	'higherThan ': [precedence_group_names] [NL] | 'lowerThan ': [precedence_group_names] [NL]
+end define
+
+define precedence_group_assignment
+	'assignment ': [boolean_literal] [NL]
+end define
+
+define precedence_group_associativity
+	'associativity ': [left_right_none] [NL]
+end define
+
+define left_right_none
+	'left | 'right | 'none
+end define
+
+define precedence_group_names
+	[list precedence_group_name+]
+end define
+
+define precedence_group_name
+	[identifier]
+end define
+
+% declaration-modifier -> class | convenience | dynamic | final | infix | lazy | optional | override | postfix | prefix | required | static | unowned | unowned ( safe ) | unowned ( unsafe ) | weak
+% declaration-modifier -> access-level-modifier
+% declaration-modifier -> mutation-modifier
+% declaration-modifiers -> declaration-modifier declaration-modifiers opt
+% access-level-modifier -> private | private ( set )
+% access-level-modifier -> fileprivate | fileprivate ( set )
+% access-level-modifier -> internal | internal ( set )
+% access-level-modifier -> public | public ( set )
+% access-level-modifier -> open | open ( set )
+% mutation-modifier -> mutating | nonmutating
+define declaration_modifier
+	'class | 'convenience | 'dynamic | 'final | 'infix | 'lazy | 'optional | 'override | 'postfix | 'prefix 
+    |	'required | 'static | 'unowned | 'unowned '( 'safe ') | 'unowned '( 'unsafe ') | 'weak
+    |	[access_level_modifier]
+    |	[mutation_modifier]
+    |	'__consuming 	% observed
+end define
+
+define declaration_modifiers
+	[declaration_modifier+]
+end define
+
+define access_level_modifier
+    	'private | 'private '( 'set ')
+    |	'fileprivate | 'fileprivate '( 'set ')
+    |	'internal | 'internal '( 'set ')
+    |	'public | 'public '( 'set ')
+    |	'open | 'open '( 'set ')
+end define
+
+define mutation_modifier
+	'mutating | 'nonmutating
+end define
+
+% Attributes
+
+% attribute -> @ attribute-name attribute-argument-clause opt
+% attribute-name -> identifier
+% attribute-argument-clause -> ( balanced-tokens opt )
+% attributes -> attribute attributes opt
+% balanced-tokens -> balanced-token balanced-tokens opt
+% balanced-token -> ( balanced-tokens opt )
+% balanced-token -> [ balanced-tokens opt ]
+% balanced-token -> { balanced-tokens opt }
+% balanced-token -> Any identifier, keyword, literal, or operator
+% balanced-token -> Any punctuation except (, ), [, ], {, or }
+define attribute
+	[SPOFF] '@ [attribute_name] [SPON] [attribute_argument_clause?] [generic_parameter_clause?]
+end define
+
+define attributes
+	[attribute+]
+end define
+
+define attribute_name
+	[identifier] [dot_identifier*]
+end define
+
+define dot_identifier
+	'. [identifier]
+end define
+
+define attribute_argument_clause
+	'( [balanced_tokens?] ')
+end define
+
+define balanced_tokens
+	[balanced_token+]
+end define
+
+define balanced_token
+	'( [balanced_tokens?] ')
+    |	'[ [balanced_tokens?] ']
+    |	'{ [balanced_tokens?] '}
+    |	[not bracket] [token_or_key]
+end define
+
+define bracket
+	'( | ') | '[ | '] | '{ | '}
+end define
+
+define token_or_key
+	[token] | [key]
+end define
+
+% Patterns
+
+% pattern -> wildcard-pattern type-annotation opt
+% pattern -> identifier-pattern type-annotation opt
+% pattern -> value-binding-pattern
+% pattern -> tuple-pattern type-annotation opt
+% pattern -> enum-case-pattern
+% pattern -> optional-pattern
+% pattern -> type-casting-pattern
+% pattern -> expression-pattern
+define pattern
+    	[wildcard_pattern] [type_annotation?]
+    |	[identifier_pattern] [type_annotation?]
+    |	[value_binding_pattern]
+    |	[tuple_pattern] [type_annotation?]
+    |	[enum_case_pattern]
+    |	[optional_pattern]
+    |	[is_type_casting_pattern]
+    |	[pattern] [as_type_casting_pattern_tail]
+    |	[expression_pattern]
+end define
+
+% wildcard-pattern -> _
+define wildcard_pattern
+	'_
+end define
+
+% identifier-pattern -> identifier
+define identifier_pattern
+	[identifier]
+end define
+
+% value-binding-pattern -> var pattern | let pattern
+define value_binding_pattern
+	'var [pattern] | 'let [pattern]
+end define
+
+% tuple-pattern -> ( tuple-pattern-element-list opt )
+% tuple-pattern-element-list -> tuple-pattern-element | tuple-pattern-element , tuple-pattern-element-list
+% tuple-pattern-element -> pattern | identifier : pattern
+define tuple_pattern
+	[identifier?]	% observed
+	'( [tuple_pattern_element_list?] ')
+end define
+
+define tuple_pattern_element_list
+	[list tuple_pattern_element+]
+end define
+
+define tuple_pattern_element
+	[identifier_colon?] [pattern] 
+end define
+
+% enum-case-pattern -> type-identifier opt . enum-case-name tuple-pattern opt
+define enum_case_pattern
+	[type_identifier?] '. [enum_case_name] [tuple_pattern?]
+end define
+
+% optional-pattern -> identifier-pattern ?
+define optional_pattern
+	[identifier_pattern] [SPOFF] '? [SPON]
+end define
+
+% type-casting-pattern -> is-pattern | as-pattern
+% is-pattern -> is type
+% as-pattern -> pattern as type
+define is_type_casting_pattern
+	'is [type]
+end define
+
+define as_type_casting_pattern_tail
+	% [pattern] 
+	'as [type]
+end define
+
+% expression-pattern -> expression
+define expression_pattern
+	[limited_expression]
+end define
+
+% Generic Parameters and Arguments
+
+% generic-parameter-clause -> < generic-parameter-list >
+% generic-parameter-list -> generic-parameter | generic-parameter , generic-parameter-list
+% generic-parameter -> type-name
+% generic-parameter -> type-name : type-identifier
+% generic-parameter -> type-name : protocol-composition-type
+% generic-where-clause -> where requirement-list
+% requirement-list -> requirement | requirement , requirement-list
+% requirement -> conformance-requirement | same-type-requirement
+% conformance-requirement -> type-identifier : type-identifier
+% conformance-requirement -> type-identifier : protocol-composition-type
+% same-type-requirement -> type-identifier == type
+define generic_parameter_clause
+	'< [SPOFF] [generic_parameter_list] [SPOFF] '> [SPON]
+end define
+
+define generic_parameter_list
+	[list generic_parameter+]
+end define
+
+define generic_parameter
+	[type_name] [SPON]
+    |	[type_name] [SPON] ': [type_identifier]
+    |	[type_name] [SPON] ': [protocol_composition_type]
+    |	'#int#	% observed
+end define
+
+define generic_where_clause
+	'where [requirement_list]
+end define
+
+define requirement_list
+	[list requirement+]
+end define
+
+define requirement
+	[conformance_requirement] | [same_type_requirement]
+end define
+
+define conformance_requirement
+	[type_identifier] ': [type_identifier]
+    |	[type_identifier] ': [protocol_composition_type]
+end define
+
+define same_type_requirement
+	[type_identifier] '== [type]
+end define
+
+% generic-argument-clause -> < generic-argument-list >
+% generic-argument-list -> generic-argument | generic-argument , generic-argument-list
+% generic-argument -> type
+define generic_argument_clause
+	'< [SPOFF] [generic_argument_list] [SPOFF] '> [SPON]
+end define
+
+define generic_argument_list
+	[list generic_argument+]
+end define
+
+define generic_argument
+	[type] [SPON]
+end define

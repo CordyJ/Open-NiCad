@@ -1,0 +1,337 @@
+module PathExp2TextualPathExp;
+create OUT : TextualPathExp from IN : PathExp;
+
+
+-------------------------------------------------------------------------------
+-- HELPERS --------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- This helper computes the root State of the input PathExp model.
+-- To this end, it selects among all State instances the one that has no
+-- incoming transition.
+-- CONTEXT: thisModule
+-- RETURN:	PathExp!State
+helper def: rootState : PathExp!State =
+	PathExp!State.allInstances()
+		->select(s | s.incoming->isEmpty())
+		->asSequence()
+		->first();
+
+
+-- This helper computes a boolean value stating whether a loop transition is
+-- defined for the contextual State.
+-- For this purpose, the helper checks if there exists an incoming transition
+-- whose source is the contextual State.
+-- CONTEXT: PathExp!State
+-- RETURN:	Boolean
+helper context PathExp!State def: existLoop() : Boolean =
+	self.incoming
+		->select(e | e.source = self)
+		->notEmpty();
+
+
+-- This helper returns the loop Transition defined for the contextual State.
+-- To this end, it returns the first incoming transition that has the
+-- contextual State as source.
+-- PRECOND:	a loop transition must be defined for the contextual State.
+-- CONTEXT: PathExp!State
+-- RETURN:	PathExp!Transition
+helper context PathExp!State def: getLoop() : PathExp!Transition =
+	self.incoming
+		->select(e | e.source = self)
+		->asSequence()
+		->first();
+
+
+-- This helper computes the set of non-loop incoming transitions of the
+-- contextual State.
+-- To this end, it selects among incoming transitions the ones that do not
+-- target the contextual State.
+-- CONTEXT: PathExp!State
+-- RETURN:	Sequence(PathExp!Transition)
+helper context PathExp!State def: getInT() : Sequence(PathExp!Transition) =
+	self.incoming
+		->select(e | e.source <> self)
+		->asSequence();
+
+
+-- This helper computes the set of non-loop outgoing transitions of the
+-- contextual State.
+-- To this end, it selects among outgoing transitions the ones that do not
+-- target the contextual State.
+-- CONTEXT: PathExp!State
+-- RETURN:	Sequence(PathExp!Transition)
+helper context PathExp!State def: getOutT() : Sequence(PathExp!Transition) =
+	self.outgoing
+		->select(e | e.target <> self)
+		->asSequence();
+
+	
+-- This helper computes the set of States whose transitions lead to the
+-- contextual State (except the contextual State if it is reachable from itself
+-- by means of a loop transitions).
+-- For this purpose, the helper simply collects the source of the transitions
+-- returned by the call of the 'getInT' helper onto the contextual State.
+-- CONTEXT: PathExp!State
+-- RETURN:	Sequence(PathExp!State)
+helper context PathExp!State def: getPrevStates() : Sequence(PathExp!State) =
+	self.getInT()->collect(e | e.source);
+
+
+-- This helper computes the set of States that can be reached by means of
+-- outgoing transitions of the contextual State (except the contextual State
+-- if it is reachable from itself through a loop transitions).
+-- For this purpose, the helper simply collects the target of the transitions
+-- returned by the call of the 'getOutT' helper onto the contextual State.
+-- CONTEXT: PathExp!State
+-- RETURN:	Sequence(PathExp!State)
+helper context PathExp!State def: getNextStates() : Sequence(PathExp!State) =
+	self.getOutT()->collect(e | e.target);
+
+
+-- This helper computes the sequence of both Path!State and Path!Transition
+-- input elements that correspond to the transitions of the Path initiated by
+-- the contextual State.
+-- The helper accepts a Boolean parameter that encodes the fact that what
+-- cooresponds to a nested alternative transition has just been parsed. The
+-- helper is initially called with false as parameter.
+--  * A contextual State with several non-loop incoming transitions along with
+--    a false nested parameter, identifies the end of the current Path. The
+--    helper therefore returns an empty sequence.
+--  * If the contextual State has several non-loop outgoing transitions with a
+--    true along with a nested parameter, this identifies the beginning of a
+--    new nested alternative transition within the current Path. The helper
+--    then returns a sequence made of 1) the loop transition of the contextual
+--    State, if it is defined, 2) the contextual State itself, and 3) the
+--    sequence returned by a recursive call of 'getTransitionsFromState' on the
+--    state that closes the new alternative transition (it is computed by the
+--    'findNextState' helper), with the nested parameter set to true.
+--  * If the contextual State has a single non-loop outgoing transition, the
+--    helper returns a sequence made of 1) the loop transition of the
+--    contextual State, if it is defined, 2) the outgoing transition of the
+--    contextual State, and 3) the sequence returned by a recursive call of
+--    'getTransitionsFromState' onto the the next state of the contextual
+--    State, with the nested parameter set to false.
+--  * Finally, a contextual State with no outgoing Transitions indicates the
+--    end of the input PathExp and (also) of the current Path. The  helper
+--    therefore returns an empty sequence.
+--
+-- NOTE: the result type of the helper is currently encoded as a sequence of
+-- strings since 1) the oclAny type is not implemented yet 2) and no type
+-- verifications are performed by the current atl version.
+--
+-- CONTEXT: PathExp!State
+-- IN:		Boolean
+-- RETURN:	Sequence(oclAny)
+helper context PathExp!State
+	def: getTransitionsFromState(nested : Boolean) : Sequence(String) =
+	let nextStates : Sequence(PathExp!State) = self.getNextStates()
+	in let prevStates : Sequence(PathExp!State) = self.getPrevStates()
+	in let loop : Sequence(PathExp!Transition) =
+		if self.existLoop() then
+			self.getLoop()
+		else
+			Sequence{}
+		endif
+	in
+
+	if prevStates->size() > 1 and not nested then
+		Sequence{}
+	else
+		if nextStates->size() > 1 then
+			let state : PathExp!State = nextStates->first().findNextState(0)
+			in Sequence{
+					loop,
+					self,
+					state.getTransitionsFromState(true)
+				}->flatten()
+		else
+			if nextStates->size() = 1 then
+				Sequence{
+					loop,
+					self.getOutT()->first(),
+					nextStates->first().getTransitionsFromState(false)
+				}->flatten()
+			else
+				Sequence{}
+			endif
+		endif
+	endif;
+			
+		
+-- This helper computes the sequence of both Path!State and Path!Transition
+-- input elements that correspond to the transitions of the Path initiated by
+-- the contextual Transition.
+-- The returned sequence is composed of the contextual transition followed by
+-- the result of the call of the 'getTransitionsFromState' helper onto the
+-- target of this contextual transition.
+--
+-- NOTE: the result type of the helper is currently encoded as a sequence of
+-- strings since 1) the oclAny type is not implemented yet 2) and no type
+-- verifications are performed by the current atl version.
+--
+-- CONTEXT: PathExp!State
+-- RETURN:	Sequence(oclAny)
+helper context PathExp!Transition
+	def: getTransitionsFromTrans() : Sequence(String) =
+	Sequence{self, self.target.getTransitionsFromState(false)}->flatten();
+
+
+-- This helper aims to compute the State that closes the alternative transition
+-- that is started at the contextual State of the initial call.
+-- It accepts an Integer as parameter which indicates the number of opened
+-- nested alternative transitions. It is initially called with n = 0.
+-- In order to compute its closing State, the helper recursively parses the
+-- Path:
+--  * if the contextual State has more than one incoming transition and no
+--    nested alternative trans. are opened (n=0), the helper returns the
+--    contextualState.
+--  * if the contextual State has more than one incoming transition and more
+--    than one outgoing transition, the helper returns the value provided by
+--    the recursive call of 'findNextState(n)' onto one of the next states of
+--    the contextual state.
+--  * if the contextual State has more than one incoming transition but a
+--    single outgoing transition, the helper returns the value provided by the
+--    recursive call of 'findNextState(n-1)' onto the next state of the
+--    contextual state.
+--  * if the contextual State has a single incoming transition and more than
+--    one outgoing transition, the helper returns the value provided by the
+--    'findNextState(n+1)' onto one of the next states of the contextual state.
+--  * finally, if the contextual State has a single incoming transition and a
+--    single outgoing transition, the helper returns the value provided by the
+--    recursive call of 'findNextState(n+)' onto the next state of the
+--    contextual state.
+-- CONTEXT: PathExp!State
+-- IN:		Integer
+-- RETURN:	PathExp!State
+helper context PathExp!State def: findNextState(n : Integer) : PathExp!State =
+	let prevStates : Sequence(PathExp!State) = self.getPrevStates() in
+	let nextStates : Sequence(PathExp!State) = self.getNextStates() in
+	if prevStates->size() > 1 and n = 0 then
+		self
+	else
+		if prevStates->size() > 1 then
+			if nextStates->size() > 1 then
+				nextStates->first().findNextState(n)
+			else
+				nextStates->first().findNextState(n-1)
+			endif
+		else
+			if nextStates->size() > 1 then
+				nextStates->first().findNextState(n+1)
+			else
+				nextStates->first().findNextState(n)
+			endif
+		endif
+	endif;
+
+		
+-------------------------------------------------------------------------------
+-- RULES ----------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- Rule 'Main'
+-- This rule generates both a TextualPathExp and its main Path from the root
+-- PathExp input element.
+-- The generated TextualPathExp accepts the Path generated by the rule as path.
+-- The sequence of transitions contained by the generated Path is returned by
+-- the call of the 'getTransitionsFromState' helper onto the root State element
+-- of the input model.
+rule Main {
+	from
+        pe : PathExp!PathExp
+	to 
+		tpe : TextualPathExp!TextualPathExp (
+			path <- p
+		),
+		
+		p : TextualPathExp!Path (
+			transitions <- thisModule.rootState.getTransitionsFromState(false)
+		)
+}
+
+
+-- Rule 'Loop'
+-- This rule generates a multiple PrimitiveTrans from a loop Transition.
+-- The generated PrimitiveTrans accepts an empty string as name. Its
+-- 'isMultiple' attribute is set to 'true'.
+rule Loop {
+	from
+       t : PathExp!Transition (
+        	t.source = t.target
+       )
+	to 
+		pt : TextualPathExp!PrimitiveTrans (
+			name <- '',
+			isMultiple <- true
+		)
+}
+
+
+-- Rule 'STransition'
+-- This rule generates a simple PrimitiveTrans from a non-loop transition
+-- which is the only outgoing transition of its source State.
+-- The generated PrimitiveTrans accepts an empty string as name. Its
+-- 'isMultiple' attribute is set to 'false'.
+rule STransition {
+	from
+       t : PathExp!Transition (
+        	t.source <> t.target and 
+        	t.source.getOutT()->size() = 1
+       )
+	to 
+		pt : TextualPathExp!PrimitiveTrans (
+			name <- '',
+			isMultiple <- false
+		)
+}
+
+
+-- Rule 'MTransition'
+-- This rule generates a simple PrimitiveTrans from a non-loop transition
+-- which is NOT the only outgoing transition of its source State.
+-- The generated PrimitiveTrans accepts an empty string as name. Its
+-- 'isMultiple' attribute is set to 'false'.
+rule MTransition {
+	from
+       t : PathExp!Transition (
+        	t.source <> t.target and 
+        	t.source.getOutT()->size() > 1
+       )
+	to 
+		pt : TextualPathExp!PrimitiveTrans (
+			name <- '',
+			isMultiple <- false
+		)
+}
+
+
+-- Rule 'State'
+-- This rule generates both an AlternativeTransition and the different Paths
+-- that compose that compose this alternative transition from an input State
+-- that has multiple non-loop outgoing Transitions.
+-- Paths of the generated AlternativeTransition are those that are generated
+-- by the rule. Its 'isMultiple' attribute is set to 'false'.
+-- A distinct Path is generated for each non-loop outgoing Transition of the
+-- input State. The sequence of transitions that is assigned to a generated
+-- Path is the corresponding (ie. at same rank) sequence of model elements in
+-- the 'transitions2' sequence (calculated in the using clause).
+rule State {
+	from
+        s : PathExp!State (
+        	s.getOutT()->size() > 1
+        )
+	using {
+    	transitions2 : Sequence(String) =
+    		s.getOutT()->collect(e | e.getTransitionsFromTrans());    	
+	}
+	to 
+		at : TextualPathExp!AlternativeTrans (
+			altPaths <- paths,
+			isMultiple <- false
+		),
+		
+		paths : distinct TextualPathExp!Path foreach(e in transitions2) (
+			transitions <- transitions2
+		)
+}

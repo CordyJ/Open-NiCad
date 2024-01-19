@@ -1,0 +1,871 @@
+--@atlcompiler	atl2006
+--@name			Measure2XHTML
+--@version		2.0
+--@domains		measurement data, metrics, XHTML
+--@authors		Eric Vepa (evepa <at> sodius.com) for SODIUS (www.sodius.com)
+--@date			2007/08/28
+--@description	This transformation is used to represent measurement data from terminal models as an XHTML document
+
+module Measure2XHTML; -- Module Template
+create OUT : XHTML from IN : Measure;
+
+uses MeasureHelpers;
+
+--@begin helper useCCSFile
+--@comments A flag for using a CSS file or an embedded CSS using the getStyleSheet() helper at the end of this file (XHTML link or style tags).
+helper def : useCSSFile : Boolean = false;
+--@end helper useCCSFile
+
+--@begin helper useJSFile
+--@comments A flag for using a JavaScript file or an embedded script using the getJavaScript() helper at the end of this file (XHTML script tag).
+helper def : useJSFile : Boolean = false;
+--@end helper useJSFile
+
+--@begin helper metricDefLocation
+--@comments The URL of the metrics definition page.
+helper def : metricDefLocation : String =
+	'http://www.mdworkbench.com/measurement/metrics/definition.htm';
+--@end helper metricDefLocation
+
+--@begin helper modelKind
+--@comments String values for model type of a measure set.
+helper def : modelKind : Map(String,String) =
+	Map {('KM3','KM3'),
+		('UML2','UML2')};
+--@end helper modelKind
+
+--@begin helper elementKind
+--@comments String values for element type of a measure set.
+helper def : elementKind : Map(String,String) =
+	Map {('metamodel','Metamodel'),
+		('model','Model'),
+		('package','Package'),
+		('interface','Interface'),
+		('class','Class')};
+--@end helper elementKind
+
+--@begin attribute helper html
+--@comments The root HTML tag.
+helper def : html : XHTML!HTML = OclUndefined;
+--@end attribute helper html
+
+--@begin rule RootMeasureSet
+--@comments Creates the unique XHTML, head, title, link or style and body tags.
+rule RootMeasureSet {
+	from
+		root : Measure!RootMeasureSet
+	using {
+		allMetamodelMeasuresSets : Sequence(Measure!MeasureSet) =
+			thisModule.allMeasureSets(#metamodel);
+		allModelMeasuresSets : Sequence(Measure!MeasureSet) =
+			thisModule.allMeasureSets(#model);
+		allPackageMeasuresSets : Sequence(Measure!MeasureSet) =
+			thisModule.allMeasureSets(#package);
+		allInterfaceMeasuresSets : Sequence(Measure!MeasureSet) =
+			thisModule.allMeasureSets(#interface);
+		allClassMeasuresSets : Sequence(Measure!MeasureSet) =
+			thisModule.allMeasureSets(#class);
+	}
+	do {		
+		if (not (allMetamodelMeasuresSets->isEmpty() and
+			allModelMeasuresSets->isEmpty() and
+				allPackageMeasuresSets->isEmpty() and
+					allInterfaceMeasuresSets->isEmpty() and
+						allClassMeasuresSets->isEmpty())) {
+			thisModule.html <- thisModule.HTML();
+		
+			for (cat in root.categories) {
+				if (allMetamodelMeasuresSets->notEmpty()) {
+					if (allMetamodelMeasuresSets->
+							first().categories()->includes(cat)) {
+						thisModule.html.body.blocks->last().flows <-
+							thisModule.TABLE(allMetamodelMeasuresSets,cat);
+					}
+				}
+				if (allModelMeasuresSets->notEmpty()) {
+					if (allModelMeasuresSets->
+							first().categories()->includes(cat)) {
+						thisModule.html.body.blocks->last().flows <-
+							thisModule.TABLE(allModelMeasuresSets,cat);
+					}
+				}
+				if (allPackageMeasuresSets->notEmpty()) {
+					if (allPackageMeasuresSets->
+							first().categories()->includes(cat)) {
+						thisModule.html.body.blocks->last().flows <-
+							thisModule.TABLE(allPackageMeasuresSets,cat);
+					}
+				}
+				if (allInterfaceMeasuresSets->notEmpty()) {
+					if (allInterfaceMeasuresSets->
+							first().categories()->includes(cat)) {
+						thisModule.html.body.blocks->last().flows <-
+							thisModule.TABLE(allInterfaceMeasuresSets,cat);
+					}
+				}
+				if (allClassMeasuresSets->notEmpty()) {
+					if (allClassMeasuresSets->
+							first().categories()->includes(cat)) {
+						thisModule.html.body.blocks->last().flows <-
+							thisModule.TABLE(allClassMeasuresSets,cat);
+					}
+				}
+			}
+		}
+	}
+}
+--@end rule RootMeasureSet
+
+--@begin called rule HTML
+--@comments Creates the XHTML document structure.
+rule HTML() {
+	to
+		html : XHTML!HTML (
+            xmllang <- xmllang,
+			head <- head,
+			body <- body
+		),
+		xmllang : XHTML!LanguageCode (
+			value <- 'en-US'
+		),
+		head : XHTML!HEAD (
+			title <- title,
+			headMiscs <- meta,
+			headMiscs <-
+				if (thisModule.useCSSFile)
+					then thisModule.LINK()
+					else thisModule.STYLE()
+				endif,
+			headMiscs <-
+				if (thisModule.useJSFile)
+					then thisModule.SCRIPT()
+					else thisModule.EmbeddedSCRIPT()
+				endif,
+			headMiscs <- thisModule.NOSCRIPT()
+        ),
+        title : XHTML!TITLE (
+            pcdata <- thisModule.PCDATA('Interactive metric report on a ' +
+            	thisModule.getModelKind() + ' model')
+        ),
+        meta : XHTML!META (
+            httpequiv <- thisModule.CDATA('Content-Type'),
+            content <- thisModule.CDATA('text/html; charset=utf-8')
+        ),
+		body : XHTML!BODY (
+			blocks <- thisModule.HowToDIV()
+		)
+	do {			
+		html;
+	}
+}
+--@end called rule HTML
+
+--@begin called rule LINK
+--@comments Creates a link on the default .css file used by the generated document.
+rule LINK() {	
+	to
+		link : XHTML!LINK (
+			href <- href,
+			type <- type,
+			rel <- rel
+		),
+		href : XHTML!URI (
+			value <- 'stylesheet.css'
+		),
+		type : XHTML!ContentType (
+			value <- 'text/css'
+		),
+		rel : XHTML!LinkTypes (
+			value <- 'stylesheet'
+		)
+	do {
+		link;
+	}
+}
+--@end called rule LINK
+
+--@begin called rule STYLE
+--@comments Creates a XHTML style using the stylesheet returned by the getStyleSheet() helper from MeasureHelpers library.
+rule STYLE() {	
+	to
+		style : XHTML!STYLE (
+			type <- type,
+			pcdata <- thisModule.PCDATA(thisModule.getStyleSheet())
+		),
+		type : XHTML!ContentType (
+			value <- 'text/css'
+		)
+	do {
+		style;
+	}
+}
+--@end called rule STYLE
+
+--@begin called rule SCRIPT
+--@comments Creates a XHTML script using the default script.js used by the generated document.
+rule SCRIPT() {	
+	to
+		script : XHTML!SCRIPT (
+			type <- type,
+			src <- src
+		),
+		type : XHTML!ContentType (
+			value <- 'text/javascript'
+		),
+		src : XHTML!URI (
+			value <- 'script.js'
+		)
+	do {		
+		script;
+	}
+}
+--@end called rule SCRIPT
+
+--@begin called rule EmbeddedSCRIPT
+--@comments Creates a XHTML script using the script returned by the getJavaScript() helper from MeasureHelpers library.
+rule EmbeddedSCRIPT() {	
+	to
+		embeddedScript : XHTML!SCRIPT (
+			type <- type,
+			pcdata <- thisModule.PCDATA(thisModule.getJavaScript())
+		),
+		type : XHTML!ContentType (
+			value <- 'text/javascript'
+		)
+	do {		
+		embeddedScript;
+	}
+}
+--@end called rule EmbeddedSCRIPT
+
+--@begin called rule NOSCRIPT
+--@comments Creates a XHTML noscript, for preventing user activatoing JavaScript in his browser
+rule NOSCRIPT() { 
+    to
+        noscript : XHTML!NOSCRIPT (
+            blocks <- fieldset
+        ),
+        fieldset : XHTML!FIELDSET (
+            fieldsetElements <- legend, 
+            fieldsetElements <- p
+        ),
+        legend : XHTML!LEGEND (
+            inlines <- thisModule.PCDATA('Warning')
+        ),
+        p : XHTML!P (
+            inlines <- thisModule.PCDATA('In order to use the interactive features, you must enable JavaScript in your browser.')
+        )
+    do {        
+        noscript;
+    }
+}
+--@end called rule NOSCRIPT
+
+--@begin called rule ACRONYM
+--@comments Creates an XHTML acronym with a value and a title.
+rule ACRONYM(value : String, title : String) {
+	to
+		acronym : XHTML!ACRONYM (
+			title <- titleText,
+			inlines <- thisModule.PCDATA(value)
+		),
+		titleText : XHTML!Text (
+			value <- title
+		)
+	do {
+		acronym;
+	}
+}
+--@end called rule ACRONYM
+
+--begin called rule LI
+--@comments Creates an XHTML li with a text content.
+rule LI(text : String) {
+    to
+        li : XHTML!LI (
+            flows <- thisModule.PCDATA(text)
+        )
+    do {
+        li;
+    }
+}
+--end called rule LI
+
+--begin called rule BR
+--@comments Creates an XHTML br.
+rule BR() {
+    to
+        br : XHTML!BR
+    do {
+        br;
+    }
+}
+--end called rule BR
+
+--@begin called rule HowToDIV
+--@comments Creates a XHTML div with the validation for the XHTML and CSS content of the generated document.
+rule HowToDIV() {
+    to
+        howtoDiv : XHTML!DIV (
+            flows <- fieldset,
+            flows <- thisModule.BR(),
+            flows <- thisModule.BR()
+        ),
+        fieldset : XHTML!FIELDSET (
+            fieldsetElements <- legend, 
+            fieldsetElements <- p1,
+            fieldsetElements <- p2,
+            fieldsetElements <- operatorsUl,
+            fieldsetElements <- p3,
+            fieldsetElements <- p4,
+            fieldsetElements <- samplesUl
+        ),
+        legend : XHTML!LEGEND (
+            inlines <- thisModule.PCDATA('How To')
+        ),
+        p1 : XHTML!P (
+            inlines <- thisModule.PCDATA('A predicate can be set for each metric column (an operator followed by a number).' +
+                     ' The values for the metric that respect the given predicate are emphasized.')
+        ),
+        p2 : XHTML!P (
+            inlines <- thisModule.PCDATA('Operators for the predicate are among:')
+        ),
+        operatorsUl : XHTML!UL (
+            lis <- thisModule.LI('lower than (&lt;)'),
+            lis <- thisModule.LI('lower or equal than (&lt;=)'),
+            lis <- thisModule.LI('equal to (= or ==)'),
+            lis <- thisModule.LI('not equal to (!= or !)'),
+            lis <- thisModule.LI('greater or equal than (&gt;)'),
+            lis <- thisModule.LI('greater than (&gt;=)')
+        ),
+        p3 : XHTML!P (
+            inlines <- thisModule.PCDATA('Unit for percentage values are not necessary.' +
+                     ' If no operator is given, the operator lower or equal than (&lt;=) is used.' +
+                     ' If the predicate is incorrect, no value is emphasized.')
+        ),
+        p4 : XHTML!P (
+            inlines <- thisModule.PCDATA('Predicate samples:')
+        ),
+        samplesUl : XHTML!UL (
+            lis <- thisModule.LI('&gt;1'),
+            lis <- thisModule.LI('=33.3')
+        )
+    do {
+        howtoDiv;
+    }
+}
+--@end called rule HowToDIV
+
+--@begin called rule TABLE
+--@comments Creates a table for the measures of a category and on a type of model element.
+rule TABLE(allMeasSet : Sequence(Measure!MeasureSet), cat : Measure!Category) {
+	to
+		table : XHTML!TABLE (
+			caption <- caption,
+			thead <- thead,
+			tfoot <- tfoot,
+			tableElements <- tbody
+		),
+		caption : XHTML!CAPTION (
+			inlines <- thisModule.PCDATA(cat.desc + ' on ' +
+                allMeasSet->first().getElementKind() + ' elements')
+		),
+		thead : XHTML!THEAD (
+			trs <-thisModule.FirstHeaderRow(cat,
+				allMeasSet->first().allMeasures(cat)->size()),
+			trs <-thisModule.HeaderRow(allMeasSet->first(),cat)
+		),
+		tfoot : XHTML!TFOOT (
+			trs <-thisModule.HeaderRow(allMeasSet->first(),cat)
+		),
+		tbody : XHTML!TBODY (
+			trs <-thisModule.InputTextRow(allMeasSet->
+				first().allMeasures(cat)),
+			trs <-allMeasSet->
+				collect(ms|thisModule.DataRow(ms,cat))
+		)
+	do {
+		table;
+	}
+}
+--@end called rule TABLE
+
+--@begin called rule FirstHeaderRow
+--@comments Creates an XHTML table header row with the category and the number of column.
+rule FirstHeaderRow(cat : Measure!Category, colspan : Integer) {
+	to
+		tr : XHTML!TR (
+			trElements <- emptyTh,
+			trElements <- th			
+		),
+		emptyTh : XHTML!TH (
+			class <- thisModule.CDATA('empty')
+		),
+		th : XHTML!TH (
+			class <- thisModule.CDATA('category'),
+			colspan <- colspanNumber,
+			flows <- a
+		),
+		colspanNumber : XHTML!Number (
+			value <- colspan.toString()
+		),
+		a : XHTML!A (
+			href <- href,
+			onclick <- onclick,
+			aContents <- thisModule.ACRONYM(cat.name,cat.desc)
+		),
+		href : XHTML!URI (
+			value <- thisModule.metricDefLocation + '#' + cat.name  +
+				'4' + thisModule.getModelKind()
+		),
+		onclick : XHTML!Script (
+			value <- 'window.open(this.href,"_blank"); return false;'
+		)
+	do {
+		tr;
+	}
+}
+--@end called rule FirstHeaderRow
+
+--@begin lazy rule HeaderRow
+--@comments Creates a table row with table header cells for the names of all metrics for this kind of element and for a category.
+lazy rule HeaderRow {
+	from
+		ms : Measure!MeasureSet,
+		cat : Measure!Category
+	to
+		tr : XHTML!TR (
+			trElements <- thisModule.FirstHeaderCell(ms.getElementKind()),
+			trElements <- ms.allMeasures(cat)->
+				collect(meas|thisModule.HeaderCell(meas.metric))
+		)
+}
+--@end lazy rule HeaderRow
+
+--@begin called rule FirstHeaderCell
+--@comments Creates an XHTML table header cell with the kind of model element.
+rule FirstHeaderCell(elementType : String) {
+	to
+		th : XHTML!TH (
+			class <- thisModule.CDATA('element'),
+			flows <- thisModule.PCDATA(elementType)
+		)
+	do {
+		th;
+	}
+}
+--@end called rule FirstHeaderCell
+
+--@begin lazy rule HeaderCell
+--@comments Creates an XHTML table header cell with an acronym for the metric given.
+lazy rule HeaderCell {
+	from
+		metric : Measure!Metric
+	to
+		th : XHTML!TH (
+			class <- thisModule.CDATA('metric'),
+			flows <- a
+		),
+		a : XHTML!A (
+			href <- href,
+			onclick <- onclick,
+			aContents <- thisModule.ACRONYM(metric.name,metric.desc)
+		),
+		href : XHTML!URI (
+			value <- thisModule.metricDefLocation +
+				'#' + metric.category.name + '4' + thisModule.getModelKind() +
+				'::' + metric.name
+		),
+		onclick : XHTML!Script (
+			value <- 'window.open(this.href,"_blank"); return false;'
+		)
+}
+--@end called rule HeaderCell
+
+--@begin lazy rule 	
+--@comments Creates an XHTML table row with input text fields for all measures of a category.
+rule InputTextRow(allMeas : Sequence(Measure!Measure)) {
+	to
+		tr : XHTML!TR (
+			class <- thisModule.CDATA('bound'),
+			trElements <- firstTh
+		),
+		firstTh : XHTML!TH
+	do {
+		for (meas in allMeas) {
+			tr.trElements <- thisModule.InputTextCell(meas);
+		}
+		
+		tr;
+	}
+}
+--@end called rule InputTextRow
+
+--@begin called rule InputTextCell
+--@comments Creates an XHTML table data cell with an input text field for a given measure.
+rule InputTextCell(meas : Measure!Measure) {
+	to
+		th : XHTML!TH (
+			flows <- inputText
+		),
+		inputText : XHTML!INPUT (
+			type <- #text,
+			size <- thisModule.CDATA('3'),
+			maxlength <- thisModule.CDATA('7'),
+			value <- thisModule.CDATA(meas.metric.preferredValue),
+			onchange <- onchange,
+			onkeypress <- onkeypress
+		),
+		onchange : XHTML!Script (
+			value <- 'changeStyle(this);'
+		),
+		onkeypress : XHTML!Script (
+			value <- 'changeStyleOnEnter(event,this);'
+		)
+	do {
+		th;
+	}
+}
+--@end called rule InputTextCell
+
+--@begin lazy rule DataRow
+--@comments Creates XHTML rows with the values for the measures of a measure set and for a category.
+lazy rule DataRow {
+	from
+		ms : Measure!MeasureSet,
+		cat : Measure!Category
+	to
+		tr : XHTML!TR (
+			trElements <- thisModule.FirstDataCell(ms.absoluteName()),
+			trElements <- ms.allMeasures(cat)->
+				collect(meas|thisModule.DataCell(meas))
+		)
+}
+--@end lazy rule DataRow
+
+--@begin called rule FirstDataCell
+--@comments Creates an XHTML table data cell with a value.
+rule FirstDataCell(elementName : String) {
+	to
+		td : XHTML!TD (
+			class <- thisModule.CDATA('first'),
+			flows <- thisModule.PCDATA(elementName)
+		)
+	do {
+		td;
+	}
+}
+--@end called rule FirstDataCell
+
+--@begin lazy rule DataCell
+--@comments Creates an XHTML table data cell for a measure.
+lazy rule DataCell {
+	from
+		meas : Measure!Measure
+	to
+		td : XHTML!TD (
+			flows <- thisModule.PCDATA(meas.stringValue())
+		)
+	do {
+		if (not meas.matchPreferredValue()) {
+			td.class <- thisModule.CDATA('ignoredValue');
+		}
+		
+		td;
+	}
+}
+--@end lazy rule DataCell
+
+--begin called rule CDATA
+--@comments Creates an XHTML CDATA for the value given.
+rule CDATA(value : String) {
+    to
+		cdata : XHTML!CDATA (
+            value <- value
+        )
+    do {
+        cdata;
+    }
+}
+--end called rule CDATA
+
+--begin called rule PCDATA
+--@comments Creates an XHTML PCDATA with a CDATA for the value given.
+rule PCDATA(value : String) {
+    to
+        pcdata : XHTML!PCDATA (
+            inlines <- thisModule.CDATA(value)
+        )
+    do {
+        pcdata;
+    }
+}
+--end called rule PCDATA
+
+--@begin helper getStyleSheet
+--@comments Returns a String containing the stylesheet used by the generated HTML document.
+helper def : getStyleSheet() : String = '
+<!--/*--><![CDATA[/*><!--*/
+html
+{
+    font-family: arial,helvetica,sans-serif;
+    font-size: small;
+    font-style: normal;
+    font-weight: normal;
+    text-align: justify;
+}
+
+fieldset
+{
+    padding: 0px 10px 0px 10px;
+}
+
+legend
+{
+    font-weight: bold;
+}
+
+caption
+{
+    font-style: italic;
+    font-weight: bold;
+    margin-left: auto;
+    margin-right: auto;
+    padding-bottom: 5px;
+}
+
+table
+{
+    border: none;
+    border-collapse: collapse;
+    margin: 5px auto 40px auto;
+}
+
+tr.bound, th.metric, th.element
+{
+    background: #c8c8ff;
+    text-align: center;
+}
+
+th
+{
+    border: 1px solid black;
+    padding: 1px 4px 4px 4px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+th.empty
+{
+    border: none;
+}
+
+th.category
+{
+    background: #9696ff;
+}
+
+acronym
+{
+    border-bottom: 1px dotted;
+}
+
+input
+{
+    border: 1px solid gray;
+    padding-right: 2px;
+    text-align: right;
+}
+
+td
+{
+    background: #e5e5ef;
+    border: 1px solid black;
+    color: #0000ff;
+    font-family: courier,monospace;
+    padding: 2px 5px 2px 5px;
+    text-align: right;
+    white-space: nowrap;
+}
+
+td.first
+{
+    color: #000000;
+    font-family: arial,helvetica,sans-serif;
+    text-align: left;
+}
+
+td.ignoredValue
+{
+    background: #ffffff;
+    color: #adadad;
+    text-align: right;
+}
+
+a
+{
+    color: blue;
+    text-decoration: none;
+}
+
+a:hover
+{
+    text-decoration: underline;
+}
+/*]]>*/-->
+';
+--@end helper getStyleSheet
+
+--@begin helper getJavaScript
+--@comments Returns a String containing the script used by the generated HTML document.
+helper def : getJavaScript() : String =	'
+<!--//--><![CDATA[//><!--
+function indexOf(node, item)
+{
+  var index = 0;
+  var current = first_child(node);
+  
+  while (current != null)
+  {
+    if (current == item)
+    {
+      return index;
+    }
+    else
+    {
+      current = node_after(current);
+      index++;
+    }
+  }
+  
+  return 0;
+}
+
+function at(node, index)
+{
+  var i = 0;
+  var current = first_child(node);
+  
+  while (current != null)
+  {
+    if (i == index)
+    {
+      return current;
+    }
+    else
+    {
+      current = node_after(current);
+      i++;
+    }
+  }
+  
+  return current;
+}
+
+function matchPreferredValue(rawValue, inputText)
+{    
+  var result = false;
+  var value = parseFloat(rawValue);
+  
+  if (inputText.value.substring(0,2) == "<=")
+  {
+    result = (value <= parseFloat(inputText.value.substring(2,inputText.value.length)));
+  }
+  else if (inputText.value.substring(0,2) == ">=")
+  {
+    result = (value >= parseFloat(inputText.value.substring(2,inputText.value.length)));
+  }
+  else if (inputText.value.substring(0,2) == "==")
+  {
+    result = (value == parseFloat(inputText.value.substring(2,inputText.value.length)));
+  }
+  else if (inputText.value.substring(0,2) == "!=")
+  {
+    result = (value != parseFloat(inputText.value.substring(2,inputText.value.length)));
+  }
+  else if (inputText.value.substring(0,1) == "<")
+  {
+    result = (value < parseFloat(inputText.value.substring(1,inputText.value.length)));
+  }
+  else if (inputText.value.substring(0,1) == ">")
+  {
+    result = (value > parseFloat(inputText.value.substring(1,inputText.value.length)));
+  }
+  else if (inputText.value.substring(0,1) == "=")
+  {
+    result = (value == parseFloat(inputText.value.substring(1,inputText.value.length)));
+  } 
+  else if (inputText.value.substring(0,1) == "!")
+  {
+    result = (value != parseFloat(inputText.value.substring(1,inputText.value.length)));
+    }
+  else
+  {
+    result = (value <= parseFloat(inputText.value));
+    if (inputText.value != "")
+    {
+      inputText.value = "<=" + inputText.value
+    }
+  }
+  
+  return result;
+}function changeStyleOnEnter(event, inputText)
+{
+  if (event.keyCode == 13)
+  {
+  	changeStyle(inputText);
+  }
+}
+
+function changeStyle(inputText)
+{
+  var tdInputText = inputText.parentNode;
+  var index = indexOf(tdInputText.parentNode,tdInputText);
+     
+  if (index != -1)
+  {
+    for (var trValue = node_after(tdInputText.parentNode); trValue != null; trValue = node_after(trValue))
+    {
+      var tdValue = at(trValue,index)
+    
+      if (matchPreferredValue(tdValue.innerHTML,inputText))
+      {
+        tdValue.className = "";
+      }
+      else
+      {
+        tdValue.className = "ignoredValue";
+      }
+    }
+  }
+}
+
+function is_all_ws(nod)
+{
+  return !(/[^\\t\\n\\r ]/.test(nod.data));
+}
+
+function is_ignorable(nod)
+{
+  return (nod.nodeType == 8) ||
+         ((nod.nodeType == 3) && is_all_ws(nod));
+}
+function node_after(sib)
+{
+  while ((sib = sib.nextSibling)) {
+    if (!is_ignorable(sib)) return sib;
+  }
+  return null;
+}
+function first_child(par)
+{
+  var res=par.firstChild;
+  while (res) {
+    if (!is_ignorable(res)) return res;
+    res = res.nextSibling;
+  }
+  return null;
+}
+//--><!]]>
+';
+--@end helper getJavaScript

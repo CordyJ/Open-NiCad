@@ -1,0 +1,643 @@
+module TextualPathExp2PathExp;
+create OUT : PathExp from IN : TextualPathExp;
+
+
+-------------------------------------------------------------------------------
+-- HELPERS --------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- This helper returns the root TextualPathExp element of the input
+-- TextualPathExp model.
+-- CONTEXT: thisModule
+-- RETURN:	TextualPathExp!TextualPathExp
+helper def: root : TextualPathExp!TextualPathExp = 
+	TextualPathExp!TextualPathExp.allInstances()
+		->asSequence()->first();
+
+
+-- This helper returns the 1st Transition element contained by the root
+-- TextualPathExp model.
+-- CONTEXT: thisModule
+-- RETURN:	TextualPathExp!Transition
+helper def: rootTrans : TextualPathExp!Transition = 
+	thisModule.root.path.transitions->first();
+
+
+-- This helper returns the last Transition element contained by the root
+-- TextualPathExp model.
+-- CONTEXT: thisModule
+-- RETURN:	TextualPathExp!Transition
+helper def: leafTrans : TextualPathExp!Transition = 
+	thisModule.root.path.transitions->last();
+
+
+-- This helper computes the Set containing all the Path elements of the input
+-- TextualPathExp model.
+-- CONTEXT: thisModule
+-- RETURN:	Set(TextualPathExp!Path)
+helper def: allPaths : Set(TextualPathExp!Path) = 
+	TextualPathExp!Path.allInstances();
+
+
+-- This helper computes the Set of Path elements that are contained by
+-- AlternativeTransition elements.
+-- CONTEXT: thisModule
+-- RETURN:	Set(TextualPathExp!PrimitiveTrans)
+helper def: altPaths : Set(TextualPathExp!Path) = 
+	thisModule.allPaths
+		->select(a |
+			TextualPathExp!AlternativeTrans.allInstances()
+				->collect(b | b.altPaths)
+				->flatten()
+				->includes(a)
+		);
+
+
+-- This helper computes the Set of PrimitiveTrans that are not contained
+-- by any AlternativeTransition.
+-- To this end, it selects, among all Paths, those that are not contained
+-- by any AlternativeTransition element. It then gets, for the selected Paths,
+-- the transitions of type PrimitiveTrans.
+-- CONTEXT: thisModule
+-- RETURN:	Set(TextualPathExp!PrimitiveTrans)
+helper def: primTransitions : Set(TextualPathExp!PrimitiveTrans) = 
+	TextualPathExp!Path.allInstances()
+		->select(a |
+			not TextualPathExp!AlternativeTrans.allInstances()
+				->collect(b | b.altPaths)
+				->flatten()
+				->includes(a)
+		)
+		->collect(p | p.transitions)
+		->flatten()
+		->select(c | c.oclIsTypeOf(TextualPathExp!PrimitiveTrans));
+
+
+-- This helper computes the Set of 'single' primitive transitions.
+-- For this purpose, it selects in the primTransitions set, the transitions
+-- whose 'isMultiple' attribute is set to false.
+-- CONTEXT: thisModule
+-- RETURN:	Set(TextualPathExp!PrimitiveTrans)
+helper def: singlePrimTransitions : Set(TextualPathExp!PrimitiveTrans) = 
+	thisModule.primTransitions->select(c | c.isMultiple = false);
+
+
+-- This helper computes the Set of 'multiple' primitive transitions.
+-- For this purpose, it selects in the primTransitions set, the transitions
+-- whose 'isMultiple' attribute is set to true.
+-- CONTEXT: thisModule
+-- RETURN:	Set(TextualPathExp!PrimitiveTrans)
+helper def: multiplePrimTransitions : Set(TextualPathExp!PrimitiveTrans) = 
+	thisModule.primTransitions->select(c | c.isMultiple = true);
+
+
+-- This helper computes the Set of PrimitiveTrans that are contained by an
+-- AlternativeTransition, except those that are the last transition of their
+-- Path.
+-- To this end, the helper first collects the transitions contained by each
+-- alternative path. For each collected sequence of transitions of size S, it
+-- gets the (S-1 ) first transition. Finally, it selects in the built sequence
+-- the transitions of type PrimitiveTrans.
+-- CONTEXT: thisModule
+-- RETURN:	Set(TextualPathExp!PrimitiveTrans)
+helper def: altTransitions1 : Set(TextualPathExp!PrimitiveTrans) = 
+	thisModule.altPaths
+		->collect(p | p.transitions)
+		->iterate(e;
+				  res : Sequence(Sequence(TextualPathExp!Transition)) = Set{} |
+			res->including(e->subSequence(1, e->size()-1))
+		)
+		->asSequence()
+		->flatten()
+		->select(c | c.oclIsTypeOf(TextualPathExp!PrimitiveTrans));
+
+
+-- This helper computes the Set of 'single' alternative transitions.
+-- For this purpose, it selects in the altTransitions1 set, the transitions
+-- whose 'isMultiple' attribute is set to false.
+-- CONTEXT: thisModule
+-- RETURN:	Set(TextualPathExp!PrimitiveTrans)
+helper def: singleAltTransitions1 : Set(TextualPathExp!PrimitiveTrans) = 
+	thisModule.altTransitions1->select(c | c.isMultiple = false);
+
+
+-- This helper computes the Set of 'multiple' alternative transitions.
+-- For this purpose, it selects in the altTransitions1 set, the transitions
+-- whose 'isMultiple' attribute is set to true.
+-- CONTEXT: thisModule
+-- RETURN:	Set(TextualPathExp!PrimitiveTrans)
+helper def: multipleAltTransitions1 : Set(TextualPathExp!PrimitiveTrans) = 
+	thisModule.altTransitions1->select(c | c.isMultiple = true);
+
+
+-- This helper computes the Set of PrimitiveTrans that are contained by an
+-- AlternativeTransition and that are the last transition of their Path (which
+-- may also be the first transition if the path contains a singel transition).
+-- To this end, the helper first collects the transitions contained by each
+-- alternative path. For each collected sequence of transitions of size S, it
+-- gets the transition number S. Finally, it selects in the built sequence
+-- the transitions of type PrimitiveTrans.
+-- CONTEXT: thisModule
+-- RETURN:	Set(TextualPathExp!PrimitiveTrans)
+helper def: altTransitions2 : Set(TextualPathExp!PrimitiveTrans) = 
+	thisModule.altPaths
+		->collect(p | p.transitions)
+		->iterate(e;
+				  res : Sequence(Sequence(TextualPathExp!Transition)) = Set{} |
+			res->including(e->last())
+		)
+		->asSequence()
+		->flatten()
+		->select(c | c.oclIsTypeOf(TextualPathExp!PrimitiveTrans));
+
+
+-- This helper computes the containing Path of the contextual Transition
+-- element.
+-- For this purpose, it selects ammong all Paths, the one that contains the
+-- contextual Transition elements.
+-- CONTEXT: TextualPathExp!Transition
+-- RETURN:	TextualPathExp!Path
+helper context TextualPathExp!Transition
+	def: getPath() :  TextualPathExp!Path = 
+	thisModule.allPaths
+		->select(a | a.transitions->includes(self))
+		->first();
+
+
+-- This helper computes a boolean value assessing whether or not the contextual
+-- PrimitiveTrans is the last transition of its Path.
+-- To this end, the helper first gets the path of the contextual transition (by
+-- means of the 'getPath' helper) and then compares the contextual transition
+-- to the last transition of the path.
+-- CONTEXT: TextualPathExp!PrimitiveTrans
+-- RETURN:	TextualPathExp!Transition
+helper context TextualPathExp!PrimitiveTrans
+	def: isLastOfPath() : Boolean = 
+	let p : TextualPathExp!Path = self.getPath()
+	in self = p.transitions->last();
+	
+
+-- This helper computes a boolean value assessing whether or not the contextual
+-- PrimitiveTrans is the first transition of its Path.
+-- To this end, the helper first gets the path of the contextual transition (by
+-- means of the 'getPath' helper) and then compares the contextual transition
+-- to the first transition of the path.
+-- CONTEXT: TextualPathExp!PrimitiveTrans
+-- RETURN:	TextualPathExp!Transition
+helper context TextualPathExp!PrimitiveTrans
+	def: isFirstOfPath() : Boolean = 
+	let p : TextualPathExp!Path = self.getPath()
+	in self = p.transitions->first();
+
+		
+-- This helper computes the Transition for which is generated the target state
+-- of the loop defined by the contextual PrimitiveTrans. A multiple primitive
+-- transition only leads to the generation of a loop transition. As a
+-- consequence, the computed Transition is the one preceding the contextual 
+-- primitive transition in their path. The contextual primitrive transition
+-- should therefore not be the first of its path.
+-- CONTEXT: TextualPathExp!PrimitiveTrans
+-- RETURN:	TextualPathExp!Transition
+helper context TextualPathExp!PrimitiveTrans
+	def: getLoopTarget() : TextualPathExp!Transition = 
+	let p : TextualPathExp!Path = self.getPath()
+	in let i : Integer = p.transitions->indexOf(self)
+	in p.transitions->at(i-1);
+
+
+-- This helper computes a boolean value assessing whether or not the contextual
+-- PrimitiveTrans is preceding a multiple transition in its Path.
+-- If the contextual PrimitiveTrans is the last transition of its Path, the
+-- helper returns false. Otherwise, it returns the value of the 'isMultiple'
+-- attribute of the next transition in the path.
+-- CONTEXT: TextualPathExp!PrimitiveTrans
+-- RETURN:	Boolean
+helper context TextualPathExp!PrimitiveTrans
+	def: loopIncoming() : Boolean = 
+	let p : TextualPathExp!Path = self.getPath()
+	in let i : Integer = p.transitions->indexOf(self)
+	in if self = p.transitions->last() then
+			false
+	   else
+			p.transitions->at(i+1).isMultiple
+	   endif;
+
+
+-- This helper computes the incoming/outgoing loop Transition of the contextual
+-- multiple PrimitiveTrans.
+-- For this purpose, it returns the next transition in the path.
+-- PRECOND:	this helper should only be called from a PrimTransition that
+-- precedes a multiple PrimitiveTrans.
+-- CONTEXT: TextualPathExp!PrimitiveTrans
+-- RETURN:	TextualPathExp!Transition
+helper context TextualPathExp!PrimitiveTrans
+	def: getLoopIncoming() : TextualPathExp!Transition = 
+	let p : TextualPathExp!Path = self.getPath()
+	in let i : Integer = p.transitions->indexOf(self)
+	in p.transitions->at(i + 1);
+
+
+-- This helper computes the set of primitive transitions (except loop
+-- transitions) that follow the contextual transition.
+-- For this purpose, the helper first gets the transition next to the
+-- contextual transition in the same path.
+-- If this following transition is a PrimitiveTrans and is not multiple, the
+-- helper returns the transition. If the following transition is a multiple
+-- PrimitiveTrans, then the helper looks for the transitions that follow this
+-- next transition by means of a recursive call onto this "next transition".
+-- If the following transition is an AlternativeTrans, the helper collects the
+-- first transition of each alternative path of the AlternativeTrans, and
+-- returns the calculated set.
+-- CONTEXT: TextualPathExp!Transition
+-- IN:		Integer
+-- RETURN:	Set(TextualPathExp!PrimitiveTrans)
+helper context TextualPathExp!Transition
+	def: getOutgoing() : Set(TextualPathExp!PrimitiveTrans) = 
+	let p : TextualPathExp!Path = self.getPath()
+	in let i : Integer = p.transitions->indexOf(self)
+	in let t : TextualPathExp!Transition = p.transitions->at(i + 1)
+	in if t.oclIsTypeOf(TextualPathExp!PrimitiveTrans) then
+			if not t.isMultiple then 
+				Set{t}
+			else
+				t.getOutgoing()
+			endif
+	   else
+		t.altPaths
+			->iterate(e; res : Set(TextualPathExp!PrimitiveTrans) = Set{} |
+				res->including(e.transitions->first()) 
+			)
+	   endif;
+
+
+-- This helper computes the Transition (primitive or alternative) that precedes
+-- the contextual PrimitiveTrans in the input TextualPathExp model.
+-- To this end, the helper first checks whether or not the contextual
+-- PrimitiveTrans is the first transition of its Path.
+-- If the contextual transition is the first of its path, the helper first gets
+-- the AtlernativeTrans the contextual transition belongs to. It then gets the
+-- Path in which this AlternativeTrans is defined, and the rank of the
+-- AlternativeTrans within this Path. From then, it gets the transition that
+-- precedes the computed AlternativeTrans. The helper returns this preceding
+-- transition if it is not multiple. If the preceding transition is multiple,
+-- the helper returns the transition that precedes this preceding transition
+-- by means of a recursive call of the helper onto the transition that precedes
+-- the AlternativeTrans.
+-- If the contextual transition is not the first of its path, the helper
+-- returns its preceding transition if this last is not multiple. If the
+-- preceding transition is multiple, the helper returns the preceding
+-- transition of the preceding transition by means of a recursive call of the
+-- helper onto the transition preceding the contextual transition.
+-- PRECOND: this helper should not be called on the root Transition of the
+-- input model.
+-- CONTEXT: TextualPathExp!PrimitiveTrans
+-- RETURN:	TextualPathExp!Transition
+helper context TextualPathExp!PrimitiveTrans
+	def: getPreviousTransition() : TextualPathExp!Transition = 
+	let p : TextualPathExp!Path = self.getPath() in
+	if self.isFirstOfPath() then
+		let alt : TextualPathExp!AlternativeTrans =
+			TextualPathExp!AlternativeTrans.allInstances()
+				->select(a | a.altPaths->includes(p))
+				->first()
+		in let p2 : TextualPathExp!Path =
+			thisModule.allPaths
+				->select(a | a.transitions->includes(alt))
+				->first()
+		in let i : Integer = p2.transitions->indexOf(alt)
+		in let t : TextualPathExp!Transition = 
+			p2.transitions->at(i-1) in
+		if t.isMultiple then
+			t.getPreviousTransition()
+		else
+			t
+		endif
+	else
+		let i : Integer = p.transitions->indexOf(self)
+		in let t : TextualPathExp!Transition = 
+			p.transitions->at(i-1) in
+		if t.isMultiple then
+			t.getPreviousTransition()
+		else
+			t
+		endif
+	endif;
+		
+
+-------------------------------------------------------------------------------
+-- RULES ----------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- Rule 'Main'
+-- This rule generates both a PathExp element and its initial State element
+-- from the input root TextualPathExp element.
+-- The generated PathExp element accepts an empty string as name. Its set of
+-- states corresponds to the 'pe_s' elements generated for the input elements
+-- of the singlePrimTransitions, singleAltTransitions sets, plus the 'pe_s'
+-- elements generated for AlternativeTransition, plus the initial State
+-- generated by the current rule. Its set of transitions corresponds to the
+-- 'pe_t' elements generated for the input elements in the primTransitions,
+-- altTransitions1, and altTransitions2 sets.
+-- The generated initial State has an empty set of incoming transitions. Its
+-- set of outgoing transitions corresponds to the 'pe_t' elements that are
+-- generated for the outgoing transitions computed by the getOutgoing(0) call.
+rule Main {
+	from
+        tpe : TextualPathExp!TextualPathExp
+	to 
+		pe : PathExp!PathExp (
+			name <- '',
+			states <- Set{
+						thisModule.singlePrimTransitions
+							->collect(e | thisModule.resolveTemp(e, 'pe_s')),
+						thisModule.singleAltTransitions1
+							->collect(e | thisModule.resolveTemp(e, 'pe_s')),
+						TextualPathExp!AlternativeTrans.allInstances()
+							->collect(e | thisModule.resolveTemp(e, 'pe_s')),
+						pe_s
+						},
+			transitions <- Set{
+						thisModule.primTransitions
+							->collect(e | thisModule.resolveTemp(e, 'pe_t')),
+						thisModule.altTransitions1
+							->collect(e | thisModule.resolveTemp(e, 'pe_t')),
+						thisModule.altTransitions2
+							->collect(e | thisModule.resolveTemp(e, 'pe_t'))
+							}
+		),
+		
+		pe_s : PathExp!State (
+			incoming <- Set{},
+			outgoing <- Set{thisModule.rootTrans}
+							->collect(e | thisModule.resolveTemp(e, 'pe_t'))
+		)
+}
+
+
+-- Rule 'AlternativeTrans'
+-- This rule generates the State element that closes an input
+-- AlternativeTransition element. The generated State is the one at which the
+-- different alternative paths of the AlternativeTransition join.
+-- Incoming transitions of the generated state correspond to the elements
+-- generated for the last alternative transitions of the input
+-- AlternativeTransition element.
+-- Outgoing transitions of the generated state correspond to the 'pe_t'
+-- elements generated for the set of transitions returned by the call of
+-- getOutgoing(1).
+rule AlternativeTrans {
+	from
+		tpe_at : TextualPathExp!AlternativeTrans (
+--			tpe_at.isMultiple = false
+			true
+		)
+	to 
+		pe_s : PathExp!State (
+			incoming <- thisModule.altTransitions2
+							->select(a | tpe_at.altPaths
+								->collect(b | b.transitions)
+								->flatten()
+								->includes(a)
+							),
+			outgoing <- tpe_at.getOutgoing()
+							->collect(e | thisModule.resolveTemp(e, 'pe_t'))
+		)
+}
+
+
+-- Rule ''
+-- This rule generates ...
+--rule MultipleAlternativeTrans {
+--	from
+--		tpe_at : TextualPathExp!AlternativeTrans (
+--			tpe_at.isMultiple = true
+--		)
+--	to 
+--		pe_s : PathExp!State (
+--			outgoing <- Set{
+--						tpe_at.getOutgoing()
+--							->collect(e | thisModule.resolveTemp(e, 'pe_t')),
+--						pe_t}
+--		),
+--		
+--		pe_t : PathExp!Transition (
+--			name <- ''--,
+--			target <- pe_s
+--		)
+--}
+
+
+-- Rule 'SinglePrimitiveTrans'
+-- This rule generates both a Transition and a State for each PrimitiveTrans
+-- element that belongs to the 'singlePrimTransitions' set.
+-- The generated transition accepts as name the name of the input
+-- PrimitiveTrans. If the input PrimitiveTrans is the root transition of the
+-- input model, its source corresponds to the 'pe_s' initial state generated
+-- for the input TextualPathExp element by rule 'Main'. Otherwise, the source
+-- element corresponds to the 'pe_s' element generated for the transition that
+-- precedes the input PrimitiveTrans in the current Path. Its target is the
+-- State generated by the rule.
+-- Incoming transitions for the generated State include the Transition
+-- generated by the rule and, when the input Transition precedes a multiple
+-- transition, the 'pe_t' element generated for this next transition.
+-- If the input PrimitiveTrans is the leaf transition of the input model, the
+-- generated State has no outgoing transitions. Otherwise, its outgoing
+-- transition corresponds to the 'pe_t' element generated for the input
+-- transition returned by the call of getOugoing(). Moreover, if the input
+-- Transition precedes a multiple transition, the 'pe_t' element generated for
+-- this next transition is added to the set ougoing transitions of the
+-- generated State.
+rule SinglePrimitiveTrans {
+	from
+       tpe_pt : TextualPathExp!PrimitiveTrans (
+			thisModule.singlePrimTransitions->includes(tpe_pt)
+       	)
+	to 
+		pe_t : PathExp!Transition (
+			name <- tpe_pt.name,
+			source <- 
+					if tpe_pt = thisModule.rootTrans then
+						thisModule.resolveTemp(thisModule.root, 'pe_s')
+					else
+						let p : TextualPathExp!Path = tpe_pt.getPath()
+						in let i : Integer = p.transitions->indexOf(tpe_pt)
+						in let t : TextualPathExp!Transition = 
+							p.transitions->at(i-1)
+						in thisModule.resolveTemp(t, 'pe_s')
+					endif,
+			target <- pe_s
+		),
+		
+		pe_s : PathExp!State (
+			incoming <- Set{pe_t}->union(
+							if tpe_pt.loopIncoming() then
+								Set{thisModule.resolveTemp(tpe_pt.getLoopIncoming(), 'pe_t')}
+							else
+								Set{}
+							endif
+						),
+			outgoing <- if tpe_pt = thisModule.leafTrans then
+							Set{}
+						else
+							tpe_pt.getOutgoing()
+								->collect(e | thisModule.resolveTemp(e, 'pe_t'))
+								->union(
+								if tpe_pt.loopIncoming() then
+									Set{thisModule.resolveTemp(tpe_pt.getLoopIncoming(), 'pe_t')}
+								else
+									Set{}
+								endif
+								)
+						endif
+		)
+}
+
+
+-- Rule 'MultiplePrimitiveTrans'
+-- This rule generates a loop transition for each transition that belongs
+-- to the 'multiplePrimTransitions' set. The generated transition is a
+-- transition from and to the state generated for the previous input
+-- transition.
+-- The generated loop transition accepts the name of the input Transition as
+-- name.
+-- If the input PrimitiveTrans is the root transition of the input model, its
+-- source is the initial State generated by the 'Main' rule. Otherwise, the
+-- source is computed by the getLoopTarget() helper.
+-- If the input PrimitiveTrans is the root transition of the input model, its
+-- target is the initial State generated by the 'Main' rule. Otherwise, the
+-- target is computed by the getLoopTarget() helper.
+rule MultiplePrimitiveTrans {
+	from
+       tpe_pt : TextualPathExp!PrimitiveTrans (
+			thisModule.multiplePrimTransitions->includes(tpe_pt)
+       	)
+	to 
+		pe_t : PathExp!Transition (
+			name <- tpe_pt.name,
+			source <- 
+					if tpe_pt = thisModule.rootTrans then
+						thisModule.resolveTemp(thisModule.root, 'pe_s')
+					else
+						tpe_pt.getLoopTarget()
+					endif,
+			target <-
+					if tpe_pt = thisModule.rootTrans then
+						thisModule.resolveTemp(thisModule.root, 'pe_s')
+					else
+						tpe_pt.getLoopTarget()
+					endif
+		)
+}
+
+
+-- Rule 'SingleAltTrans1'
+-- This rule generates both a Transition and a State for each PrimitiveTrans
+-- element that belongs to the 'singleAltTransitions1' set.
+-- The generated transition accepts as name the name of the input
+-- PrimitiveTrans. Its source element corresponds to the 'pe_s' element
+-- generated for the transition returned by the call of the
+-- 'getPrevioustransition' helper. Its target is the State generated by the
+-- rule.
+-- Incoming transitions for the generated State include the Transition
+-- generated by the rule and, when the input Transition precedes a multiple
+-- transition, the 'pe_t' element generated for this next transition.
+-- Outgoing transitions for the generated State include to the 'pe_t' element
+-- generated for the input transition returned by the call of getOugoing(1).
+-- Moreover, if the input Transition precedes a multiple transition, the 'pe_t'
+-- element generated for this next transition is added to the set ougoing
+-- transitions of the generated State.
+rule SingleAltTrans1 {
+	from
+       tpe_pt : TextualPathExp!PrimitiveTrans (
+			thisModule.singleAltTransitions1->includes(tpe_pt)
+       	)
+	to 
+		pe_t : PathExp!Transition (
+			name <- tpe_pt.name,
+			source <-
+					thisModule.resolveTemp(
+						tpe_pt.getPreviousTransition(),
+						'pe_s'
+					),
+			target <- pe_s
+		),
+		
+		pe_s : PathExp!State (
+			incoming <- Set{pe_t}->union(
+							if tpe_pt.loopIncoming() then
+								Set{thisModule.resolveTemp(tpe_pt.getLoopIncoming(), 'pe_t')}
+							else
+								Set{}
+							endif
+						),
+			outgoing <- tpe_pt.getOutgoing()
+							->collect(e | thisModule.resolveTemp(e, 'pe_t'))
+							->union(
+							if tpe_pt.loopIncoming() then
+								Set{thisModule.resolveTemp(tpe_pt.getLoopIncoming(), 'pe_t')}
+							else
+								Set{}
+							endif
+							)
+		)
+}
+
+
+-- Rule 'MultipleAltTrans1'
+-- This rule generates a loop transition for each transition that belongs
+-- to the 'multipleAltTransitions1' set. The generated transition is a
+-- transition from and to the state generated for the previous input
+-- transition.
+-- The generated loop transition accepts the name of the input Transition as
+-- name.
+-- Its source corresponds to the 'pe_s' element generated for the input State
+-- returned by the call to the getLoopTarget() helper.
+-- Its target corresponds to the 'pe_s' element generated for the input State
+-- returned by the call to the getLoopTarget() helper.
+rule MultipleAltTrans1 {
+	from
+       tpe_pt : TextualPathExp!PrimitiveTrans (
+			thisModule.multipleAltTransitions1->includes(tpe_pt)
+       	)
+	to 
+		pe_t : PathExp!Transition (
+			name <- tpe_pt.name,
+			source <- thisModule.resolveTemp(tpe_pt.getLoopTarget(), 'pe_s'),
+			target <- thisModule.resolveTemp(tpe_pt.getLoopTarget(), 'pe_s')
+		)
+}
+
+
+-- Rule 'AltTrans2'
+-- This rule generates a Transition from the last Transition of a Path
+-- contained by an AlternativeTransition. The generated transition goes from
+-- the state generated for the previous transition to the final state generated
+-- for the current AlternativeTransition by the 'AlternativeTrans' helper.
+-- The generated loop transition accepts the name of the input Transition as
+-- name.
+-- Its source corresponds to the 'pe_s' element generated for the input element
+-- returned by the call of the 'getPreviousTransition()' helper.
+-- Its target corresponds to the 'pe_s' element generated for the
+-- AlternativeTransition element that contains the rule input PrimitiveTrans
+-- element in one of its alternative pathes.
+rule AltTrans2 {
+	from
+       tpe_pt : TextualPathExp!PrimitiveTrans (
+			thisModule.altTransitions2->includes(tpe_pt)
+       	)
+	to 
+		pe_t : PathExp!Transition (
+			name <- tpe_pt.name,
+			source <- thisModule.resolveTemp(
+						tpe_pt.getPreviousTransition(),
+						'pe_s'),
+			target <- thisModule.resolveTemp(
+						TextualPathExp!AlternativeTrans.allInstances()
+							->select(a | a.altPaths
+								->collect(b | b.transitions)
+								->flatten()
+								->includes(tpe_pt)
+							)->asSequence()
+							->first(),
+						'pe_s')
+		)
+}

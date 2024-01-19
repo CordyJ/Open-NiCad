@@ -1,0 +1,610 @@
+-- @atlcompiler atl2006
+
+module UML2OWL; -- Module Template
+create OUT : OWL from IN : UML;
+
+-- =============================================================================
+-- UML2OWL
+-- Version 1.0
+-- Release date : 20/02/2007
+-- Author : Guillaume Hillairet (g.hillairet@gmail.com)
+-- =============================================================================
+	
+helper def: primitiveTypeMap : Map(String, String) =
+	Map {
+		('String', 'http://www.w3.org/2001/XMLSchema#string'),
+		('Integer', 'http://www.w3.org/2001/XMLSchema#nonNegativeInteger'),
+		('Boolean', 'http://www.w3.org/2001/XMLSchema#boolean'),
+		('UnlimitedNatural', 'http://www.w3.org/2001/XMLSchema#integer' )
+	};
+	
+helper def: addNamespace( s : String ) : String = 'http://example.org/' + s ;
+
+helper context UML!uml::Association def: isBinary() : Boolean =
+	self.ownedEnd->asSequence().size() = 2;
+
+helper context UML!uml::Property def: isSymmetric() : Boolean =
+	self.type = 
+		self.association.ownedEnd->asSequence()->any( e | 
+			e.oclIsTypeOf(UML!uml::Property) and not (e = self)).type;
+			 
+helper context UML!uml::Property def: isInverseFunctional() : Boolean =
+	self.association.ownedEnd->asSequence()->any( e | 
+		e.oclIsTypeOf(UML!uml::Property) and not (e = self)).upper = 1
+	and
+	self.association.ownedEnd->asSequence()->any( e | 
+		e.oclIsTypeOf(UML!uml::Property) and not (e = self)).lower = 1;
+
+helper def: sequenceOfUnionClass : Sequence( UML!uml::CLass ) =
+	let s : Sequence( UML!uml::CLass ) =
+	UML!uml::GeneralizationSet.allInstances()->select( e | 
+		e.oclIsTypeOf(UML!uml::GeneralizationSet) and e.isCovering )
+		->iterate( acc; res : Sequence(UML!uml::Class) = Sequence{} |
+			res -> including( acc.powertype )
+		)
+	in s;
+
+helper def: getIntegerURI() : OclAny =
+	thisModule.resolveTemp( 
+		UML!uml::PrimitiveType.allInstances()->any( e |
+			e.oclIsTypeOf(UML!uml::PrimitiveType)  and e.name = 'Integer' ),
+			'u'
+	);
+
+-- =============================================================================
+-- RULES
+-- =============================================================================
+	
+rule Model2Graph {
+	from
+		m : UML!uml::Model (
+			m.oclIsTypeOf(UML!uml::Model)
+		)
+	to
+		g : OWL!OWLGraph (
+			ontology <- m.packagedElement->select( e | e.oclIsTypeOf(UML!uml::Package)),
+			uriRef <- uri
+		),
+		d : OWL!Document (
+			namespaceDefinition <- nd,
+			localName <- ln,
+			xmlBase <- xb
+		),
+		ln : OWL!LocalName ( name <- m.name, uriRef <- uri ),
+		uri : OWL!URIReference ( uri <- u_r_i ),
+		u_r_i : OWL!UniformResourceIdentifier ( name <- thisModule.addNamespace(m.name) ),
+		xb : OWL!Namespace ( namespaceURIRef <- uri),
+		nd : OWL!NamespaceDefinition (
+			namespacePrefix <- thisModule.addNamespace(m.name),
+			namespace <- xb
+		)
+}
+
+rule Package2Ontology {
+	from
+		p : UML!uml::Package (
+			p.oclIsTypeOf(UML!uml::Package)
+		)
+	to
+		o : OWL!OWLOntology (
+			uriRef <- u,
+			OWLImports <- p.packageImport->collect( e | e.importedPackage ),
+			owlGraph <- UML!uml::Model.allInstances()->asSequence()
+					->any( m | m.oclIsTypeOf(UML!uml::Model)),
+			owlUniverse <- p.packagedElement
+		),
+		u : OWL!URIReference ( fragmentIdentifier <- l, uri <- uri ),
+		l : OWL!LocalName ( name <- p.name ),
+		uri : OWL!UniformResourceIdentifier (
+			name <- thisModule.addNamespace(p.name)
+		)
+}
+
+rule UMLClass2OWLClass {
+	from
+		c : UML!uml::Class (
+			c.oclIsTypeOf(UML!uml::Class) and 
+				not thisModule.sequenceOfUnionClass.includes(c)
+		)
+	to
+		oc : OWL!OWLClass (
+			subClassOf <- c.general,
+			uriRef <- u,
+			label <- label
+		),
+		label : OWL!PlainLiteral ( lexicalForm <- c.name	),
+		u : OWL!URIReference ( fragmentIdentifier <- l,uri <- uri 	),
+		l : OWL!LocalName ( name <- c.name 	),
+		uri : OWL!UniformResourceIdentifier ( name <- c.name )
+}
+
+rule AssociationClass2OWLClass {
+	from
+		ac : UML!uml::AssociationClass(
+			ac.oclIsTypeOf(UML!uml::AssociationClass)
+		)
+	to
+		oc : OWL!OWLClass (
+			subClassOf <- ac.superClass,
+			uriRef <- u,
+			label <- label
+		),
+		label : OWL!PlainLiteral ( lexicalForm <- ac.name ),
+		u : OWL!URIReference (	fragmentIdentifier <- l, uri <- uri ),
+		l : OWL!LocalName ( name <- ac.name ),
+		uri : OWL!UniformResourceIdentifier ( name <- ac.name )
+}
+
+rule GeneralizationSetIsCovering2Union {
+	from
+		g : UML!uml::GeneralizationSet (
+			g.isCovering
+		)
+	using {
+			uc : UML!uml::Class = g.powertype;		
+			unions : Sequence( UML!uml::Class ) = g.generalization->collect( e | e.specific );
+		}
+	to
+		c : OWL!UnionClass (
+			OWLUnionOf <- unions,
+			subClassOf <- uc.general,
+			superClass <- unions,
+			uriRef <- u,
+			label <- label
+		),
+		label : OWL!PlainLiteral ( lexicalForm <- uc.name ),
+		u : OWL!URIReference ( fragmentIdentifier <- l, uri <- uri ),
+		l : OWL!LocalName ( name <- uc.name ),
+		uri : OWL!UniformResourceIdentifier ( name <- uc.name )
+}
+
+rule PrimitiveType2RDFSDataType {
+	from
+		p : UML!uml::PrimitiveType
+	to
+		d : OWL!RDFSDataType (
+			uriRef <- u
+		),
+		u : OWL!URIReference (
+			uri <- uri
+		),
+		uri : OWL!UniformResourceIdentifier ( 
+			name <- thisModule.primitiveTypeMap.get(p.name) 
+		)
+}
+
+rule Enumeration2EnumeratedClass {
+	from
+		e : UML!uml::Enumeration
+	to
+		oe : OWL!EnumeratedClass (
+			OWLOneOf <- e.ownedLiteral,
+			uriRef <- u,
+			label <- label
+		),
+		label : OWL!PlainLiteral ( lexicalForm <- e.name 	),
+		u : OWL!URIReference (	fragmentIdentifier <- l, uri <- uri ),
+		l : OWL!LocalName ( name <- e.name ),
+		uri : OWL!UniformResourceIdentifier ( name <- e.name )
+}
+
+rule EnumLiteral2Individual {
+	from
+		e : UML!uml::EnumerationLiteral
+	to
+		oe : OWL!Individual (
+			uriRef <- u
+		),
+		u : OWL!URIReference ( fragmentIdentifier <- l, uri <- uri ),
+		l : OWL!LocalName ( name <- e.name ),
+		uri : OWL!UniformResourceIdentifier ( name <- e.name )
+}
+
+rule PrimitiveProperty2DataTypeProperty {
+	from
+		p : UML!uml::Property
+		(
+			p.type.oclIsTypeOf(UML!uml::PrimitiveType)
+		)
+	to
+		d : OWL!OWLDatatypeProperty (
+			uriRef <- u,
+			domain <- p.class,
+			range <- p.type
+		),
+		u : OWL!URIReference ( fragmentIdentifier <- l, uri <- uri ),
+		l : OWL!LocalName ( name <- p.class.name + '.' + p.name ),
+		uri : OWL!UniformResourceIdentifier ( name <- p.class.name + '.' + p.name )
+		
+		do {
+			if ( p.upper = p.lower )  -- [n-n]
+				thisModule.addCardinalityRestriction( p );
+			else
+				if (( p.upper = 0-1 ) and ( p.lower >= 0 )) -- [*]
+					thisModule.addMinCardinalityRestriction( p );
+				else  { -- [m-n]
+					thisModule.addMinCardinalityRestriction( p );
+					thisModule.addMaxCardinalityRestriction( p );
+				}
+		}
+}
+
+rule EnumerationProperty2ObjectProperty {
+	from
+		p : UML!uml::Property
+		(
+			p.type.oclIsTypeOf(UML!uml::Enumeration)
+		)
+	to
+		d : OWL!OWLObjectProperty (
+			uriRef <- u,
+			domain <- p.class,
+			range <- p.type
+		),
+		u : OWL!URIReference ( fragmentIdentifier <- l, uri <- uri ),
+		l : OWL!LocalName ( name <- p.class.name + '.' + p.name ),
+		uri : OWL!UniformResourceIdentifier ( name <- p.class.name + '.' + p.name )
+		
+	do {
+		if ( ( p.upper = 1) and ( p.lower = 1) )
+				thisModule.addFunctionalProperty( p );
+		if ( p.upper = p.lower )  -- [n-n]
+				thisModule.addCardinality( p, p.class );
+			else
+				if (( p.upper = 0-1 ) and ( p.lower >= 0 )) -- [*]
+					thisModule.addMinCardinality( p, p.class );
+				else  {-- [m-n]
+					thisModule.addMinCardinality( p, p.class );
+					thisModule.addMaxCardinality( p, p.class );
+				}
+		
+	}
+}
+
+rule addCardinalityRestriction( p : UML!uml::Property ) {
+	to
+		c : OWL!CardinalityRestriction (
+			superClass <- p.class,
+			OWLCardinality <- literal,
+			OWLOnProperty <- p
+		),
+		literal : OWL!TypedLiteral (
+			lexicalForm <- p.upper.toString(),
+			datatypeURI <- thisModule.getIntegerURI()
+		)
+}
+
+rule addMaxCardinalityRestriction( p : UML!uml::Property ) {
+	to
+		c : OWL!MaxCardinalityRestriction (
+			superClass <- p.class,
+			OWLMaxCardinality <- literal,
+			OWLOnProperty <- p
+		),
+		literal : OWL!TypedLiteral (
+			lexicalForm <- p.upper.toString(),
+			datatypeURI <- thisModule.getIntegerURI()
+		)
+}
+
+rule addMinCardinalityRestriction( p : UML!uml::Property ) {
+	to
+		c : OWL!MinCardinalityRestriction (
+			superClass <- p.class,
+			OWLMinCardinality <- literal,
+			OWLOnProperty <- p
+		),
+		literal : OWL!TypedLiteral (
+			lexicalForm <- p.lower.toString(),
+			datatypeURI <- thisModule.getIntegerURI()
+		)
+}
+
+rule Property2InverseObjectProperty {
+	from
+		p : UML!uml::Property (
+			not (p.type.oclIsTypeOf(UML!uml::PrimitiveType)) 
+			and if (p.association.oclIsUndefined())
+					then false 
+					else if (p.association.isBinary() and not (p.association.oclIsKindOf(UML!uml::Class)))
+							then (not p.isSymmetric() and not p.isInverseFunctional())
+							else false
+						endif					
+				endif
+		)
+		
+	using {
+			inverse : UML!uml::Property =
+				p.association.ownedEnd->asSequence()
+				->any( e | e.oclIsTypeOf(UML!uml::Property) and not (e = p));
+		}
+
+	to
+		o : OWL!OWLObjectProperty (
+			domain <- inverse.type,
+			range <- p.type,
+			OWLInverseOf <- inverse,
+			uriRef <- o_u,
+			subPropertyOf <- p.redefinedProperty
+		),
+		o_u : OWL!URIReference ( 	fragmentIdentifier <- o_l, uri <- o_uri ),
+		o_l : OWL!LocalName ( name <- inverse.type.name + '.' + p.name ),
+		o_uri : OWL!UniformResourceIdentifier ( name <- inverse.type.name + '.' + p.name )
+		
+	do {
+		if ( ( p.upper = 1) and ( p.lower = 1) )
+				thisModule.addFunctionalProperty( p );
+		if ( p.upper = p.lower )  -- [n-n]
+				thisModule.addCardinality( p, inverse.type );
+			else
+				if (( p.upper = 0-1 ) and ( p.lower >= 0 )) -- [*]
+					thisModule.addMinCardinality( p, inverse.type );
+				else  {-- [m-n]
+					thisModule.addMinCardinality( p, inverse.type );
+					thisModule.addMaxCardinality( p, inverse.type );
+				}
+		
+	}
+}
+
+rule Property2SymmetricObjectProperty {
+	from
+		p : UML!uml::Property (
+			not (p.type.oclIsTypeOf(UML!uml::PrimitiveType)) 
+			and if (p.association.oclIsUndefined())
+					then false 
+					else if (p.association.isBinary() and not (p.association.oclIsKindOf(UML!uml::Class)))
+							then (p.isSymmetric() and not p.isInverseFunctional())
+							else false
+						endif
+				endif
+			
+		)
+		
+	using {
+			inverse : UML!uml::Property =
+				p.association.ownedEnd->asSequence()
+				->any( e | e.oclIsTypeOf(UML!uml::Property) and not (e = p));
+		}
+
+	to
+		o : OWL!SymmetricProperty (
+			domain <- inverse.type, 
+			range <- p.type,
+			OWLInverseOf <- inverse,
+			uriRef <- o_u,
+			subPropertyOf <- p.redefinedProperty
+		),
+		o_u : OWL!URIReference ( fragmentIdentifier <- o_l, uri <- o_uri ),
+		o_l : OWL!LocalName ( name <- inverse.type.name + '.' + p.name ),
+		o_uri : OWL!UniformResourceIdentifier ( name <- inverse.type.name + '.' + p.name )
+		
+	do {
+	
+		if ( ( p.upper = 1) and ( p.lower = 1) )
+			thisModule.addFunctionalProperty( p );
+		if ( p.upper = p.lower )  -- [n-n]
+				thisModule.addCardinality( p, inverse.type );
+			else
+				if (( p.upper = 0-1 ) and ( p.lower >= 0 )) -- [*]
+					thisModule.addMinCardinality( p, inverse.type );
+				else  {-- [m-n]
+					thisModule.addMinCardinality( p, inverse.type );
+					thisModule.addMaxCardinality( p, inverse.type );
+				}
+		
+	}
+}
+
+rule Property2InverseFunctionalProperty {
+	from
+		p : UML!uml::Property (
+			not (p.type.oclIsTypeOf(UML!uml::PrimitiveType)) 
+			and if (p.association.oclIsUndefined())
+					then false 
+					else if (p.association.isBinary() and not (p.association.oclIsKindOf(UML!uml::Class)))
+							then (p.isInverseFunctional() and not p.isSymmetric())
+							else false
+						endif
+				endif
+		)
+		
+	using {
+			inverse : UML!uml::Property =
+				p.association.ownedEnd->asSequence()
+				->any( e | e.oclIsTypeOf(UML!uml::Property) and not (e = p));
+		}
+
+	to
+		o : OWL!InverseFunctionalProperty (
+			domain <- inverse.type, 
+			range <- p.type,
+			OWLInverseOf <- inverse,
+			uriRef <- o_u,
+			subPropertyOf <- p.redefinedProperty
+		),
+		o_u : OWL!URIReference ( fragmentIdentifier <- o_l, uri <- o_uri ),
+		o_l : OWL!LocalName ( name <- inverse.type.name + '.' + p.name ),
+		o_uri : OWL!UniformResourceIdentifier ( name <- inverse.type.name + '.' + p.name )
+		
+	do {
+	
+		if ( ( p.upper = 1) and ( p.lower = 1) )
+			thisModule.addFunctionalProperty( p );
+		if ( p.upper = p.lower )  -- [n-n]
+				thisModule.addCardinality( p, inverse.type );
+			else
+				if (( p.upper = 0-1 ) and ( p.lower >= 0 )) -- [*]
+					thisModule.addMinCardinality( p, inverse.type );
+				else  {-- [m-n]
+					thisModule.addMinCardinality( p, inverse.type );
+					thisModule.addMaxCardinality( p, inverse.type );
+				}
+		
+	}
+}
+
+rule PropertyFromAssociationClass2InverseObjectProperty {
+	from
+		p : UML!uml::Property (
+			not (p.type.oclIsTypeOf(UML!uml::PrimitiveType)) 
+			and if (p.association.oclIsUndefined())
+					then false 
+					else (p.association.isBinary() and (p.association.oclIsKindOf(UML!uml::Class)))
+				endif
+		)
+		
+	using {
+			inverse : UML!uml::Property =
+				p.association.ownedEnd->asSequence()
+				->any( e | e.oclIsTypeOf(UML!uml::Property) and not (e = p));
+		}
+
+	to
+		o : OWL!OWLObjectProperty (
+			domain <- p.class,
+			range <- p.type,
+			OWLInverseOf <- inverse,
+			uriRef <- o_u
+		),
+		o_u : OWL!URIReference ( fragmentIdentifier <- o_l, uri <- o_uri ),
+		o_l : OWL!LocalName ( name <- p.class.name + '.' + p.name ),
+		o_uri : OWL!UniformResourceIdentifier ( name <- p.class.name + '.' + p.name )
+		
+	do {
+		if ( ( p.upper = 1) and ( p.lower = 1) )
+				thisModule.addFunctionalProperty( p );
+		if ( p.upper = p.lower )  -- [n-n]
+				thisModule.addCardinality( p, p.class );
+			else
+				if (( p.upper = 0-1 ) and ( p.lower >= 0 )) -- [*]
+					thisModule.addMinCardinality( p, p.class );
+				else  {-- [m-n]
+					thisModule.addMinCardinality( p, p.class );
+					thisModule.addMaxCardinality( p, p.class );
+				}
+		
+	}
+}
+
+rule addFunctionalProperty( p : UML!uml::Property ) {
+	to
+		o : OWL!FunctionalProperty (
+				isDefinedBy <- p
+		)
+}
+
+rule addCardinality( p : UML!uml::Property, class : UML!uml::Class ) {
+	to
+		c : OWL!CardinalityRestriction (
+			superClass <- class,
+			OWLCardinality <- literal,
+			OWLOnProperty <- p
+		),
+		literal : OWL!TypedLiteral (
+			lexicalForm <- p.upper.toString(),
+			datatypeURI <- thisModule.getIntegerURI()
+		)
+}
+
+rule addMinCardinality( p : UML!uml::Property, class : UML!uml::Class ) {
+	to
+		c : OWL!MinCardinalityRestriction (
+			superClass <- class,
+			OWLMinCardinality <- literal,
+			OWLOnProperty <- p
+		),
+		literal : OWL!TypedLiteral (
+			lexicalForm <- p.lower.toString(),
+			datatypeURI <- thisModule.getIntegerURI()
+		)
+}
+
+rule addMaxCardinality( p : UML!uml::Property, class : UML!uml::Class ) {
+	to
+		c : OWL!MaxCardinalityRestriction (
+			superClass <- class,
+			OWLMaxCardinality <- literal,
+			OWLOnProperty <- p
+		),
+		literal : OWL!TypedLiteral (
+			lexicalForm <- p.upper.toString(),
+			datatypeURI <- thisModule.getIntegerURI()
+		)
+}
+
+-- =============================================================================
+--	RULES FOR INSTANCES
+-- =============================================================================
+	
+rule InstanceSpecification2Individual {
+	from
+		i : UML!uml::InstanceSpecification (
+			i.oclIsTypeOf(UML!uml::InstanceSpecification)
+		)
+	to
+		ind : OWL!Individual (
+			uriRef <- u,
+			type <- i.classifier
+		),
+		u : OWL!URIReference ( fragmentIdentifier <- l, uri <- uri ),
+		l : OWL!LocalName ( name <- i.name 	),
+		uri : OWL!UniformResourceIdentifier ( name <- i.name )
+}
+
+-- A Slot serves to create statement between the instance and the slot's value 
+
+rule SlotPrimitive2Statement {
+	from
+		s : UML!uml::Slot (
+			-- Property Type is Primitive Datatype
+			s.definingFeature.type.oclIsTypeOf(UML!uml::PrimitiveType)
+		)
+	to
+		state : OWL!OWLStatement (
+			graph <- UML!uml::Model.allInstances()->asSequence()
+					->any( m | m.oclIsTypeOf(UML!uml::Model)),
+			RDFsubject <- s.owningInstance,
+			RDFpredicate <- s.definingFeature,
+			RDFobject <- o
+		),
+		o : OWL!Individual (
+			type <- s.definingFeature.type,
+			uriRef <- u
+		),
+		u : OWL!URIReference ( fragmentIdentifier <- l, uri <- uri ),
+		l : OWL!LocalName (
+		 	name <-  s.value->asSequence()
+			->any( e | e.oclIsKindOf(UML!uml::LiteralSpecification) ).value
+		),
+		uri : OWL!UniformResourceIdentifier (
+		 	name <-  s.value->asSequence()
+			->any( e | e.oclIsKindOf(UML!uml::LiteralSpecification) ).value
+		)
+}
+
+rule SlotClass2Statement {
+	from
+		s : UML!uml::Slot (
+			-- Property Type is Class
+			s.definingFeature.type.oclIsTypeOf(UML!uml::Class)
+			or
+			s.definingFeature.type.oclIsTypeOf(UML!uml::Enumeration)
+		)
+	do {
+		for( i in s.value ) {
+			thisModule.createStatement( s, i );
+		}
+	}
+} 
+
+rule createStatement( s : UML!uml::Slot, i : UML!uml::InstanceValue ) {
+	to
+		state : OWL!OWLStatement (
+			graph <- UML!uml::Model.allInstances()->asSequence()
+					->any( m | m.oclIsTypeOf(UML!uml::Model)),
+			RDFsubject <- s.owningInstance,
+			RDFpredicate <- s.definingFeature,
+			RDFobject <- i.instance
+		)
+}

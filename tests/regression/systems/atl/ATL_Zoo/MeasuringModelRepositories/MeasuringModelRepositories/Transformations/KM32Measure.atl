@@ -1,0 +1,372 @@
+--@name KM32Measure
+--@version 1.0
+--@domains measurement data, metrics, metamodel
+--@authors Eric Vepa (eric.vepa <at> gmail.com)
+--@date 2006/08/06
+--@description This transformation is used to collect measurement data on a KM3 metamodel. Some metrics are defined and measures are performed on the different model element and stored with the help of the Measure metamodel.
+
+module KM32Measure; -- Module Template
+create OUT : Measure from IN : KM3;
+
+--@begin helper divide
+--@comments returns a number even for a division by zero
+helper context Real def : divide(divisor: Real) : Real =
+	if divisor = 0
+		then 0
+		else self/divisor
+	endif;
+--@end helper divide
+
+--@begin attribute helper allClasses
+--@comments returns the sequence of all Class element of a Package or Metamodel element
+helper context KM3!Package def : allClasses : Sequence(KM3!Class) =
+	self.contents->select(c|c.oclIsTypeOf(KM3!Class));
+
+helper context KM3!Metamodel def : allClasses : Sequence(KM3!Class) =
+	self.contents->iterate(pkg; acc : Sequence(KM3!Class)=Sequence{}|
+		acc->union(pkg.allClasses))->flatten();
+--@end attribute helper allClasses
+
+--@begin attribute helper allAttributesInherited
+--@comments returns the sequence of all Attribute elements inherited of a Class, a Package or a Metamodel element
+helper context KM3!Class def : allAttributesInherited : Sequence(KM3!Attribute) =
+	if self.supertypes->isEmpty()
+		then Sequence{}
+		else self.supertypes->iterate(supertype; acc : Sequence(KM3!Attribute)=Sequence{}|
+			acc->union(supertype.allAttributes))
+	endif;
+
+helper context KM3!Package def : allAttributesInherited : Sequence(KM3!Attribute) =
+	self.allClasses->iterate(c; acc : Sequence(KM3!Attribute)=Sequence{}|
+		acc->including(c.allAttributesInherited))->flatten();
+
+helper context KM3!Metamodel def : allAttributesInherited : Sequence(KM3!Attribute) =
+	self.allClasses->iterate(c; acc : Sequence(KM3!Attribute)=Sequence{}|
+		acc->including(c.allAttributesInherited))->flatten();
+--@end attribute helper allAttributesInherited
+
+--@begin attribute helper allAttributes
+--@comments returns the sequence of all Attribute elements (locally defined and inherited) of a Class, a Package or a Metamodel element
+helper context KM3!Class def : allAttributes : Sequence(KM3!Attribute) =
+	self.structuralFeatures->select(sf|sf.oclIsTypeOf(KM3!Attribute))->
+		union(self.allAttributesInherited);
+
+helper context KM3!Package def : allAttributes : Sequence(KM3!Attribute) =
+	self.allClasses->iterate(class; acc : Sequence(KM3!Attribute)=Sequence{}|
+		acc->union(class.allAttributes))->flatten();
+
+helper context KM3!Metamodel def : allAttributes : Sequence(KM3!Attribute) =
+	self.contents->iterate(pkg; acc : Sequence(KM3!Attribute)=Sequence{}|
+		acc->union(pkg.allAttributes))->flatten();
+--@end attribute helper allAttributes
+
+--@begin attribute helper allReferencesInherited
+--@comments returns the sequence of all Reference elements inherited of a Class, a Package or a Metamodel element
+helper context KM3!Class def : allReferencesInherited : Sequence(KM3!Reference) =
+	if self.supertypes->isEmpty()
+		then Sequence{}
+		else self.supertypes->iterate(supertype; acc : Sequence(KM3!Reference)=Sequence{}|
+			supertype.allReferences)
+	endif;
+
+helper context KM3!Package def : allReferencesInherited : Sequence(KM3!Reference) =
+	self.allClasses->iterate(c; acc : Sequence(KM3!Reference)=Sequence{}|
+		acc->including(c.allReferencesInherited))->flatten();
+
+helper context KM3!Metamodel def : allReferencesInherited : Sequence(KM3!Reference) =
+	self.allClasses->iterate(c; acc : Sequence(KM3!Reference)=Sequence{}|
+		acc->including(c.allReferencesInherited))->flatten();
+--@end attribute helper allReferencesInherited
+
+--@begin attribute helper allReferences
+--@comments returns the sequence of all Reference elements (locally defined and inherited) of a Class, a Package or a Metamodel element
+helper context KM3!Class def : allReferences : Sequence(KM3!Reference) =
+	self.structuralFeatures->select(sf|sf.oclIsTypeOf(KM3!Reference))->
+		union(self.allReferencesInherited)->flatten();
+
+helper context KM3!Package def : allReferences : Sequence(KM3!Reference) =
+	self.allClasses->iterate(class; acc : Sequence(KM3!Reference)=Sequence{}|
+		--@comments returns Reference element without opposite or which not have container opposite
+		acc->union(class.allReferences->select(ref|
+				if ref.opposite.oclIsUndefined()
+					then true
+					else not ref.opposite.isContainer
+				endif)))->flatten();
+
+helper context KM3!Metamodel def : allReferences : Sequence(KM3!Reference) =
+	self.contents->iterate(pkg; acc : Sequence(KM3!Reference)=Sequence{}|
+		acc->union(pkg.allReferences))->flatten();
+--@end attribute helper allReferences
+
+--@begin helper attributeInheritanceFactor
+--@comments returns the value of the metric Attribute Inheritance Factor for a Class, Package or Metamodel element
+helper context KM3!LocatedElement def : attributeInheritanceFactor() : Real =
+	self.allAttributesInherited->size().divide(self.allAttributes->size());
+--@end helper attributeInheritanceFactor
+
+--@begin helper depthInheritanceTree
+--@comments returns the value of the metric Depth Inheritance Tree for a Class, Package or Metamodel element
+helper context KM3!Class def : depthInheritanceTree() : Real =
+	if self.supertypes->isEmpty()
+		then 0
+		else 1+self.supertypes->iterate(supertype; maxDIT:Real=0|
+			maxDIT.max(supertype.depthInheritanceTree()))
+	endif;
+
+helper context KM3!Package def : depthInheritanceTree() : Real =
+	self.allClasses->iterate(c; maxDIT:Real=0|maxDIT.max(c.depthInheritanceTree()));
+
+helper context KM3!Metamodel def : depthInheritanceTree() : Real =
+	self.allClasses->iterate(c; maxDIT:Real=0|maxDIT.max(c.depthInheritanceTree()));
+--@end helper depthInheritanceTree
+
+--@begin helper numberOfChildren
+--@comments returns the value of the metric Number of Children for a Class, Package or Metamodel element
+helper context KM3!Class def : numberOfChildren() : Real =
+	KM3!Class.allInstances()->select(c|c.supertypes->includes(self))->size();
+
+helper context KM3!Package def : numberOfChildren() : Real =
+	if self.allClasses->isEmpty()
+		then 0
+		else self.allClasses->collect(c|c.numberOfChildren())->sum()
+	endif;
+
+helper context KM3!Metamodel def : numberOfChildren() : Real =
+	if self.allClasses->isEmpty()
+		then 0
+		else self.allClasses->collect(c|c.numberOfChildren())->sum()
+	endif;
+--@end helper numberOfChildren
+
+
+--@begin helper metric
+--@comments returns the Metric element which shortName is given
+helper def : metric(shortName: String) : Measure!Metric =
+	Measure!Metric.allInstances()->select(metric|metric.shortName=shortName)->first();
+--@end helper metric
+
+--@begin entrypoint rule Metrics
+--@comments creates all Metric elements with a short and long name
+entrypoint rule Metrics() {
+	to
+		--@comments corresponds to the metric : Total Number of Packages
+		metricTNP:Measure!Metric (
+			shortName <- 'TNP',
+			name <- 'Total Number of Packages'
+		),
+		--@comments corresponds to the metric : Total Number of Classes
+		metricTNC:Measure!Metric (
+			shortName <- 'TNC',
+			name <- 'Total Number of Classes'
+		),
+		--@comments corresponds to the metric : Total Number of Attributes
+		metricTNA:Measure!Metric (
+			shortName <- 'TNA',
+			name <- 'Total Number of Attributes'
+		),
+		--@comments corresponds to the metric : Total Number of Attributes Inherited
+		metricTNAI:Measure!Metric (
+			shortName <- 'TNAI',
+			name <- 'Total Number of Attributes Inherited'
+		),
+		--@comments corresponds to the metric : Attribute Inheritance Factor
+		metricAIF:Measure!Metric (
+			shortName <- 'AIF',
+			name <- 'Attribute Inheritance Factor'
+		),
+		--@comments corresponds to the metric : Depth Inheritance Tree
+		metricDIT:Measure!Metric (
+			shortName <- 'DIT',
+			name <- 'Depth Inheritance Tree'
+		),
+		--@comments corresponds to the metric : Number of Children
+		metricNOC:Measure!Metric (
+			shortName <- 'NOC',
+			name <- 'Number of Children'
+		),
+		--@comments corresponds to the metric : Total Number of Relationships
+		metricTNR:Measure!Metric (
+			shortName <- 'TNR',
+			name <- 'Total Number of Relationships'
+		),
+		--@comments corresponds to the metric : Total Number of Relationships Inherited
+		metricTNRI:Measure!Metric (
+			shortName <- 'TNRI',
+			name <- 'Total Number of Relationships Inherited'
+		)
+}
+--@end entrypoint rule Metrics
+		
+
+--@begin rule MetamodelMeasureSet
+--@comments collect measurement data on a Metamodel element
+rule MetamodelMeasureSet {
+	from
+		mm:KM3!Metamodel
+	to
+		mmMeasSet:Measure!MetamodelMeasureSet (
+			elementName <- mm.contents->iterate(pkg; name:String=''|name +
+				if pkg.name <> 'PrimitiveTypes'
+					then pkg.name
+					else ''
+				endif),
+			elementType <- #Metamodel,
+			measures <- thisModule.SimpleMeasure('TNP','',
+					mm.contents->size()),
+			measures <- thisModule.SimpleMeasure('TNC','',
+					mm.allClasses->size()),
+			measures <- thisModule.SimpleMeasure('TNC','per Package',
+					mm.allClasses->size().divide(mm.contents->size())),
+			measures <- thisModule.SimpleMeasure('TNA','',
+					mm.allAttributes->size()),
+			measures <- thisModule.SimpleMeasure('TNA','per Package',
+					mm.allAttributes->size().divide(mm.contents->size())),
+			measures <- thisModule.SimpleMeasure('TNA','per Class',
+					mm.allAttributes->size().divide(mm.allClasses->size())),
+			measures <- thisModule.SimpleMeasure('TNAI','',
+					mm.allAttributesInherited->size()),
+			measures <- thisModule.SimpleMeasure('TNAI','per Package',
+					mm.allAttributesInherited->size().divide(mm.contents->size())),
+			measures <- thisModule.SimpleMeasure('TNAI','per Class',
+					mm.allAttributesInherited->size().divide(mm.allClasses->size())),
+			measures <- thisModule.SimpleMeasure('TNR','',
+					mm.allReferences->size()),
+			measures <- thisModule.SimpleMeasure('TNR','per Package',
+					mm.allReferences->size().divide(mm.contents->size())),
+			measures <- thisModule.SimpleMeasure('TNR','per Class',
+					mm.allReferences->size().divide(mm.allClasses->size())),
+			measures <- thisModule.SimpleMeasure('TNRI','',
+					mm.allReferencesInherited->size()),
+			measures <- thisModule.SimpleMeasure('TNRI','per Package',
+					mm.allReferencesInherited->size().divide(mm.contents->size())),
+			measures <- thisModule.SimpleMeasure('TNRI','per Class',
+					mm.allReferencesInherited->size().divide(mm.allClasses->size())),
+			measures <- thisModule.SimpleMeasure('AIF','per Class',
+					mm.attributeInheritanceFactor()),
+			measures <- thisModule.SimpleMeasure('DIT','',
+					mm.depthInheritanceTree()),
+			measures <- thisModule.SimpleMeasure('DIT','per Package',
+				if mm.contents->isEmpty()
+					then 0
+					else mm.contents->collect(c|c.depthInheritanceTree())->
+						sum()/mm.contents->size()
+					endif),
+			measures <- thisModule.SimpleMeasure('DIT','per Class',
+				if mm.allClasses->isEmpty()
+					then 0
+					else mm.allClasses->collect(c|c.depthInheritanceTree())->
+						sum()/mm.allClasses->size()
+				endif),
+			measures <- thisModule.SimpleMeasure('NOC','',
+					mm.numberOfChildren()),
+			measures <- thisModule.SimpleMeasure('NOC','per Package',
+					mm.numberOfChildren().divide(mm.contents->size())),
+			measures <- thisModule.SimpleMeasure('NOC','per Class',
+					mm.numberOfChildren().divide(mm.allClasses->size())),
+			pkgMeasureSets <- mm.contents
+		)
+}
+--@end rule MetamodelMeasureSet
+
+--@begin rule PackageMeasureSet
+--@comments collect measurement data on a Package element
+rule PackageMeasureSet {
+	from
+		pkg:KM3!Package
+	to
+		pkgMeasSet:Measure!PackageMeasureSet (
+			elementName <- pkg.name,
+			elementType <- #Package,
+			measures <- thisModule.SimpleMeasure('TNC','',
+					pkg.allClasses->size()),
+			measures <- thisModule.SimpleMeasure('TNA','',
+					pkg.allAttributes->size()),
+			measures <- thisModule.SimpleMeasure('TNA','per Class',
+					pkg.allAttributes->size().divide(pkg.allClasses->size())),
+			measures <- thisModule.SimpleMeasure('TNAI','',
+					pkg.allAttributesInherited->size()),
+			measures <- thisModule.SimpleMeasure('TNAI','per Class',
+					pkg.allAttributesInherited->size().divide(pkg.allClasses->size())),
+			measures <- thisModule.SimpleMeasure('TNR','',
+					pkg.allReferences->size()),
+			measures <- thisModule.SimpleMeasure('TNR','per Class',
+					pkg.allReferences->size().divide(pkg.allClasses->size())),
+			measures <- thisModule.SimpleMeasure('TNRI','',
+					pkg.allReferencesInherited->size()),
+			measures <- thisModule.SimpleMeasure('TNRI','per Class',
+					pkg.allReferencesInherited->size().divide(pkg.allClasses->size())),
+			measures <- thisModule.SimpleMeasure('AIF','',
+					pkg.attributeInheritanceFactor()),
+			measures <- thisModule.SimpleMeasure('DIT','',
+					pkg.depthInheritanceTree()),
+			measures <- thisModule.SimpleMeasure('DIT','per Class',
+				if pkg.allClasses->isEmpty()
+					then 0
+					else pkg.allClasses->collect(c|c.depthInheritanceTree())->
+						sum()/pkg.allClasses->size()
+				endif),
+			measures <- thisModule.SimpleMeasure('NOC','',
+					pkg.numberOfChildren()),
+			measures <- thisModule.SimpleMeasure('NOC','per Class',
+					pkg.numberOfChildren().divide(pkg.allClasses->size())),
+			classMeasureSets <- pkg.allClasses
+		)
+}
+--@end rule PackageMeasureSet
+
+--@begin rule ClassMeasureSet
+--@comments collect measurement data on a Class element
+rule ClassMeasureSet {
+	from
+		class:KM3!Class
+	to
+		classMeasSet:Measure!ClassMeasureSet (
+			elementName <- class.name,
+			elementType <- #Class,
+			measures <- thisModule.SimpleMeasure('TNA','',
+					class.allAttributes->size()),
+			measures <- thisModule.SimpleMeasure('TNAI','',
+					class.allAttributesInherited->size()),	
+			measures <- thisModule.SimpleMeasure('TNR','',
+					class.allReferences->size()),
+			measures <- thisModule.SimpleMeasure('TNRI','',
+					class.allReferencesInherited->size()),
+			measures <- thisModule.SimpleMeasure('AIF','',
+					class.attributeInheritanceFactor()),
+			measures <- thisModule.SimpleMeasure('DIT','',
+					class.depthInheritanceTree()),
+			measures <- thisModule.SimpleMeasure('NOC','',
+					class.numberOfChildren()),
+			attrMeasureSets <- class.allAttributes
+		)
+}
+--@end rule ClassMeasureSet
+
+--@begin rule AttributeMeasureSet
+--@comments collect measurement data on a Attribute element
+rule AttributeMeasureSet {
+	from
+		attr:KM3!Attribute
+	to
+		attrMeasSet:Measure!AttributeMeasureSet (
+			elementName <- attr.name,
+			elementType <- #Attribute
+		)
+}
+--@end rule AttributeMeasureSet
+		
+--@begin lazy rule SimpleMeasure
+--@comments stores a simple measure for the metric named 'shortName', the unit 'unit' and the value given
+lazy rule SimpleMeasure {
+	from
+		shortName:String,
+		unit:String,
+		value:Real
+	to
+		simpleMeas:Measure!SimpleMeasure (
+			metric <- thisModule.metric(shortName),
+			unit <- unit,
+			value <- value
+		)
+}
+--@end lazy rule SimpleMeasure

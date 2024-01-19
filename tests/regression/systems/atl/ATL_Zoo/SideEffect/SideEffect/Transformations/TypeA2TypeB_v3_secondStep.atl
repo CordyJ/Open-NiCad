@@ -1,0 +1,33 @@
+-- @path TypeA=/SideEffect/Metamodels/TypeA.ecore
+-- @path TypeB=/SideEffect/Metamodels/TypeB.ecore
+
+module TypeA2TypeB; 
+create b : TypeB from a : TypeA, bIn : TypeB;
+
+rule RootA2RootB {
+	from
+		rtA : TypeA!RootA, rtBIN : TypeB!RootB
+	to
+		rtB : TypeB!RootB (
+			defs <- rtBIN.defs,
+			elms <- rtA.elms
+		)
+}
+
+rule Definition {
+	from
+		s : TypeB!DefinitionB
+	to
+		t : TypeB!DefinitionB(
+			name <- s.name
+		)
+}
+
+rule Element {
+	from
+		s : TypeA!ElementA
+	to
+		t : TypeB!ElementB(
+			definition <- TypeB!DefinitionB.allInstancesFrom('bIn')->any(e | e.name = s.name)
+		)
+}

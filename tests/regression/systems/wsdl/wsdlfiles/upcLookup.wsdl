@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<definitions name="urn:UPCLookup"
+             targetNamespace="urn:UPCLookup"
+             xmlns:typens="urn:UPCLookup"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
+             xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+             xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+  <types>
+    <xsd:schema xmlns="http://www.w3.org/2001/XMLSchema" 
+                targetNamespace="urn:UPCLookup">
+            
+      <xsd:complexType name="UPCLookupResult">
+        <xsd:all>
+          <xsd:element name="description"		  	type="xsd:string"/>
+          <xsd:element name="sizeWeight"  		  	type="xsd:string"/>
+          <xsd:element name="manufacturer"          type="xsd:string"/>                      
+        </xsd:all>
+      </xsd:complexType>
+
+    </xsd:schema>
+  </types>
+
+  <message name="getProductInfo">
+    <part name="username"       type="xsd:string"/>
+    <part name="password"       type="xsd:string"/>
+    <part name="upc"         	type="xsd:string"/>
+  </message>
+
+  <message name="getProductInfoResponse">
+    <part name="return"         type="typens:UPCLookupResult"/>           
+  </message>
+
+
+  <portType name="UPCLookupPort">
+    <operation name="getProductInfo">
+      <input message="typens:getProductInfo"/>
+      <output message="typens:getProductInfoResponse"/>
+    </operation>
+  </portType>
+
+  
+  <binding name="UPCLookupBinding" type="typens:UPCLookupPort">
+    <soap:binding style="rpc"
+                  transport="http://schemas.xmlsoap.org/soap/http"/>
+
+    <operation name="getProductInfo">
+      <soap:operation soapAction="urn:UPCLookupAction"/>
+      <input>
+        <soap:body use="encoded"
+                   namespace="urn:UPCLookup"
+                   encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </input>
+      <output>
+        <soap:body use="encoded"
+                   namespace="urn:UPCLookup"
+                   encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </output>
+    </operation>
+  </binding>
+
+  
+  <service name="UPCLookupService">
+  <documentation>Enter the all digits printed on the UPC bar code, including any numbers to the right or left of the bar code itself, even if they don't line up with the main row of numbers.  This service will return the product name, description, size, and manufacturer.</documentation>
+    <port name="UPCLookupPort" binding="typens:UPCLookupBinding">
+      <soap:address location="http://www.flash-db.com/services/ws/upcLookup.php"/>
+    </port>
+  </service>
+
+</definitions>

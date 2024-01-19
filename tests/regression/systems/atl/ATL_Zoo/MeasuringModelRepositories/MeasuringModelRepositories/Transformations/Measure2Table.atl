@@ -1,0 +1,390 @@
+--@name Measure2Table
+--@version 1.0
+--@domains measurement data, metrics, metamodel, generic table representation
+--@authors Eric Vepa (eric.vepa <at> gmail.com)
+--@date 2006/08/06
+--@description This transformation is used to represent measurement data on metamodels as a generic table representation. Different kind of table are created (different header row, number of columns, etc), depending on the final representation (tabular HTML, SVG bar and pie chart, etc). 
+
+module Measure2Table; -- Module Template
+create OUT : Table from IN : Measure;
+
+--@begin helper metric
+--@comments returns the Metric element which shortName is given
+helper def : metric(shortName: String) : Measure!Metric =
+	Measure!Metric.allInstances()->select(metric|metric.shortName=shortName)->first();
+--@end helper metric
+
+--@begin helper simpleMeasures
+--@comments returns all the simple measures of a measure set for the metric shortName given
+helper context Measure!MeasureSet def : simpleMeasures(metricName: String) : Sequence(Measure!SimpleMeasure) =
+	self.measures->select(m|m.oclIsTypeOf(Measure!SimpleMeasure))->
+		select(meas|meas.metric.shortName = metricName);
+--@end helper simpleMeasures
+
+--@begin helper classMeasureSets
+--@comments returns the sequence of all the ClassMeasureSet elements of a MetamodelMeasureSet element
+helper context Measure!MetamodelMeasureSet def : classMeasureSets() : Sequence(Measure!ClassMeasureSet) =
+	self.pkgMeasureSets->collect(pkg|pkg.classMeasureSets)->flatten();
+--@end helper classMeasureSets
+
+--@begin helper valueNotNull
+--@comments returns true, if the value for the metric named 'metricName' is not null
+helper context Measure!MeasureSet def : valueNotNull(metricName: String) : Boolean =
+	self.simpleMeasures(metricName)->first().value <> 0;
+--@end helper valueNotNull
+
+--@begin helper canCreatePieChart
+--@comments returns true if the data measurement on the metric named 'metricName' are sufficient for creating a table for a SVG pie chart representation (at least one row with a non null value)
+helper context Measure!PackageMeasureSet def : canCreatePieChart(metricName: String) : Boolean =
+	if self.classMeasureSets->notEmpty()
+		then self.classMeasureSets->exists(measSet|measSet.valueNotNull(metricName))
+		else false
+	endif;
+
+helper context Measure!MetamodelMeasureSet def : canCreatePieChart(metricName: String) : Boolean =
+	if self.classMeasureSets()->notEmpty()
+		then self.classMeasureSets()->exists(measSet|measSet.valueNotNull(metricName))
+		else false
+	endif;
+--@end helper canCreatePieChart
+
+--@begin entrypoint rule Tables
+--@comments creates tables for different representations
+entrypoint rule Tables() {
+	using {
+		--@comments only non empty measure sets are retained, then sorted by element name
+		allMetamodelMeasuresSets : Sequence(Measure!MetamodelMeasureSet) =
+			Measure!MetamodelMeasureSet.allInstances()->
+				select(measSet|measSet.measures->notEmpty())->
+					asSet()->sortedBy(measSet|measSet.elementName);
+		allPackageMeasuresSets : Sequence(Measure!PackageMeasureSet) =
+			Measure!PackageMeasureSet.allInstances()->
+				select(measSet|measSet.measures->notEmpty())->
+					asSet()->sortedBy(measSet|measSet.elementName);
+		allClassMeasuresSets : Sequence(Measure!ClassMeasureSet) =
+			Measure!ClassMeasureSet.allInstances()->
+				select(measSet|measSet.measures->notEmpty())->
+					asSet()->sortedBy(measSet|measSet.elementName);
+		allAttributeMeasuresSets : Sequence(Measure!AttributeMeasureSet) =
+			Measure!AttributeMeasureSet.allInstances()->
+				select(measSet|measSet.measures->notEmpty())->
+					asSet()->sortedBy(measSet|measSet.elementName);
+	}
+	do {
+		--@comments creates tables for each kind of non empty measure set [Metamodel][Zoo][TabularHTML]
+		if allMetamodelMeasuresSets->notEmpty()
+			then thisModule.AllMeasureSet2Table(allMetamodelMeasuresSets)
+			else OclUndefined
+		endif;
+		if allPackageMeasuresSets->notEmpty()
+			then thisModule.AllMeasureSet2Table(allPackageMeasuresSets)
+			else OclUndefined
+		endif;
+		if allClassMeasuresSets->notEmpty()
+			then thisModule.AllMeasureSet2Table(allClassMeasuresSets)
+			else OclUndefined
+		endif;
+		if allAttributeMeasuresSets->notEmpty()
+			then thisModule.AllMeasureSet2Table(allAttributeMeasuresSets)
+			else OclUndefined
+		endif;
+		--@comments creates tables for metrics on one metamodel and for SVG bar chart representation [Metamodel][SVGBarChart]
+		for (pkgMeasSet in allPackageMeasuresSets->select(pkgMeasSet|pkgMeasSet.classMeasureSets->notEmpty())) {
+			thisModule.MeasureSets2SVGBarChart(pkgMeasSet.classMeasureSets,'TNAI');
+			thisModule.MeasureSets2SVGBarChart(pkgMeasSet.classMeasureSets,'TNR');
+			thisModule.MeasureSets2SVGBarChart(pkgMeasSet.classMeasureSets,'TNRI');
+			thisModule.MeasureSets2SVGBarChart(pkgMeasSet.classMeasureSets,'AIF');
+			thisModule.MeasureSets2SVGBarChart(pkgMeasSet.classMeasureSets,'DIT');
+			thisModule.MeasureSets2SVGBarChart(pkgMeasSet.classMeasureSets,'NOC');
+		}
+		--@comments creates tables for metrics on one metamodel and for SVG pie chart representation [Metamodel][SVGPieChart]
+		for (pkgMeasSet in allPackageMeasuresSets) {
+			if pkgMeasSet.canCreatePieChart('TNA')
+				then thisModule.MeasureSets2SVGPieChart(pkgMeasSet.classMeasureSets,'TNA')
+				else OclUndefined
+			endif;
+			if pkgMeasSet.canCreatePieChart('TNAI')
+				then thisModule.MeasureSets2SVGPieChart(pkgMeasSet.classMeasureSets,'TNAI')
+				else OclUndefined
+			endif;
+			if pkgMeasSet.canCreatePieChart('TNR')
+				then thisModule.MeasureSets2SVGPieChart(pkgMeasSet.classMeasureSets,'TNR')
+				else OclUndefined
+			endif;
+			if pkgMeasSet.canCreatePieChart('TNRI')
+				then thisModule.MeasureSets2SVGPieChart(pkgMeasSet.classMeasureSets,'TNRI')
+				else OclUndefined
+			endif;
+			if pkgMeasSet.canCreatePieChart('AIF')
+				then thisModule.MeasureSets2SVGPieChart(pkgMeasSet.classMeasureSets,'AIF')
+				else OclUndefined
+			endif;
+			if pkgMeasSet.canCreatePieChart('DIT')
+				then thisModule.MeasureSets2SVGPieChart(pkgMeasSet.classMeasureSets,'DIT')
+				else OclUndefined
+			endif;
+			if pkgMeasSet.canCreatePieChart('NOC')
+				then thisModule.MeasureSets2SVGPieChart(pkgMeasSet.classMeasureSets,'NOC')
+				else OclUndefined
+			endif;
+		}
+		--@comments creates tables for metrics on the entire zoo of metamodels and for SVG bar and pie chart representation [Zoo][SVGBarChart][SVGPieChart]
+		if allPackageMeasuresSets->isEmpty()
+			then thisModule.TablesForEntireZoo(allMetamodelMeasuresSets)
+			else OclUndefined
+		endif;
+	}
+}
+--@end entrypoint rule Tables
+
+--@begin called rule AllMeasureSet2Table
+--@comments creates a table for all measure sets of one kind
+rule AllMeasureSet2Table(allMeasSet:Sequence(Measure!MeasureSet)) {
+	to
+		globalTable:Table!Table (
+			rows <- thisModule.MeasureSet2RowName(allMeasSet->first()),
+			rows <- allMeasSet->iterate(measSet; acc:Sequence(Table!Row)=Sequence{}|
+					acc->including(thisModule.MeasureSet2RowValue(measSet)))
+		)
+}
+--@end called rule AllMeasureSet2Table
+
+--@begin called rule TablesForEntireZoo
+--@comments creates tables for metrics on the entire zoo of metamodels and for SVG bar and pie chart representation [Zoo][SVGBarChart][SVGPieChart]
+rule TablesForEntireZoo(allMmMeasSet:Sequence(Measure!MetamodelMeasureSet)) {
+	do {
+		--@comments creates tables for metrics on the entire zoo of metamodels and for SVG bar chart representation [Zoo][SVGBarChart]
+		thisModule.MeasureSets2SVGBarChart(allMmMeasSet,'TNP');
+		thisModule.MeasureSets2SVGBarChart(allMmMeasSet,'TNC');
+		thisModule.MeasureSets2SVGBarChart(allMmMeasSet,'TNA');
+		thisModule.MeasureSets2SVGBarChart(allMmMeasSet,'TNAI');
+		thisModule.MeasureSets2SVGBarChart(allMmMeasSet,'TNR');
+		thisModule.MeasureSets2SVGBarChart(allMmMeasSet,'TNRI');
+		thisModule.MeasureSets2SVGBarChart(allMmMeasSet,'AIF');
+		thisModule.MeasureSets2SVGBarChart(allMmMeasSet,'DIT');
+		thisModule.MeasureSets2SVGBarChart(allMmMeasSet,'NOC');
+		--@comments creates tables for metrics on the entire zoo of metamodels and for SVG pie chart representation [Zoo][SVGPieChart]
+		thisModule.MeasureSets2SVGPieChart(allMmMeasSet,'TNP');
+		thisModule.MeasureSets2SVGPieChart(allMmMeasSet,'TNC');
+		thisModule.MeasureSets2SVGPieChart(allMmMeasSet,'TNA');
+		thisModule.MeasureSets2SVGPieChart(allMmMeasSet,'TNAI');
+		thisModule.MeasureSets2SVGPieChart(allMmMeasSet,'TNR');
+		thisModule.MeasureSets2SVGPieChart(allMmMeasSet,'TNRI');
+		thisModule.MeasureSets2SVGPieChart(allMmMeasSet,'AIF');
+		thisModule.MeasureSets2SVGPieChart(allMmMeasSet,'DIT');
+		thisModule.MeasureSets2SVGPieChart(allMmMeasSet,'NOC');
+	}
+}
+--@end called rule TablesForEntireZoo
+
+--@begin unique lazy rule MeasureSet2RowName
+--@comments creates a row with the type and all the names of the metrics of a MeasureSet element
+unique lazy rule MeasureSet2RowName {
+	from
+		measSet:Measure!MeasureSet
+	to
+		rowName:Table!Row (
+			cells <- thisModule.MeasureSet2CellElementType(measSet),
+			cells <- measSet.measures->
+				select(meas|meas.oclIsTypeOf(Measure!SimpleMeasure))->
+					iterate(meas; acc:Sequence(Table!Cell)=Sequence{}|
+						acc->including(thisModule.Measure2CellName(meas)))
+		)
+}
+--@end unique lazy rule MeasureSet2RowName
+
+--@begin lazy rule MeasureSet2RowValue
+--@comments creates a row with the name and all the values of the simple measures of a MeasureSet element
+lazy rule MeasureSet2RowValue {
+	from
+		measSet:Measure!MeasureSet
+	to
+		rowValue:Table!Row (
+			cells <- thisModule.MeasureSet2CellElementName(measSet),
+			cells <- measSet.measures->
+				select(meas|meas.oclIsTypeOf(Measure!SimpleMeasure))->
+					iterate(meas; acc:Sequence(Table!Cell)=Sequence{}|
+						acc->including(thisModule.SimpleMeasure2CellValue(meas)))
+		)
+}
+--@end lazy rule MeasureSet2RowValue
+
+--@begin unique lazy rule MeasureSet2CellElementType
+--@comments creates a cell with the type of a MeasureSet element
+unique lazy rule MeasureSet2CellElementType {
+	from
+		measSet:Measure!MeasureSet
+	to
+		cellType:Table!Cell (
+			content <-	if measSet.elementType = #Attribute
+							then 'Attribute'
+							else	if measSet.elementType = #Class
+										then 'Class'
+										else	if measSet.elementType = #Package
+													then 'Package'
+													else	if measSet.elementType = #Metamodel
+																then 'Metamodel'
+																else 'UnknowModelElement'
+															endif
+												endif
+									endif
+						endif
+		)
+}
+--@end unique lazy rule MeasureSet2CellElementType
+
+--@begin lazy rule MeasureSet2CellElementName
+--@comments creates a cell with the name of a MeasureSet element
+lazy rule MeasureSet2CellElementName {
+	from
+		measSet:Measure!MeasureSet
+	to
+		cellName:Table!Cell (
+			content <- measSet.elementName
+		)
+}
+--@end lazy rule MeasureSet2CellElementName
+
+--@begin lazy rule Measure2CellName
+--@comments creates a cell with the name of the metric and the unit of a Measure element
+lazy rule Measure2CellName {
+	from
+		meas:Measure!Measure
+	to
+		cellName:Table!Cell (
+			content <- meas.metric.shortName +
+				if meas.unit->size() <> 0
+					then ' ' + meas.unit
+					else ''
+				endif
+		)
+}
+--@end lazy rule Measure2CellName
+
+--@begin lazy rule SimpleMeasure2CellValue
+--@comments creates a cell with a the value of a SimpleMeasure element
+lazy rule SimpleMeasure2CellValue {
+	from
+		meas:Measure!SimpleMeasure
+	to
+		cellValue:Table!Cell (
+			content <- meas.value.toString()
+		)
+}
+--@end lazy rule SimpleMeasure2CellValue
+
+
+--@begin lazy rule ChartHeaderRow
+--@comments creates a header row for a SVG chart representation
+lazy rule ChartHeaderRow {
+	from
+		firstCellContent:String,
+		metricName:String,
+		unit:String
+	to		
+		headerRow:Table!Row (
+			cells <- headerCell,
+			cells <- metricNameCell
+		),
+		headerCell:Table!Cell (
+			content <- firstCellContent
+		),
+		metricNameCell:Table!Cell (
+			content <- thisModule.metric(metricName).name +
+				' ' + unit
+		)
+}
+--@end lazy rule ChartHeaderRow
+
+--@begin lazy rule MeasureSets2SVGBarChart
+--@comments creates a table for a SVG bar chart representation and for one metric
+lazy rule MeasureSets2SVGBarChart {
+	from
+		measSets:Sequence(Measure!MeasureSet),
+		metricName:String
+	to
+		barDiagTable:Table!Table (
+			rows <- thisModule.ChartHeaderRow('Bar Chart',metricName,
+				if measSets->first().oclIsTypeOf(Measure!AttributeMeasureSet)
+					then 'per Attribute'
+					else if measSets->first().oclIsTypeOf(Measure!ClassMeasureSet)
+							then 'per Class'
+							else if measSets->first().oclIsTypeOf(Measure!PackageMeasureSet)
+									then 'per Package'
+									else 'per Metamodel'
+								endif
+						endif
+				endif),
+			rows <- measSets->iterate(measSet; acc:Sequence(Table!Row)=Sequence{}|
+					acc->including(thisModule.MeasureName2RowBar(measSet,metricName)))
+		)
+}
+--@end lazy rule MeasureSets2SVGBarChart
+
+--@begin lazy rule MeasureName2RowBar
+--@comments creates a row, for a bar of the SVG bar chart representation, with the name and the value of the model element for one metric
+lazy rule MeasureName2RowBar {
+	from
+		measSet:Measure!MeasureSet,
+		metricName:String
+	to
+		rowValue:Table!Row (
+			cells <- thisModule.MeasureSet2CellElementName(measSet),
+			cells <- thisModule.SimpleMeasure2CellValue(measSet.simpleMeasures(metricName)->first())
+		)
+}
+--@end lazy rule MeasureName2RowBar
+
+
+--@begin lazy rule MeasureSets2SVGPieChart
+--@comments creates a table for a SVG pie chart representation and for one metric
+lazy rule MeasureSets2SVGPieChart {
+	from
+		measSets:Sequence(Measure!MeasureSet),
+		metricName:String
+	using {
+		sumSectors : Real = measSets->
+			collect(measSet|measSet.simpleMeasures(metricName)->
+				first().value)->sum();
+	}
+	to
+		pieDiagTable:Table!Table (
+			rows <- thisModule.ChartHeaderRow('Pie Chart',metricName,
+				if measSets->first().oclIsTypeOf(Measure!AttributeMeasureSet)
+					then 'per Attribute'
+					else if measSets->first().oclIsTypeOf(Measure!ClassMeasureSet)
+							then 'per Class'
+							else if measSets->first().oclIsTypeOf(Measure!PackageMeasureSet)
+									then 'per Package'
+									else 'per Metamodel'
+								endif
+						endif
+				endif),
+			rows <- measSets->iterate(measSet; acc:Sequence(Table!Row)=Sequence{}|
+				--@comments creates a sector for non null value
+				if measSet.valueNotNull(metricName)
+					then acc->including(thisModule.MeasureName2RowSector(measSet,metricName,sumSectors))
+					else acc
+				endif)
+		)
+}
+--@end lazy rule MeasureSets2SVGPieChart
+--
+--@begin lazy rule MeasureName2RowSector
+--@comments creates a row, for a sector of the SVG pie chart representation, with the name and the value of the model element for one metric
+lazy rule MeasureName2RowSector {
+	from
+		measSet:Measure!MeasureSet,
+		metricName:String,
+		sumSectors:Real
+	to
+		rowValue:Table!Row (
+			cells <- thisModule.MeasureSet2CellElementName(measSet),
+			cells <- cellSector
+		),
+		cellSector:Table!Cell (
+			content <- (measSet.simpleMeasures(metricName)->
+					first().value/sumSectors*100).toString()
+		)
+}
+--@end lazy rule MeasureName2RowSector

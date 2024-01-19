@@ -1,0 +1,233 @@
+module SimpleClass2SimpleRDBMS;
+create OUT : SimpleRDBMS from IN : SimpleClass;
+
+-- Transforms all persistent classes that are a root of an inheritance tree
+
+rule PersistentClass2Table{
+	from
+		c : SimpleClass!Class (
+			  c.is_persistent and c.parent->oclIsUndefined() 
+			)
+			
+	using {
+		primary_attributes : Sequence(TupleType(name : String,
+			                            		type : SimpleClass!Classifier,
+										        isPrimary : Boolean)
+					 		 ) =
+					c.flattenedFeatures->select(f | f.isPrimary);
+
+		--	this variable holds all the features of a persistent class
+		--	and for each feature it keeps the number of the primary attributes
+		--	of the persistent class plus the total number of the primary attributes of the 
+		--	preceding attributes
+
+		persistent_features : Sequence(TupleType(
+											name : String,
+											class : SimpleClass!Class,
+											offcet : Integer,
+											nofAttrs : Integer
+										)
+			                    ) =
+			c.flattenedFeatures->iterate(tuple; acc : Sequence(TupleType(name : String,
+			             									  class : SimpleClass!Class,
+															  offcet : Integer,
+															  nofAttrs : Integer))=Sequence{} |
+			          if tuple.type->oclIsKindOf(SimpleClass!Class)
+					  then -- a persistent feature is found
+					  	 acc->append(
+								Tuple{
+									name=tuple.name,
+									class = tuple.type,
+									offcet=if acc->size()=0 then 1
+										   else acc->last().offcet + acc->last().nofAttrs
+										   endif,
+									nofAttrs=tuple.type.topParent.flattenedFeatures->select(t | t.isPrimary)->size()
+								}
+							  )
+						else
+							acc
+						endif
+			);
+
+		foreign_key_attributes : Sequence(TupleType(name : String,
+			                            			type : SimpleClass!Classifier)
+					 		     ) =
+					persistent_features->collect(tuple | 
+						                   	  tuple.class.topParent.flattenedFeatures->select(t | t.isPrimary)->collect(a |
+						                   	     Tuple {
+						                   	  	 	name=tuple.name + '_' + a.name,
+													type=a.type
+						                   	  	 }
+						                   	  )
+					                      )->flatten();
+		
+		rest_of_attributes : Sequence(TupleType(name : String,
+			                            		type : SimpleClass!Classifier
+							 )) =
+			c.flattenedFeatures->select(tuple | 
+					 		 	not tuple.isPrimary and 
+								not tuple.type->oclIsKindOf(SimpleClass!Class)
+					 		 );
+	}
+	
+	to
+		t : SimpleRDBMS!Table (
+		    	name<-c.name,
+				cols<-primary_key_columns->union(foreign_key_columns)->union(rest),
+				pkey<-primary_key_columns,
+				fkeys<-foreign_keys
+			),
+		
+		primary_key_columns : distinct SimpleRDBMS!Column foreach (primAttr in primary_attributes)
+			    (
+		 		    name<-primAttr.name,
+				    type<-primAttr.type.name
+		         ),
+		
+		foreign_keys : distinct SimpleRDBMS!FKey foreach (persAttr in persistent_features)
+		 		(
+		 			references<-persAttr.class.topParent, 
+					cols<-persistent_features->iterate(tuple;
+													   acc : Sequence(Sequence(SimpleRDBMS!Column))=Sequence{} |
+					      	acc->append(foreign_key_columns.subSequence(
+					      					tuple.offcet,
+					      					tuple.offcet + tuple.nofAttrs-1)
+										)
+						         )
+											 			
+		 		),
+				
+		foreign_key_columns : distinct SimpleRDBMS!Column foreach (attr in foreign_key_attributes)
+		 		(
+		 			name<-attr.name,
+				    type<-attr.type.name
+		 		),
+		
+		rest : distinct SimpleRDBMS!Column foreach (attr in rest_of_attributes)
+		 		(
+		 			name<-attr.name,
+				    type<-attr.type.name
+		 		)
+}
+
+-- This helper determines all the attributes of a given class
+-- as an union of the attributes defined in the class and
+-- the attributes inherited from the parent class. 
+-- Attributes in a sub-class overrides inherited
+-- attributes with the same name.
+
+helper context SimpleClass!Class def :
+	allAttributes : Sequence(SimpleClass!Attribute) =
+
+	self.attrs->union(
+		if not self.parent.oclIsUndefined() then -- there is a parent class
+			self.parent.allAttributes->select(attr |
+			   not self.attrs->exists(at | at.name = attr.name)
+			)
+		else  -- no parent class
+			Sequence {} 
+		endif
+	)->flatten();
+	
+	   
+-- This helper determines all the associations
+-- for a given class as an union of the defined
+-- and inherited associations.
+-- We assume that name clashes in association ends are not allowed.
+	   
+helper context SimpleClass!Class def :
+	allAssociations : Sequence(SimpleClass!Association) =
+
+	let defAssoc : Sequence(SimpleClass!Association) = 
+		SimpleClass!Association.allInstances()->select(assoc |
+			assoc.src = self) in
+   	defAssoc->union(
+		if not self.parent.oclIsUndefined() then 
+		   self.parent.allAssociations
+		else 
+		   Sequence {} 
+        endif
+	)->flatten();
+
+-- This helper returns a sequence of attributes collected from the 
+-- specialized classes of the context class.
+-- In this way a flattening of inheritance hierarchy
+-- is achieved.
+
+helper context SimpleClass!Class def :
+	attributesOfSubclasses : Sequence(SimpleClass!Attribute) =
+	
+	let attrsInSubclasses : Sequence(SimpleClass!Attribute) =
+		SimpleClass!Class.allInstances()->select(c |
+			c.parent=self
+		)->collect(directSubclass |
+			directSubclass.attributesOfSubclasses
+		)->flatten() in
+	attrsInSubclasses->union(
+		self.attrs->select(attr | 
+			not attrsInSubclasses->exists(a |
+				a.name = attr.name)
+	))->flatten();
+
+--Helper similar to the previous one that flattens associations.
+
+helper context SimpleClass!Class def :
+	associationsOfSubclasses : Sequence(SimpleClass!Association) =
+
+	SimpleClass!Association.allInstances()->select(assoc |
+			assoc.src = self)->union(
+	   		SimpleClass!Class.allInstances()->select(c |
+	   			c.parent = self)->collect(subclass |
+	   		subclass.associationsOfSubclasses)->flatten()
+	)->flatten();
+
+-- This helper locates the top parent class
+-- for a given context class. The helper is used
+-- when an attribute/association refers to a
+-- persistent class that is not a root of
+-- an inheritance hierarchy. In that case
+-- the root must be located in order to obtain
+-- the target table derived from the root class. 
+
+helper context SimpleClass!Class def :
+	topParent : SimpleClass!Class =
+
+	if self.parent.oclIsUndefined() then 
+		self 
+	else
+		self.parent.topParent
+	endif;
+
+-- Helper that performs flattening of non-simple attributes
+-- and associations pointing to non-persistent classes.
+
+helper context SimpleClass!Class def :
+	flattenedFeatures : Sequence(TupleType(
+		                                   name : String,
+										   type : SimpleClass!Classifier,
+										   isPrimary : Boolean
+										  )) =
+
+    if self.topParent.is_persistent then
+		self.topParent.attributesOfSubclasses->union(
+			self.topParent.associationsOfSubclasses)
+	else
+		self.allAttributes->union(self.allAssociations)
+	endif->collect(f | 
+		let feature : TupleType(
+			             name : String,
+			             type : SimpleClass!Classifier,
+					     isPrimary : Boolean
+				      ) = 
+		if f.oclIsKindOf(SimpleClass!Attribute) then
+			Tuple{name = f.name, type = f.type, isPrimary = f.is_primary}
+	 	else
+			Tuple{name = f.name, type = f.dest, isPrimary = false}
+	 	endif in
+	if feature.type.oclIsKindOf(SimpleClass!PrimitiveDataType) then
+		feature
+	else if not feature.type.topParent.is_persistent then 	 
+		feature.type.flattenedFeatures->collect (f | Tuple{name=feature.name+ '_' + f.name, type=f.type, isPrimary=f.isPrimary})
+	else feature
+	endif endif
+	)->flatten();

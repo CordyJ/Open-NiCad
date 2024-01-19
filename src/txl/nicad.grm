@@ -1,0 +1,16 @@
+% Generic grammar for NiCad XML tags
+% Jim Cordy, July 2020
+
+% We use special tokens to prevent language grammars from mistaking NiCad tags as language elements
+tokens
+    sourcetag	  "<source "	% includes space for precision
+    endsourcetag  "</source>"
+end tokens
+
+define xml_source_coordinate
+    [sourcetag] [SPOFF] 'file=[stringlit] [SP] 'startline=[stringlit] [SP] 'endline=[stringlit] '> [SPON] [NL]
+end define
+
+define end_xml_source_coordinate
+    [NL] [endsourcetag] [NL]
+end define

@@ -1,0 +1,72 @@
+--@atlcompiler	atl2006
+--@name			Simian2CodeClone
+--@version		1.0
+--@domains		Simian, CodeClone
+--@authors		Yu Sun
+--@email        yusun@cis.uab.edu
+--@date			2007/10/04
+--@description	This transformation is used to transform the output of Simian into generic Code Clone DSL model.
+
+
+module Simian2CodeClone; -- Module Template
+create OUT : CodeClone from IN : Simian, IN2 : FileInfo;
+
+helper context Simian!Clone
+def : getFile() : CodeClone!File = 
+	(
+			CodeClone!File.allInstances() -> flatten() -> select(e | e.fileName = self.file) -> first()
+	);
+
+rule FileInfo2FileList {
+	from 
+		fi : FileInfo!FileInfo
+	to
+		fl : CodeClone!FileList (
+			files <- fi.file
+		)
+}
+
+rule File2File {
+	from 
+		f : FileInfo!File
+	to
+		ff : CodeClone!File (
+			fileName <- f.name,
+			totalFileLines <- f.totallines
+		)
+}
+
+rule ClonePairs2CodeClone {
+	from 
+		clonePairs : Simian!ClonePairs,
+		fi : FileInfo!FileInfo
+	to
+		codeClone : CodeClone!CodeClone (
+			sourceToolName <- 'Simian',
+			groups <- clonePairs.clonepart
+		)
+}
+
+
+
+rule ClonePair2CloneGroup {
+	from 
+		clonepair : Simian!ClonePair
+	to 
+		cloneGroup : CodeClone!CloneGroup (
+			totalUnits <- clonepair.clonesubpart -> size(),
+			units <- clonepair.clonesubpart
+		)
+}
+
+rule Clone2CloneUnit {
+	from 
+		clone : Simian!Clone
+	to 
+		cloneUnit : CodeClone!CloneUnit (
+			startLine <- clone.start_line,
+			endLine <- clone.end_line,
+			file <- clone.getFile()
+		)
+}
+

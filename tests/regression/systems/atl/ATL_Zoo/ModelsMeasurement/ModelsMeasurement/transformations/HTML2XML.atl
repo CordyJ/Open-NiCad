@@ -1,0 +1,183 @@
+--@atlcompiler	atl2006
+--@name			HTML2XML
+--@version		2.0
+--@domains		HTML, Table
+--@authors		Eric Vepa (evepa <at> sodius.com) for SODIUS (www.sodius.com)
+--@date			2007/05/28
+--@description	HTML extractor for a subset of the HTML metamodel (table representation).
+
+module HTML2XML; -- Module Template
+create OUT : XML from IN : HTML;
+
+--@begin rule HTML
+rule HTML {
+	from
+		html : HTML!HTML
+	to
+		xml : XML!Root (
+			name <- 'html',
+			children <- html.head,
+			children <- html.body
+		)
+}	
+--@end rule HTML
+
+--@begin rule HTMLElement
+rule HTMLElement {
+	from
+		html : HTML!HTMLElement
+	to
+		xml : XML!Element (
+			children <-  html.children
+		)
+}	
+--@end rule HTMLElement
+
+--@begin rule HEAD
+rule HEAD extends HTMLElement {
+	from
+		html : HTML!HEAD
+	to
+		xml : XML!Element (
+			name <- 'head',
+			children <- html.headElements
+		)
+}	
+--@end rule HEAD
+
+--@begin abstract rule HEADElement
+abstract rule HEADElement extends HTMLElement {
+	from
+		html : HTML!HEADElement
+	to
+		xml : XML!Element
+}	
+--@end abstract rule HEADElement
+
+--@begin rule TITLE
+rule TITLE extends HEADElement {
+	from
+		html : HTML!TITLE
+	to
+		xml : XML!Element (
+			name <- 'title',
+			children <- thisModule.Text(html.value)
+		)
+}	
+--@end rule TITLE
+
+--@begin rule BODY
+rule BODY extends HTMLElement {
+	from
+		html : HTML!BODY
+	to
+		xml : XML!Element (
+			name <- 'body',
+			children <- html.bodyElements
+		)
+}	
+--@end rule BODY
+
+--@begin abstract rule BODYElement
+abstract rule BODYElement extends HTMLElement {
+	from
+		html : HTML!BODYElement
+	to
+		xml : XML!Element
+}	
+--@end abstract rule BODYElement
+
+--@begin abstract rule TABLEElement
+abstract rule TABLEElement extends BODYElement {
+	from
+		html : HTML!TABLEElement
+	to
+		xml : XML!Element
+}	
+--@end abstract rule TABLEElement
+
+--@begin rule TABLE
+rule TABLE extends TABLEElement {
+	from
+		html : HTML!TABLE
+	to
+		xml : XML!Element (
+			name <- 'table',
+			children <- thisModule.Attribute('border',
+				if not html.border.oclIsUndefined()
+					then html.border
+					else '0'
+				endif),
+			children <- html.trs
+		)
+}	
+--@end rule TABLE
+
+--@begin rule TR
+rule TR extends TABLEElement {
+	from
+		html : HTML!TR
+	to
+		xml : XML!Element (
+			name <- 'tr',
+			children <- html.tds
+		)
+}	
+--@end rule TR
+
+--@begin rule TD
+rule TD extends TABLEElement {
+	from
+		html : HTML!TD
+	to
+		xml : XML!Element (
+			name <- 'td',
+			children <- thisModule.Text(html.value)
+		)
+	do {
+		if (not html.align.oclIsUndefined()) {
+			xml.children <- thisModule.Attribute('align', html.align);
+		}
+	}
+}	
+--@end rule TD
+
+--@begin rule TH
+rule TH extends TD {
+	from
+		html : HTML!TH
+	to
+		xml : XML!Element (
+			name <- 'th'
+		)
+}	
+--@end rule TH
+
+--@begin called rule Attribute
+rule Attribute(attrName : String, attrValue : String) {
+	to
+		attr : XML!Attribute (
+			name <- attrName,
+			value <- attrValue
+		)
+	do {
+		attr;
+	}
+}	
+--@end called rule Attribute
+
+--@begin called rule Text
+rule Text(value : String) {
+	to
+		text : XML!Text (
+			value <-
+				if not value.oclIsUndefined()
+					then value
+					else ''
+				endif
+		)
+	do {
+		text;
+	}
+}	
+--@end called rule Text

@@ -1,0 +1,257 @@
+
+module TT2BDD;
+create OUT:BDD from IN:TT;
+
+rule TruthTable2BDD {
+   from src : TT!TruthTable
+   to dest : BDD!BDD
+      (
+         name <- src.name,
+         ports <- src.ports,
+         tree <- src.getTree().cell
+      )
+}
+
+rule InputPort2InputPort {
+   from src : TT!InputPort
+   to dest : BDD!InputPort
+      (
+         name <- src.name
+      )
+}
+
+rule OutputPort2OutputPort {
+   from src : TT!OutputPort
+   to dest : BDD!OutputPort
+      (
+         name <- src.name
+      )
+}
+
+rule Row2Leaf {
+   from src : TT!Row
+   to dest : BDD!Leaf
+      (
+         assignments <- src.cells->select(c | c.port.oclIsKindOf(TT!OutputPort))
+      )
+}
+
+rule Cell2Assignment {
+   from src: TT!Cell (src.port.oclIsKindOf(TT!OutputPort))
+   to dest : BDD!Assignment
+      (
+         value <- src.value,
+         port <- src.port
+      )
+}
+
+rule Cell2Subtree {
+   from src: TT!Cell (not src.getNode().oclIsUndefined())
+   using {
+      node : TupleType( cell : TT!Cell , zeroSubtree : OclAny , oneSubtree : OclAny ) =
+         src.getNode();
+   }
+   to dest : BDD!Subtree
+      (
+         port <- src.port,
+         treeForZero <-
+            if node.zeroSubtree.oclIsKindOf(TT!Row) then
+               node.zeroSubtree
+            else
+               node.zeroSubtree.cell
+            endif,
+         treeForOne <-
+            if node.oneSubtree.oclIsKindOf(TT!Row) then
+               node.oneSubtree
+            else
+               node.oneSubtree.cell
+            endif
+      )
+}
+
+---------------------------------------------------------------------------------------------------
+-- Partitionner une partie de la table de vérité.
+--
+-- Ce helper effectue un travail préparatoire à la création d'un arbre binaire.
+-- En prenant une sous-ensemble des lignes d'une table de vérité et un port de référence, il 
+-- retourne deux sous-ensembles de lignes : celles pour lesquelles le port vaut faux
+-- et celles pour lesquelles le port vaut vrai.
+--
+-- Entrées :
+--    rows : l'ensemble des lignes à traiter
+--    port : le port qui doit servir de référence au partitionnement
+--
+-- Sorties :
+--    un tuple contenant :
+--       zeroPart : l'ensemble des lignes pour lesquelles ce port vaut zéro (faux)
+--       onePart  : l'ensemble des lignes pour lesquelles ce port vaut un (vrai)
+--
+-- Préconditions :
+--
+--    Le port à utiliser doit être un port d'entrée :
+--
+--       port.oclIsKindOf(TT!InputPort))
+--
+--    Sa valeur est définie dans toutes les lignes
+--
+--         rows->forAll(r |
+--            r.cells->collect(c | c.port)
+--                   ->includes(port)
+--         )
+---------------------------------------------------------------------------------------------------
+helper def:
+   getPartition(rows : Sequence(TT!Row), port : TT!Port)
+      : TupleType( zeroPart : Sequence(TT!Row) , onePart : Sequence(TT!Row) ) =
+      
+      -- Sélectionner les lignes pour lesquelles ce port vaut faux
+      let _zeroPart : Sequence(TT!Row) =
+         rows->select(r |
+            r.cells->exists(c |
+               c.port = port and c.value = false
+            )
+         ) in
+         
+      -- Sélectionner les lignes pour lesquelles ce port vaut vrai
+      let _onePart : Sequence(TT!Row) =
+         rows->select(r |
+            r.cells->exists(c |
+               c.port = port and c.value = true
+            )
+         ) in
+
+      -- Construire le tuple résultat
+      Tuple{
+         zeroPart = _zeroPart,
+         onePart = _onePart
+      };
+
+---------------------------------------------------------------------------------------------------
+-- Construire une structure d'arbre à partir d'un ensemble de lignes.
+--
+-- Ce helper construit un arbre à base de tuples.
+-- Parmi l'ensemble des ports d'entrée utilisables, il sélectionne un port dont la valeur est
+-- définie dans toutes les lignes.
+-- Le helper getPartition est invoqué pour obtenir deux sous-ensembles de lignes correspondant
+-- aux deux états possibles du port sélectionné.
+-- L'arbre se construit de manière récursive jusqu'à ce que l'ensemble de lignes fourni se
+-- réduise à une seule ligne.
+--
+-- Entrées :
+--    rows        : l'ensemble des lignes à traiter
+--    usablePorts : l'ensemble des ports dont la valeur doit être considérée dans la construction
+--                  de l'arbre 
+--
+-- Sorties :
+--    un tuple contenant :
+--       cell        : une cellule qui sert de référence et désigne le noeud courant de l'arbre
+--       zeroSubtree : le sous-arbre correspondant à la valeur zéro du port
+--       oneSubtree  : le sous-arbre correspondant à la valeur un du port
+---------------------------------------------------------------------------------------------------
+helper def:
+   getTree(rows : Sequence(TT!Row), usablePorts : Sequence(TT!Port))
+      : TupleType( cell : TT!Cell , zeroSubtree : OclAny , oneSubtree : OclAny ) =
+
+      -- Parmi tous les ports utilisables, en choisir un dont la valeur est définie
+      -- dans toutes les lignes
+      let _port : TT!Port =
+         usablePorts->any(p |
+            rows->forAll(r |
+               r.cells->collect(c | c.port)
+                     ->includes(p)
+            )
+         ) in
+      
+      -- Sélectionner une cellule qui définit une valeur pour ce port
+      let _cell : TT!Cell =
+         rows->first().cells->any(c | c.port = _port) in
+         
+      -- Partitionner l'ensemble de lignes fourni
+      let _part : TupleType( zeroPart : Sequence(TT!Row), onePart : Sequence(TT!Row) ) =
+         thisModule.getPartition(rows, _port) in
+
+      -- Définir le nouvel ensemble de ports utilisables pour les partitionnements ultérieurs
+      let _updatedPorts : Sequence(TT!Port) =
+         usablePorts->excluding(_port) in
+            
+      -- Construire le tuple résultat : une structure d'arbre est construite récursivement
+      Tuple{
+         cell = _cell,
+         zeroSubtree =
+            if _part.zeroPart->size() = 1 then
+               _part.zeroPart->first()
+            else
+               thisModule.getTree(_part.zeroPart, _updatedPorts)
+            endif,
+         oneSubtree =
+            if _part.onePart->size() = 1 then
+               _part.onePart->first()
+            else
+               thisModule.getTree(_part.onePart, _updatedPorts)
+            endif
+      };
+
+---------------------------------------------------------------------------------------------------
+-- Obtenir l'arbre représentatif d'une table de vérité complète.
+--
+-- Ce helper construit une structure d'arbre en utilisant thisModule.getTree().
+---------------------------------------------------------------------------------------------------
+helper context TT!TruthTable def:
+   getTree()
+      : TupleType( cell : TT!Cell , zeroSubtree : OclAny , oneSubtree : OclAny ) =
+      thisModule.getTree(self.rows, self.ports->select(p | p.oclIsKindOf(TT!InputPort)));
+      
+---------------------------------------------------------------------------------------------------
+-- Recherche une cellule de table de vérité dans un arbre.
+--
+-- Ce helper explore récursivement les sous-arbres jusqu'à ce que la cellule cherchée ait été
+-- trouvée ou jusqu'à ce que l'arbre entier ait été parcouru sans succès.
+--
+-- Entrées :
+--    cell : la cellule cherchée
+--    tree : le noeud racine de l'arbre dans lequel il faut le rechercher
+--
+-- Sorties :
+--    un noeud de l'arbre en cas de succès,
+--    OclUndefined en cas d'échec
+---------------------------------------------------------------------------------------------------
+helper def:
+   findCell(cell : TT!Cell, tree : TupleType( cell : TT!Cell, zeroSubtree : OclAny, oneSubtree : OclAny ))
+      : TupleType( cell : TT!Cell , zeroSubtree : OclAny , oneSubtree : OclAny ) =
+
+      if tree.cell = cell then
+         tree
+      else if tree.zeroSubtree.oclIsKindOf(TT!Row) then
+         if tree.oneSubtree.oclIsKindOf(TT!Row) then
+            -- Les deux sous-arbres sont des feuilles
+            Sequence{}->first()
+         else
+            -- Seul Le sous-arbre 1 n'est pas une feuille
+            thisModule.findCell(cell,tree.oneSubtree)
+         endif
+      else
+         let tryInZero : OclAny = thisModule.findCell(cell,tree.zeroSubtree) in
+         if tree.oneSubtree.oclIsKindOf(TT!Row) then
+            -- Seul Le sous-arbre 0 n'est pas une feuille
+            tryInZero
+         else if tryInZero.oclIsUndefined() then
+            -- Aucun des sous-arbres n'est une feuille
+            -- mais le sous-arbre 0 n'a donné aucun résultat
+            thisModule.findCell(cell,tree.oneSubtree)
+         else
+            -- Aucun des sous-arbres n'est une feuille
+            -- et le sous-arbre 0 a donné un résultat
+            tryInZero
+         endif endif
+      endif endif;
+
+---------------------------------------------------------------------------------------------------
+-- Obtenir, pour une cellule donnée d'une table de vérité, le noeud correspondant dans l'arbre
+-- représentatif de cette table.
+--
+-- Ce helper utilise getTree et findCell.
+---------------------------------------------------------------------------------------------------
+helper context TT!Cell def:
+   getNode() 
+      : TupleType( cell : TT!Cell , zeroSubtree : OclAny , oneSubtree : OclAny ) =
+
+      thisModule.findCell(self, self.owner.owner.getTree());

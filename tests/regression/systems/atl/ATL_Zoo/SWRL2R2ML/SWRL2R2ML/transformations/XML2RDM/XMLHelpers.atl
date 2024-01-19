@@ -1,0 +1,155 @@
+-- ============================================================
+-- Created as part of M.Sc. theses at GOOD OLD AI Laboratory
+-- Author: Milan Milanovic (milan at milanovic.org)
+-- Licence: GNU General Public License, version 2
+-- ============================================================
+	
+library XMLHelpers;
+
+--------------------------------
+-- General XML metamodel helpers
+--------------------------------
+
+-- HELPER:	getChildren
+-- Returns a children nodes with name n for XML element
+-- CONTEXT:	XML!Element
+-- IN:		String
+-- OUT:		Sequence(XML!Node)
+helper context XML!Element def: getChildren(n : String) : Sequence(XML!Node) =
+	self.children->select(e | e.name = n);
+
+-- HELPER:	getAttr
+-- Returns an attribute with name n for XML element
+-- CONTEXT:	XML!Element
+-- IN:		String
+-- OUT:		Sequence(XML!Attribute)
+helper context XML!Element def: getAttr(n : String) : Sequence(XML!Attribute) =
+	self.getChildren(n)->select(e | e.oclIsKindOf(XML!Attribute))->first();
+
+-- HELPER:	hasAttr
+-- Returns true/false regarding XML element has attribute with name n or doesn't have
+-- CONTEXT:	XML!Element
+-- IN:		String
+-- OUT:		Boolean
+helper context XML!Element def: hasAttr(n : String) : Boolean =
+	let d : XML!Attribute = self.getAttr(n) in
+	if d.oclIsUndefined() then
+		false
+	else
+		true
+	endif;
+
+-- HELPER:	getAttrVal
+-- Returns a string corresponding to the value of the attribute (identified by
+-- the string passed as parameter) of the contextual XML!Element.
+-- CONTEXT:	XML!Element
+-- IN:		String
+-- OUT:		String
+helper context XML!Element def: getAttrVal(n : String) : String =
+	let d : XML!Attribute = self.getAttr(n) in
+	if d.oclIsUndefined() then
+		OclUndefined
+	else
+		d.value
+	endif;
+
+-- HELPER:	getAttrVal
+-- Returns a true/false value for Boolean attribute type of XML element
+-- CONTEXT:	XML!Element
+-- IN:		String
+-- OUT:		Boolean
+helper context XML!Element def: getBooleanAttrVal(n : String) : Boolean =
+	let v : String = self.getAttrVal(n) in
+	if v.oclIsUndefined() then
+		OclUndefined
+	else
+		v = 'true'
+	endif;
+
+-- HELPER:	getIntegerAttrVal
+-- Returns an integer value for Integer attribute type of XML element
+-- CONTEXT:	XML!Element
+-- IN:		String
+-- OUT:		Boolean
+helper context XML!Element def: getIntegerAttrVal(n : String) : Integer =
+	let v : String = self.getAttrVal(n) in
+	if v.oclIsUndefined() then
+		OclUndefined
+	else
+		v.toInteger()
+	endif;
+
+-- HELPER:	rootElt
+-- Returns the root Root element of the XML input model.
+-- CONTEXT:	thisModule
+-- OUT:		XML!Root
+helper def: rootElt : XML!Root =
+	XML!Root.allInstances()->asSequence()->first();
+
+-- HELPER:	toBoolean
+-- Converts String value to Boolean value
+-- CONTEXT:	String
+-- IN:		String
+-- OUT:		Boolean
+helper context String def: toBoolean() : Boolean =
+	if self = 'true'
+	then true
+	else false
+	endif;
+
+-- HELPER:	getElementsByName
+-- Returns the XML!Element corresponding to the children (identified by the
+-- string passed as parameter) of the contextual XML!Element.
+-- CONTEXT:	XML!Element
+-- IN:		String
+-- OUT:		Set(XML!Element)
+helper context XML!Element def: getElementsByName(name : String) : Set(XML!Element) =
+	self.children->select(c | c.oclIsKindOf(XML!Element) and c.name = name);
+
+-- HELPER:	getFirstElementByName
+-- Returns the XML!Element corresponding to the first child (identified by the
+-- string passed as parameter) of the contextual XML!Element.
+-- CONTEXT:	XML!Element
+-- IN:		String
+-- OUT:		XML!Element
+helper context XML!Element def: getFirstElementByName(name : String) : XML!Element =
+	self.getElementsByName(name)->first();
+
+-- HELPER:	getTextValue()
+-- Returns a string contraining the value of the Text which is the child of the
+-- contextual XML!Element.
+-- CONTEXT:	XML!Element
+-- OUT:		String
+helper context XML!Element def: getTextValue() : String =
+	if self.children->isEmpty()
+	then
+		''
+	else
+		if self.children->first().oclIsUndefined()
+		then
+			''
+		else
+			self.children->first().value
+		endif
+	endif;
+
+-- This helper return a Sequence of XML!Element from a child name of a child names of self
+-- CONTEXT: XML!Element
+-- RETURN:  Sequence(XML!Element)
+helper context XML!Element def: getSeq(names : String,name : String) : Sequence(XML!Element) =
+	self.children -> select(m | m.oclIsTypeOf(XML!Element) and m.name = names )
+	-> collect(d | d.children )->flatten()->select(m | m.oclIsTypeOf(XML!Element) and m.name = name );
+
+-- This helper recognize the XML!Element who are children of e
+-- CONTEXT: XML!Element
+-- RETURN:  Boolean
+helper context XML!Element def: isChildrenOf(e : XML!Element) : Boolean =
+	let a : Boolean =
+		if self.parent.oclIsKindOf(XML!Element)
+			then if self.parent = e 
+					then true 
+					else self.parent.isChildrenOf(e) 
+				endif
+			else false
+		endif
+	in a;

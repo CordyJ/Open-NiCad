@@ -1,0 +1,538 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://Grass_Raster_Curvature.grass.ws.laits.gmu.edu" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://Grass_Raster_Curvature.grass.ws.laits.gmu.edu" xmlns:intf="http://Grass_Raster_Curvature.grass.ws.laits.gmu.edu" xmlns:tns1="http://grass.ws.laits.gmu.edu" xmlns:tns2="http://ws.laits.gmu.edu" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+	 <wsdl:types>
+
+		  <schema elementFormDefault="qualified" targetNamespace="http://Grass_Raster_Curvature.grass.ws.laits.gmu.edu" xmlns="http://www.w3.org/2001/XMLSchema">
+
+			<!-- ELEMENTS -->
+
+			   <element name="Profile_curvatureElement">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Name of the element to describe input parameters.
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element minOccurs="1" name="sourceURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of input raster elevation file. Default data format is GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element default="1.0" minOccurs="0" name="zfactor" nillable="true" type="xsd:float">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Multiplicative factor to convert elevation units to meters.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element default="Byte" minOccurs="1" name="outputGeoTiffType" type="tns1:GeoTiffFileType">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Type of output GeoTIFF file. The output Format Type is specified as GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+			   <element name="Profile_curvatureResponse">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Always return URL and Format of output file.
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element name="returnURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of output profile curvature file.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element name="returnFormat" type="xsd:string">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Format of output profile curvature file.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+			   <element name="fault" type="tns2:WebServiceExceptionsType"/>
+
+			   <element name="Tangential_curvatureElement">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Name of the element to describe input parameters.
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element minOccurs="1" name="sourceURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of input raster elevation file. Default data format is GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element default="1.0" minOccurs="0" name="zfactor" nillable="true" type="xsd:float">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Multiplicative factor to convert elevation units to meters.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element default="Byte" minOccurs="1" name="outputGeoTiffType" type="tns1:GeoTiffFileType">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Type of output GeoTIFF file. The output Format Type is specified as GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+			   <element name="Tangential_curvatureResponse">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Always return URL and Format of output file.
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element name="returnURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of output tangential curvature file.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element name="returnFormat" type="xsd:string">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Format of output tangential curvature file.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+		  </schema>
+
+		  <schema elementFormDefault="qualified" targetNamespace="http://grass.ws.laits.gmu.edu" xmlns="http://www.w3.org/2001/XMLSchema">
+
+			   <simpleType name="GeoTiffFileType">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Type of output file if the outputFormatType is specified as GeoTIFF.
+                         </documentation>
+
+				    </annotation>
+
+				    <restriction base="string">
+
+					     <enumeration value="Byte">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be Byte - 8-bit unsigned integer.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="Int16">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be Int16 - 16-bit signed integer.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="UInt16">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be UInt16 - 16-bit unsigned integer.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="UInt32">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be UInt32 - 32-bit unsigned integer.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="Int32">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be Int32 - 32-bit signed integer.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="Float32">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be Float32 - 32-bit floating point.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="Float64">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be Float64 - 64-bit floating point.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="CInt16">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be CInt16 - Complex 16-bit signed integer (ie. two Int16's one representing the real component, and one the imaginary component).
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="CInt32">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be CInt32 - Complex 32-bit signed integer.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="CFloat32">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be CFloat32 - Complex 32-bit floating point.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="CFloat64">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be CFloat64 - Complex 64-bit floating point.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+				    </restriction>
+
+			   </simpleType>
+
+		  </schema>
+
+		  <schema elementFormDefault="qualified" targetNamespace="http://ws.laits.gmu.edu" xmlns="http://www.w3.org/2001/XMLSchema">
+
+			   <complexType name="WebServiceExceptionsType">
+
+				    <sequence>
+
+					     <element name="exception" type="xsd:string"/>
+
+				    </sequence>
+
+			   </complexType>
+
+		  </schema>
+
+	 </wsdl:types>
+
+	 <wsdl:message name="profile_curvatureRequest">
+
+		  <wsdl:part element="impl:Profile_curvatureElement" name="parameters"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="profile_curvatureResponse">
+
+		  <wsdl:part element="impl:Profile_curvatureResponse" name="return"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="tangential_curvatureRequest">
+
+		  <wsdl:part element="impl:Tangential_curvatureElement" name="parameters"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="tangential_curvatureResponse">
+
+		  <wsdl:part element="impl:Tangential_curvatureResponse" name="return"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="WebServiceExceptionsType">
+
+		  <wsdl:part element="impl:fault" name="fault"/>
+
+	 </wsdl:message>
+
+	 <wsdl:portType name="Grass_Raster_CurvaturePortType">
+
+		  <wsdl:operation name="profile_curvature">
+
+			   <wsdl:input message="impl:profile_curvatureRequest" name="profile_curvatureRequest"/>
+
+			   <wsdl:output message="impl:profile_curvatureResponse" name="profile_curvatureResponse"/>
+
+			   <wsdl:fault message="impl:WebServiceExceptionsType" name="WebServiceExceptionsType"/>
+
+		  </wsdl:operation>
+
+		  <wsdl:operation name="tangential_curvature">
+
+			   <wsdl:input message="impl:tangential_curvatureRequest" name="tangential_curvatureRequest"/>
+
+			   <wsdl:output message="impl:tangential_curvatureResponse" name="tangential_curvatureResponse"/>
+
+			   <wsdl:fault message="impl:WebServiceExceptionsType" name="WebServiceExceptionsType"/>
+
+		  </wsdl:operation>
+
+	 </wsdl:portType>
+
+	 <wsdl:binding name="Grass_Raster_CurvatureSoapBinding" type="impl:Grass_Raster_CurvaturePortType">
+
+		  <wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+		  <wsdl:operation name="profile_curvature">
+
+			   <wsdl:documentation>
+Generate raster map layer of profile curvature from a raster map layer of true elevation values. Profile curvatures are the curvatures in the direction of steepest slope. The curvatures are expressed as 1/metres. The operation is based on GRASS raster command r.slope.aspect.   </wsdl:documentation>
+
+			   <wsdlsoap:operation soapAction="profile_curvature" style="document"/>
+
+			   <wsdl:input>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:input>
+
+			   <wsdl:output>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:output>
+
+			   <wsdl:fault name="WebServiceExceptionsType">
+
+				    <wsdlsoap:fault name="WebServiceExceptionsType" use="literal"/>
+
+			   </wsdl:fault>
+
+		  </wsdl:operation>
+
+		  <wsdl:operation name="tangential_curvature">
+
+			   <wsdl:documentation>
+Generate raster map layer of tangential curvature from a raster map layer of true elevation values. Tangential curvatures are the curvatures in the direction of the contour tangent. The curvatures are expressed as 1/metres. The operation is based on GRASS raster command r.slope.aspect.   </wsdl:documentation>
+
+			   <wsdlsoap:operation soapAction="tangential_curvature" style="document"/>
+
+			   <wsdl:input>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:input>
+
+			   <wsdl:output>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:output>
+
+			   <wsdl:fault name="WebServiceExceptionsType">
+
+				    <wsdlsoap:fault name="WebServiceExceptionsType" use="literal"/>
+
+			   </wsdl:fault>
+
+		  </wsdl:operation>
+
+	 </wsdl:binding>
+
+	 <wsdl:service name="Grass_Raster_CurvatureService">
+
+		  <wsdl:documentation>
+Compute profile and tangential curvatures from a raster map layer of true elevation values.  </wsdl:documentation>
+
+		  <wsdl:port binding="impl:Grass_Raster_CurvatureSoapBinding" name="Grass_Raster_Curvature">
+
+			   <wsdlsoap:address location="http://65.123.203.154:8099/axis/services/Grass_Raster_Curvature"/>
+
+		  </wsdl:port>
+
+	 </wsdl:service>
+
+	<!--WSDL created by Apache Axis version: 1.4
+Built on Apr 22, 2006 (06:55:48 PDT)-->
+
+</wsdl:definitions>

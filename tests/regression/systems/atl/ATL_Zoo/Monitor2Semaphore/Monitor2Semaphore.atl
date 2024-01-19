@@ -1,0 +1,926 @@
+module Monitor2Semaphore;
+create OUT : Program from IN : Program;
+
+
+-------------------------------------------------------------------------------
+-- HELPERS --------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- This helper provides access to the root Program element.
+-- CONTEXT: thisModule
+-- RETURN: Program!Program
+helper def: rootElt : Program!Program =
+	Program!Program.allInstances()->asSequence()->first();
+
+-- This helper builds the set of 'condition' VariableDeclaration elements.
+-- CONTEXT: thisModule
+-- RETURN: Set(Program!VariableDeclaration)
+helper def: allCondVariables : Set(Program!VariableDeclaration) =
+	Program!VariableDeclaration.allInstances()
+		->select(c | c.type.name = 'condition');
+
+-- This helper builds the set of Monitor elements.
+-- CONTEXT: thisModule
+-- RETURN: Set(Program!Monitor)
+helper def: allMonitors : Set(Program!Monitor) =
+	Program!Monitor.allInstances();
+
+-- This helper provides a boolean indicating if monitors (at least one) are
+-- defined in the input model.
+-- CONTEXT: thisModule
+-- RETURN: Boolean
+helper def: monitorsDefined : Boolean =
+	thisModule.allMonitors->notEmpty();
+
+-- This helper builds the set of 'condition' calls VariableExp elements.
+-- CONTEXT: thisModule
+-- RETURN: Set(Program!VariableExp)
+helper def: allCondCalls : Set(Program!VariableExp) =
+	Program!ProcedureCallExp.allInstances()->collect(e | e.source);
+--		->collect(e | allCondVariables->includes(e.source.declaration));
+
+-- This helper computes the Structure (Program, Monitor, Procedure) element
+-- the context VariableDeclaration has to be attached to:
+--  * a standalone declaration is attached to the Program element;
+--  * a monitor declaration is attached to the Program element;
+--  * an in-procedure declaration is attached to its Procedure element.
+-- CONTEXT: Program!VariableDeclaration
+-- RETURN: Program!Structure
+helper context Program!VariableDeclaration
+	def: getTargetStructure() : Program!Structure =
+	let v_container : Program!Structure = self.structure in
+	if v_container.oclIsKindOf(Program!Monitor) then
+		v_container.program
+	else
+		v_container
+	endif;
+
+-- This helper returns the Type of a VariableDeclaration (which may be a
+-- Parameter) when:
+--  1- this variable is of 'integer' or 'boolean' type;
+--  2- at least 1 monitor has been defined in the input program.
+-- CONTEXT: Program!VariableDeclaration
+-- RETURN: Program!Type
+helper context Program!VariableDeclaration
+	def: getType() : Program!Type =
+	if self.type.name = 'integer' then
+		thisModule.resolveTemp(thisModule.rootElt, 'integer_type')
+	else
+		thisModule.resolveTemp(thisModule.rootElt, 'boolean_type')
+	endif;
+	
+-- This helper computes a boolean indicating whether the context variable is
+-- declared within a monitor or a procedure of a monitor.
+-- CONTEXT: Program!VariableDeclaration
+-- RETURN: Boolean
+helper context Program!VariableDeclaration
+	def: isDeclaredInMonitor() : Boolean =
+	let v_container : Program!Structure = self.structure in
+	if v_container.oclIsKindOf(Program!Monitor) then
+		true
+	else
+		if v_container.oclIsKindOf(Program!Procedure) then
+			v_container.container.oclIsKindOf(Program!Monitor)
+		else
+			false
+		endif
+	endif;
+
+-- This helper computes the set of Procedure elements to be attached to the
+-- root Program element. This set includes:
+--  * the defined standalone procedures;
+--  * the 'signal', and 'wait' procedures generated for each input Monitor
+--    element;
+--  * the 'cond_wait' and 'cond_signal' procedures generated for each input
+--    'condition' element.
+-- CONTEXT: Program!Program
+-- RETURN: Set(Program!Procedure)
+helper context Program!Program
+	def: getProcedures() : Set(Program!Procedure) =
+	self.monitors->collect(e | e.procedures)
+		->union(thisModule.allCondVariables
+			->collect(e | thisModule.resolveTemp(e, 'cond_wait')))
+		->union(thisModule.allCondVariables
+			->collect(e | thisModule.resolveTemp(e, 'cond_signal')))
+		->union(self.procedures);
+
+-- This helper computes the set of VariableDeclaration elements to be attached
+-- to the root Program element. This set includes:
+--  * the defined standalone variables;
+--  * the 'mutex', 'urgent' and 'urgentcount' variables generated for each
+--    input Monitor element;
+--  * the 'condsem' and 'count' variables generated for each input
+--    'condition' element.
+-- CONTEXT: Program!Program
+-- RETURN: Set(Program!VariableDeclaration)
+helper context Program!Program
+	def: getVariables() : Set(Program!VariableDeclaration) =
+	self.variables
+		->union(thisModule.allCondVariables
+			->collect(e | thisModule.resolveTemp(e, 'condsem')))
+		->union(thisModule.allCondVariables
+			->collect(e | thisModule.resolveTemp(e, 'count')))
+		->union(thisModule.allMonitors
+			->collect(e | thisModule.resolveTemp(e, 'mutex')))
+		->union(thisModule.allMonitors
+			->collect(e | thisModule.resolveTemp(e, 'urgent')))
+		->union(thisModule.allMonitors
+			->collect(e | thisModule.resolveTemp(e, 'urgentcount')));
+
+
+
+-------------------------------------------------------------------------------
+-- RULES ----------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- Rule 'MainWithMonitors'.
+-- This rule generates the structure of the root Program element when the
+-- input element contains monitors (1-*).
+rule MainWithMonitors {
+	from
+		i : Program!Program (
+			thisModule.monitorsDefined
+		)
+	to
+		prg : Program!Program (
+			name <- i.name,
+			variables <- i.getVariables(),
+			procedures <- i.getProcedures(),
+			monitors <- Set{}
+		),
+		
+		-- 'this' variable delcaration: this variable is used for generated
+		-- condition procedure calls.
+		this_var : Program!VariableDeclaration (
+			name <- 'this',
+			type <- this_type
+		),
+		-- 'this' type is 'program'
+		this_type : Program!Type (
+			name <- 'program'
+		),
+
+		-- Basic types required for generated semaphore-based
+		-- procedures.
+		boolean_type : Program!Type (
+			name <- 'boolean'
+		),
+		integer_type : Program!Type (
+			name <- 'integer'
+		)
+}
+
+-- Rule 'MainWithoutMonitors'.
+-- This rule generates the structure of the root Program element when the
+-- input element contains no monitors.
+rule MainWithoutMonitors {
+	from
+		i : Program!Program (
+			not thisModule.monitorsDefined
+		)
+	to
+		prg : Program!Program (
+			name <- i.name,
+			variables <- i.variables,
+			procedures <- i.procedures,
+			monitors <- Set{}
+		)
+}
+
+-- Rule 'Monitor'.
+-- This rule generates a set of variable and procedure declarations that are
+-- associated with each defined monitor in the input model:
+--  * the 'urgent' variable initialized to 'false';
+--  * the 'urgentcount' variable initialized to '0';
+--  * the 'mutex' variable initialized to 'true'.
+rule Monitor {
+	from
+		i : Program!Monitor
+	to
+		-- Generation of a semaphore ('mutex') for mutual exclusion:
+		--   * its name is prefixed by the monitor name;
+		--   * its type is 'boolean';
+		--   * its initial value is 'true'.
+		mutex : Program!VariableDeclaration (
+			name <- i.name + '_mutex',
+			type <- thisModule.resolveTemp(thisModule.rootElt, 'boolean_type'),
+			initialValue <- true_value,
+			structure <- i.program
+		),
+		
+		-- Generation of a second semaphore ('urgent'):
+		--   * its name is prefixed by the monitor name;
+		--   * its type is 'boolean';
+		--   * its initial value is 'false'.
+		urgent : Program!VariableDeclaration (
+			name <- i.name + '_urgent',
+			type <- thisModule.resolveTemp(thisModule.rootElt, 'boolean_type'),
+			initialValue <- false_value,
+			structure <- i.program
+		),
+
+		-- Generation of an integer counter ('urgentcount'):
+		--   * its name is prefixed by the monitor name;
+		--   * its type is 'integer';
+		--   * its initial value is '0'.
+		urgentcount : Program!VariableDeclaration (
+			name <- i.name + '_urgentcount',
+			type <- thisModule.resolveTemp(thisModule.rootElt, 'integer_type'),
+			initialValue <- zero_value,
+			structure <- i.program
+		),
+
+		-- Basic values elements required for generated variables
+		-- initialization.
+		true_value : Program!BooleanExp (
+			symbol <- true
+		),
+		false_value : Program!BooleanExp (
+			symbol <- false
+		),
+		zero_value : Program!IntegerExp (
+			symbol <- 0
+		)
+}
+
+-- Rule 'Condition'.
+-- This rule generates a set of variable and procedure declarations that are
+-- associated with each defined 'condition' variable of the input model:
+--  * the 'sem' variable initialized to 'false';
+--  * the 'count' variable initialized to '0';
+--  * the condition 'wait' procedure declaration;
+--  * the condition 'signal' procedure declaration.
+rule Condition {
+	from
+		condition : Program!VariableDeclaration (
+			thisModule.allCondVariables->includes(condition)
+		)
+	to
+		-- Generation of the 'sem' boolean variable:
+		--   * its name is prefixed both by the monitor and the condition
+		---    names;
+		--   * its type is 'boolean';
+		--   * its initial value is 'false'.
+		condsem : Program!VariableDeclaration (
+			name <- condition.structure.name + '_' + condition.name +'_sem',
+			type <- thisModule.resolveTemp(thisModule.rootElt, 'boolean_type'),
+			initialValue <- false_value,
+			structure <- condition.structure.program
+		),
+		
+		-- Generation of the 'count' integer variable:
+		--   * its name is prefixed both by the monitor and the condition
+		---    names;
+		--   * its type is 'integer';
+		--   * its initial value is '0'.
+		count : Program!VariableDeclaration (
+			name <- condition.structure.name + '_' + condition.name + '_count',
+			type <- thisModule.resolveTemp(thisModule.rootElt, 'integer_type'),
+			initialValue <- zero_value_1,
+			structure <- condition.structure.program
+		),
+
+
+		-----------------------------------------------------------------------
+		-----------------------------------------------------------------------
+		-- Generation of the 'wait' procedure associated with a condition.
+		-- The procedure name is built by associating: the monitor name, the
+		-- condition name, and the 'wait' constant.
+		-- It is composed of four statements:
+		--   [1] condcount := condcount + 1;
+		--   [2] if urgentcount > 0 then V(urgent) else V(mutex);
+		--   [3] P(condsem);
+		--   [4] condcount := condcount -1;
+		cond_wait : Program!Procedure (
+			name <- condition.structure.name + '_' + condition.name + '_wait',
+			statements <-
+				Sequence{wait_stat1, wait_stat2, wait_stat3, wait_stat4},
+			container <- condition.structure.program
+		),
+		wait_stat1 : Program!AssignmentStat (
+			target <- count_exp_1,
+			value <- plus
+		),
+		wait_stat2 : Program!ConditionalStat (
+			condition <- urgentcount_test,
+			thenStats <- Sequence{then_st},
+			elseStats <- Sequence{else_st}
+		),
+		wait_stat3 : Program!ExpressionStat (
+			expression <- third_exp
+		),
+		wait_stat4 : Program!AssignmentStat (
+			target <- count_exp_3,
+			value <- less
+		),
+	
+		-- [Wait_1] condcount := condcount + 1;
+		count_exp_1 : Program!VariableExp (
+			declaration <- count
+		),
+		plus : Program!OperatorCallExp (
+			name <- '+',
+			source <- count_exp_2,
+			right <- one_value_1
+		),
+		count_exp_2 : Program!VariableExp (
+			declaration <- count
+		),
+		-- [Wait_2] if urgentcount > 0 then V(urgent) else V(mutex);
+		urgentcount_test : Program!OperatorCallExp (
+			name <- '>',
+			source <- urgentcount_exp_3,
+			right <- zero_value_2
+		),
+		urgentcount_exp_3 : Program!VariableExp (
+			declaration <-
+				thisModule.resolveTemp(condition.structure, 'urgentcount')
+		),
+		then_st : Program!ExpressionStat (
+			expression <- then_exp
+		),
+		then_exp : Program!ProcedureCallExp (
+			name <- 'v',
+			source <-  urgent_exp_1,
+			arguments <- Sequence{}
+		),
+		urgent_exp_1 : Program!VariableExp (
+			declaration <-
+				thisModule.resolveTemp(condition.structure, 'urgent')
+		),
+		else_st : Program!ExpressionStat (
+			expression <- else_exp
+		),
+		else_exp : Program!ProcedureCallExp (
+			name <- 'v',
+			source <- mutex_exp,
+			arguments <- Sequence{}
+		),
+		mutex_exp : Program!VariableExp (
+			declaration <- thisModule.resolveTemp(condition.structure, 'mutex')
+		),
+		-- [Wait_3] P(condsem);
+		third_exp : Program!ProcedureCallExp (
+			name <- 'p',
+			source <- condsem_exp_1,
+			arguments <- Sequence{}
+		),
+		condsem_exp_1 : Program!VariableExp (
+			declaration <- condsem
+		),
+		-- [Wait_4] condcount := condcount -1;
+		count_exp_3 : Program!VariableExp (
+			declaration <- count
+		),
+		less : Program!OperatorCallExp (
+			name <- '-',
+			source <- count_exp_4,
+			right <- one_value_2
+		),
+		count_exp_4 : Program!VariableExp (
+			declaration <- count
+		),
+
+		
+		-----------------------------------------------------------------------
+		-----------------------------------------------------------------------		
+		-- Generation of the 'signal' procedure associated with a condition.
+		-- The procedure name is built by associating: the monitor name, the
+		-- condition name, and the 'signal' constant.
+		-- It is composed of three statements:
+		--   [1] urgentcount := urgentcount +1;
+		--   [2] if condcount > 0 then {V(condsem); P(urgent)};
+		--   [3] urgentcount := urgentcount -1
+		cond_signal : Program!Procedure (
+			name <-
+				condition.structure.name + '_' + condition.name + '_signal',
+			statements <- Sequence{signal_stat1, signal_stat2, signal_stat3},
+			container <- condition.structure.program
+		),
+		signal_stat1 : Program!AssignmentStat (
+			target <-urgentcount_exp_1,
+			value <- urgentcount_plus
+		),
+		signal_stat2 : Program!ConditionalStat (
+			condition <- condcount_test,
+			thenStats <- Sequence{signal_condsem_stat, wait_urgent_stat}
+		),
+		signal_stat3 : Program!AssignmentStat (
+			target <-urgentcount_exp_2,
+			value <- urgentcount_less
+		),
+
+		-- [Signal_1] urgentcount := urgentcount +1;
+		urgentcount_exp_1 : Program!VariableExp (
+			declaration <-
+				thisModule.resolveTemp(condition.structure, 'urgentcount')
+		),
+		urgentcount_plus : Program!OperatorCallExp (
+			name <- '+',
+			source <- urgentcount_exp_4,
+			right <- one_value_3
+		),
+		urgentcount_exp_4 : Program!VariableExp (
+			declaration <-
+				thisModule.resolveTemp(condition.structure, 'urgentcount')
+		),
+		-- [Signal_2] if condcount > 0 then {V(condsem); P(urgent)};	
+		condcount_test : Program!OperatorCallExp (
+			name <- '>',
+			source <- count_exp_5,
+			right <- zero_value_3
+		),
+		count_exp_5 : Program!VariableExp (
+			declaration <- count
+		),
+		signal_condsem_stat : Program!ExpressionStat (
+			expression <- signal_condsem
+		),
+		signal_condsem : Program!ProcedureCallExp (
+			name <- 'v',
+			source <- condsem_exp_2,
+			arguments <- Sequence{}
+		),
+		condsem_exp_2 : Program!VariableExp (
+			declaration <- condsem
+		),
+		wait_urgent_stat : Program!ExpressionStat	(
+			expression <- wait_urgent
+		),
+		wait_urgent : Program!ProcedureCallExp (
+			name <- 'p',
+			source <- urgent_exp_2,
+			arguments <- Sequence{}
+		),
+		urgent_exp_2 : Program!VariableExp (
+			declaration <-
+				thisModule.resolveTemp(condition.structure, 'urgent')
+		),
+		-- [Signal_3] urgentcount := urgentcount -1
+		urgentcount_exp_2 : Program!VariableExp (
+			declaration <-
+				thisModule.resolveTemp(condition.structure, 'urgentcount')
+		),
+		urgentcount_less : Program!OperatorCallExp (
+			name <- '-',
+			source <- urgentcount_exp_5,
+			right <- one_value_4
+		),
+		urgentcount_exp_5 : Program!VariableExp (
+			declaration <-
+				thisModule.resolveTemp(condition.structure, 'urgentcount')
+		),
+
+
+		-- Basic values elements required for generated variables
+		-- initialization.
+		false_value : Program!BooleanExp (
+			symbol <- false
+		),
+		one_value_1 : Program!IntegerExp (
+			symbol <- 1
+		),
+		one_value_2 : Program!IntegerExp (
+			symbol <- 1
+		),
+		one_value_3 : Program!IntegerExp (
+			symbol <- 1
+		),
+		one_value_4 : Program!IntegerExp (
+			symbol <- 1
+		),
+		zero_value_1 : Program!IntegerExp (
+			symbol <- 0
+		),
+		zero_value_2 : Program!IntegerExp (
+			symbol <- 0
+		),
+		zero_value_3 : Program!IntegerExp (
+			symbol <- 0
+		)
+}
+
+-- Rule 'StandaloneProcedure'.
+-- This rule copies each standalone procedure defined in the input model to the
+-- output model.
+rule StandaloneProcedure {
+	from
+		i : Program!Procedure (
+			i.container.oclIsKindOf(Program!Program)
+		)
+	to
+		o : Program!Procedure (
+			name <- i.name,
+			parameters <- i.parameters,
+			variables <- i.variables,
+			statements <- i.statements,
+			container <- i.container
+		)
+}
+
+-- Rule 'MonitorProcedure'.
+-- This rule copies each procedure defined in an input model monitor to the
+-- output model.
+-- The name of the generated procedure is prefixed by the monitor name.
+-- The input procedure statements are preceded by a monitor entering statement
+-- and followed by a monitor leaving statement.
+rule MonitorProcedure {
+	from
+		i : Program!Procedure (
+			i.container.oclIsKindOf(Program!Monitor)
+		)
+	to
+		-- Generated procedure
+		proc : Program!Procedure (
+			name <- i.container.name + '_' + i.name,
+			parameters <- i.parameters,
+			variables <- i.variables,
+			statements <- Sequence{in_stat, i.statements, out_stat},
+			container <- i.container.program
+		),
+		
+		-- Monitor entering statement: P(mutex)
+		in_stat : Program!ExpressionStat (
+			expression <- in_exp
+		),
+		in_exp : Program!ProcedureCallExp (
+			name <- 'p',
+			source <- mutex_exp1,
+			arguments <- Sequence{}
+		),
+		mutex_exp1 : Program!VariableExp (
+			declaration <- thisModule.resolveTemp(i.container, 'mutex')
+		),
+		
+		-- Monitor leaving statement:
+		-- if urgentcount > 0 then V(urgent); else V(mutex);
+		out_stat : Program!ConditionalStat (
+			condition <- urgentcount_test,
+			thenStats <- Sequence{then_st},
+			elseStats <- Sequence{else_st}
+		),
+		-- Condition
+		urgentcount_test : Program!OperatorCallExp (
+			name <- '>',
+			source <- count_exp,
+			right <- zero_value
+		),
+		count_exp : Program!VariableExp (
+			declaration <- thisModule.resolveTemp(i.container, 'urgentcount')
+		),
+		zero_value : Program!IntegerExp (
+			symbol <- 0
+		),
+		-- 'then' statement
+		then_st : Program!ExpressionStat (
+			expression <- then_exp
+		),
+		then_exp : Program!ProcedureCallExp (
+			name <- 'v',
+			source <- urgent_exp,
+			arguments <- Sequence{}
+		),
+		urgent_exp : Program!VariableExp (
+			declaration <- thisModule.resolveTemp(i.container, 'urgent')
+		),
+		-- 'else' statement
+		else_st : Program!ExpressionStat (
+			expression <- else_exp
+		),
+		else_exp : Program!ProcedureCallExp (
+			name <- 'v',
+			source <- mutex_exp2,
+			arguments <- Sequence{}
+		),
+		mutex_exp2 : Program!VariableExp (
+			declaration <- thisModule.resolveTemp(i.container, 'mutex')
+		)
+}
+
+-- Rule 'Type'.
+-- This rule copies some of the types defined in the input model into the
+-- output model. Each matched type must:
+--  *  not be a 'condition' type, if no monitors are defined;
+--  *  not be a 'condition', an 'integer' or a 'boolean' type, if some
+--     monitors are defined (in this case, 'integer' and 'boolean' types
+--     are generated once into the 'MainWithMonitors' rule).
+rule Type {
+	from
+		i : Program!Type (
+			i.name <> 'condition' and
+			(
+				(not thisModule.monitorsDefined) or
+				(
+					thisModule.monitorsDefined and
+					i.name <> 'boolean' and
+					i.name <> 'integer'
+				)
+			)
+		)
+	to
+		o : Program!Type (
+			name <- i.name
+		)
+}
+
+-- Rule 'BooleanIntegerMonitorVariableDeclaration'.
+-- This rule performs a copy of variable declarations of type 'integer' or
+-- 'boolean 'that are declared either within a monitor or a procedure of a 
+-- monitor.
+rule BooleanIntegerMonitorVariableDeclaration {
+	from
+		i : Program!VariableDeclaration (
+			i.oclIsTypeOf(Program!VariableDeclaration) and
+			i.isDeclaredInMonitor() and
+			(
+				i.type.name = 'integer' or
+				i.type.name = 'boolean'
+			)
+		)
+	to
+		o : Program!VariableDeclaration (
+			name <- i.structure.name + '_' + i.name,
+			type <- i.getType(),
+			initialValue <- i.initialValue,
+			structure <- i.getTargetStructure()
+		)
+}
+
+-- Rule 'MonitorVariableDeclaration'.
+-- This rule performs a copy of each variable declaration which type is different of
+-- 'integer', 'boolean' and 'condition', and that is declared either within a monitor
+-- or a procedure of a monitor.
+rule MonitorVariableDeclaration {
+	from
+		i : Program!VariableDeclaration (
+			i.oclIsTypeOf(Program!VariableDeclaration) and
+			i.isDeclaredInMonitor() and
+			i.type.name <> 'condition' and
+			i.type.name <> 'integer' and
+			i.type.name <> 'boolean'
+		)
+	to
+		o : Program!VariableDeclaration (
+			name <- i.structure.name + '_' + i.name,
+			type <- i.type,
+			initialValue <- i.initialValue,
+			structure <- i.getTargetStructure()
+		)
+}
+
+-- Rule 'BooleanIntegerVariableDeclaration'.
+-- This rule performs a copy of variable declarations of type 'integer' or
+-- 'boolean' that are declared either within the root program or a standalone
+-- procedure.
+rule BooleanIntegerStandaloneVariableDeclaration {
+	from
+		i : Program!VariableDeclaration (
+			i.oclIsTypeOf(Program!VariableDeclaration) and
+			not i.isDeclaredInMonitor() and
+			(
+				i.type.name = 'integer'
+				or
+				i.type.name = 'boolean'
+			)
+		)
+	to
+		o : Program!VariableDeclaration (
+			name <- i.name,
+			type <- i.getType(),
+			initialValue <- i.initialValue,
+			structure <- i.structure
+		)
+}
+
+-- Rule 'StandaloneVariableDeclaration'.
+-- This rule performs of each variable declaration which type is different of
+-- 'integer', 'boolean' and 'condition', and that is declared either within the
+-- root program or a standalone procedure.
+rule StandaloneVariableDeclaration {
+	from
+		i : Program!VariableDeclaration (
+			i.oclIsTypeOf(Program!VariableDeclaration) and
+			not i.isDeclaredInMonitor() and
+			i.type.name <> 'condition' and
+			i.type.name <> 'integer' and
+			i.type.name <> 'boolean'
+		)
+	to
+		o : Program!VariableDeclaration (
+			name <- i.name,
+			type <- i.type,
+			initialValue <- i.initialValue,
+			structure <- i.structure
+		)
+}
+
+-- Rule 'BooleanIntegerMonitorParameter'.
+-- If monitors are defined in the input program, this rule performs a copy,
+-- from the input model to the output model, of each parameter of type
+-- 'integer' or 'boolean'.
+rule BooleanIntegerMonitorParameter {
+	from
+		i : Program!Parameter (
+			thisModule.monitorsDefined and
+			(
+			 	i.type.name = 'integer' or
+			 	i.type.name = 'boolean'
+			)
+		)
+	to
+		o : Program!Parameter (
+			name <- i.name,
+			type <- i.getType(),
+			initialValue <- i.initialValue,
+			direction <- i.direction,
+			procedure <- i.procedure
+		)
+}
+
+-- Rule 'Parameter'.
+-- This rule performs a copy, from the input model to the output model, of a
+-- parameter when:
+--  * no monitors are defined in the input program;
+--  * or monitors are defined in the input program but the parameter is not
+--    of type 'integer' or 'boolean'.
+rule Parameter {
+	from
+		i : Program!Parameter (
+			not thisModule.monitorsDefined or
+			(
+				thisModule.monitorsDefined and
+			 	i.type.name <> 'integer' and
+			 	i.type.name <> 'boolean'
+			 )
+		)
+	to
+		o : Program!Parameter (
+			name <- i.name,
+			type <- i.type,
+			initialValue <- i.initialValue,
+			direction <- i.direction,
+			procedure <- i.procedure
+		)
+}
+
+-------------
+-- Statements
+-------------
+-- Rule 'ExpressionStat'.
+-- This rule copies each expression statement from the input model to the
+-- output model.
+rule ExpressionStat {
+	from
+		i : Program!ExpressionStat
+	to
+		o : Program!ExpressionStat (
+			expression <- i.expression
+		)
+}
+
+-- Rule 'WhileStat'.
+-- This rule copies each while statement from the input model to the
+-- output model.
+rule WhileStat {
+	from
+		i : Program!WhileStat
+	to
+		o : Program!WhileStat (
+			condition <- i.condition,
+			doStats <- i.doStats
+		)
+}
+
+-- Rule 'ConditionalStat'.
+-- This rule copies each conditional statement from the input model to the
+-- output model.
+rule ConditionalStat {
+	from
+		i : Program!ConditionalStat
+	to
+		o : Program!ConditionalStat (
+			condition <- i.condition,
+			thenStats <- i.thenStats,
+			elseStats <- i.elseStats
+		)
+}
+
+-- Rule 'AssignmentStat'.
+-- This rule copies each assignment statement from the input model to the
+-- output model.
+rule AssignmentStat {
+	from
+		i : Program!AssignmentStat
+	to
+		o : Program!AssignmentStat (
+			target <- i.target,
+			value <- i.value
+		)
+}
+
+--------------
+-- Expressions
+--------------
+-- Rule 'OperatorCallExp'.
+-- This rule copies each operator call expression from the input model to the
+-- output model.
+rule OperatorCallExp {
+	from
+		i : Program!OperatorCallExp
+	to
+		o : Program!OperatorCallExp (
+			right <- i.right,
+			source <- i.source,
+			name <- i.name
+		)
+}
+
+-- Rule 'AttributeCallExp'.
+-- This rule copies each attribute call expression from the input model to the
+-- output model.
+rule AttributeCallExp {
+	from
+		i : Program!AttributeCallExp
+	to
+		o : Program!AttributeCallExp (
+			source <- i.source,
+			name <- i.name
+		)
+}
+
+-- Rule 'ProcedureCallExp'.
+-- This rule copies each procedure call expression, whose source is different
+-- from 'condition', from the input model to the output model.
+rule ProcedureCallExp {
+	from
+		i : Program!ProcedureCallExp (
+			i.source.declaration.type.name <> 'condition'
+		)
+	to
+		o : Program!ProcedureCallExp (
+			arguments <- i.arguments,
+			source <- i.source,
+			name <- i.name
+		)
+}
+
+-- Rule 'ConditionProcCallExp'.
+-- This rule copies each 'condition' call expression from the input model to
+-- the output model.
+-- In the output model, the source call is set to the global 'this' variable
+-- defined in the 'MainWithMonitors' rule.
+rule ConditionProcCallExp {
+	from
+		i : Program!ProcedureCallExp (
+			i.source.declaration.type.name = 'condition'
+		)
+	to
+		call_exp : Program!ProcedureCallExp (
+			arguments <- i.arguments,
+			source <- source_exp,
+			name <- i.source.declaration.structure.name + '_'
+				+ i.source.declaration.name + '_' + i.name
+		),
+		source_exp : Program!VariableExp (
+			declaration <-
+				thisModule.resolveTemp(thisModule.rootElt, 'this_var')
+		)
+}
+
+-- Rule 'VariableExp'.
+-- This rule copies each variable expression, which is not a 'condition'
+-- variable, from the input model to the output model.
+rule VariableExp {
+	from
+		i : Program!VariableExp (
+			thisModule.allCondCalls->excludes(i)
+		)
+	to
+		o : Program!VariableExp (
+			declaration <- i.declaration
+		)
+}
+
+-- Rule 'BooleanExp'.
+-- This rule copies each boolean value from the input model to the output
+-- model.
+rule BooleanExp {
+	from
+		i : Program!BooleanExp
+	to
+		o : Program!BooleanExp (
+			symbol <- i.symbol
+		)
+}
+
+-- Rule 'IntegerExp'.
+-- This rule copies each integer value from the input model to the output
+-- model.
+rule IntegerExp {
+	from
+		i : Program!IntegerExp
+	to
+		o : Program!IntegerExp (
+			symbol <- i.symbol
+		)
+}

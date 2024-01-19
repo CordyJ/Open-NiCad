@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions name="WellWebService" targetNamespace="http://edu.mit.broad.chembank.shared.mda.webservices.service" xmlns:impl="http://edu.mit.broad.chembank.shared.mda.webservices.service" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+
+    <!-- WSDL Types -->
+
+     <wsdl:types>
+
+          <xsd:schema elementFormDefault="qualified" targetNamespace="http://edu.mit.broad.chembank.shared.mda.webservices.service" xmlns="http://www.w3.org/2001/XMLSchema">
+
+               <xsd:element name="getByPlate">
+
+                    <xsd:annotation>
+
+                         <xsd:documentation>
+
+                        
+                         </xsd:documentation>
+
+                    </xsd:annotation>
+
+                    <xsd:complexType>
+
+                         <xsd:sequence>
+
+                              <xsd:element name="plateName" nillable="false" type="xsd:string">
+
+                                   <xsd:annotation>
+
+                                        <xsd:documentation>
+
+                                    
+                                        </xsd:documentation>
+
+                                   </xsd:annotation>
+
+                              </xsd:element>
+
+                         </xsd:sequence>
+
+                    </xsd:complexType>
+
+               </xsd:element>
+
+               <xsd:element name="getByPlateResponse">
+
+                    <xsd:complexType>
+
+                         <xsd:sequence>
+
+                              <xsd:element name="getByPlateReturn" type="impl:ArrayOfWell"/>
+
+                         </xsd:sequence>
+
+                    </xsd:complexType>
+
+               </xsd:element>
+
+               <xsd:element name="getByPlateFault1" nillable="true" type="impl:WebServiceException"/>
+
+               <xsd:complexType name="WebServiceException">
+
+                    <xsd:annotation>
+
+                         <xsd:documentation>
+
+                        
+                         </xsd:documentation>
+
+                    </xsd:annotation>
+
+               </xsd:complexType>
+
+               <xsd:complexType name="Molecule">
+
+                    <xsd:annotation>
+
+                         <xsd:documentation>
+
+                        
+                         </xsd:documentation>
+
+                    </xsd:annotation>
+
+                    <xsd:sequence>
+
+                         <xsd:element name="chembankId" nillable="false" type="xsd:string">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                         <xsd:element name="smiles" nillable="false" type="xsd:string">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                         <xsd:element name="inchi" nillable="false" type="xsd:string">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                    </xsd:sequence>
+
+               </xsd:complexType>
+
+               <xsd:complexType name="Well">
+
+                    <xsd:annotation>
+
+                         <xsd:documentation>
+
+                        
+                         </xsd:documentation>
+
+                    </xsd:annotation>
+
+                    <xsd:sequence>
+
+                         <xsd:element name="position" nillable="false" type="xsd:string">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                         <xsd:element name="type" nillable="false" type="xsd:string">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                         <xsd:element name="rawValue" nillable="false" type="xsd:double">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                         <xsd:element name="bsubValue" nillable="false" type="xsd:double">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                         <xsd:element name="zscoreValue" nillable="false" type="xsd:double">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                         <xsd:element name="compositezValue" nillable="false" type="xsd:double">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                         <xsd:element name="reproducibilityValue" nillable="false" type="xsd:double">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                         <xsd:element name="standardHit" nillable="false" type="xsd:boolean">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                         <xsd:element name="molecule" nillable="true" type="impl:Molecule">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                    </xsd:sequence>
+
+               </xsd:complexType>
+
+               <xsd:complexType name="ArrayOfWell">
+
+                    <xsd:sequence>
+
+                         <xsd:element form="qualified" maxOccurs="unbounded" minOccurs="0" name="well" type="impl:Well"/>
+
+                    </xsd:sequence>
+
+               </xsd:complexType>
+
+          </xsd:schema>
+
+     </wsdl:types>
+
+
+    <!-- Messages -->
+
+     <wsdl:message name="getByPlate1Request">
+
+          <wsdl:part element="impl:getByPlate" name="parameters"/>
+
+     </wsdl:message>
+
+     <wsdl:message name="getByPlate1Response">
+
+          <wsdl:part element="impl:getByPlateResponse" name="parameters"/>
+
+     </wsdl:message>
+
+     <wsdl:message name="getByPlate1Fault1">
+
+          <wsdl:part element="impl:getByPlateFault1" name="fault"/>
+
+     </wsdl:message>
+
+
+    <!-- Port Type -->
+
+     <wsdl:portType name="WellWebService">
+
+          <wsdl:operation name="getByPlate">
+
+
+               <wsdl:documentation>
+
+                
+               </wsdl:documentation>
+
+               <wsdl:input message="impl:getByPlate1Request" name="getByPlate1Request"/>
+
+               <wsdl:output message="impl:getByPlate1Response" name="getByPlate1Response"/>
+
+
+               <wsdl:fault message="impl:getByPlate1Fault1" name="getByPlate1Fault1"/>
+
+          </wsdl:operation>
+
+     </wsdl:portType>
+
+
+    <!-- WSDL Binding -->
+
+     <wsdl:binding name="WellWebServiceSoapBinding" type="impl:WellWebService">
+
+          <wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+          <wsdl:operation name="getByPlate">
+
+               <wsdlsoap:operation soapAction="getByPlate" style="document"/>
+
+               <wsdl:input name="getByPlate1Request">
+
+                    <wsdlsoap:body use="literal"/>
+
+               </wsdl:input>
+
+               <wsdl:output name="getByPlate1Response">
+
+                    <wsdlsoap:body use="literal"/>
+
+               </wsdl:output>
+
+               <wsdl:fault name="getByPlate1Fault1">
+
+                    <wsdlsoap:fault name="getByPlate1Fault1" use="literal"/>
+
+               </wsdl:fault>
+
+         </wsdl:operation>
+
+     </wsdl:binding>
+
+
+    <!-- Service Definition -->
+
+     <wsdl:service name="WellWebService">
+
+          <wsdl:documentation>
+
+            
+          </wsdl:documentation>
+
+          <wsdl:port binding="impl:WellWebServiceSoapBinding" name="WellWebService">
+
+               <wsdlsoap:address location="http://chembank.broad.harvard.edu/webservices/WellWebService"/>
+
+          </wsdl:port>
+
+     </wsdl:service>
+
+
+</wsdl:definitions>

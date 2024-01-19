@@ -1,0 +1,39 @@
+--
+-- Written in January 2005 by Peter Rosenthal
+--
+
+
+query DXF2Code = DXF!DXF.allInstances()->collect(e | 
+	('999\n' + 
+	'This is DFX file has been generated with ATL\n' +
+	'0\n' +
+	'SECTION\n' +
+	'2\n' +
+	'ENTITIES\n' +
+	e.toString() +
+	'0\nENDSEC\n0\nEOF')
+	.writeTo('C:/Documents and Settings/rosenthal/Mes documents/atlas/runtime-workspace/geometricalTransformations/myOut.dxf'));
+
+ helper context DXF!DXF def: toString() : String = 
+ 	self.meshes->iterate(e; acc : String = '' |
+		acc + e.toString());
+ 	
+ helper context DXF!Mesh def: toString() : String =  	
+	'0\n3DFACE\n' +
+ 	'8\n' + self.name + '\n' +
+	(self.points->iterate(e; acc : String = '' |
+		acc  + e.toString()));
+ 
+ helper context DXF!Point def: toString() : String =
+ 	'1' + self.name->substring(2,2)  +
+	 '\n' +
+ 	self.x->toString()+ '\n' +
+	
+	'2' + self.name->substring(2,2) +
+	 '\n' +
+ 	self.y->toString()+ '\n'+
+	
+	'3' + self.name->substring(2,2) +
+	 '\n' +
+ 	self.z->toString()+ '\n'
+	;

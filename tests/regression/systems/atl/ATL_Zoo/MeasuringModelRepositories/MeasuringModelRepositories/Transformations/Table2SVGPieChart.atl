@@ -1,0 +1,233 @@
+--@name Table2SVG
+--@version 1.0
+--@domains Table, SVG, Pie chart
+--@authors Eric Vepa (eric.vepa <at> gmail.com)
+--@date 2006/08/04
+--@description This transformation is used to transform generic tables into SVG pie charts. Each entry table is a two columns table (two cells per row). The first row contains two cells with a String (the first cell contains the String 'Pie Chart' and the second cell, the name of the chart). The other rows contains one cell with a name as String and an other cell with the value as Double.
+
+module Table2SVG; -- Module Template
+create OUT : SVG from IN : Table;
+
+--@begin attribute helper radius
+--@comments radius of the pie chart
+helper def : radius : Real = 100;
+--@end attribute helper radius
+
+--@begin attribute helper scale
+--@comments scale of the pie chart
+helper def : scale : Real = 0.9;
+--@end attribute helper scale
+
+--@begin attribute helper allValidTables
+--@comments returns all valid tables, ie tables which can be represented as pie chart
+helper def : allValidTables : Sequence(Table!Table) =
+	Table!Table.allInstances()->select(t|t.rows->first().cells->first().content = 'Pie Chart')->
+		asSet()->sortedBy(t|t.rows->first().cells->at(2).content);
+--@end attribute helper allValidTables
+
+--@begin attribute helper maxSizeName
+--@comments returns the max size of all name of a table
+helper def : maxSizeName : Integer =
+	thisModule.allValidTables->iterate(table; max:Integer=0|
+		let maxTable : Integer =
+				table.rows->subSequence(2,table.rows->size())->iterate(row; max:Integer=0|
+					let value : Integer = row.cells->first().content->size() in
+						if value > max
+							then value
+							else max
+						endif)*10*thisModule.scale  in
+			if maxTable > max
+				then maxTable
+				else max
+			endif);		
+--@end attribute helper maxSizeName
+
+--@begin attribute helper angle
+--@comments current angle rotation for a sector
+helper def : angle : Real = 0;
+--@end attribute helper angle
+
+--@begin helper toDegree
+--@comments converts from radians to degrees
+helper context Real def : toDegree() : Real =
+	self*(3.1415926535897932/180);
+--@end helper toDegree
+
+--@begin helper radianAngle
+--@comments converts the angle value, stored in the cell, from radians to degrees
+helper context Table!Cell def : radianAngle() : Real =
+	(self.content.toReal()*3.6).toDegree();
+--@end helper radianAngle
+
+--@begin entrypoint rule SvgFile
+--@comments creates the SVG file with one svg tag
+helper def: svgFile : SVG!SvgFile = OclUndefined;
+
+entrypoint rule SvgFile() {
+	to
+		svgFile:SVG!SvgFile (
+			tag <- svg
+		),
+		svg:SVG!Svg (
+			size <- svgSize,
+			namespace <- 'http://www.w3.org/2000/svg',
+			version <- '1.1'
+		),
+		svgSize:SVG!Dimension (
+			width <- 2*(thisModule.radius+thisModule.maxSizeName)*thisModule.allValidTables->size()*thisModule.scale,
+			height <- 2*(thisModule.radius+thisModule.maxSizeName)*thisModule.scale
+		)
+	do {
+		thisModule.svgFile <- svgFile;
+		for (table in thisModule.allValidTables) {
+			thisModule.Table2PieChart(table);
+		}
+	}
+}
+--@end entrypoint rule SvgFile
+
+--@begin lazy rule Table2PieChart
+--@comments creates a pie chart (SVG group) for one valid table
+lazy rule Table2PieChart {
+	from
+		table:Table!Table (
+			table.rows->first().cells->first().content = 'Pie Chart'
+		)
+	to
+		g:SVG!G (
+			attribute <- transl,
+			attribute <- scale,
+			groupContent <- rect,
+			groupContent <- text,
+			--@comments creates a complete pie chart for table with one valued row or a sector for each row
+			groupContent <-	if table.rows->size() = 2
+											then thisModule.Row2Circle(table.rows->at(2))
+											else table.rows->subSequence(2,table.rows->size())->iterate(row; acc:Sequence(SVG!G)=Sequence{}|
+												acc->including(thisModule.Row2Sector(row)))
+										endif
+		),
+		scale:SVG!Scale (
+			sx <- thisModule.scale,
+			sy <- scale.sx
+		),
+		transl:SVG!Translate (
+			ty <- (thisModule.svgFile.tag.size.height/2)*scale.sx,
+			tx <- transl.ty+(thisModule.allValidTables->indexOf(table)-1)*thisModule.svgFile.tag.size.height*scale.sx
+		),
+		rect:SVG!Rect (
+			size <- rectSize,
+			position <- rectCoord,
+			fill <- 'none'
+		),
+		rectSize:SVG!Dimension (
+			width <- thisModule.svgFile.tag.size.height-5,
+			height <- rectSize.width
+		),
+		rectCoord:SVG!AbsoluteCoord (
+			x <- 0-rectSize.width/2,
+			y <- rectCoord.x
+		),
+		text:SVG!Text (
+			position <- txtCoord,
+			stroke <- 'blue',
+			--@comments text-anchor value strored in lengthAdjust attribute
+			lengthAdjust <- 'middle',
+			content <- table.rows->first().cells->at(2).content
+		),
+		txtCoord:SVG!AbsoluteCoord (
+			x <- 0,
+			y <- rectSize.height/2-25
+		)
+	do {
+		thisModule.svgFile.tag.children <- g;
+		--@comments initialise rotation angle
+		thisModule.angle <- 0;
+	}
+}
+--@end lazy rule Table2PieChart
+
+--@begin lazy rule Row2Sector
+--@comments creates a sector (SVG path) for one row
+lazy rule Row2Sector {
+	from
+		row:Table!Row
+	using {
+		x : Real = thisModule.radius*row.cells->at(2).radianAngle().cos();
+		y : Real = thisModule.radius*row.cells->at(2).radianAngle().sin();
+	}
+	to
+		g:SVG!G (
+			attribute <- rotate,
+			groupContent <- sector,
+			groupContent <- text
+		),
+		rotate:SVG!Rotate (
+			angle <- thisModule.angle
+		),
+		sector:SVG!Path (
+			d <- 'M0,0 L' + thisModule.radius.toString() + ',0 ' +
+				'A' + thisModule.radius.toString() + ',' +
+				thisModule.radius.toString() + ' 0 ' +
+				if 3.6*row.cells->at(2).content.toReal() < 180
+					then '0,1 '
+					else '1,1 '
+				endif +	x.toString() + ',' + y.toString() + ' z',
+			--@comments rgb color defined with absolute values of angle, cosinus and sinus of the sector
+			fill <- 'rgb(' + rotate.angle.floor().toString() + ',' +
+					x.abs().floor().toString() + ',' +
+					y.abs().floor().toString() + ')',
+			stroke <- 'black'
+		),
+		text:SVG!Text (
+			position <- coord,
+			stroke <- 'blue',
+			fontSize <- '10',
+			content <- '-- ' + row.cells->first().content
+		),
+		coord:SVG!AbsoluteCoord (
+			x <- x,
+			y <- y
+		)
+	do {
+		--@comments add the angle value of the new sector
+		thisModule.angle <- rotate.angle + 3.6*row.cells->at(2).content.toReal();
+	}
+}
+--@end lazy rule Row2Sector
+
+--@begin lazy rule Row2Circle
+--@comments creates a complete pie (SVG Circle) for a table containing one row with a value
+lazy rule Row2Circle {
+	from
+		row:Table!Row
+	to
+		g:SVG!G (
+			groupContent <- circle,
+			groupContent <- text
+		),
+		circle:SVG!Circle (
+			size <- cirlceSize,
+			position <- circleCoord,
+			fill <- 'blue',
+			stroke <- 'black'
+		),
+		cirlceSize:SVG!Dimension (
+			width <- thisModule.radius,
+			height <- cirlceSize.width
+		),
+		circleCoord:SVG!AbsoluteCoord (
+			x <- 0,
+			y <- 0
+		),
+		text:SVG!Text (
+			position <- coord,
+			stroke <- 'blue',
+			fontSize <- '10',
+			content <- '-- ' + row.cells->first().content
+		),
+		coord:SVG!AbsoluteCoord (
+			x <- cirlceSize.width,
+			y <- 0
+		)
+}
+--@end lazy rule Row2Circle

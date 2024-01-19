@@ -1,0 +1,44 @@
+library KM2Tools; -- Library Template
+
+-- This library contains helpers used by transformation generate with KM32ATL
+
+-- This helper returns the String value from the property with its name in parameter
+-- CONTEXT: KM2!ModelElement
+-- RETURN: String
+helper context KM2!ModelElement def: getStringProperty(name : String) : String =
+	self.properties->select( p | p.name = name)->collect( d | d.value)->first().value;
+
+-- This helper returns the Integer value from the property with its name in parameter
+-- CONTEXT: KM2!ModelElement
+-- RETURN: Integer
+helper context KM2!ModelElement def: getIntegerProperty(name : String) : Integer =
+	self.properties->select( p | p.name = name)->collect( d | d.value)->first().value;
+
+-- This helper returns the Boolean value from the property with its name in parameter
+-- CONTEXT: KM2!ModelElement
+-- RETURN: Boolean
+helper context KM2!ModelElement def: getBooleanProperty(name : String) : Boolean =
+	self.properties->select( p | p.name = name)->collect( d | d.value)->first().value;
+
+-- This helper return a KM2!ModelElement contain in a property with its name in parameter
+-- the property must contains a simple value, not a set
+-- CONTEXT: KM2!ModelElement
+-- RETURN: KM2!ModelElement
+helper context KM2!ModelElement def: get(name : String) : KM2!ModelElement =
+	self.properties->select(p | p.name = name)->first().value.element;
+
+-- This helper return a Sequence of KM2!ModelElement contain in a property with its name in parameter
+-- the property must contains a set value and corresponds to a reference
+-- CONTEXT: KM2!ModelElement
+-- RETURN: Sequence(KM2!ModelElement)
+helper context KM2!ModelElement def: getRefSet(name : String) : Sequence(KM2!ModelElement) =
+	self.properties->select(p | p.name = name)->first().value.contents
+	->select( e | e.oclIsTypeOf(KM2!ModelElementRefVal) )->collect( d | d.element )->asSequence();
+
+-- This helper return a Sequence of KM2!ModelElement contain in a property with its name in parameter
+-- the property must contains a set value and corresponds to a composition (container)
+-- CONTEXT: KM2!ModelElement
+-- RETURN: Sequence(KM2!ModelElement)
+helper context KM2!ModelElement def: getSet(name : String) : Sequence(KM2!ModelElement) =
+	self.properties->select(p | p.name = name)->first().value.contents
+	->select( e | e.oclIsTypeOf(KM2!ModelElementVal) )->collect( d | d.element )->asSequence();

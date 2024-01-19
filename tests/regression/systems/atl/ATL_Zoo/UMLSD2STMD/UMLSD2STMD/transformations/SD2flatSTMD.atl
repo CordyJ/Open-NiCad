@@ -1,0 +1,353 @@
+-- title: UMLSD2STMD
+-- release: 0.1
+-- date: 18 oktober 2006
+
+-- author:      Bas Graaf
+--                      SWERL SoftWare Evolution Research Lab
+--                      Delft University of Technology
+--                      b.s.graaf@tudelft.nl
+
+module SD2flatSTMD;
+create OUT : UML from IN : UML;
+
+helper def: allConstraints: Set(UML!Constraint) =
+	UML!Constraint->allInstances()
+;
+helper def: allMessages: Set(UML!Message) =
+	UML!Message->allInstances()
+;
+helper def: allClasses: Set(UML!Class) =
+	UML!Class->allInstances()
+;
+helper def: allAttributes: Set(UML!Attribute) =
+	UML!Attribute->allInstances()
+;
+helper def: allObjects: Set(UML!Object) =
+	UML!Object->allInstances()
+;
+helper def: allStereotypes: Set(UML!Stereotype) =
+	UML!Stereotype->allInstances()
+;
+helper def: allCollaborationInstanceSets: Set(UML!CollaborationInstanceSet) =
+	UML!CollaborationInstanceSet->allInstances()
+;
+helper def: constraintConstraints: Set(UML!Constraint) = 
+	thisModule.allConstraints->iterate(c; cs:Set(UML!Constraint)=Set{} |
+		if cs->exists(e|e.equals(c)) then
+			cs
+		else
+			cs->including(c)
+		endif)
+;
+helper def: frame(frame:Set(UML!Constraint), framed:Set(UML!Constraint)): Set(UML!Constraint) =
+	frame->iterate(c; cs:Set(UML!Constraint)=framed |
+		if cs->exists(e|e.stateVariable=c.stateVariable) then
+			cs
+		else
+			cs->including(c)
+		endif)
+;
+helper def: unifiable(cseq1:Sequence(UML!Constraint),cseq2:Sequence(UML!Constraint)): Boolean =
+	cseq1->forAll(c|cseq2->exists(e|e.stateVariable=c.stateVariable) implies cseq2->exists(e|e.body.body=c.body.body))
+;
+helper context UML!Constraint def: equals(c:UML!Constraint): Boolean =
+	self.body.body=c.body.body
+;
+helper context UML!Constraint def: getUnique: UML!Constraint = 
+	thisModule.constraintConstraints->select(c|c.equals(self))->asSequence()->first()
+;	
+helper context UML!Constraint def: isPrecondition: Boolean = 
+	self.stereotype->asSequence()
+	->first().name='precondition'
+;
+helper context UML!Constraint def: stateVariable: UML!Attribute =
+	thisModule.allAttributes->select(a|a.name=self.stateVariableName)->asSequence()->first()
+;
+helper context UML!Constraint def: stateVariableName: String =
+	self.body.body->substring(self.body.body.indexOf('.')+2,self.body.body.indexOf('='))
+;
+helper context UML!Constraint def: isStateInvariantFor(o:UML!Object): Boolean =
+	o.stateVariables->includes(self.stateVariable)
+;
+helper context UML!CollaborationInstanceSet def: useCaseName: String =
+	UML!Diagram->allInstances()->select(d|
+		d.owner.element=self)->asSequence()
+	->first().name
+;
+helper context UML!Object def: stateVariables: Set(UML!Attribute) =
+	self.classifier->asSequence()->first().feature->select(f|f.oclIsTypeOf(UML!Attribute))
+;
+helper context UML!Object def: initialStateVector : Set(UML!Constraint) =
+	let mseq:Sequence(UML!Message) = thisModule.allMessages->select(m|
+		m.conformingStimulus->asSequence()->first().sender=self or
+		m.conformingStimulus->asSequence()->first().receiver=self) in
+		mseq->select(m|m.predecessor.isEmpty())->asSequence()->first().preconditions
+;		
+helper context UML!Object def: isActive: Boolean =
+	self.classifier->asSequence()->first().isActive
+;
+helper context UML!Object def: messages : Set(UML!Message) =
+	self.incomingMessages->union(self.outgoingMessages)
+;
+helper context UML!Object def: incomingMessages : Set(UML!Message) =
+	thisModule.allMessages->select(m|
+		m.conformingStimulus->asSequence()
+		->first().receiver=self and not(m.is2Self))
+;
+helper context UML!Object def: outgoingMessages : Set(UML!Message) =
+	thisModule.allMessages->select(m|
+		m.conformingStimulus->asSequence()
+		->first().sender=self)
+;
+helper context UML!Message def: activeObject : UML!Object =
+	let s:UML!Object = self.conformingStimulus->asSequence()->first().sender in
+	let r:UML!Object = self.conformingStimulus->asSequence()->first().receiver in
+		if s.isActive then
+			s
+		else
+			r
+		endif
+;
+helper context UML!Message def: stateVector : Set(UML!Constraint) =
+	let stateVectorPrev:Set(UML!Constraint) = 
+		if self.getLocalPredecessor.oclIsUndefined() then
+			self.preconditions->select(c|c.isStateInvariantFor(self.activeObject))
+		else 
+			self.getLocalPredecessor.stateVector
+		endif in
+	let pres:Set(UML!Constraint) = self.preconditions->select(c|c.isStateInvariantFor(self.activeObject)) in
+	let posts:Set(UML!Constraint) = self.postconditions->select(c|c.isStateInvariantFor(self.activeObject)) in
+	let sv:Set(UML!Constraint) = thisModule.frame(stateVectorPrev,thisModule.frame(pres,posts))->collect(c|c.getUnique)->asSet() in
+		if thisModule.unifiable(stateVectorPrev,pres) then
+			sv
+		else
+			sv.debug('INCONSISTENCY DETECTED!')
+		endif
+;
+helper context UML!Message def: stateVectorFor(o:UML!Object) : Set(UML!Constraint) =
+	let presNext:Set(UML!Constraint) = 
+		if self.getLocalSuccessor(o).oclIsUndefined() then
+			Set{}
+		else
+			self.getLocalSuccessor(o).preconditions->select(c|c.isStateInvariantFor(o))
+		endif in
+	let stateVectorPrev:Set(UML!Constraint) = 
+		if self.getLocalPredecessorFor(o).oclIsUndefined() then
+			self.preconditions->select(c|c.isStateInvariantFor(o))
+		else 
+			self.getLocalPredecessorFor(o).stateVectorFor(o)
+		endif in
+	let stateVectorPresNext:Set(UML!Constaint) = Set{} in
+		thisModule.frame(stateVectorPresNext,
+		thisModule.frame(stateVectorPrev,
+		thisModule.frame(presNext,
+			self.postconditions->select(c|c.isStateInvariantFor(o)))))->collect(c|c.getUnique)->asSet()
+;
+helper context UML!Message def: preconditions: Set(UML!Constraint) =
+	self.conformingStimulus->asSequence()
+	->first().dispatchAction.constraint
+	->select(c|c.stereotype->exists(s|
+		s.name='precondition'))
+;
+helper context UML!Message def: postconditions: Set(UML!Constraint) =
+	self.conformingStimulus->asSequence()
+	->first().dispatchAction.constraint
+	->select(c|c.stereotype->exists(s|
+		s.name='postcondition'))
+;
+helper context UML!Message def: is2Self: Boolean = 
+	self.conformingStimulus->asSequence()
+	->first().sender = self.conformingStimulus
+		->asSequence()->first().receiver
+;
+helper context UML!Message def: getLocalPredecessorFor(o: UML!Object) : UML!Message =
+	if self.predecessor.isEmpty() then
+		self.predecessor->asSequence()->first()
+	else
+		let s: UML!Stimulus = self.predecessor
+			->asSequence()->first().conformingStimulus
+			->asSequence()->first() in
+			if s.sender=o or s.receiver=o then
+				self.predecessor->asSequence()->first()
+			else
+				self.predecessor->asSequence()
+				->first().getLocalPredecessorFor(o)
+			endif
+	endif
+;
+helper context UML!Message def: getLocalPredecessor: UML!Message =
+	if self.predecessor.isEmpty() then
+		Sequence{}->first()
+	else
+		let s: UML!Stimulus = self.predecessor
+			->asSequence()->first().conformingStimulus
+			->asSequence()->first() in
+			if s.sender.isActive or s.receiver.isActive then
+				self.predecessor->asSequence()->first()
+			else
+				self.predecessor->asSequence()
+				->first().getLocalPredecessor
+			endif
+	endif
+;
+helper context UML!Message def: getLocalSuccessorFor(o:UML!Object) : UML!Message =
+	thisModule.allMessages->select(m|m.getLocalPredecessor(o)=self)->asSequence()->first()
+;
+helper context UML!Message def: getLocalSuccessor : UML!Message =
+	thisModule.allMessages->select(m|m.getLocalPredecessor=self)->asSequence()->first()
+;
+rule Class {
+	from c_in:UML!Class
+	to c_out:UML!Class(
+		name <- c_in.name,
+		isActive <- c_in.isActive,
+		feature <- c_in.feature)
+}
+rule Operation {
+	from o_in:UML!Operation
+	to o_out:UML!Operation(
+		name <- o_in.name,
+		constraint <- o_in.constraint)
+}
+rule Method {
+	from m_in:UML!Method
+	to m_out:UML!Method(
+		name <- m_in.name,
+		body <- m_in.body,
+		specification <- m_in.specification)
+}
+rule Attribute {
+	from a_in:UML!Attribute
+	to a_out:UML!Attribute(
+		name <- a_in.name,
+		visibility <- a_in.visibility,
+		type <- a_in.type)
+}
+rule Package {
+	from p_in:UML!Package(
+		not(p_in.oclIsTypeOf(UML!Model)))		
+	to p_out:UML!Package(
+		name <- p_in.name,
+		ownedElement <- p_in.ownedElement)
+}
+rule Constraint {
+	from c:UML!Constraint(
+		thisModule.constraintConstraints->includes(c))
+	to c_out:UML!Constraint(
+		name<-c.name,
+		body<-be,
+		stereotype<-c.stereotype),
+	be:UML!BooleanExpression(
+		body<-c.body.body)
+}
+rule Stereotype {
+	from s:UML!Stereotype
+	to s_out:UML!Stereotype(
+		name<-s.name,
+		baseClass<-s.baseClass)
+}
+rule Model {
+	from m_in:UML!Model
+	to m_out:UML!Model (
+		ownedElement <- m_in.ownedElement->select(e|e.oclIsTypeOf(UML!Package))
+		->union(thisModule.allClasses
+		->union(thisModule.allObjects->select(o|o.isActive)
+		->union(thisModule.allMessages->select(m|
+			not(m.is2Self))->select(m|m.conformingStimulus
+				->asSequence()->first().receiver.isActive)
+				->collect(e|thisModule.resolveTemp(e,'ce'))
+		->union(thisModule.allStereotypes)))))
+}	
+
+rule Statemachine {
+	from o:UML!Object(
+		o.isActive)
+	to sm:UML!StateMachine (
+		name <- o.name + ' in ' + 	
+			thisModule.allCollaborationInstanceSets->select(c|
+				c.participatingInstance->includes(o))
+			->asSequence()->first().useCaseName,
+		transitions <- Set{t}->union(o.outgoingMessages->union(
+				o.incomingMessages)),
+		"context" <- o.classifier->asSequence()->first(),
+		top <- cs),
+	cs:UML!CompositeState (
+		subvertex <- Set{is,ss}
+			->union(o.messages->collect(e|
+				thisModule.resolveTemp(e,'trgt')))),
+	is:UML!Pseudostate (
+		kind <- #pk_initial),
+	ss:UML!SimpleState (
+		name <- 'default',
+		constraint <- o.initialStateVector->collect(c|c.getUnique)),
+	t:UML!Transition (
+		name <- 'default',
+		source <- is,
+		target <- ss)
+}
+rule EffectTransition {
+	from m:UML!Message (
+		m.conformingStimulus->asSequence()
+		->first().sender.isActive)
+	to
+	t_effect: UML!Transition(
+		name <- m.name,
+		effect <- ca,
+		target <- trgt,
+		source <- if m.getLocalPredecessor.oclIsUndefined() then
+				thisModule.resolveTemp(m.conformingStimulus
+					->asSequence()->first().sender,'ss')
+			else 
+				thisModule.resolveTemp(
+					m.getLocalPredecessor,'trgt')
+			endif),
+	ae:UML!ActionExpression (
+		body <- m.conformingStimulus->asSequence()
+		->first().dispatchAction.operation.name+
+			if m.conformingStimulus->asSequence()
+			->first().dispatchAction.actualArgument
+			->isEmpty() then
+				''
+			else
+				'('+m.conformingStimulus->asSequence()
+					->first().dispatchAction.actualArgument
+					->asSequence()->first().value.body+')'
+			endif),
+	ca:UML!CallAction (
+		script <- ae),
+	trgt:UML!SimpleState (
+		name <- ae.body+'_sent',
+		constraint <- m.stateVector)
+}
+rule TriggerTransition {
+	from m:UML!Message (
+		m.conformingStimulus->asSequence()
+		->first().receiver.isActive and	not (m.is2Self))
+	to
+	t_trigger:UML!Transition (
+		name <- m.conformingStimulus->asSequence()
+			->first().name,
+		trigger <- ce,
+		target <- trgt,
+		source <- if m.getLocalPredecessor.oclIsUndefined() then
+				thisModule.resolveTemp(m.conformingStimulus
+					->asSequence()->first().receiver,'ss')
+			else 
+				thisModule.resolveTemp(m.getLocalPredecessor,'trgt')
+			endif),
+	ce:UML!CallEvent (
+		name <- m.conformingStimulus->asSequence()
+			->first().dispatchAction.operation.name+
+			if m.conformingStimulus->asSequence()
+			->first().dispatchAction.actualArgument
+			->isEmpty() then
+				''
+			else
+				'('+m.conformingStimulus->asSequence()
+						->first().dispatchAction.actualArgument
+						->asSequence()->first().value.body+')'
+			endif),
+	trgt:UML!SimpleState(
+		name <- ce.name+'_received',
+		constraint <- m.stateVector)
+}

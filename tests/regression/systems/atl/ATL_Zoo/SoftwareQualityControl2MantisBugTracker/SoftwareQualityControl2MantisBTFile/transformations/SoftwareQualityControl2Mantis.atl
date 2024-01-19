@@ -1,0 +1,131 @@
+module SoftwareQualityControl2Mantis; -- Module Template
+create OUT : Mantis from IN : SoftwareQualityControl;
+
+
+-- This helper permits to convert the status value of a bug in string 
+-- CONTEXT: n/a
+-- RETURN: String
+helper def: convertStatus(bs : SoftwareQualityControl!BugStatusType) :  String =
+	let sv : String = bs.toString()
+	in
+		sv.substring(5,sv.size()); 
+
+-- This helper permits to get the name of the person who is responsible for the bug.
+-- If the "responsible" field is not valued, the responsible of this bug is the
+-- control responsible.
+-- CONTEXT: n/a
+-- RETURN: String
+helper context SoftwareQualityControl!Bug def: getResponsibleName() :  String =
+	let rv : String = self.responsible
+	in
+		if rv.oclIsUndefined()
+		then
+			self.b_bugTracking.ct_control.responsible
+		else
+			rv
+		endif;
+
+
+
+-- Rule 'BugTracking2MantisRoot'
+-- This rule generates the root of the Mantis output model
+-- if a BugTracking element exists in the input model
+rule  BugTracking2MantisRoot {
+	from
+		bt : SoftwareQualityControl!BugTracking
+	
+	to
+		mr : Mantis!MantisRoot (
+			issues <- bt.bugs->collect(e | thisModule.resolveTemp(e, 'mi'))
+		)
+}
+
+
+-- Rule 'Bug2Issue'
+-- This rule generates a issue in Mantis for each
+-- bug reported in the BugTracking element.
+rule  Bug2Issue {
+	from
+		bbt : SoftwareQualityControl!Bug
+	using {
+		commentsAnswersOrNot : Sequence(String) =
+			let ca : String = bbt.commentsAnswers
+			in
+				if ca.oclIsUndefined()
+				then
+					Sequence{}
+				else
+					Sequence{ca}
+				endif;
+	}
+	to
+		mi : Mantis!Issue (
+			id <- bbt.number,
+			project <- proj,
+			category <- '',
+			priority <- prior,
+			severity <- sev,
+			status <- stat,
+			reporter <- rep,
+			summary <- '',
+			description <- bbt.description,
+			version <- bbt.componentVersion,
+--			build <-,
+--			platform <-,
+--			os <-,
+--			osVersion <-
+			reproducibility <- reprod,
+--			stepsToReproduce <-,
+--			additionalInfo <-,
+			dateSubmitted <- 0, -- the date is an integer value in a specific format : how to convert?
+			assignedTo <- at,
+--			projection <-,
+--			eta <-,
+--			resolution <-,
+--			fixedInVersion <-,
+			attachments <- Sequence{},
+			relationships <- Sequence{},
+			notes <- Sequence{note},
+			lastUpdate <- 0 -- this date is not mentionned in any field in the Software Quality Control metamodel
+		),
+		proj : Mantis!ValueWithId (
+			id <- 0,
+			value <- bbt.b_bugTracking.ct_control.component
+		),
+		prior : Mantis!ValueWithId (
+			id <- 0,
+			value <- ''
+		),
+		sev : Mantis!ValueWithId (
+			id <- 0,
+			value <- ''
+		),
+		stat : Mantis!ValueWithId (
+			id <- 0,
+			value <- thisModule.convertStatus(bbt.status)
+		),
+		rep : Mantis!Person (
+			id <- 0,
+			value <- bbt.originator,
+			login <-''
+		),
+		reprod : Mantis!ValueWithId (
+			id <- 0,
+			value <- ''
+		),
+		at : Mantis!Person (
+			id <- 0,
+			value <- bbt.getResponsibleName(),
+			login <-''
+		), 
+		note : distinct Mantis!Note foreach(commentsAnswersVal in commentsAnswersOrNot)(
+			timestamp <- 0,
+			author <- aut,
+			text <- commentsAnswersVal
+		),
+		aut : distinct Mantis!Person foreach(commentsAnswersVal in commentsAnswersOrNot)(
+			id <- 0,
+			value <- bbt.originator,
+			login <-''
+		)
+}

@@ -1,0 +1,265 @@
+module XML2ATOM; -- Module Template
+create OUT : ATOM from IN : XML;
+
+-- ============================================================
+-- XML2ATOM
+-- Created by : Guillaume Hillairet (g.hillairet@gmail.com)
+-- Date: 16/06/2006
+-- Version: 1
+-- modified by : Youssef Srour (srour.youssef@gmail.com)
+-- ============================================================
+	
+-- ============================================================
+-- HELPERS
+-- ============================================================
+
+-- This helper gets the Attribute who has value name = name and return it to a Boolean
+-- CONTEXT: XML!Element
+-- RETURN:  Boolean
+helper context XML!Element def: getAttrBool(name : String) : Boolean =
+	let a : String = 
+    self.children->select(c | c.oclIsTypeOf(XML!Attribute) and c.name = name)->first().value
+	in if a ='true' then true else false endif;
+
+-- This helper gets the Attribute who has value name = name
+-- CONTEXT: XML!Element
+-- RETURN:  String
+helper context XML!Element def: getAttrVal(name : String) : String =
+	let e : XML!Attribute =
+    self.children->any(c | c.oclIsTypeOf(XML!Attribute) and c.name = name)
+	in if e.oclIsUndefined() then '' else e.value endif;
+
+-- This helper gets Text from an XML!Element who has a child with a name value = name 
+-- and with a child XML!Text.
+-- CONTEXT: XML!Element
+-- RETURN:  String
+helper context XML!Element def: getText(name : String) : String =
+	let e :Sequence(XML!Element) =
+	self.children-> select(m | m.oclIsTypeOf(XML!Element) )
+	in
+	(if e.isEmpty() then '' else
+		let r:Sequence(XML!Element) =
+	    e->select (f|f.name=name)
+		in
+		if r.isEmpty() then '' else
+			r-> collect(d | d.children )->flatten()
+			->select(f | f.oclIsTypeOf(XML!Text) )
+			->select ( g | g.name = '#text' )->first().value
+		endif
+	endif).toString();
+
+
+
+-- This helper gets a Sequence of XML!Element from an XML!Element who has a child with a name value = name 
+-- CONTEXT: XML!Element
+-- RETURN:  Sequence(XML!Element)
+helper context XML!Element def: getSequence(name : String) : Sequence(XML!Element) =
+	let e :Sequence(XML!Element) = self.children-> select(m | m.oclIsTypeOf(XML!Element) )
+	in if e.isEmpty() 
+		then Sequence{} 
+		else 
+			let r : Sequence(XML!Element) = e->select (f|f.name = name)
+		in r
+	endif;
+	
+-- This helper say if an XML!Element has a child with value name = name
+-- CONTEXT: XML!Element
+-- RETURN:  Boolean
+helper context XML!Element def: hasChildren(name : String) : Boolean =
+	let a : XML!Element =
+	self.children-> select(m | m.oclIsTypeOf(XML!Element) and m.name = name )->first()
+	in if (a.oclIsTypeOf(XML!Element) and a.name = name) 
+		then true else false 
+	endif;
+
+-- This helper stores an integer value used to assign an ID to each generated
+-- CONTEXT: XML!Element
+-- RETURN:  Boolean
+--teste si l'element possede un certain XMLattribut
+helper context XML!Element def: hasAttribute(name : String) : Boolean =
+	let a : XML!Attribute =
+	self.children-> select(m | m.oclIsTypeOf(XML!Attribute) and m.name = name )->first()
+	in if not a.oclIsUndefined()
+		then (a.name = name) else false
+	endif;
+
+-- This helper stores adds All Text value contains in an XML element in a single String
+-- CONTEXT: XML!Element
+-- RETURN:  String
+helper context XML!Element def: getAllText() : String = 
+	let s :String =
+		self.children->select( e | e.oclIsTypeOf(XML!Text))->iterate(acc; res : String = '' | res + acc.value )
+	in s;
+
+helper context XML!Element def: getUpdate() : String = 
+	let s :String =
+		(if self.getText('updated').oclIsUndefined() then self.getText('modified') else self.getText('updated') endif).toString()
+	in s;
+
+
+
+
+--(if e.getText('updated').oclIsUndefined() then e.getText('modified') else e.getText('updated') endif).toString(),
+-- ============================================================
+-- Rules
+-- ============================================================
+
+-- this rule 
+rule Atom {
+	from
+		r : XML!Root (
+			r.name = 'feed'
+		)
+	to
+		a : ATOM!ATOM (
+			title <- r.getText('title'),
+			id <- r.getText('id'),
+			subtitle <- r.getText('subtitle'),
+			rights <- r.getText('rights'),
+			authors <- r.getSequence('author'),
+			icon <- r.getText('icon'),
+			logo <- r.getText('logo'),
+			links <- r.getSequence('link'),
+			entrie <- r.getSequence('entry'),
+			lastUpdate <- (if r.getText('updated').oclIsUndefined() then r.getText('modified') else r.getText('updated') endif).toString(),
+			generator <- r.children->any( e | e.oclIsTypeOf(XML!Element) and e.name = 'generator'),
+			categories <- r.getSequence('category'),
+			
+			contributors <- r.getSequence('contributor')
+		)
+}
+
+rule Category {
+	from
+		e : XML!Element (
+			e.name = 'category'
+		)
+	to 
+		a : ATOM!Category (
+			term <- e.getAttrVal('term'),
+			scheme <- e.getAttrVal('scheme'),
+			label <- e.getAttrVal('label')
+		)
+}
+
+rule Generator {
+	from
+		e : XML!Element (
+			e.name = 'generator'
+		)
+	to
+		a : ATOM!Generator (
+			name <- e.children->any(e | e.oclIsTypeOf(XML!Text)).value,
+			uri <- e.getAttrVal('uri').toString(),
+			version <-e.getAttrVal('version')
+		)
+}
+
+
+
+rule Entry {
+	from
+		e : XML!Element (
+			e.name = 'entry'
+		)
+	to
+		a : ATOM!Entry (
+			title <- e.getText('title'),
+			id <- e.getText('id'),
+			rights <- e.getText('rights'),
+			summary <- e.getText('summary'),
+			links <- e.getSequence('link'),
+			lastUpdate <-e.getUpdate(),
+			content <- e.children->select( e | e.oclIsTypeOf(XML!Element) and e.name = 'content'),
+			authors <- e.getSequence('author'),
+			contributors <- e.getSequence('contributor')
+		)
+}
+
+rule TextContent {
+	from
+		e : XML!Element (
+			e.name = 'content' and e.getAttrVal('type') = 'text'
+		)
+	to
+		a : ATOM!InLineTextContent (
+			type <- e.getAttrVal('type'),
+			mode <- e.getAttrVal('mode'),
+			text <- e.getAllText()
+			
+		)
+}
+
+rule XHtmlContent {
+	from
+		e : XML!Element (
+			e.name = 'content' and  (( e.getAttrVal('type') = 'html' or
+				e.getAttrVal('type') = 'xhtml'  ) or 
+				e.getAttrVal('type') = 'text/html' )
+		)
+	to
+		a : ATOM!InLineXHTMLContent (
+			type <- e.getAttrVal('type'),
+			mode <- e.getAttrVal('mode'),
+			text <- e.getAllText()
+		)
+}
+rule Link {
+	from 
+		e : XML!Element (
+			e.name = 'link'
+			and (e.parent.value = 'feed' or e.parent.value = 'entry') 
+		)
+	to 
+		out : ATOM!Link (
+			
+			rel <- e.getAttrVal('rel'),
+			hrefl <- e.getAttrVal('href'),
+			type <- e.getAttrVal('type'),			
+			hreflang <- e.getAttrVal('hreflang'),
+			title <- e.getAttrVal('title'),
+			lenght <- e.getAttrVal('lenght').toInteger()
+		)
+}
+rule Author {
+	from
+		e : XML!Element (
+			e.name = 'author'
+		)
+	to
+		a : ATOM!Author (
+			name <- e.getText('name'),
+			email <- e.getText('email'),
+			uri <- e.getText('uri')
+		)
+}
+
+rule Contributor {
+	from
+		e : XML!Element (
+			e.name = 'contributor'
+		)
+	to
+		a : ATOM!Contributor (
+			name <- e.getText('name'),
+			email <- e.getText('email'),
+			uri <- e.getText('uri')
+		)
+}
+
+
+
+rule LinkNotLenght {
+	from
+		e : XML!Element (
+			e.name = 'link' and not e.hasAttribute('lenght')
+		)
+	to 
+		a : ATOM!Link (
+			rel <- e.getAttrVal('rel'),
+			type <- e.getAttrVal('type'),
+			hrefl <- e.getAttrVal('href'),
+			hreflang <- e.getAttrVal('hreflang'),
+			title <- e.getAttrVal('title')
+		)
+}

@@ -1,0 +1,30 @@
+-- @path A=/ListMetamodelRefactoring/Metamodel/TypeA.ecore
+-- @path B=/ListMetamodelRefactoring/Metamodel/TypeB.ecore
+
+module A2B;
+create OUT : B from IN : A;
+
+-- This rule transforms a RootA into RootB.
+-- An ElementB is created from the name of RootA and it is placed at the first position of the list.
+rule Root {
+	from
+		s : A!RootA
+	to
+		t : B!RootB(
+			elms <- OrderedSet {first_element, s.elms}
+		),
+		first_element : B!ElementB(
+			name <- 'B_' + s.name
+		)
+}
+
+-- This rule transforms an ElementA into an ElementB.
+-- 'B_' is prefixed to the name of each ElementB
+rule Element {
+	from
+		s : A!ElementA
+	to
+		t : B!ElementB(
+			name <- 'B_' + s.name
+		)
+}

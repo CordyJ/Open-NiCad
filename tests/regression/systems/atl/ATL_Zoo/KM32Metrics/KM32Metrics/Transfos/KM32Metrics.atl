@@ -1,0 +1,304 @@
+module KM32Metrics;
+create OUT : Metrics from IN : KM3;
+
+-------------------------------------------------------------------------------
+-- HELPERS --------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- This helper computes the set of all the Class elements of the input model.
+-- CONTEXT:	thisModule
+-- RETURN:	Set(KM3!Class)
+helper def: allClasses : Set(KM3!Class) = KM3!Class.allInstances();
+
+-- This helper computes the set of all the Reference elements of the input
+-- model.
+-- CONTEXT:	thisModule
+-- RETURN:	Set(KM3!Reference)
+helper def: allReferences : Set(KM3!Reference) = KM3!Reference.allInstances();
+
+-- This helper computes the set of all the Class elements of the input model
+-- that correspond to the root of the different inheritance trees.
+-- CONTEXT:	thisModule
+-- RETURN:	Set(KM3!Class)
+helper def: inheritanceRoots : Set(KM3!Class) =
+	thisModule.allClasses
+		->select(e | e.supertypes->isEmpty());
+
+-- This helper returns the number of own attributes of the contextual Class.
+-- CONTEXT:	KM3!Class
+-- RETURN:	Integer
+helper context KM3!Class def: attributeNb : Integer =
+	self.structuralFeatures
+		->select(e | e.oclIsTypeOf(KM3!Attribute))
+		->size();
+
+-- This helper returns the total number of attributes (including inherited
+-- ones) of the contextual Class.
+-- CONTEXT:	KM3!Class
+-- RETURN:	Integer
+helper context KM3!Class def: attributeNb2 : Integer =
+	self.attributeNb + 
+	self.supertypes
+		->iterate(e; sum : Integer = 0 |
+			sum + e.attributeNb
+		);
+
+-- This helper returns the number of own references of the contextual Class.
+-- CONTEXT:	KM3!Class
+-- RETURN:	Integer
+helper context KM3!Class def: referenceNb : Integer =
+	self.structuralFeatures
+		->select(e | e.oclIsTypeOf(KM3!Reference))
+		->size();
+
+-- This helper returns the total number of references (including inherited
+-- ones) of the contextual Class.
+-- CONTEXT:	KM3!Class
+-- RETURN:	Integer
+helper context KM3!Class def: referenceNb2 : Integer =
+	self.referenceNb + 
+	self.supertypes
+		->iterate(e; sum : Integer = 0 |
+			sum + e.referenceNb
+		);
+
+-- This helper returns the size of the maximum lenght of the inheritance trees
+-- that lead to the contextual Class.
+-- If the class has no supertype, the helper returns 0. Otherwise, it iterates
+-- through the set of supertypes of the contextual Class in order to find out
+-- the maximum lenght of inheritance trees (from roots to the contextual
+-- Class).
+-- CONTEXT:	KM3!Class
+-- RETURN:	Integer
+helper context KM3!Class def: getInheritanceLenght() : Integer =
+	if self.supertypes->size() = 0
+	then
+		0
+	else
+		self.supertypes->iterate(e; max : Integer = 0 |
+			if e.getInheritanceLenght() + 1 > max
+			then
+				e.getInheritanceLenght() + 1
+			else
+				max
+			endif
+		)
+	endif;
+
+-- This helper returns the maximal depth of an inheritance tree in the input
+-- metamodel. For this purpose, it calls the getInheritanceLenght() helper on
+-- each Class of the input model and returns the maximum value.
+-- CONTEXT:	thisModule
+-- RETURN:	Integer
+helper def: getInheritanceMaxDepth() : Integer =
+	thisModule.allClasses
+		->iterate(e; max : Integer = 0 |
+			if e.getInheritanceLenght() > max
+			then
+				e.getInheritanceLenght()
+			else
+				max
+			endif
+		);
+
+-- This helper returns the number of inheritance trees in the input model.
+-- For this purpose, it computes the number of "root" classes, that is the
+-- classes that donot have any supertype.
+-- CONTEXT:	thisModule
+-- RETURN:	Integer
+helper def: getInheritanceTreeNb() : Integer =
+	thisModule.inheritanceRoots->size();
+
+-- This helper returns the set of subtypes of its contextual Class.
+-- For this purpose, it selects among all existing Class elements, those that
+-- have the contextual Class as a supertype.
+-- CONTEXT:	KM3!Class
+-- RETURN:	Set(KM3!Class)
+helper context KM3!Class def: subTypes : Set(KM3!Class) =
+	thisModule.allClasses
+		->select(e | e.supertypes->includes(self))
+		->asSet();
+
+-- This helper computes the inheritance subtree of the contextual Class.
+-- For this purpose, the helper recursively calls itself for each subtype of
+-- the contextual Class, adding this contextual Class to the computed result.
+-- CONTEXT:	KM3!Class
+-- RETURN:	Set(KM3!Class)
+helper context KM3!Class def: getTree() : Set(KM3!Class) =
+	self.subTypes->iterate(e; tree : Set(KM3!Class) = Set{self} |
+		tree->union( e.getTree() )
+	);
+
+-- This helper computes a boolean value stating whether its exists an (or more)
+-- inheritance relation between classes of trees t1 and t2.
+-- The helper checks whether such a relation (supertype/subtype) exists between
+-- each class of the tree t1 and the classes of the tree t2.
+-- Comment sur les asSet()...
+-- CONTEXT:	thisModule
+-- IN:		Set(KM3!Class), Set(KM3!Class)
+-- RETURN:	Boolean
+helper def: existsHLink(t1 : Set(KM3!Class), t2 : Set(KM3!Class)) : Boolean =
+	t1->iterate(e; res : Boolean = false |
+		if (e.supertypes->asSet()->intersection(t2)->isEmpty() and
+			e.subTypes->asSet()->intersection(t2)->isEmpty())
+		then
+			res
+		else
+			true
+		endif
+	);
+
+-- This recursive helper computes the number of independant inheritance graphs
+-- corresponding to the sequence of inheritance trees passed as a parameter.
+-- If the input sequence contains a single tree, the helper returns 1.
+-- Otherwise, the helper checks whether there exists inheritance relationships
+-- (super/subtype) between classes of the first tree of the input sequence (the
+-- reference tree), and the following ones. If so, it merges the linked trees
+-- into the reference tree.
+-- If the new tree sequence built this way contains a single tree, the helper
+-- returns 1. Otherwise, the helper returns 1 + the value provideed by a
+-- recursive call of itself on the newly calculated tree sequence without its
+-- first reference tree.
+-- CONTEXT:	thisModule
+-- IN:		Sequence(Set(KM3!Class))
+-- RETURN:	Integer
+helper def: computeGraphNb(tree_seq : Sequence(Set(KM3!Class))) : Integer =
+	if tree_seq->size() = 1
+	then
+		1
+	else
+		let first_t : Set(KM3!Class) = tree_seq->first() in
+		let new_seq : Sequence(Set(KM3!Class)) =
+		tree_seq
+			->subSequence(2, tree_seq->size())
+			->iterate(e;t_seq : Sequence(Set(KM3!Class)) = Sequence{first_t} |
+				if thisModule.existsHLink(first_t, e)
+				then
+					t_seq
+						->subSequence(2, t_seq->size())
+						->prepend(t_seq->first()->including(e))
+				else
+					t_seq.append(e)
+				endif
+			)
+		in
+		if new_seq->size() = 1
+		then
+			1
+		else
+			thisModule.computeGraphNb(
+				new_seq->subSequence(2, new_seq->size())
+			) + 1
+		endif
+	endif;
+
+-- This helper returns the number of inheritage graphs in the input model.
+-- For this purpose, it first computes a sequence containing the set of classes
+-- representing the different inheritance trees of the input model. The helper
+-- then calls the recursive computeGraphNb with the calculated sequence as a 
+-- parameter.
+-- CONTEXT:	thisModule
+-- RETURN:	Integer
+helper def: getInheritanceGraphNb() : Integer =
+	let tree_seq : Sequence(Set(KM3!Class)) =
+		thisModule.inheritanceRoots
+			->collect(e | e.getTree())
+			->asSequence()
+	in thisModule.computeGraphNb(tree_seq);
+
+
+-------------------------------------------------------------------------------
+-- RULES ----------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- Rule 'Model'
+-- This rule generates metrics elements that are relative to the input model:
+-- * the number of classes of the model;
+-- * the number of associations of the model (this number corresponds to the
+--   number of references without an opposite, plus the half of the number of
+--   references that has an opposite);
+-- * the maximal depth of an inheritance tree (computed by the
+--   getInheritanceMaxDepth helper);
+-- * the number of inheritance trees (computed by the getInheritanceTreeNb
+--   helper);
+-- * the number of inheritance graphs (computed by the getInheritanceGraphNb
+--   helper).
+rule Model {
+	from
+		i : KM3!Metamodel
+	to
+		o1 : Metrics!IntegerMetric (
+			"context" <- 'Model',
+			label <- 'Number of classes',
+			data <- thisModule.allClasses->size()
+		),
+		
+		o2 : Metrics!IntegerMetric (
+			"context" <- 'Model',
+			label <- 'Number of associations',
+			data <-
+				(thisModule.allReferences
+					->select(e | e.opposite = OclUndefined)
+					->size())
+				+
+				((thisModule.allReferences
+					->select(e | e.opposite <> OclUndefined)
+					->size()) div 2)
+		),
+		
+		o3 : Metrics!IntegerMetric (
+			"context" <- 'Model',
+			label <- 'Maximal depth of heritance',
+			data <- thisModule.getInheritanceMaxDepth()
+		),
+		
+		o4 : Metrics!IntegerMetric (
+			"context" <- 'Model',
+			label <- 'Number of inheritance trees',
+			data <- thisModule.getInheritanceTreeNb()
+		),
+		
+		o5 : Metrics!IntegerMetric (
+			"context" <- 'Model',
+			label <- 'Number of inheritance graphs',
+			data <- thisModule.getInheritanceGraphNb()
+		)
+}
+
+-- Rule 'Class'
+-- This rule generates metrics elements taht are relative to a Class of the
+-- input model. The context of the generated metrics elements therefore
+-- includes the name of the class theyr refer to.
+-- Generated metrics are:
+-- * the number of own attributes of the class;
+-- * the number of own references of the class;
+-- * the total number of attributes of the class (including inherited ones);
+-- * the total number of references of the class (including inherited ones);
+rule Class {
+	from
+		i : KM3!Class
+	to
+		o1 : Metrics!IntegerMetric (
+			"context" <- 'Class ' + i.name,
+			label <- 'Number of own attributes',
+			data <- i.attributeNb
+		),
+
+		o2 : Metrics!IntegerMetric (
+			"context" <- 'Class ' + i.name,
+			label <- 'Number of own references',
+			data <- i.referenceNb
+		),
+		
+		o3 : Metrics!IntegerMetric (
+			"context" <- 'Class ' + i.name,
+			label <- 'Total number of attributes',
+			data <- i.attributeNb2
+		),
+
+		o4 : Metrics!IntegerMetric (
+			"context" <- 'Class ' + i.name,
+			label <- 'Total number of references',
+			data <- i.referenceNb2
+		)
+}

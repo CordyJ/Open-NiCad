@@ -1,0 +1,1236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Followings are for revision purposes. Please ***DO NOT*** remove them. 
+$Author: akh $
+$Date: 2007/01/23 10:58:42 $
+$Revision: 1.4 $
+$Id: identification.wsdl,v 1.4 2007/01/23 10:58:42 akh Exp $
+$Log: identification.wsdl,v $
+
+Revision 1.5  2008/01/22 11:24:00 akh 
+New facility "GetListCertificateID" added.
+ 
+Revision 1.4  2007/01/23 10:58:42  akh
+Version 1.1.5 RC1 committed
+
+Revision 1.3  2007/01/11 14:20:42  akh
+VATreclaimable added to ComplexType Type and a version enum 1.1.5 added
+
+Revision 1.2  2006/07/12 14:15:11  akh
+GetVersion method added, ETGoperationType and OperationAllowed element added to Type element
+
+Revision 1.1.1.1  2006/01/24 21:48:59  swisswap
+Initial import into CVS
+
+
+
+
+     Copyright 2003 - 2007, EurotaxGlass's International AG
+     All Rights Reserved
+     
+     The Author grants permission to retrieve the WSDL or a copy of the WSDL for building software that
+     will consume or consumes the facilities available in this WSDL.
+     
+     The original of this WSDL file can be located at:
+        http://webservices.eurotaxglass.com/wsdl/identification.wsdl
+        http://webservices2.eurotaxglass.com/wsdl/identification.wsdl
+        
+     THIS SCHEMA/WSDL FILE IS PROVIDED "AS IS", WITHOUT ANY WARRANITIES AS TO ITS
+     SUITABILITY OR FITNESS FOR ANY PARTICULAR USE. THE AUTHOR DOES NOT TAKE 
+     RESPONSIBILITY FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL
+     DAMAGES THAT MAY UNINTENTIONALLY BE CAUSED THROUGH ITS USE OR DISTRIBUTION.
+     
+     No other rights are granted by implication, estoppel or otherwise.
+
+
+-->
+<definitions xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" 
+xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
+xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://schemas.xmlsoap.org/wsdl/"
+xmlns:tns="http://www.eurotax.com/Webservices/Identification/" 
+targetNamespace="http://www.eurotax.com/Webservices/Identification/"> 
+
+<types>
+<xs:schema targetNamespace="http://www.eurotax.com/Webservices/Identification/" 
+   xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+   elementFormDefault="qualified" attributeFormDefault="unqualified">
+   <xs:simpleType name="ISOcurrencyType">
+    <xs:restriction base="xs:NMTOKEN">
+     <xs:enumeration value="AUD"/>
+     <xs:enumeration value="CAD"/>
+     <xs:enumeration value="CHF"/>
+     <xs:enumeration value="CZK"/>
+     <xs:enumeration value="DKK"/>
+     <xs:enumeration value="EUR"/>
+     <xs:enumeration value="GBP"/>
+     <xs:enumeration value="HUF"/>
+     <xs:enumeration value="JPY"/>
+     <xs:enumeration value="NOK"/>
+     <xs:enumeration value="NZD"/>
+     <xs:enumeration value="PLN"/>
+     <xs:enumeration value="SEK"/>
+     <xs:enumeration value="SKK"/>
+     <xs:enumeration value="USD"/>
+      <!-- Date: 06/03/2008 15:10:00 CET
+       RON (New Leu) , CNY (Yuan Renminbi),
+       TRY (Turkey Lira), INR (Indian Rupee )
+     -->
+     <xs:enumeration value="RON" />
+     <xs:enumeration value="TRY" />
+     <xs:enumeration value="CNY" />
+     <xs:enumeration value="INR" />
+    </xs:restriction>
+   </xs:simpleType>
+   <xs:simpleType name="ISOcountryType">
+    <xs:restriction base="xs:NMTOKEN">
+     <xs:enumeration value="AT"/>
+     <xs:enumeration value="BE"/>
+     <xs:enumeration value="CZ"/>
+     <xs:enumeration value="CH"/>
+     <xs:enumeration value="DE"/>
+     <xs:enumeration value="ES"/>
+     <xs:enumeration value="FR"/>
+     <xs:enumeration value="GR"/>
+     <xs:enumeration value="HR"/>
+     <xs:enumeration value="HU"/>
+     <xs:enumeration value="IT"/>
+     <xs:enumeration value="LU"/>
+     <xs:enumeration value="NL"/>
+     <xs:enumeration value="PL"/>
+     <xs:enumeration value="PT"/>
+     <xs:enumeration value="RU"/>
+     <xs:enumeration value="SK"/>
+     <xs:enumeration value="SI"/>
+      <!-- Deprecated and will be replaced by ISO 3166 code for Great Britain.
+          Use enumeration value "GB" instead of "UK"
+     -->	 
+     <xs:enumeration value="UK">
+       <xs:annotation><xs:documentation>This enumeration with value "UK" is deprecated, and will be removed in future releases. Use enumeration with value "GB" instead.</xs:documentation></xs:annotation>
+     </xs:enumeration>
+     <xs:enumeration value="GB"/>
+     <!-- Norway  NOR 578 -->
+     <xs:enumeration value="NO"/>
+     <!-- Romania ROU 642 -->
+     <xs:enumeration value="RO" /> 
+     <!-- TURKEY TOR 792-->
+     <xs:enumeration value="TR"/>
+     <!-- Future extension  China CHN 156-->
+     <xs:enumeration value="CN"/>    
+    </xs:restriction>
+   </xs:simpleType>
+   <xs:simpleType name="ISOlanguageType">
+    <xs:restriction base="xs:NMTOKEN">
+     <xs:enumeration value="BG"/>
+     <xs:enumeration value="CS"/>
+     <xs:enumeration value="DA"/>
+     <xs:enumeration value="DE"/>
+     <xs:enumeration value="EL"/>
+     <xs:enumeration value="EN"/>
+     <xs:enumeration value="ES"/>
+     <xs:enumeration value="ET"/>
+     <xs:enumeration value="FI"/>
+     <xs:enumeration value="FR"/>
+     <xs:enumeration value="HR"/>
+     <xs:enumeration value="HU"/>
+     <xs:enumeration value="IT"/>
+     <xs:enumeration value="LT"/>
+     <xs:enumeration value="LV"/>
+     <xs:enumeration value="NL"/>
+     <xs:enumeration value="NO"/>
+     <xs:enumeration value="PL"/>
+     <xs:enumeration value="PT"/>
+     <xs:enumeration value="RO"/>
+     <xs:enumeration value="RU"/>
+     <xs:enumeration value="SK"/>
+     <xs:enumeration value="SL"/>
+     <xs:enumeration value="SR"/>
+     <xs:enumeration value="SV"/>
+     <xs:enumeration value="TR"/>
+    </xs:restriction>
+   </xs:simpleType>
+   <xs:simpleType name="ISOunitType">
+    <xs:restriction base="xs:NMTOKEN">
+     <xs:enumeration value="m"/>
+     <xs:enumeration value="mm"/>
+     <xs:enumeration value="kg"/>
+     <xs:enumeration value="ccm"/>
+     <xs:enumeration value="HP"/>
+     <xs:enumeration value="KW"/>
+     <!--
+      $Author$
+      $Date$
+      Rationale: The following is not part of International System of Units, outside of SI units but widely 
+      used and recommended by CIPM (Comit&#233; International des Poids et Mesures) and accepted for use with
+      SI.
+      -->  
+      <xs:enumeration value="L">
+       <xs:annotation>
+        <xs:documentation>Litre (1000 ccm = 1L )</xs:documentation>
+       </xs:annotation>
+      </xs:enumeration>
+     
+    </xs:restriction>
+   </xs:simpleType>
+
+    <xs:simpleType name="VersionType">
+      <xs:restriction base="xs:string">
+	  <xs:enumeration value="1.1.0"/>
+	  <xs:enumeration value="1.1.1"/>
+	  <xs:enumeration value="1.1.2"/>
+	  <xs:enumeration value="1.1.3"/>
+	  <xs:enumeration value="1.1.5"/>
+	  <xs:enumeration value="1.1.6"/>
+	  <xs:enumeration value="1.1.7"/>
+	  <!-- $Author: akh $
+	  $Date: 2007/12/05 12:23:00 
+	  Version: 1.1.8 added
+	  -->
+	  <xs:enumeration value="1.1.8"/>
+          <!-- $Author: akh $
+	  $Date: 2008/04/24 12:23:00 
+	  Version: 1.1.9 added
+	  -->
+	  <xs:enumeration value="1.1.9"/>
+          <!-- $Author: akh $
+	  $Date: 2008/07/08 10:23:00 
+	  Version: 1.2.0 added
+	  -->
+	  <xs:enumeration value="1.2.0"/>
+
+
+       </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="ETGpriceIndicatorType">
+      <xs:restriction base="xs:string">
+        <xs:enumeration value="N"/>
+        <xs:enumeration value=" "/>
+      </xs:restriction>
+     </xs:simpleType>
+     <!-- $Date: 2007/01/23 10:58:42 $ $Author: akh $
+     Available operations - a list of operations that 
+     are applicable for a particular NationalVehicle
+     code.
+     -->
+     <xs:simpleType name="ETGoperationType">
+       <xs:annotation>
+          <xs:documentation>A list of operations that may be available for a vehicle. </xs:documentation>
+       </xs:annotation>
+       <xs:restriction base="xs:NMTOKEN">
+	 <xs:enumeration value="GetValuation">
+           <xs:annotation><xs:documentation>Returns valuation data of a vehicle of a current date or previous date</xs:documentation></xs:annotation>
+         </xs:enumeration>		 
+	 <xs:enumeration value="GetForecast">
+            <xs:annotation><xs:documentation>Returns valuation data of a vehicle for future date and estimated future mileage</xs:documentation></xs:annotation>
+	 </xs:enumeration> 
+	 <xs:enumeration value="GetRepairEstimation">
+           <xs:annotation><xs:documentation>Returns valuation data of a vehicle for future date and estimated future mileage</xs:documentation></xs:annotation>
+	 </xs:enumeration> 
+       </xs:restriction>
+    </xs:simpleType>
+
+<!-- All complex Types go here -->
+   <xs:complexType name="ETGpriceType">
+    <xs:sequence>
+     <xs:element name="Amount" type="xs:double" default="0.00"/>
+     <xs:element name="ISOcurrencyCode" type="tns:ISOcurrencyType"/>
+     <xs:element name="AmountDate" type="tns:ETGdateType" minOccurs="0"/>
+     <xs:element name="Indicator" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name="ETGpriceRangeType">
+    <xs:annotation>
+     <xs:documentation>Common data type for range and exact value representation (double values)</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+     <xs:element name="RequestedLowerBound" type="xs:double" minOccurs="0" default="0.00">
+      <xs:annotation>
+       <xs:documentation>Double value lower boundary</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="RequestedUpperBound" type="xs:double" minOccurs="0">
+      <xs:annotation>
+       <xs:documentation>Double value upper boundary</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="Price" type="tns:ETGpriceType" minOccurs="0">
+      <xs:annotation>
+       <xs:documentation>Exact double value within "upper-lower" range</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name="ETGdateType">
+    <xs:annotation>
+     <xs:documentation>Common data type for date representation</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+     <xs:element name="Day" type="xs:gDay" minOccurs="0">
+      <xs:annotation>
+       <xs:documentation>day of the month</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="Month" type="xs:gMonth">
+      <xs:annotation>
+       <xs:documentation>month</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="Year" type="xs:gYear">
+      <xs:annotation>
+       <xs:documentation>year</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name="ETGlookupType">
+    <xs:annotation>
+     <xs:documentation>Common type to represent different lookup data</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+     <xs:element name="Code" type="xs:int" minOccurs="0"/>
+     <xs:element name="Name" type="xs:string" minOccurs="0"/>
+     <xs:element name="NameEx" type="xs:string" minOccurs="0">
+      <xs:annotation>
+       <xs:documentation>Optional alternative name</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+     <!-- $Author: akh $
+      $Date: 2007/12/05 14:20 
+      Deprecated and commented out for ref. only. Will be removed in future.
+      
+     <xs:element name="SortCode" type="xs:int" minOccurs="0"/>
+     -->
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name="ETGproductionPeriodType">
+    <xs:annotation>
+     <xs:documentation>Common data type for date range and exact value representation (YYYMM format)</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+     <xs:element name="ProductionStartDate" type="tns:ETGdateType" minOccurs="0">
+      <xs:annotation>
+       <xs:documentation>Date lower boundary</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="ProductionEndDate" type="tns:ETGdateType" minOccurs="0">
+      <xs:annotation>
+       <xs:documentation>Date upper boundary</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="RequestedProductionDate" type="tns:ETGdateType" minOccurs="0">
+      <xs:annotation>
+       <xs:documentation>Exact date value within "start-end" range</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name="ETGmeasurement">
+    <xs:annotation>
+     <xs:documentation>Common value/unit data type (double value type)</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+     <xs:element name="Value" type="xs:double" minOccurs="1" maxOccurs="1"/>
+     <xs:element name="Unit" type="tns:ISOunitType" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+   </xs:complexType>
+   
+   <xs:complexType name="ETGsettingType">
+    <xs:annotation>
+     <xs:documentation>Settings for country, language, response format etc.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+     <xs:element name="ISOcountryCode" type="tns:ISOcountryType" minOccurs="1" maxOccurs="1">
+      <xs:annotation>
+       <xs:documentation>ISO country code</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="ISOlanguageCode" type="tns:ISOlanguageType" minOccurs="1" maxOccurs="1">
+      <xs:annotation>
+       <xs:documentation>ISO language code</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="ISOcurrencyCode" type="tns:ISOcurrencyType" minOccurs="0" maxOccurs="1">
+      <xs:annotation>
+       <xs:documentation>ISO currency code</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+     </xs:sequence>
+     </xs:complexType>
+
+   <xs:complexType name="ETGversionInformationType">
+    <xs:sequence>
+      <xs:element name="ServiceVersion" type="xs:string" minOccurs="1" maxOccurs="1" />
+      <xs:element name="IntelligenceVersion" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <!-- We do not use version number in data release -->
+      <xs:element name="DataReleaseDate" type="tns:ETGdateType" minOccurs="1" maxOccurs="1"/>
+     </xs:sequence>
+   </xs:complexType>
+   
+
+       <xs:complexType name="LoginDataType">
+           <xs:sequence>
+     <xs:element name="Name" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>ETG-wide unique user name</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="Password" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>User password</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="ReturnSecurityToken" type="xs:boolean" minOccurs="0">
+     <xs:annotation>
+      <xs:documentation>If set to true, SecurityToken and corresponding TimeToLive will be returned</xs:documentation>
+     </xs:annotation>
+     </xs:element>
+           </xs:sequence>
+       </xs:complexType>
+   <xs:complexType name="OriginatorType">
+    <xs:sequence>
+     <xs:element name="Signature" type="xs:string">
+      <xs:annotation>
+       <xs:documentation>ETG-wide unique user ID / user signature</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+     <xs:choice>
+      <xs:element name="LoginData" type="tns:LoginDataType">
+       <xs:annotation>
+        <xs:documentation>User authentication data</xs:documentation>
+       </xs:annotation>
+      </xs:element>
+      <xs:element name="SecurityToken" type="xs:string">
+       <xs:annotation>
+        <xs:documentation>Security token to be used instead of username/password pair</xs:documentation>
+       </xs:annotation>
+      </xs:element>
+     </xs:choice>
+     <!-- $Author: akh $
+          $Date: 2008/01/22 10:05:00 Deprecated and will be removed in future
+     <xs:element name="User" type="tns:UserInfoType" minOccurs="0">
+      <xs:annotation>
+       <xs:documentation>Optional user information. Can be registered on the server side</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+     -->
+    </xs:sequence>
+   </xs:complexType>
+         <xs:complexType name="FailureType">
+    <xs:sequence>
+     <xs:element name="ETGError" type="tns:ETGStatus"/>
+     <xs:element name="ETGWarning" type="tns:ETGStatus" minOccurs="0"/>
+    </xs:sequence>
+         </xs:complexType>
+
+   <xs:complexType name="SuccessType">
+    <xs:sequence minOccurs="0">
+     <xs:element name="ETGWarning" type="tns:ETGStatus" minOccurs="0"/>
+    </xs:sequence>
+   </xs:complexType>
+
+   <xs:complexType name="ResponseType">
+    <xs:sequence>
+     <xs:element name="OrderID" type="xs:string">
+      <xs:annotation>
+       <xs:documentation>A unique ID that the ETG service has assigned to the order originated by the client request. In case of asynchronous request processing can be used by the client for related request identification.</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="VersionResponse" type="xs:string" minOccurs="0">
+      <xs:annotation>
+       <xs:documentation>Version of global ETG services specification used to construct the response</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="Statistics" type="tns:StatisticsType"/>
+     <xs:element name="SecurityToken" type="xs:string" minOccurs="0">
+      <xs:annotation>
+       <xs:documentation>Reurned security token to be used instead of username/password pair for further calls</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="TimeToLive" type="xs:dateTime" minOccurs="0">
+      <xs:annotation>
+       <xs:documentation>Validity period of the reurned security token</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+
+     <xs:choice>
+      <xs:element name="Failure" type="tns:FailureType">
+       <xs:annotation>
+        <xs:documentation>Indicates that the processing of this request has failed, and provides error and optional warning messages that arose during the processing.</xs:documentation>
+       </xs:annotation>
+      </xs:element>
+      <xs:element name="Success" type="tns:SuccessType">
+       <xs:annotation>
+        <xs:documentation>Indicates that the processing of this request has succeeded; may provide non-fatal warning messages that arose during the processing.</xs:documentation>
+       </xs:annotation>
+      </xs:element>
+     </xs:choice>
+
+
+    </xs:sequence>
+   </xs:complexType>
+
+
+   <xs:complexType name="StatisticsType">
+    <xs:sequence>
+     <xs:element name="StartDateTime" type="xs:dateTime">
+      <xs:annotation>
+       <xs:documentation>Processing start timestamp</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="EndDateTime" type="xs:dateTime">
+      <xs:annotation>
+       <xs:documentation>Processing finish timestamp</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name="ETGStatus">
+    <xs:annotation>
+     <xs:documentation>Placeholder for general status report. To be filled out before sending a response back to the originator.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+     <xs:element name="Code" type="xs:int">
+      <xs:annotation>
+       <xs:documentation>Top level error or warning code</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="Description" type="xs:string">
+      <xs:annotation>
+       <xs:documentation>Top level error or warning description</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="ExtCode" type="xs:int" minOccurs="0">
+      <xs:annotation>
+       <xs:documentation>Extended error or warning code. Can be service specific</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="ExtDescription" type="xs:string" minOccurs="0">
+      <xs:annotation>
+       <xs:documentation>Extended error or warning description.</xs:documentation>
+      </xs:annotation>
+     </xs:element>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name="ETGHeaderType">
+    <xs:sequence>
+     <xs:element name="VersionRequest" type="tns:VersionType"/>
+     <xs:element name="Originator" type="tns:OriginatorType"/>
+     <!-- Deprecated and will be removed 
+     <xs:element name="Request" type="tns:RequestType"/>
+     -->
+     <xs:element name="Response" type="tns:ResponseType" minOccurs="0"/>
+    </xs:sequence>
+   </xs:complexType> 
+   
+   <xs:element name="ETGHeader" type="tns:ETGHeaderType"/>
+
+
+  <xs:complexType name="VehicleType">
+     <xs:sequence>
+        <xs:element name="VehicleTypeCode" type="xs:int" />
+        <xs:element name="Name" type="xs:string"  />
+        <xs:element name="ShortName" type="xs:string" />
+        <xs:element name="SortCode" type="xs:int" />
+     </xs:sequence>
+  </xs:complexType>
+
+
+   <xs:complexType name="Make">
+     <xs:sequence>
+         <xs:element name="MakeCode" type="xs:int" minOccurs="0" maxOccurs="1"/>
+         <xs:element name="Name"     type="xs:string" minOccurs="0" maxOccurs="1"/>
+         <xs:element name="Company"  type="xs:string" minOccurs="0" maxOccurs="1"/>
+         <xs:element name="Importer" type="xs:string" minOccurs="0" maxOccurs="1"/>
+         <xs:element name="ProductionPeriod" type="tns:ETGproductionPeriodType" minOccurs="0" maxOccurs="1"/>
+         <xs:element name="SortCode" type="xs:int" minOccurs="0" maxOccurs="1"/>
+     </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name="Model">
+      <xs:sequence>
+         <xs:element name="ModelCode" type="xs:int" minOccurs="0" maxOccurs="1"/>
+         <xs:element name="Name"  type="xs:string" minOccurs="0" maxOccurs="1"/>
+         <xs:element name="NameExtended" type="xs:string" minOccurs="0" maxOccurs="1"/>
+         <xs:element name="ManufacturerSeriesCode" type="xs:string" minOccurs="0" maxOccurs="1"/>
+         <xs:element name="ProductionPeriod" type="tns:ETGproductionPeriodType" minOccurs="0" maxOccurs="1"/>
+         <xs:element name="SortCode" type="xs:int" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+   </xs:complexType>
+
+   <xs:complexType name="Type">
+      <xs:sequence>
+          <xs:element name="NationalVehicleCode" type="xs:long" minOccurs="0" maxOccurs="1" />
+          <xs:element name="InternationalVehicleCode" type="xs:string" minOccurs="0" maxOccurs="1"/>
+  <xs:element name="Name" type="xs:string" minOccurs="0" maxOccurs="1"/>
+  <!-- Added by $Author: akh$ $Revision$
+    implemented in videntsrv-1.1.6
+    -->
+    <xs:element name="AlternativeName" type="xs:string" minOccurs="0" maxOccurs="1">
+    <xs:annotation><xs:documentation>This is customised description of the vehicle. The content may be different from the original descriptrion of the type</xs:documentation></xs:annotation>
+  </xs:element>
+          <xs:element name="TrimLineName" type="xs:string" minOccurs="0" maxOccurs="1" />
+          <xs:element name="ManufacturerCode" type="xs:string" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="ProductionPeriod" type="tns:ETGproductionPeriodType" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="NewPrice" type="tns:ETGpriceRangeType" minOccurs="0" maxOccurs="1"/>
+  <xs:element name="SortCode" type="xs:int" minOccurs="0" maxOccurs="1"/>
+  <!-- Added by $Author: akh $ in $Revision: 1.4 $ -->
+  <xs:element name="OperationAllowed" type="tns:ETGoperationType" minOccurs="0" maxOccurs="unbounded">
+    <xs:annotation><xs:documentation>ETG may have a list of intelligent operations available for this vehicle type. Note: This is suplimentary information, it does not gurantee the successful status of the operation.</xs:documentation></xs:annotation>
+         </xs:element>
+ <!-- Added by $Author: akh $ in $Revision: 1.4 $
+ Implemented in version: videntsrv-1.1.5
+ -->
+ <xs:element name="VATreclaimable" type="xs:boolean" minOccurs="0" maxOccurs="1">
+   <xs:annotation>
+   <xs:documentation>The value of the element indicates whether the VAT included in price(s) of a vehicle is reclaimable or not. If the value is "true", it means that the VAT is reclaimable. If the value is "false", it implies that VAT paid for the vehicle is not reclaimable.</xs:documentation>
+   </xs:annotation>  
+ </xs:element>
+ <!-- Added by $Author: akh $ in $Revision: 1.10 $
+      Implemented in version: videntsrv-1.2.0
+ -->
+  <xs:element name="RegistrationDate" type="tns:ETGdateType" minOccurs="0" maxOccurs="1">
+   <xs:annotation>
+   <xs:documentation>The date when the vehicle with NationalVehicleCode is registered in vehicle registration authority of a country/region.</xs:documentation>
+   </xs:annotation>  
+ </xs:element>
+ 
+      </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name="MarketSegmentType">
+      <xs:sequence>
+          <xs:element name="MarketSegmentDescription" type="tns:ETGlookupType" minOccurs="0" />
+      </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name="Body">
+       <xs:sequence>
+           <xs:element name="BodyStyleDescription" type="tns:ETGlookupType" minOccurs="0" maxOccurs="1"/>
+           <xs:element name="DoorsNumber" type="xs:int" minOccurs="0" maxOccurs="1"/>
+       </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name="GearBox">
+      <xs:sequence>
+         <xs:element name="Type" type="tns:ETGlookupType" minOccurs="0" maxOccurs="1"/>
+         <xs:element name="GearsNumber" type="xs:int" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name="Transmission">
+      <xs:sequence>
+         <xs:element name="DriveType" type="tns:ETGlookupType" minOccurs="0" maxOccurs="1"/>
+         <xs:element name="GearBox"   type="tns:GearBox" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name="Engine">
+      <xs:sequence>
+         <xs:element name="Fuel" type="tns:ETGlookupType" minOccurs="0" maxOccurs="1"/>
+         <xs:element name="Layout" type="tns:ETGlookupType" minOccurs="0" maxOccurs="1"/>
+         <xs:element name="Power"  type="tns:ETGmeasurement" minOccurs="0" maxOccurs="2"/>
+         <xs:element name="Displacement" type="tns:ETGmeasurement" minOccurs="0" maxOccurs="1"/>
+	 <xs:element name="CylindersNumber" type="xs:int" minOccurs="0" maxOccurs="1"/>
+	 <xs:element name="ValvesPerCylinder" type="xs:int" minOccurs="0" maxOccurs="1">
+        <xs:annotation><xs:documentation>Number of valves per cylinder.</xs:documentation></xs:annotation>
+     </xs:element>
+     <xs:element name="RoundedDisplacement" type="tns:ETGmeasurement" minOccurs="0" maxOccurs="1" >
+        <xs:annotation><xs:documentation>This is the volume of the engine rounded and converted to Litre from total displacement in ccm. This conversion is done for marketing and  other purposes.</xs:documentation></xs:annotation>
+</xs:element>
+    </xs:sequence>
+   </xs:complexType>
+
+ <xs:complexType name="Miscellaneous">
+   <xs:sequence>
+      <xs:element name="TotalWeight" type="tns:ETGmeasurement" minOccurs="0" maxOccurs="1">
+         <xs:annotation><xs:documentation>TODO: To be completed.</xs:documentation></xs:annotation>
+      </xs:element>
+      <xs:element name="PayLoad" type="tns:ETGmeasurement" minOccurs="0" maxOccurs="1">
+         <xs:annotation><xs:documentation>TODO: To be completed.</xs:documentation></xs:annotation>
+      </xs:element>
+      <xs:element name="Wheelbase" type="tns:ETGmeasurement" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="Wheelbase2" type="tns:ETGmeasurement" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="SeatsNumber" type="xs:int" minOccurs="0" maxOccurs="1"/>
+      <!-- 
+          Added by $Author$ $Date$
+      -->
+      <xs:element name="CurbWeight" type="tns:ETGmeasurement" minOccurs="0" maxOccurs="1">
+          <xs:annotation><xs:documentation>The weight of an empty vehicle without passenger or payload, but including oil, gas, coolant and other standard equipment</xs:documentation></xs:annotation>
+      </xs:element> 
+      <xs:element name="ManufacturerProductID" type="xs:string" minOccurs="0" maxOccurs="unbounded">
+           <xs:annotation><xs:documentation>This is the code of the vehicle that manufacurer uses for selling the car to the market. This is the code the manufacturer assign after configuring the car with equipment.</xs:documentation></xs:annotation>    
+      </xs:element>          
+      </xs:sequence>
+   </xs:complexType>
+
+
+
+   <xs:complexType name="Vehicle">
+       <xs:sequence>
+           <xs:element name="VehicleType" type="tns:VehicleType" minOccurs="0" maxOccurs="1"/>
+           <xs:element name="Make"        type="tns:Make"        minOccurs="0" maxOccurs="1"/>
+           <xs:element name="Model" type="tns:Model"  minOccurs="0" maxOccurs="1" />
+           <xs:element name="Type"  type="tns:Type"   minOccurs="0" maxOccurs="1" />
+           <xs:element name="MarketSegment"  type="tns:MarketSegmentType" minOccurs="0" maxOccurs="1" />
+           <xs:element name="Body" type="tns:Body" minOccurs="0" maxOccurs="1" />
+           <xs:element name="Transmission" type="tns:Transmission" minOccurs="0" maxOccurs="1" />
+           <xs:element name="Engine"  type="tns:Engine"  minOccurs="0" maxOccurs="1"/>
+           <xs:element name="Miscellaneous" type="tns:Miscellaneous" minOccurs="0" maxOccurs="1" />
+       </xs:sequence>
+   </xs:complexType>
+
+
+   <xs:complexType name="VehicleListType">
+     <xs:sequence>
+         <xs:element name="Vehicle" type="tns:Vehicle" minOccurs="0" maxOccurs="unbounded"/>
+     </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name="VehicleHomologationType">
+    <xs:sequence>
+     <xs:element name="CertificateID" type="xs:string" minOccurs="1" maxOccurs="1">
+      <xs:annotation><xs:documentation>For CH (ISO 639 Country Code) typenschein. For DE -- HSN number, or complete KBA number (HSN+TSN)</xs:documentation></xs:annotation>
+     </xs:element>
+     <xs:element name="CertificatePart2" type="xs:string" minOccurs="0" maxOccurs="1">
+      <xs:annotation><xs:documentation>Only for DE. Instance document can provide 2-nd part(TSN), if only HSN was provided in CertifcateID. Instance document should not include this element if complete KBA was provided in element CertificateID</xs:documentation></xs:annotation>
+     </xs:element>
+     <xs:element name="EUhomologationID" type="xs:string" minOccurs="0" maxOccurs="1">
+      <xs:annotation><xs:documentation>For future usage. </xs:documentation></xs:annotation>
+     </xs:element> 
+    </xs:sequence>
+   </xs:complexType>
+   
+   <xs:complexType name="VehicleImmatriculationYearListType">
+     <xs:sequence>
+         <xs:element name="ImmatriculationYear" type="xs:gYear" minOccurs="0" maxOccurs="unbounded"/>
+     </xs:sequence>
+   </xs:complexType>
+   
+   <xs:complexType name="VehicleInformationType">
+     <xs:sequence>
+        <xs:element name="CertificateID" type="xs:string" minOccurs="0" maxOccurs="1" />
+        <xs:element name="RegistrationDate" type="tns:ETGdateType" minOccurs="0" maxOccurs="1"/>
+     </xs:sequence>
+   </xs:complexType>
+   
+   <xs:element name="Settings" type="tns:ETGsettingType">
+    <xs:annotation>
+     <xs:documentation>Settings for country (market), language, response format etc.</xs:documentation>
+    </xs:annotation>
+   </xs:element>
+   <!-- Deprecated, replaced by VersionInformation element -->  
+   <xs:element name="VersionInformation" type="tns:ETGversionInformationType"/>
+   <xs:element name="VehicleList" type="tns:VehicleListType"/>
+   <xs:element name="Certification" type="tns:VehicleHomologationType"/>
+   <xs:element name="ImmatriculationYearList" type="tns:VehicleImmatriculationYearListType">
+	   <xs:annotation><xs:documentation>List of Immatriculation years available in vehicle database</xs:documentation></xs:annotation>
+   </xs:element>
+      <!-- 
+   $Date: 2007/08/27 12:36:42 $ $Author: akh $ 
+   -->
+   <xs:element name="GetListCertificateID">
+     <xs:complexType>
+        <xs:sequence>
+          <xs:element name="Settings" type="tns:ETGsettingType" minOccurs="1" maxOccurs="1" />
+          <xs:choice minOccurs="1" maxOccurs="1">
+             <xs:element name="NationalVehicleCode" type="xs:long" />
+             <xs:element name="RegistrationNumberPlate" type="xs:string" />
+          </xs:choice>
+        </xs:sequence>
+    </xs:complexType>
+   </xs:element>
+   <!-- 
+   $Date: 2007/08/27 12:36:42 $ $Author: akh $
+   -->
+   <xs:element name="GetListCertificateIDResponse">
+     <xs:complexType>
+        <xs:sequence>
+          <xs:element name="Settings" type="tns:ETGsettingType" minOccurs="1" maxOccurs="1" />
+          <xs:choice minOccurs="1" maxOccurs="1">
+             <xs:element name="NationalVehicleCode" type="xs:long" />
+             <xs:element name="RegistrationNumberPlate" type="xs:string" />
+          </xs:choice>
+          <xs:element name="RegistrationDate" type="tns:ETGdateType" minOccurs="0" maxOccurs="1"/>          
+          <xs:element name="CertificateID" type="xs:string"  minOccurs="0" maxOccurs="unbounded">
+          <xs:annotation><xs:documentation>A vehicle may be identified by several certificate ID (one to many relation).</xs:documentation></xs:annotation>              
+          </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+   </xs:element>
+   <!-- 
+     $Date: 2008/07/07 15:20:00 CET $
+     $Author: akh $
+     
+     GetListVehicleByRegistrationNumberPlate and VehicleListByRegistrationNumberPlate
+     XML schema complex types are defined to comply with WS-I compliance that 
+     does not allow message(s) with more than one part composed of complex type.
+
+     All future methods will strictly follow WS-I profile rules while defining 
+     XML schema complex types.
+     
+    -->
+    <xs:element name="GetListVehicleByRegistrationNumberPlate">
+    <xs:complexType>
+     <xs:sequence>
+      <xs:element name="Settings" type="tns:ETGsettingType" minOccurs="1" maxOccurs="1" />
+      <xs:element name="RegistrationNumberPlate" type="xs:string" minOccurs="1" maxOccurs="1">
+      <xs:annotation><xs:documentation>A vehicle registration plate is a metal or plastic plate attached to a motor vehicle or trailer for official identification purposes. The registration identifier is a numeric or alphanumeric code that uniquely identifies the vehicle within the issuing region's database. In some countries, the identifier is unique within the entire country. In others, it is unique within each state or province. There is also variation on whether the identifier is associated with a vehicle or a person. Depending on the country or region of issue, it may also be referred to as a license plate, number plate, vehicle tag, license tag, or simply tag. </xs:documentation></xs:annotation> 
+      </xs:element>
+     </xs:sequence>
+    </xs:complexType>
+   </xs:element>
+   <!-- Response -->
+   <xs:element name="VehicleListByRegistrationNumberPlate">
+    <xs:complexType>
+     <xs:sequence>
+      <xs:element name="Settings" type="tns:ETGsettingType" minOccurs="0" maxOccurs="1" />
+      <xs:element name="RegistrationNumberPlate" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="Vehicle"  type="tns:Vehicle" minOccurs="0" maxOccurs="unbounded"/>
+     </xs:sequence>
+    </xs:complexType>
+   </xs:element>
+   <!-- 
+     $Date: 2008/07/11 11:00:00 CET $
+     $Author: akh $
+     GetListCertificateIDByRegistrationNumberPlate 
+     and CertificateIDByRegistrationNumberPlate 
+     XML schema complex types are defined to comply with WS-I compliance that 
+     does not allow message(s) with more than one part composed of complex type.
+
+     All future methods will strictly follow WS-I profile rules while defining 
+     XML schema complex types.
+    -->
+   <xs:element name="GetListCertificateIDByRegistrationNumberPlate">
+    <xs:complexType>
+     <xs:sequence>
+      <xs:element name="Settings" type="tns:ETGsettingType" minOccurs="1" maxOccurs="1" />
+      <xs:element name="RegistrationNumberPlate" type="xs:string" minOccurs="1" maxOccurs="1">
+      <xs:annotation><xs:documentation>A vehicle registration plate is a metal or plastic plate attached to a motor vehicle or trailer for official identification purposes. The registration identifier is a numeric or alphanumeric code that uniquely identifies the vehicle within the issuing region's database. In some countries, the identifier is unique within the entire country. In others, it is unique within each state or province. There is also variation on whether the identifier is associated with a vehicle or a person. Depending on the country or region of issue, it may also be referred to as a license plate, number plate, vehicle tag, license tag, or simply tag. </xs:documentation></xs:annotation> 
+      </xs:element>
+     </xs:sequence>
+    </xs:complexType>
+   </xs:element>
+   <!-- Response -->
+   <xs:element name="CertificateIDByRegistrationNumberPlate">
+    <xs:complexType>
+     <xs:sequence>
+      <xs:element name="Settings" type="tns:ETGsettingType" minOccurs="0" maxOccurs="1" />
+      <xs:element name="RegistrationNumberPlate" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="VehicleInformation"  type="tns:VehicleInformationType" minOccurs="0" maxOccurs="unbounded"/>
+     </xs:sequence>
+    </xs:complexType>
+   </xs:element>
+  </xs:schema>
+ </types>
+
+ <message name="ServiceHeader">
+  <part name="etg_header" element="tns:ETGHeader"/>
+ </message>
+ <message name="GetListMake">
+    <part name="settings" element="tns:Settings"/>
+    <part name="types" element="tns:VehicleList"/>
+ </message>
+
+ <message name="GetVersionRequest">
+  <part name="settings" element="tns:Settings"/>
+ </message>
+ 
+ <message name="GetVersionResponse">
+   <part name="settings" element="tns:Settings"/>
+   <part name="versionInformation" element="tns:VersionInformation"/>
+ </message>
+
+ 
+ <message name="GetListVehicle">
+  <part name="settings" element="tns:Settings"/>
+  <part name="types" element="tns:VehicleList"/>
+ </message>
+ 
+ <message name="VehicleListByCertID">
+  <part name="settings" element="tns:Settings"/>
+  <part name="certID"   element="tns:Certification"/> 
+ </message>
+
+ <!-- $Date: 2007/08/27 12:36:42 $ $Author: akh $
+     The following messages are for "GetListImmatriculationYear"
+     method
+  -->
+ <message name="GetListImmatriculationYearRequest">
+  <part name="settings" element="tns:Settings"/>
+ </message>
+ 
+ <message name="GetListImmatriculationYearResponse">
+    <part name="settings" element="tns:Settings"/>
+    <part name="listofyears" element="tns:ImmatriculationYearList"/>
+ </message>
+   <!-- $Date: 2007/12/05 10:42:42 $ 
+       $Author: akh $
+       Message for GetListFuelTypeEx
+   -->
+   <message name="GetListFuelTypeExRequest">
+       <part name="settings" element = "tns:Settings"/>
+       <part name="types"    element ="tns:VehicleList"/>
+   </message>
+   <message name="GetListFuelTypeExResponse">
+       <part name="settings" element = "tns:Settings"/>
+       <part name="types"    element ="tns:VehicleList"/>
+   </message>
+   
+    <!-- $Date: 2008/01/22 09:44:42 $ 
+      $Author: akh $
+      
+      GetListCertificateID's messages 
+ -->
+  <message name="GetListCertificateIDRequest">
+      <part name="param" element="tns:GetListCertificateID">
+          <documentation>This message is used in input to the "GetListCertificateID" facility/method.</documentation>
+      </part>
+  </message>
+  <message name="GetListCertificateIDResponse">
+      <part name="param" element="tns:GetListCertificateIDResponse">
+          <documentation>This is the structure of output of "GetListCertificateID" facility/method.</documentation>
+      </part>
+  </message>
+  <!-- 
+  The following messages are for rpc-literal binding operations 
+
+  -->
+  <!-- Commented out 
+     For future usage 
+   
+  <message name="GetListVehicleByRegistrationNumberPlateRequest">
+      <documentation>This message is used for rpc-literal style operations.</documentation>
+      <part name="Settings" type="tns:ETGsettingType" />
+      <part name="RegistrationNumberPlate" type="xs:string" />
+  </message>
+  <message name="GetListVehicleByRegistrationNumberPlateResponse">
+      <documentation>This message is used for rpc-literal style operations.</documentation>
+      <part name="Settings" type="tns:ETGsettingType" />
+      <part name="RegistrationNumberPlate" type="xs:string" />
+      <part name="Vehicle" type="tns:VehicleType" />
+  </message>
+ -->
+  <!--
+   $Date: 2008/07/07 15:20:00 CET $
+   $Author: akh $
+
+   The following messages are constructed to be conformant to WS-I profile 
+   and can be used for document-literal operations.
+  -->
+  <message name="GetListVehicleByRegistrationNumberPlateReq">
+      <documentation>This message is used for document-literal style operations (input)</documentation>
+      <part name="inputmsg" element="tns:GetListVehicleByRegistrationNumberPlate"/>
+  </message>
+  <message name="GetListVehicleByRegistrationNumberPlateResp">
+      <documentation>This message is used for document-literal style operations (output)</documentation>
+      <part name="outputmsg" element="tns:VehicleListByRegistrationNumberPlate"/>
+  </message>
+                 
+  <message name="GetListCertificateIDByRegistrationNumberPlateReq">
+      <documentation>This message is used for document-literal style operations (input)</documentation>
+      <part name="inputmsg" element="tns:GetListCertificateIDByRegistrationNumberPlate"/>
+  </message>
+  <message name="GetListCertificateIDByRegistrationNumberPlateResp">
+      <documentation>This message is used for document-literal style operations (output)</documentation>
+      <part name="outputmsg" element="tns:CertificateIDByRegistrationNumberPlate"/>
+  </message>
+ 
+  
+ <portType name="IdentificationSoapPort">
+   <operation name="GetListMake">
+      <input message="tns:GetListMake"/>
+      <output message="tns:GetListVehicle"/>
+  </operation>
+  
+  <operation name="GetVersion">
+     <input message="tns:GetVersionRequest"/>
+     <output message="tns:GetVersionResponse"/>
+  </operation>
+  <operation name="GetListVehicleType">
+   <input message="tns:GetListVehicle"/>
+   <output message="tns:GetListVehicle"/>
+  </operation>
+  <operation name="GetListModel">
+   <input message="tns:GetListVehicle"/>
+   <output message="tns:GetListVehicle"/>
+  </operation>
+  <operation name="GetListType">
+   <input message="tns:GetListVehicle"/>
+   <output message="tns:GetListVehicle"/>
+  </operation>
+  <operation name="GetListTypeEx">
+   <input message="tns:GetListVehicle"/>
+   <output message="tns:GetListVehicle"/>
+  </operation>
+
+  <operation name="GetListTypeByCertificateID">
+   <input message="tns:VehicleListByCertID"/>
+   <output message="tns:GetListVehicle"/>
+  </operation>
+  
+  <operation name="GetListBodyType">
+   <input message="tns:GetListVehicle"/>
+   <output message="tns:GetListVehicle"/>
+  </operation>
+  <operation name="GetListGearBoxType">
+   <input message="tns:GetListVehicle"/>
+   <output message="tns:GetListVehicle"/>
+  </operation>
+  <operation name="GetListDriveType">
+   <input message="tns:GetListVehicle"/>
+   <output message="tns:GetListVehicle"/>
+  </operation>
+  <operation name="GetListFuelType">
+   <input message="tns:GetListVehicle"/>
+   <output message="tns:GetListVehicle"/>
+  </operation>
+  <operation name="GetListImmatriculationYear">
+   <input message="tns:GetListImmatriculationYearRequest"/>
+   <output message="tns:GetListImmatriculationYearResponse"/>
+  </operation>
+  <!-- $Date: 2007/12/05 10:42:42 $ 
+       $Author: akh $
+     
+  -->
+  <operation name="GetListFuelTypeEx">
+  
+      <documentation>This is an alternative facility to the "GetListFuelType". The GetListFuelTypeEx returns the extended list of fuels available whereas the GetListFuelType returns the list of Fuels for which a vehicle can be searched.</documentation>
+      <input message="tns:GetListFuelTypeExRequest"/>
+      <output message="tns:GetListFuelTypeExResponse" />
+  </operation>
+<!-- $Date: 2008/01/22 09:44:42 $ 
+      $Author: akh $
+      
+      GetListCertificateID' operation 
+ -->
+ <operation name="GetListCertificateID">
+   <input message="tns:GetListCertificateIDRequest"/>
+   <output message="tns:GetListCertificateIDResponse"/>
+  </operation>
+  <operation name="GetListVehicleByRegistrationNumberPlate">
+     <input message="tns:GetListVehicleByRegistrationNumberPlateReq"/>
+     <output message="tns:GetListVehicleByRegistrationNumberPlateResp"/>
+   </operation>
+   
+  <operation name="GetListCertificateIDByRegistrationNumberPlate">
+     <input message="tns:GetListCertificateIDByRegistrationNumberPlateReq"/>
+     <output message="tns:GetListCertificateIDByRegistrationNumberPlateResp"/>
+   </operation>
+   
+   
+ </portType>
+ <!-- Commented out
+  For future usage 
+ 
+ <portType name="videntsrvSoapPortRPC">
+   <documentation>RPC-Literal Style opertaions</documentation>
+   <operation name="GetListVehicleByRegistrationNumberPlate">
+     <input message="tns:GetListVehicleByRegistrationNumberPlateRequest"/>
+     <output message="tns:GetListVehicleByRegistrationNumberPlateResponse"/>
+   </operation>
+ </portType>       
+ <portType name="videntsrvSoapDocumentPort">
+    <documentation>document-literal style operations</documentation>
+     <operation name="GetListVehicleByRegistrationNumberPlate">
+     <input message="tns:GetListVehicleByRegistrationNumberPlateReq"/>
+     <output message="tns:GetListVehicleByRegistrationNumberPlateResp"/>
+   </operation>
+ </portType>       
+ -->
+ <binding name="IdentificationBinding" type="tns:IdentificationSoapPort">
+  <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+  <operation name="GetListMake">
+   <soap:operation soapAction="http://www.eurotax.com/GetListMake" style="document"/>
+   <input>
+    <soap:header message="tns:ServiceHeader" part="etg_header" use="literal"/>
+    <soap:body use="literal"/>
+   </input>
+   <output>
+    <soap:header message="tns:ServiceHeader" part="etg_header" use="literal"/>
+    <soap:body use="literal"/>
+   </output>
+  </operation>
+
+  <operation name="GetVersion">
+   <soap:operation soapAction="http://www.eurotax.com/GetVersion" style="document"/>
+   <input>
+    <soap:header message="tns:ServiceHeader" part="etg_header" use="literal"/>
+    <soap:body use="literal"/>
+   </input>
+   <output>
+    <soap:header message="tns:ServiceHeader" part="etg_header" use="literal"/>
+    <soap:body use="literal"/>
+   </output>
+  </operation>
+
+  <operation name="GetListVehicleType">
+   <soap:operation soapAction="http://www.eurotax.com/GetListVehicleType" style="document"/>
+   <input>
+    <soap:header message="tns:ServiceHeader" part="etg_header" use="literal"/>
+    <soap:body use="literal"/>
+   </input>
+   <output>
+    <soap:header message="tns:ServiceHeader" part="etg_header" use="literal"/>
+    <soap:body use="literal"/>
+   </output>
+  </operation>
+
+  <operation name="GetListModel">
+   <soap:operation soapAction="http://www.eurotax.com/GetListModel" style="document"/>
+   <input>
+    <soap:header message="tns:ServiceHeader" part="etg_header" use="literal"/>
+    <soap:body use="literal"/>
+   </input>
+   <output>
+    <soap:header message="tns:ServiceHeader" part="etg_header" use="literal"/>
+    <soap:body use="literal"/>
+   </output>
+  </operation>
+  <operation name="GetListType">
+   <soap:operation soapAction="http://www.eurotax.com/GetListType" style="document"/>
+   <input>
+    <soap:header message="tns:ServiceHeader" part="etg_header" use="literal"/>
+    <soap:body use="literal"/>
+   </input>
+   <output>
+    <soap:header message="tns:ServiceHeader" part="etg_header" use="literal"/>
+    <soap:body use="literal"/>
+   </output>
+  </operation>
+
+  <operation name="GetListTypeEx">
+   <soap:operation soapAction="http://www.eurotax.com/GetListTypeEx" style="document"/>
+   <input>
+    <soap:header message="tns:ServiceHeader" part="etg_header" use="literal"/>
+    <soap:body use="literal"/>
+   </input>
+   <output>
+    <soap:header message="tns:ServiceHeader" part="etg_header" use="literal"/>
+    <soap:body use="literal"/>
+   </output>
+  </operation>
+
+  <operation name="GetListTypeByCertificateID">
+   <soap:operation soapAction="http://www.eurotax.com/GetListTypeByCertificateID" style="document"/>
+   <input>
+    <soap:header message="tns:ServiceHeader" part="etg_header" use="literal"/>
+    <soap:body use="literal"/>
+   </input>
+   <output>
+    <soap:header message="tns:ServiceHeader" part="etg_header" use="literal"/>
+    <soap:body use="literal"/>
+   </output>
+  </operation>
+
+  
+  <operation name="GetListBodyType">
+   <soap:operation soapAction="http://www.eurotax.com/GetListBodyType" style="document"/>
+   <input>
+    <soap:header message="tns:ServiceHeader" part="etg_header" use="literal"/>
+    <soap:body use="literal"/>
+   </input>
+   <output>
+    <soap:header message="tns:ServiceHeader" part="etg_header" use="literal"/>
+    <soap:body use="literal"/>
+   </output>
+  </operation>
+  <operation name="GetListGearBoxType">
+   <soap:operation soapAction="http://www.eurotax.com/GetListGearBoxType" style="document"/>
+   <input>
+    <soap:header message="tns:ServiceHeader" part="etg_header" use="literal"/>
+    <soap:body use="literal"/>
+   </input>
+   <output>
+    <soap:header message="tns:ServiceHeader" part="etg_header" use="literal"/>
+    <soap:body use="literal"/>
+   </output>
+  </operation>
+  <operation name="GetListDriveType">
+   <soap:operation soapAction="http://www.eurotax.com/GetListDriveType" style="document"/>
+   <input>
+    <soap:header message="tns:ServiceHeader" part="etg_header" use="literal"/>
+    <soap:body use="literal"/>
+   </input>
+   <output>
+    <soap:header message="tns:ServiceHeader" part="etg_header" use="literal"/>
+    <soap:body use="literal"/>
+   </output>
+  </operation>
+  <operation name="GetListFuelType">
+   <soap:operation soapAction="http://www.eurotax.com/GetListFuelType" style="document"/>
+   <input>
+    <soap:header message="tns:ServiceHeader" part="etg_header" use="literal"/>
+    <soap:body use="literal"/>
+   </input>
+   <output>
+    <soap:header message="tns:ServiceHeader" part="etg_header" use="literal"/>
+    <soap:body use="literal"/>
+   </output>
+  </operation>
+  
+  <operation name="GetListFuelTypeEx">
+   <soap:operation soapAction="http://www.eurotax.com/GetListFuelTypeEx" style="document"/>
+   <input>
+    <soap:header message="tns:ServiceHeader" part="etg_header" use="literal"/>
+    <soap:body use="literal"/>
+   </input>
+   <output>
+    <soap:header message="tns:ServiceHeader" part="etg_header" use="literal"/>
+    <soap:body use="literal"/>
+   </output>
+  </operation>
+  
+  
+  <operation name="GetListImmatriculationYear">
+   <soap:operation soapAction="http://www.eurotax.com/GetListImmatriculationYear" style="document"/>
+   <input>
+    <soap:header message="tns:ServiceHeader" part="etg_header" use="literal"/>
+    <soap:body use="literal"/>
+   </input>
+   <output>
+    <soap:header message="tns:ServiceHeader" part="etg_header" use="literal"/>
+    <soap:body use="literal"/>
+   </output>
+  </operation>
+  
+  <!-- $Author: akh $
+       $Date: 22/01/2008 $
+   -->
+  <operation name="GetListCertificateID">
+   <soap:operation soapAction="http://www.eurotax.com/GetListCertificateID" style="document"/>
+   <input>
+    <soap:header message="tns:ServiceHeader" part="etg_header" use="literal"/>
+    <soap:body use="literal"/>
+   </input>
+   <output>
+    <soap:header message="tns:ServiceHeader" part="etg_header" use="literal"/>
+    <soap:body use="literal"/>
+   </output>
+  </operation>
+  <!-- 
+  $Author: akh $
+  $Date:   2008/07/08 09:49:00 CET $ 
+  -->
+  
+  <operation name="GetListVehicleByRegistrationNumberPlate">
+   <soap:operation soapAction="http://www.eurotax.com/GetListVehicleByRegistrationNumberPlate" style="document"/>
+   <input>
+    <soap:header message="tns:ServiceHeader" part="etg_header" use="literal"/>
+    <soap:body use="literal"/>
+   </input>
+   <output>
+    <soap:header message="tns:ServiceHeader" part="etg_header" use="literal"/>
+    <soap:body use="literal"/>
+   </output>
+  </operation>
+  <operation name="GetListCertificateIDByRegistrationNumberPlate">
+   <soap:operation soapAction="http://www.eurotax.com/GetListCertificateIDByRegistrationNumberPlate" style="document"/>
+   <input>
+    <soap:header message="tns:ServiceHeader" part="etg_header" use="literal"/>
+    <soap:body use="literal"/>
+   </input>
+   <output>
+    <soap:header message="tns:ServiceHeader" part="etg_header" use="literal"/>
+    <soap:body use="literal"/>
+   </output>
+  </operation>
+ </binding>
+ <service name="IdentificationStub">
+  <port name="IdentificationService" binding="tns:IdentificationBinding">
+   <soap:address location="http://webservices.eurotaxglass.com/webservices/Identification.wsa"/>
+  </port>
+ </service>
+  </definitions>
+

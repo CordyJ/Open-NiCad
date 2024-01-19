@@ -1,0 +1,144 @@
+--@atlcompiler	atl2006
+--@name			CodeClone2SVG2
+--@version		1.0
+--@domains		CodeClone, SVG2
+--@authors		Yu Sun
+--@email        yusun@cis.uab.edu
+--@date			2007/11/05
+--@description	This transformation is used to transform the generic Code Clone DSL model to SVG model in a different format.
+
+module CodeClone2SVG2; -- Module Template
+create OUT : SVG from IN : CodeClone;
+
+helper context CodeClone!CloneUnit 
+def : firstOne(p : CodeClone!CloneUnit) : Integer =
+	(
+		CodeClone!CloneUnit.allInstances()->indexOf(CodeClone!CloneUnit.allInstances()->select(e | e.file.fileName = self.file.fileName)->first())
+	);
+
+helper context CodeClone!CloneUnit 
+def : getColor() : String =
+	(
+		Sequence{'red', 'green', 'blue', 'yellow', 'pink', 'gold', 'brown', 'cyan', 'honeydew', 'lime', 'purple', 'sienna', 'springgreen', 'black', 'dark'} -> at(self.parent.parent.groups.indexOf(self.parent))
+	);
+
+helper context CodeClone!CloneUnit
+def : getPos(p : String) : Integer =
+	(
+		CodeClone!CloneUnit.allInstances()->iterate(e; acc : OrderedSet(String) = OrderedSet{}|
+																			acc->including(e.file.fileName)) -> indexOf(p)
+	);
+
+helper context CodeClone!CloneUnit
+def : maxLine() : Integer = 
+	(
+	    CodeClone!CloneUnit.allInstances()->flatten()->iterate(e; res : Integer = -1 |
+	    											if e.file.totalFileLines > res then e.file.totalFileLines
+													   else res
+													   endif)
+	);
+
+rule CodeClone2Svg {
+	from
+		cc : CodeClone!CodeClone
+	to
+		s : SVG!Svg (
+			width <- 1000,                
+     	    height <- CodeClone!CloneUnit.allInstances()->collect(e | e.file.fileName)-> asSet() -> size() * 90 + 100,
+
+			version <- '1.1',     
+			standalone <- 'no',   
+			children <- group,
+			children <- CodeClone!CloneUnit.allInstances()
+		),
+		
+		group : SVG!Group (
+			translate_x <- 0,
+			translate_y <- 0,
+			components <- text
+		),
+			
+		text : SVG!Text (	
+			x <- 220,                             
+			y <- 20,                              
+			font_family <- 'Arial Black',           
+			font_size <- 16,                            
+			contend <- 'Code Clone Analysis Result by ' + cc.sourceToolName              
+		)
+}
+
+
+rule CloneUnit2Group {
+	from 
+		 cu : CodeClone!CloneUnit(
+		 	CodeClone!CloneUnit.allInstances()->flatten()->indexOf(cu) = cu.firstOne(cu)
+			)
+	to 
+		g : SVG!Group (
+			translate_x <- 0,
+			translate_y <- 90 * (cu.getPos(cu.file.fileName) - 1),
+			components <- text,
+			components <- rect,
+			components <- rect2
+		),
+		
+		text : SVG!Text (
+			x <- 25,
+			y <- 75,           
+			font_size <- 12,   
+			font_family <- 'Arial',             
+			fill <- 'blue',                     
+			contend <- cu.file.fileName + '  (Total Lines: ' + cu.file.totalFileLines -> toString() + ')'        
+		),
+		
+		rect : SVG!Rect (
+			x <- 20,
+			y <- 80,                
+			rx <- 10,               
+			ry <- 10,                
+			width <- (950 / cu.maxLine() * cu.file.totalFileLines).floor(),      
+			height <- 60,     
+			fill <- 'white',        
+			stroke <- 'brown',      
+			stroke_width <- 3,      
+			title <- cu.file.fileName + 'Test Test again',
+			opacity <- 0.8
+		),
+		
+		rect2 : SVG!Rect (
+				x <- 20 + (950 / cu.maxLine() * cu.startLine).floor(),   
+				y <- 83,           
+				rx <- 0,
+				ry <- 0,
+				width <- (950 / cu.maxLine() * (cu.endLine - cu.startLine)).floor(),        
+				height <- 54,      
+				fill <- cu.getColor(),              
+				opacity <- 0.75,          
+				title <- 'Line ' + cu.startLine->toString() + ' to ' + cu.endLine->toString() + ' (' + (cu.endLine - cu.startLine + 1)->toString() + ' lines)'
+		)
+}
+
+rule CloneUnit22Group {
+	from 
+		 cu : CodeClone!CloneUnit(
+		 	 not (CodeClone!CloneUnit.allInstances()->flatten()->indexOf(cu) = cu.firstOne(cu))
+			)
+	to 
+		g : SVG!Group (
+			translate_x <- 0,
+			translate_y <- 90 * (cu.getPos(cu.file.fileName) - 1),
+			components <- rect2
+		),
+		
+		rect2 : SVG!Rect (
+				x <- 20 + (950 / cu.maxLine() * cu.startLine).floor(),              
+				y <- 83,            
+				rx <- 0,
+				ry <- 0,
+				width <- (950 / cu.maxLine() * (cu.endLine - cu.startLine)).floor(),
+				height <- 54,       
+				fill <- cu.getColor(),             
+				opacity <- 0.75,           
+				title <- 'Line ' + cu.startLine->toString() + ' to ' + cu.endLine->toString() + ' (' + (cu.endLine - cu.startLine + 1)->toString() + ' lines)'
+		)
+}

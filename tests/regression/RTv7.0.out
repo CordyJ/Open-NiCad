@@ -1,0 +1,6233 @@
+Warning, this will remove all previous NiCad extraction and clone analysis results in ./nicadclones
+Are you certain you want to do this (y/n)? Done.
+
+===== Functions in default mode =====
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/default.cfg
+system=tests/regression/systems/c/httpd-2.2.8
+threshold=0.30
+granularity=functions
+language=c
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=yes
+include=
+exclude=
+
+Thu 18 Jan 2024 12:57:42 EST
+
+Extracting functions from c files in nicadclones/httpd-2.2.8/httpd-2.2.8
+
+real	0m7.988s
+user	0m4.774s
+sys	0m2.690s
+
+*** Warning:        2 source files failed to parse
+
+Extracted     5013 functions
+
+Applying blind renaming to extracted functions from c files in nicadclones/httpd-2.2.8/httpd-2.2.8
+
+real	0m2.013s
+user	0m1.806s
+sys	0m0.179s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.238s
+user	0m0.224s
+sys	0m0.009s
+
+Found 1387 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.013s
+user	0m0.005s
+sys	0m0.007s
+
+Clustered clone pairs into 251 classes
+
+Getting original sources for clones
+
+real	0m0.062s
+user	0m0.049s
+sys	0m0.012s
+
+Making HTML reports
+
+real	0m0.020s
+user	0m0.015s
+sys	0m0.004s
+
+Done.
+
+Detailed log in nicadclones/httpd-2.2.8/httpd-2.2.8_functions-clones-2024-01-18-12:57:42.log
+Results in nicadclones/httpd-2.2.8/httpd-2.2.8_functions-blind-clones/
+Report in nicadclones/httpd-2.2.8/httpd-2.2.8_functions-blind-clones/httpd-2.2.8_functions-blind-clones-0.30-classes-withsource.html
+
+Thu 18 Jan 2024 12:57:53 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/default.cfg
+system=tests/regression/systems/cs/RssBandit1.5.0.17sources
+threshold=0.30
+granularity=functions
+language=cs
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=yes
+include=
+exclude=
+
+Thu 18 Jan 2024 12:57:53 EST
+
+Extracting functions from cs files in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources
+
+real	0m6.999s
+user	0m5.145s
+sys	0m1.562s
+
+*** Warning:        3 source files failed to parse
+
+Extracted     4481 functions
+
+Applying blind renaming to extracted functions from cs files in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources
+
+real	0m0.989s
+user	0m0.819s
+sys	0m0.144s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.052s
+user	0m0.043s
+sys	0m0.007s
+
+Found 332 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.012s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 122 classes
+
+Getting original sources for clones
+
+real	0m0.051s
+user	0m0.042s
+sys	0m0.008s
+
+Making HTML reports
+
+real	0m0.013s
+user	0m0.008s
+sys	0m0.004s
+
+Done.
+
+Detailed log in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources_functions-clones-2024-01-18-12:57:53.log
+Results in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources_functions-blind-clones/
+Report in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources_functions-blind-clones/RssBandit1.5.0.17sources_functions-blind-clones-0.30-classes-withsource.html
+
+Thu 18 Jan 2024 12:58:01 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/default.cfg
+system=tests/regression/systems/java/jEdit
+threshold=0.30
+granularity=functions
+language=java
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=yes
+include=
+exclude=
+
+Thu 18 Jan 2024 12:58:01 EST
+
+Extracting functions from java files in nicadclones/jEdit/jEdit
+
+real	0m4.611s
+user	0m2.538s
+sys	0m1.785s
+
+Extracted     7021 functions
+
+Applying blind renaming to extracted functions from java files in nicadclones/jEdit/jEdit
+
+real	0m1.087s
+user	0m0.845s
+sys	0m0.202s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.086s
+user	0m0.076s
+sys	0m0.008s
+
+Found 811 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.012s
+user	0m0.004s
+sys	0m0.007s
+
+Clustered clone pairs into 92 classes
+
+Getting original sources for clones
+
+real	0m0.071s
+user	0m0.061s
+sys	0m0.008s
+
+Making HTML reports
+
+real	0m0.011s
+user	0m0.006s
+sys	0m0.003s
+
+Done.
+
+Detailed log in nicadclones/jEdit/jEdit_functions-clones-2024-01-18-12:58:01.log
+Results in nicadclones/jEdit/jEdit_functions-blind-clones/
+Report in nicadclones/jEdit/jEdit_functions-blind-clones/jEdit_functions-blind-clones-0.30-classes-withsource.html
+
+Thu 18 Jan 2024 12:58:07 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/default.cfg
+system=tests/regression/systems/py/Django
+threshold=0.30
+granularity=functions
+language=py
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=yes
+include=
+exclude=
+
+Thu 18 Jan 2024 12:58:07 EST
+
+Extracting functions from py files in nicadclones/Django/Django
+
+real	0m12.772s
+user	0m5.220s
+sys	0m6.448s
+
+Extracted     7068 functions
+
+Applying blind renaming to extracted functions from py files in nicadclones/Django/Django
+
+real	0m1.330s
+user	0m1.079s
+sys	0m0.206s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.075s
+user	0m0.065s
+sys	0m0.008s
+
+Found 193 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 86 classes
+
+Getting original sources for clones
+
+real	0m0.016s
+user	0m0.009s
+sys	0m0.006s
+
+Making HTML reports
+
+real	0m0.009s
+user	0m0.005s
+sys	0m0.003s
+
+Done.
+
+Detailed log in nicadclones/Django/Django_functions-clones-2024-01-18-12:58:07.log
+Results in nicadclones/Django/Django_functions-blind-clones/
+Report in nicadclones/Django/Django_functions-blind-clones/Django_functions-blind-clones-0.30-classes-withsource.html
+
+Thu 18 Jan 2024 12:58:21 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/default.cfg
+system=tests/regression/systems/atl/ATL_Zoo
+threshold=0.30
+granularity=functions
+language=atl
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=yes
+include=
+exclude=
+
+Thu 18 Jan 2024 12:58:21 EST
+
+Extracting functions from atl files in nicadclones/ATL_Zoo/ATL_Zoo
+
+real	0m1.607s
+user	0m0.634s
+sys	0m0.814s
+
+Extracted     2631 functions
+
+Applying blind renaming to extracted functions from atl files in nicadclones/ATL_Zoo/ATL_Zoo
+
+real	0m0.292s
+user	0m0.190s
+sys	0m0.085s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.624s
+user	0m0.583s
+sys	0m0.036s
+
+Found 77085 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.211s
+user	0m0.194s
+sys	0m0.013s
+
+Clustered clone pairs into 151 classes
+
+Getting original sources for clones
+
+real	0m0.151s
+user	0m0.123s
+sys	0m0.026s
+
+Making HTML reports
+
+real	0m0.031s
+user	0m0.025s
+sys	0m0.005s
+
+Done.
+
+Detailed log in nicadclones/ATL_Zoo/ATL_Zoo_functions-clones-2024-01-18-12:58:21.log
+Results in nicadclones/ATL_Zoo/ATL_Zoo_functions-blind-clones/
+Report in nicadclones/ATL_Zoo/ATL_Zoo_functions-blind-clones/ATL_Zoo_functions-blind-clones-0.30-classes-withsource.html
+
+Thu 18 Jan 2024 12:58:24 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/default.cfg
+system=tests/regression/systems/php/phpBB3
+threshold=0.30
+granularity=functions
+language=php
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=yes
+include=
+exclude=
+
+Thu 18 Jan 2024 12:58:24 EST
+
+Extracting functions from php files in nicadclones/phpBB3/phpBB3
+
+real	0m8.568s
+user	0m7.286s
+sys	0m1.065s
+
+*** Warning:        2 source files failed to parse
+
+Extracted     1779 functions
+
+Applying blind renaming to extracted functions from php files in nicadclones/phpBB3/phpBB3
+
+real	0m2.023s
+user	0m1.886s
+sys	0m0.118s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.141s
+user	0m0.131s
+sys	0m0.008s
+
+Found 834 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.012s
+user	0m0.004s
+sys	0m0.007s
+
+Clustered clone pairs into 86 classes
+
+Getting original sources for clones
+
+real	0m0.026s
+user	0m0.019s
+sys	0m0.007s
+
+Making HTML reports
+
+real	0m0.010s
+user	0m0.006s
+sys	0m0.003s
+
+Done.
+
+Detailed log in nicadclones/phpBB3/phpBB3_functions-clones-2024-01-18-12:58:24.log
+Results in nicadclones/phpBB3/phpBB3_functions-blind-clones/
+Report in nicadclones/phpBB3/phpBB3_functions-blind-clones/phpBB3_functions-blind-clones-0.30-classes-withsource.html
+
+Thu 18 Jan 2024 12:58:35 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/default.cfg
+system=tests/regression/systems/ruby/spree-master
+threshold=0.30
+granularity=functions
+language=rb
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=yes
+include=
+exclude=
+
+Thu 18 Jan 2024 12:58:35 EST
+
+Extracting functions from rb files in nicadclones/spree-master/spree-master
+
+real	0m7.998s
+user	0m3.650s
+sys	0m3.756s
+
+*** Warning:        3 source files failed to parse
+
+Extracted     2494 functions
+
+Applying blind renaming to extracted functions from rb files in nicadclones/spree-master/spree-master
+
+real	0m0.235s
+user	0m0.147s
+sys	0m0.073s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.018s
+user	0m0.010s
+sys	0m0.007s
+
+Found 59 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.010s
+user	0m0.003s
+sys	0m0.006s
+
+Clustered clone pairs into 18 classes
+
+Getting original sources for clones
+
+real	0m0.006s
+user	0m0.002s
+sys	0m0.004s
+
+Making HTML reports
+
+real	0m0.006s
+user	0m0.002s
+sys	0m0.003s
+
+Done.
+
+Detailed log in nicadclones/spree-master/spree-master_functions-clones-2024-01-18-12:58:35.log
+Results in nicadclones/spree-master/spree-master_functions-blind-clones/
+Report in nicadclones/spree-master/spree-master_functions-blind-clones/spree-master_functions-blind-clones-0.30-classes-withsource.html
+
+Thu 18 Jan 2024 12:58:43 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/default.cfg
+system=tests/regression/systems/swift/boltmobile
+threshold=0.30
+granularity=functions
+language=swift
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=yes
+include=
+exclude=
+
+Thu 18 Jan 2024 12:58:43 EST
+
+Extracting functions from swift files in nicadclones/boltmobile/boltmobile
+
+real	0m0.327s
+user	0m0.126s
+sys	0m0.173s
+
+Extracted      227 functions
+
+Applying blind renaming to extracted functions from swift files in nicadclones/boltmobile/boltmobile
+
+real	0m0.048s
+user	0m0.031s
+sys	0m0.013s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.006s
+
+Found 26 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.010s
+user	0m0.003s
+sys	0m0.006s
+
+Clustered clone pairs into 5 classes
+
+Getting original sources for clones
+
+real	0m0.006s
+user	0m0.002s
+sys	0m0.003s
+
+Making HTML reports
+
+real	0m0.005s
+user	0m0.002s
+sys	0m0.003s
+
+Done.
+
+Detailed log in nicadclones/boltmobile/boltmobile_functions-clones-2024-01-18-12:58:43.log
+Results in nicadclones/boltmobile/boltmobile_functions-blind-clones/
+Report in nicadclones/boltmobile/boltmobile_functions-blind-clones/boltmobile_functions-blind-clones-0.30-classes-withsource.html
+
+Thu 18 Jan 2024 12:58:43 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/default.cfg
+system=tests/regression/systems/sol/smart_contracts
+threshold=0.30
+granularity=functions
+language=sol
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=yes
+include=
+exclude=
+
+Thu 18 Jan 2024 12:58:43 EST
+
+Extracting functions from sol files in nicadclones/smart_contracts/smart_contracts
+
+real	0m2.361s
+user	0m0.956s
+sys	0m1.182s
+
+*** Warning: 1 source file failed to parse
+
+Extracted     8004 functions
+
+Applying blind renaming to extracted functions from sol files in nicadclones/smart_contracts/smart_contracts
+
+real	0m0.564s
+user	0m0.326s
+sys	0m0.198s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.043s
+user	0m0.033s
+sys	0m0.008s
+
+Found 2466 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.014s
+user	0m0.006s
+sys	0m0.007s
+
+Clustered clone pairs into 123 classes
+
+Getting original sources for clones
+
+real	0m0.031s
+user	0m0.022s
+sys	0m0.008s
+
+Making HTML reports
+
+real	0m0.013s
+user	0m0.008s
+sys	0m0.004s
+
+Done.
+
+Detailed log in nicadclones/smart_contracts/smart_contracts_functions-clones-2024-01-18-12:58:43.log
+Results in nicadclones/smart_contracts/smart_contracts_functions-blind-clones/
+Report in nicadclones/smart_contracts/smart_contracts_functions-blind-clones/smart_contracts_functions-blind-clones-0.30-classes-withsource.html
+
+Thu 18 Jan 2024 12:58:46 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/default.cfg
+system=tests/regression/systems/rust/nushell-main
+threshold=0.30
+granularity=functions
+language=rs
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=yes
+include=
+exclude=
+
+Thu 18 Jan 2024 12:58:46 EST
+
+Extracting functions from rs files in nicadclones/nushell-main/nushell-main
+
+real	0m3.426s
+user	0m1.420s
+sys	0m1.710s
+
+Extracted     1743 functions
+
+Applying blind renaming to extracted functions from rs files in nicadclones/nushell-main/nushell-main
+
+real	0m0.419s
+user	0m0.348s
+sys	0m0.058s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.024s
+user	0m0.016s
+sys	0m0.007s
+
+Found 293 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.006s
+
+Clustered clone pairs into 71 classes
+
+Getting original sources for clones
+
+real	0m0.011s
+user	0m0.005s
+sys	0m0.005s
+
+Making HTML reports
+
+real	0m0.010s
+user	0m0.005s
+sys	0m0.003s
+
+Done.
+
+Detailed log in nicadclones/nushell-main/nushell-main_functions-clones-2024-01-18-12:58:46.log
+Results in nicadclones/nushell-main/nushell-main_functions-blind-clones/
+Report in nicadclones/nushell-main/nushell-main_functions-blind-clones/nushell-main_functions-blind-clones-0.30-classes-withsource.html
+
+Thu 18 Jan 2024 12:58:50 EST
+
+=====
+
+
+===== Blocks in default mode =====
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/default.cfg
+system=tests/regression/systems/c/httpd-2.2.8
+threshold=0.30
+granularity=blocks
+language=c
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=yes
+include=
+exclude=
+
+Thu 18 Jan 2024 12:58:50 EST
+
+Extracting blocks from c files in nicadclones/httpd-2.2.8/httpd-2.2.8
+
+real	0m8.197s
+user	0m5.121s
+sys	0m2.645s
+
+*** Warning:        2 source files failed to parse
+
+Extracted    21037 blocks
+
+Applying blind renaming to extracted blocks from c files in nicadclones/httpd-2.2.8/httpd-2.2.8
+
+real	0m4.010s
+user	0m3.293s
+sys	0m0.597s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.643s
+user	0m0.629s
+sys	0m0.009s
+
+Found 1523 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.014s
+user	0m0.006s
+sys	0m0.007s
+
+Clustered clone pairs into 358 classes
+
+Getting original sources for clones
+
+real	0m0.101s
+user	0m0.083s
+sys	0m0.016s
+
+Making HTML reports
+
+real	0m0.025s
+user	0m0.019s
+sys	0m0.005s
+
+Done.
+
+Detailed log in nicadclones/httpd-2.2.8/httpd-2.2.8_blocks-clones-2024-01-18-12:58:50.log
+Results in nicadclones/httpd-2.2.8/httpd-2.2.8_blocks-blind-clones/
+Report in nicadclones/httpd-2.2.8/httpd-2.2.8_blocks-blind-clones/httpd-2.2.8_blocks-blind-clones-0.30-classes-withsource.html
+
+Thu 18 Jan 2024 12:59:03 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/default.cfg
+system=tests/regression/systems/cs/RssBandit1.5.0.17sources
+threshold=0.30
+granularity=blocks
+language=cs
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=yes
+include=
+exclude=
+
+Thu 18 Jan 2024 12:59:03 EST
+
+Extracting blocks from cs files in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources
+
+real	0m5.511s
+user	0m3.687s
+sys	0m1.556s
+
+*** Warning:        3 source files failed to parse
+
+Extracted    15697 blocks
+
+Applying blind renaming to extracted blocks from cs files in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources
+
+real	0m2.042s
+user	0m1.537s
+sys	0m0.418s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.144s
+user	0m0.134s
+sys	0m0.007s
+
+Found 547 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.012s
+user	0m0.004s
+sys	0m0.007s
+
+Clustered clone pairs into 208 classes
+
+Getting original sources for clones
+
+real	0m0.092s
+user	0m0.079s
+sys	0m0.012s
+
+Making HTML reports
+
+real	0m0.016s
+user	0m0.011s
+sys	0m0.004s
+
+Done.
+
+Detailed log in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources_blocks-clones-2024-01-18-12:59:03.log
+Results in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources_blocks-blind-clones/
+Report in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources_blocks-blind-clones/RssBandit1.5.0.17sources_blocks-blind-clones-0.30-classes-withsource.html
+
+Thu 18 Jan 2024 12:59:11 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/default.cfg
+system=tests/regression/systems/java/jEdit
+threshold=0.30
+granularity=blocks
+language=java
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=yes
+include=
+exclude=
+
+Thu 18 Jan 2024 12:59:11 EST
+
+Extracting blocks from java files in nicadclones/jEdit/jEdit
+
+real	0m4.106s
+user	0m2.017s
+sys	0m1.797s
+
+Extracted    15679 blocks
+
+Applying blind renaming to extracted blocks from java files in nicadclones/jEdit/jEdit
+
+real	0m1.933s
+user	0m1.438s
+sys	0m0.412s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.220s
+user	0m0.210s
+sys	0m0.008s
+
+Found 1995 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.015s
+user	0m0.006s
+sys	0m0.007s
+
+Clustered clone pairs into 162 classes
+
+Getting original sources for clones
+
+real	0m0.124s
+user	0m0.111s
+sys	0m0.013s
+
+Making HTML reports
+
+real	0m0.014s
+user	0m0.010s
+sys	0m0.004s
+
+Done.
+
+Detailed log in nicadclones/jEdit/jEdit_blocks-clones-2024-01-18-12:59:11.log
+Results in nicadclones/jEdit/jEdit_blocks-blind-clones/
+Report in nicadclones/jEdit/jEdit_blocks-blind-clones/jEdit_blocks-blind-clones-0.30-classes-withsource.html
+
+Thu 18 Jan 2024 12:59:18 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/default.cfg
+system=tests/regression/systems/py/Django
+threshold=0.30
+granularity=blocks
+language=py
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=yes
+include=
+exclude=
+
+Thu 18 Jan 2024 12:59:18 EST
+
+Extracting blocks from py files in nicadclones/Django/Django
+
+real	0m20.385s
+user	0m12.854s
+sys	0m6.501s
+
+Extracted    20465 blocks
+
+Applying blind renaming to extracted blocks from py files in nicadclones/Django/Django
+
+real	0m3.362s
+user	0m2.689s
+sys	0m0.567s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.233s
+user	0m0.223s
+sys	0m0.008s
+
+Found 274 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.006s
+
+Clustered clone pairs into 95 classes
+
+Getting original sources for clones
+
+real	0m0.018s
+user	0m0.010s
+sys	0m0.006s
+
+Making HTML reports
+
+real	0m0.011s
+user	0m0.006s
+sys	0m0.003s
+
+Done.
+
+Detailed log in nicadclones/Django/Django_blocks-clones-2024-01-18-12:59:18.log
+Results in nicadclones/Django/Django_blocks-blind-clones/
+Report in nicadclones/Django/Django_blocks-blind-clones/Django_blocks-blind-clones-0.30-classes-withsource.html
+
+Thu 18 Jan 2024 12:59:42 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/default.cfg
+system=tests/regression/systems/swift/boltmobile
+threshold=0.30
+granularity=blocks
+language=swift
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=yes
+include=
+exclude=
+
+Thu 18 Jan 2024 12:59:42 EST
+
+Extracting blocks from swift files in nicadclones/boltmobile/boltmobile
+
+real	0m0.315s
+user	0m0.122s
+sys	0m0.169s
+
+Extracted      518 blocks
+
+Applying blind renaming to extracted blocks from swift files in nicadclones/boltmobile/boltmobile
+
+real	0m0.074s
+user	0m0.049s
+sys	0m0.020s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.006s
+
+Found 30 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.010s
+user	0m0.003s
+sys	0m0.006s
+
+Clustered clone pairs into 7 classes
+
+Getting original sources for clones
+
+real	0m0.006s
+user	0m0.002s
+sys	0m0.003s
+
+Making HTML reports
+
+real	0m0.005s
+user	0m0.002s
+sys	0m0.003s
+
+Done.
+
+Detailed log in nicadclones/boltmobile/boltmobile_blocks-clones-2024-01-18-12:59:42.log
+Results in nicadclones/boltmobile/boltmobile_blocks-blind-clones/
+Report in nicadclones/boltmobile/boltmobile_blocks-blind-clones/boltmobile_blocks-blind-clones-0.30-classes-withsource.html
+
+Thu 18 Jan 2024 12:59:42 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/default.cfg
+system=tests/regression/systems/rust/nushell-main
+threshold=0.30
+granularity=blocks
+language=rs
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=yes
+include=
+exclude=
+
+Thu 18 Jan 2024 12:59:42 EST
+
+Extracting blocks from rs files in nicadclones/nushell-main/nushell-main
+
+real	0m3.399s
+user	0m1.415s
+sys	0m1.724s
+
+Extracted     7273 blocks
+
+Applying blind renaming to extracted blocks from rs files in nicadclones/nushell-main/nushell-main
+
+real	0m1.100s
+user	0m0.862s
+sys	0m0.198s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.066s
+user	0m0.057s
+sys	0m0.007s
+
+Found 459 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.012s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 123 classes
+
+Getting original sources for clones
+
+real	0m0.017s
+user	0m0.010s
+sys	0m0.007s
+
+Making HTML reports
+
+real	0m0.012s
+user	0m0.007s
+sys	0m0.004s
+
+Done.
+
+Detailed log in nicadclones/nushell-main/nushell-main_blocks-clones-2024-01-18-12:59:42.log
+Results in nicadclones/nushell-main/nushell-main_blocks-blind-clones/
+Report in nicadclones/nushell-main/nushell-main_blocks-blind-clones/nushell-main_blocks-blind-clones-0.30-classes-withsource.html
+
+Thu 18 Jan 2024 12:59:47 EST
+
+=====
+
+
+===== Files in default mode =====
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/default.cfg
+system=tests/regression/systems/c/httpd-2.2.8
+threshold=0.30
+granularity=files
+language=c
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=yes
+include=
+exclude=
+
+Thu 18 Jan 2024 12:59:47 EST
+
+Extracting files from c files in nicadclones/httpd-2.2.8/httpd-2.2.8
+
+real	0m6.968s
+user	0m3.905s
+sys	0m2.642s
+
+*** Warning:        2 source files failed to parse
+
+Extracted      537 files
+
+Applying blind renaming to extracted files from c files in nicadclones/httpd-2.2.8/httpd-2.2.8
+
+real	0m2.602s
+user	0m2.481s
+sys	0m0.105s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.238s
+user	0m0.228s
+sys	0m0.007s
+
+Found 24 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.010s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 20 classes
+
+Getting original sources for clones
+
+real	0m0.010s
+user	0m0.005s
+sys	0m0.004s
+
+Making HTML reports
+
+real	0m0.013s
+user	0m0.009s
+sys	0m0.004s
+
+Done.
+
+Detailed log in nicadclones/httpd-2.2.8/httpd-2.2.8_files-clones-2024-01-18-12:59:47.log
+Results in nicadclones/httpd-2.2.8/httpd-2.2.8_files-blind-clones/
+Report in nicadclones/httpd-2.2.8/httpd-2.2.8_files-blind-clones/httpd-2.2.8_files-blind-clones-0.30-classes-withsource.html
+
+Thu 18 Jan 2024 12:59:57 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/default.cfg
+system=tests/regression/systems/cs/RssBandit1.5.0.17sources
+threshold=0.30
+granularity=files
+language=cs
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=yes
+include=
+exclude=
+
+Thu 18 Jan 2024 12:59:57 EST
+
+Extracting files from cs files in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources
+
+real	0m4.979s
+user	0m3.176s
+sys	0m1.551s
+
+*** Warning:        3 source files failed to parse
+
+Extracted      314 files
+
+Applying blind renaming to extracted files from cs files in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources
+
+real	0m1.120s
+user	0m1.036s
+sys	0m0.071s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.106s
+user	0m0.098s
+sys	0m0.007s
+
+Found 39 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 21 classes
+
+Getting original sources for clones
+
+real	0m0.011s
+user	0m0.006s
+sys	0m0.005s
+
+Making HTML reports
+
+real	0m0.016s
+user	0m0.012s
+sys	0m0.004s
+
+Done.
+
+Detailed log in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources_files-clones-2024-01-18-12:59:57.log
+Results in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources_files-blind-clones/
+Report in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources_files-blind-clones/RssBandit1.5.0.17sources_files-blind-clones-0.30-classes-withsource.html
+
+Thu 18 Jan 2024 13:00:03 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/default.cfg
+system=tests/regression/systems/java/jEdit
+threshold=0.30
+granularity=files
+language=java
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=yes
+include=
+exclude=
+
+Thu 18 Jan 2024 13:00:03 EST
+
+Extracting files from java files in nicadclones/jEdit/jEdit
+
+real	0m3.619s
+user	0m1.572s
+sys	0m1.777s
+
+Extracted      539 files
+
+Applying blind renaming to extracted files from java files in nicadclones/jEdit/jEdit
+
+real	0m0.899s
+user	0m0.825s
+sys	0m0.063s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.102s
+user	0m0.092s
+sys	0m0.008s
+
+Found 17 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 6 classes
+
+Getting original sources for clones
+
+real	0m0.006s
+user	0m0.002s
+sys	0m0.003s
+
+Making HTML reports
+
+real	0m0.006s
+user	0m0.002s
+sys	0m0.003s
+
+Done.
+
+Detailed log in nicadclones/jEdit/jEdit_files-clones-2024-01-18-13:00:03.log
+Results in nicadclones/jEdit/jEdit_files-blind-clones/
+Report in nicadclones/jEdit/jEdit_files-blind-clones/jEdit_files-blind-clones-0.30-classes-withsource.html
+
+Thu 18 Jan 2024 13:00:08 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/default.cfg
+system=tests/regression/systems/py/Django
+threshold=0.30
+granularity=files
+language=py
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=yes
+include=
+exclude=
+
+Thu 18 Jan 2024 13:00:08 EST
+
+Extracting files from py files in nicadclones/Django/Django
+
+real	0m14.313s
+user	0m6.927s
+sys	0m6.372s
+
+Extracted     1334 files
+
+Applying blind renaming to extracted files from py files in nicadclones/Django/Django
+
+real	0m1.343s
+user	0m1.241s
+sys	0m0.086s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.127s
+user	0m0.119s
+sys	0m0.007s
+
+Found 159 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 19 classes
+
+Getting original sources for clones
+
+real	0m0.008s
+user	0m0.002s
+sys	0m0.004s
+
+Making HTML reports
+
+real	0m0.008s
+user	0m0.004s
+sys	0m0.003s
+
+Done.
+
+Detailed log in nicadclones/Django/Django_files-clones-2024-01-18-13:00:08.log
+Results in nicadclones/Django/Django_files-blind-clones/
+Report in nicadclones/Django/Django_files-blind-clones/Django_files-blind-clones-0.30-classes-withsource.html
+
+Thu 18 Jan 2024 13:00:24 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/default.cfg
+system=tests/regression/systems/swift/boltmobile
+threshold=0.30
+granularity=files
+language=swift
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=yes
+include=
+exclude=
+
+Thu 18 Jan 2024 13:00:24 EST
+
+Extracting files from swift files in nicadclones/boltmobile/boltmobile
+
+real	0m0.314s
+user	0m0.119s
+sys	0m0.169s
+
+Extracted       51 files
+
+Applying blind renaming to extracted files from swift files in nicadclones/boltmobile/boltmobile
+
+real	0m0.054s
+user	0m0.042s
+sys	0m0.009s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.010s
+user	0m0.003s
+sys	0m0.006s
+
+Found 2 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.010s
+user	0m0.002s
+sys	0m0.006s
+
+Clustered clone pairs into 2 classes
+
+Getting original sources for clones
+
+real	0m0.005s
+user	0m0.001s
+sys	0m0.003s
+
+Making HTML reports
+
+real	0m0.005s
+user	0m0.001s
+sys	0m0.003s
+
+Done.
+
+Detailed log in nicadclones/boltmobile/boltmobile_files-clones-2024-01-18-13:00:24.log
+Results in nicadclones/boltmobile/boltmobile_files-blind-clones/
+Report in nicadclones/boltmobile/boltmobile_files-blind-clones/boltmobile_files-blind-clones-0.30-classes-withsource.html
+
+Thu 18 Jan 2024 13:00:24 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/default.cfg
+system=tests/regression/systems/sol/smart_contracts
+threshold=0.30
+granularity=files
+language=sol
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=yes
+include=
+exclude=
+
+Thu 18 Jan 2024 13:00:24 EST
+
+Extracting files from sol files in nicadclones/smart_contracts/smart_contracts
+
+real	0m2.147s
+user	0m0.779s
+sys	0m1.182s
+
+*** Warning: 1 source file failed to parse
+
+Extracted      366 files
+
+Applying blind renaming to extracted files from sol files in nicadclones/smart_contracts/smart_contracts
+
+real	0m0.330s
+user	0m0.284s
+sys	0m0.038s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.105s
+user	0m0.092s
+sys	0m0.007s
+
+Found 633 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.012s
+user	0m0.004s
+sys	0m0.007s
+
+Clustered clone pairs into 44 classes
+
+Getting original sources for clones
+
+real	0m0.022s
+user	0m0.014s
+sys	0m0.007s
+
+Making HTML reports
+
+real	0m0.034s
+user	0m0.028s
+sys	0m0.005s
+
+Done.
+
+Detailed log in nicadclones/smart_contracts/smart_contracts_files-clones-2024-01-18-13:00:24.log
+Results in nicadclones/smart_contracts/smart_contracts_files-blind-clones/
+Report in nicadclones/smart_contracts/smart_contracts_files-blind-clones/smart_contracts_files-blind-clones-0.30-classes-withsource.html
+
+Thu 18 Jan 2024 13:00:27 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/default.cfg
+system=tests/regression/systems/rust/nushell-main
+threshold=0.30
+granularity=files
+language=rs
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=yes
+include=
+exclude=
+
+Thu 18 Jan 2024 13:00:27 EST
+
+Extracting files from rs files in nicadclones/nushell-main/nushell-main
+
+real	0m3.305s
+user	0m1.310s
+sys	0m1.731s
+
+Extracted      525 files
+
+Applying blind renaming to extracted files from rs files in nicadclones/nushell-main/nushell-main
+
+real	0m0.608s
+user	0m0.563s
+sys	0m0.036s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.049s
+user	0m0.041s
+sys	0m0.007s
+
+Found 326 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 28 classes
+
+Getting original sources for clones
+
+real	0m0.009s
+user	0m0.004s
+sys	0m0.005s
+
+Making HTML reports
+
+real	0m0.010s
+user	0m0.006s
+sys	0m0.003s
+
+Done.
+
+Detailed log in nicadclones/nushell-main/nushell-main_files-clones-2024-01-18-13:00:27.log
+Results in nicadclones/nushell-main/nushell-main_files-blind-clones/
+Report in nicadclones/nushell-main/nushell-main_files-blind-clones/nushell-main_files-blind-clones-0.30-classes-withsource.html
+
+Thu 18 Jan 2024 13:00:31 EST
+
+=====
+
+
+===== Functions with blind renaming =====
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-blind.cfg
+system=tests/regression/systems/c/httpd-2.2.8
+threshold=0.30
+granularity=functions
+language=c
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:00:31 EST
+
+Using previously extracted functions from c files in nicadclones/httpd-2.2.8/httpd-2.2.8
+
+Extracted     5013 functions
+
+Using previously blind renamed extracted functions from c files in nicadclones/httpd-2.2.8/httpd-2.2.8
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.224s
+user	0m0.214s
+sys	0m0.007s
+
+Found 1387 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.013s
+user	0m0.005s
+sys	0m0.007s
+
+Clustered clone pairs into 251 classes
+
+Done.
+
+Detailed log in nicadclones/httpd-2.2.8/httpd-2.2.8_functions-clones-2024-01-18-13:00:31.log
+Results in nicadclones/httpd-2.2.8/httpd-2.2.8_functions-blind-clones/
+
+Thu 18 Jan 2024 13:00:31 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-blind.cfg
+system=tests/regression/systems/cs/RssBandit1.5.0.17sources
+threshold=0.30
+granularity=functions
+language=cs
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:00:31 EST
+
+Using previously extracted functions from cs files in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources
+
+Extracted     4481 functions
+
+Using previously blind renamed extracted functions from cs files in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.052s
+user	0m0.043s
+sys	0m0.007s
+
+Found 332 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.012s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 122 classes
+
+Done.
+
+Detailed log in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources_functions-clones-2024-01-18-13:00:31.log
+Results in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources_functions-blind-clones/
+
+Thu 18 Jan 2024 13:00:31 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-blind.cfg
+system=tests/regression/systems/java/jEdit
+threshold=0.30
+granularity=functions
+language=java
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:00:31 EST
+
+Using previously extracted functions from java files in nicadclones/jEdit/jEdit
+
+Extracted     7021 functions
+
+Using previously blind renamed extracted functions from java files in nicadclones/jEdit/jEdit
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.086s
+user	0m0.077s
+sys	0m0.007s
+
+Found 811 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.012s
+user	0m0.004s
+sys	0m0.007s
+
+Clustered clone pairs into 92 classes
+
+Done.
+
+Detailed log in nicadclones/jEdit/jEdit_functions-clones-2024-01-18-13:00:31.log
+Results in nicadclones/jEdit/jEdit_functions-blind-clones/
+
+Thu 18 Jan 2024 13:00:31 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-blind.cfg
+system=tests/regression/systems/py/Django
+threshold=0.30
+granularity=functions
+language=py
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:00:31 EST
+
+Using previously extracted functions from py files in nicadclones/Django/Django
+
+Extracted     7068 functions
+
+Using previously blind renamed extracted functions from py files in nicadclones/Django/Django
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.073s
+user	0m0.065s
+sys	0m0.007s
+
+Found 193 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 86 classes
+
+Done.
+
+Detailed log in nicadclones/Django/Django_functions-clones-2024-01-18-13:00:31.log
+Results in nicadclones/Django/Django_functions-blind-clones/
+
+Thu 18 Jan 2024 13:00:31 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-blind.cfg
+system=tests/regression/systems/atl/ATL_Zoo
+threshold=0.30
+granularity=functions
+language=atl
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:00:31 EST
+
+Using previously extracted functions from atl files in nicadclones/ATL_Zoo/ATL_Zoo
+
+Extracted     2631 functions
+
+Using previously blind renamed extracted functions from atl files in nicadclones/ATL_Zoo/ATL_Zoo
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.607s
+user	0m0.587s
+sys	0m0.018s
+
+Found 77085 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.205s
+user	0m0.191s
+sys	0m0.012s
+
+Clustered clone pairs into 151 classes
+
+Done.
+
+Detailed log in nicadclones/ATL_Zoo/ATL_Zoo_functions-clones-2024-01-18-13:00:31.log
+Results in nicadclones/ATL_Zoo/ATL_Zoo_functions-blind-clones/
+
+Thu 18 Jan 2024 13:00:32 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-blind.cfg
+system=tests/regression/systems/php/phpBB3
+threshold=0.30
+granularity=functions
+language=php
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:00:32 EST
+
+Using previously extracted functions from php files in nicadclones/phpBB3/phpBB3
+
+Extracted     1779 functions
+
+Using previously blind renamed extracted functions from php files in nicadclones/phpBB3/phpBB3
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.141s
+user	0m0.131s
+sys	0m0.008s
+
+Found 834 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.012s
+user	0m0.004s
+sys	0m0.007s
+
+Clustered clone pairs into 86 classes
+
+Done.
+
+Detailed log in nicadclones/phpBB3/phpBB3_functions-clones-2024-01-18-13:00:32.log
+Results in nicadclones/phpBB3/phpBB3_functions-blind-clones/
+
+Thu 18 Jan 2024 13:00:32 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-blind.cfg
+system=tests/regression/systems/ruby/spree-master
+threshold=0.30
+granularity=functions
+language=rb
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:00:32 EST
+
+Using previously extracted functions from rb files in nicadclones/spree-master/spree-master
+
+Extracted     2494 functions
+
+Using previously blind renamed extracted functions from rb files in nicadclones/spree-master/spree-master
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.018s
+user	0m0.010s
+sys	0m0.006s
+
+Found 59 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 18 classes
+
+Done.
+
+Detailed log in nicadclones/spree-master/spree-master_functions-clones-2024-01-18-13:00:32.log
+Results in nicadclones/spree-master/spree-master_functions-blind-clones/
+
+Thu 18 Jan 2024 13:00:32 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-blind.cfg
+system=tests/regression/systems/swift/boltmobile
+threshold=0.30
+granularity=functions
+language=swift
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:00:32 EST
+
+Using previously extracted functions from swift files in nicadclones/boltmobile/boltmobile
+
+Extracted      227 functions
+
+Using previously blind renamed extracted functions from swift files in nicadclones/boltmobile/boltmobile
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.010s
+user	0m0.003s
+sys	0m0.006s
+
+Found 26 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 5 classes
+
+Done.
+
+Detailed log in nicadclones/boltmobile/boltmobile_functions-clones-2024-01-18-13:00:32.log
+Results in nicadclones/boltmobile/boltmobile_functions-blind-clones/
+
+Thu 18 Jan 2024 13:00:32 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-blind.cfg
+system=tests/regression/systems/sol/smart_contracts
+threshold=0.30
+granularity=functions
+language=sol
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:00:32 EST
+
+Using previously extracted functions from sol files in nicadclones/smart_contracts/smart_contracts
+
+Extracted     8004 functions
+
+Using previously blind renamed extracted functions from sol files in nicadclones/smart_contracts/smart_contracts
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.042s
+user	0m0.033s
+sys	0m0.007s
+
+Found 2466 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.014s
+user	0m0.006s
+sys	0m0.007s
+
+Clustered clone pairs into 123 classes
+
+Done.
+
+Detailed log in nicadclones/smart_contracts/smart_contracts_functions-clones-2024-01-18-13:00:32.log
+Results in nicadclones/smart_contracts/smart_contracts_functions-blind-clones/
+
+Thu 18 Jan 2024 13:00:32 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-blind.cfg
+system=tests/regression/systems/rust/nushell-main
+threshold=0.30
+granularity=functions
+language=rs
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:00:32 EST
+
+Using previously extracted functions from rs files in nicadclones/nushell-main/nushell-main
+
+Extracted     1743 functions
+
+Using previously blind renamed extracted functions from rs files in nicadclones/nushell-main/nushell-main
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.024s
+user	0m0.016s
+sys	0m0.006s
+
+Found 293 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 71 classes
+
+Done.
+
+Detailed log in nicadclones/nushell-main/nushell-main_functions-clones-2024-01-18-13:00:32.log
+Results in nicadclones/nushell-main/nushell-main_functions-blind-clones/
+
+Thu 18 Jan 2024 13:00:32 EST
+
+=====
+
+
+===== Blocks with blind renaming =====
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-blind.cfg
+system=tests/regression/systems/c/httpd-2.2.8
+threshold=0.30
+granularity=blocks
+language=c
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:00:32 EST
+
+Using previously extracted blocks from c files in nicadclones/httpd-2.2.8/httpd-2.2.8
+
+Extracted    21037 blocks
+
+Using previously blind renamed extracted blocks from c files in nicadclones/httpd-2.2.8/httpd-2.2.8
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.639s
+user	0m0.628s
+sys	0m0.009s
+
+Found 1523 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.014s
+user	0m0.006s
+sys	0m0.007s
+
+Clustered clone pairs into 358 classes
+
+Done.
+
+Detailed log in nicadclones/httpd-2.2.8/httpd-2.2.8_blocks-clones-2024-01-18-13:00:32.log
+Results in nicadclones/httpd-2.2.8/httpd-2.2.8_blocks-blind-clones/
+
+Thu 18 Jan 2024 13:00:33 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-blind.cfg
+system=tests/regression/systems/cs/RssBandit1.5.0.17sources
+threshold=0.30
+granularity=blocks
+language=cs
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:00:33 EST
+
+Using previously extracted blocks from cs files in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources
+
+Extracted    15697 blocks
+
+Using previously blind renamed extracted blocks from cs files in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.144s
+user	0m0.135s
+sys	0m0.007s
+
+Found 547 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.012s
+user	0m0.004s
+sys	0m0.007s
+
+Clustered clone pairs into 208 classes
+
+Done.
+
+Detailed log in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources_blocks-clones-2024-01-18-13:00:33.log
+Results in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources_blocks-blind-clones/
+
+Thu 18 Jan 2024 13:00:33 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-blind.cfg
+system=tests/regression/systems/java/jEdit
+threshold=0.30
+granularity=blocks
+language=java
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:00:33 EST
+
+Using previously extracted blocks from java files in nicadclones/jEdit/jEdit
+
+Extracted    15679 blocks
+
+Using previously blind renamed extracted blocks from java files in nicadclones/jEdit/jEdit
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.220s
+user	0m0.210s
+sys	0m0.007s
+
+Found 1995 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.014s
+user	0m0.006s
+sys	0m0.007s
+
+Clustered clone pairs into 162 classes
+
+Done.
+
+Detailed log in nicadclones/jEdit/jEdit_blocks-clones-2024-01-18-13:00:33.log
+Results in nicadclones/jEdit/jEdit_blocks-blind-clones/
+
+Thu 18 Jan 2024 13:00:34 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-blind.cfg
+system=tests/regression/systems/py/Django
+threshold=0.30
+granularity=blocks
+language=py
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:00:34 EST
+
+Using previously extracted blocks from py files in nicadclones/Django/Django
+
+Extracted    20465 blocks
+
+Using previously blind renamed extracted blocks from py files in nicadclones/Django/Django
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.235s
+user	0m0.225s
+sys	0m0.008s
+
+Found 274 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 95 classes
+
+Done.
+
+Detailed log in nicadclones/Django/Django_blocks-clones-2024-01-18-13:00:34.log
+Results in nicadclones/Django/Django_blocks-blind-clones/
+
+Thu 18 Jan 2024 13:00:34 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-blind.cfg
+system=tests/regression/systems/swift/boltmobile
+threshold=0.30
+granularity=blocks
+language=swift
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:00:34 EST
+
+Using previously extracted blocks from swift files in nicadclones/boltmobile/boltmobile
+
+Extracted      518 blocks
+
+Using previously blind renamed extracted blocks from swift files in nicadclones/boltmobile/boltmobile
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.006s
+
+Found 30 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.010s
+user	0m0.003s
+sys	0m0.006s
+
+Clustered clone pairs into 7 classes
+
+Done.
+
+Detailed log in nicadclones/boltmobile/boltmobile_blocks-clones-2024-01-18-13:00:34.log
+Results in nicadclones/boltmobile/boltmobile_blocks-blind-clones/
+
+Thu 18 Jan 2024 13:00:34 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-blind.cfg
+system=tests/regression/systems/rust/nushell-main
+threshold=0.30
+granularity=blocks
+language=rs
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:00:34 EST
+
+Using previously extracted blocks from rs files in nicadclones/nushell-main/nushell-main
+
+Extracted     7273 blocks
+
+Using previously blind renamed extracted blocks from rs files in nicadclones/nushell-main/nushell-main
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.066s
+user	0m0.058s
+sys	0m0.007s
+
+Found 459 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.006s
+
+Clustered clone pairs into 123 classes
+
+Done.
+
+Detailed log in nicadclones/nushell-main/nushell-main_blocks-clones-2024-01-18-13:00:34.log
+Results in nicadclones/nushell-main/nushell-main_blocks-blind-clones/
+
+Thu 18 Jan 2024 13:00:34 EST
+
+=====
+
+
+===== Files with blind renaming =====
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-blind.cfg
+system=tests/regression/systems/c/httpd-2.2.8
+threshold=0.30
+granularity=files
+language=c
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:00:34 EST
+
+Using previously extracted files from c files in nicadclones/httpd-2.2.8/httpd-2.2.8
+
+Extracted      537 files
+
+Using previously blind renamed extracted files from c files in nicadclones/httpd-2.2.8/httpd-2.2.8
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.237s
+user	0m0.228s
+sys	0m0.007s
+
+Found 24 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.010s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 20 classes
+
+Done.
+
+Detailed log in nicadclones/httpd-2.2.8/httpd-2.2.8_files-clones-2024-01-18-13:00:34.log
+Results in nicadclones/httpd-2.2.8/httpd-2.2.8_files-blind-clones/
+
+Thu 18 Jan 2024 13:00:34 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-blind.cfg
+system=tests/regression/systems/cs/RssBandit1.5.0.17sources
+threshold=0.30
+granularity=files
+language=cs
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:00:34 EST
+
+Using previously extracted files from cs files in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources
+
+Extracted      314 files
+
+Using previously blind renamed extracted files from cs files in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.106s
+user	0m0.098s
+sys	0m0.007s
+
+Found 39 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.010s
+user	0m0.003s
+sys	0m0.006s
+
+Clustered clone pairs into 21 classes
+
+Done.
+
+Detailed log in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources_files-clones-2024-01-18-13:00:34.log
+Results in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources_files-blind-clones/
+
+Thu 18 Jan 2024 13:00:35 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-blind.cfg
+system=tests/regression/systems/java/jEdit
+threshold=0.30
+granularity=files
+language=java
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:00:35 EST
+
+Using previously extracted files from java files in nicadclones/jEdit/jEdit
+
+Extracted      539 files
+
+Using previously blind renamed extracted files from java files in nicadclones/jEdit/jEdit
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.101s
+user	0m0.092s
+sys	0m0.007s
+
+Found 17 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.010s
+user	0m0.003s
+sys	0m0.006s
+
+Clustered clone pairs into 6 classes
+
+Done.
+
+Detailed log in nicadclones/jEdit/jEdit_files-clones-2024-01-18-13:00:35.log
+Results in nicadclones/jEdit/jEdit_files-blind-clones/
+
+Thu 18 Jan 2024 13:00:35 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-blind.cfg
+system=tests/regression/systems/py/Django
+threshold=0.30
+granularity=files
+language=py
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:00:35 EST
+
+Using previously extracted files from py files in nicadclones/Django/Django
+
+Extracted     1334 files
+
+Using previously blind renamed extracted files from py files in nicadclones/Django/Django
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.126s
+user	0m0.117s
+sys	0m0.007s
+
+Found 159 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.010s
+user	0m0.003s
+sys	0m0.006s
+
+Clustered clone pairs into 19 classes
+
+Done.
+
+Detailed log in nicadclones/Django/Django_files-clones-2024-01-18-13:00:35.log
+Results in nicadclones/Django/Django_files-blind-clones/
+
+Thu 18 Jan 2024 13:00:35 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-blind.cfg
+system=tests/regression/systems/swift/boltmobile
+threshold=0.30
+granularity=files
+language=swift
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:00:35 EST
+
+Using previously extracted files from swift files in nicadclones/boltmobile/boltmobile
+
+Extracted       51 files
+
+Using previously blind renamed extracted files from swift files in nicadclones/boltmobile/boltmobile
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.006s
+
+Found 2 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.010s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 2 classes
+
+Done.
+
+Detailed log in nicadclones/boltmobile/boltmobile_files-clones-2024-01-18-13:00:35.log
+Results in nicadclones/boltmobile/boltmobile_files-blind-clones/
+
+Thu 18 Jan 2024 13:00:35 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-blind.cfg
+system=tests/regression/systems/sol/smart_contracts
+threshold=0.30
+granularity=files
+language=sol
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:00:35 EST
+
+Using previously extracted files from sol files in nicadclones/smart_contracts/smart_contracts
+
+Extracted      366 files
+
+Using previously blind renamed extracted files from sol files in nicadclones/smart_contracts/smart_contracts
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.096s
+user	0m0.085s
+sys	0m0.007s
+
+Found 633 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 44 classes
+
+Done.
+
+Detailed log in nicadclones/smart_contracts/smart_contracts_files-clones-2024-01-18-13:00:35.log
+Results in nicadclones/smart_contracts/smart_contracts_files-blind-clones/
+
+Thu 18 Jan 2024 13:00:35 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-blind.cfg
+system=tests/regression/systems/rust/nushell-main
+threshold=0.30
+granularity=files
+language=rs
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:00:35 EST
+
+Using previously extracted files from rs files in nicadclones/nushell-main/nushell-main
+
+Extracted      525 files
+
+Using previously blind renamed extracted files from rs files in nicadclones/nushell-main/nushell-main
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.049s
+user	0m0.041s
+sys	0m0.007s
+
+Found 326 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 28 classes
+
+Done.
+
+Detailed log in nicadclones/nushell-main/nushell-main_files-clones-2024-01-18-13:00:35.log
+Results in nicadclones/nushell-main/nushell-main_files-blind-clones/
+
+Thu 18 Jan 2024 13:00:35 EST
+
+=====
+
+
+===== Functions with consistent renaming =====
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-consistent.cfg
+system=tests/regression/systems/c/httpd-2.2.8
+threshold=0.30
+granularity=functions
+language=c
+transform=none
+rename=consistent
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:00:35 EST
+
+Using previously extracted functions from c files in nicadclones/httpd-2.2.8/httpd-2.2.8
+
+Extracted     5013 functions
+
+Applying consistent renaming to extracted functions from c files in nicadclones/httpd-2.2.8/httpd-2.2.8
+
+real	0m4.735s
+user	0m4.472s
+sys	0m0.212s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.198s
+user	0m0.187s
+sys	0m0.008s
+
+Found 658 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.012s
+user	0m0.004s
+sys	0m0.007s
+
+Clustered clone pairs into 164 classes
+
+Done.
+
+Detailed log in nicadclones/httpd-2.2.8/httpd-2.2.8_functions-clones-2024-01-18-13:00:35.log
+Results in nicadclones/httpd-2.2.8/httpd-2.2.8_functions-consistent-clones/
+
+Thu 18 Jan 2024 13:00:40 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-consistent.cfg
+system=tests/regression/systems/cs/RssBandit1.5.0.17sources
+threshold=0.30
+granularity=functions
+language=cs
+transform=none
+rename=consistent
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:00:40 EST
+
+Using previously extracted functions from cs files in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources
+
+Extracted     4481 functions
+
+Applying consistent renaming to extracted functions from cs files in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources
+
+real	0m7.728s
+user	0m7.524s
+sys	0m0.160s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.048s
+user	0m0.039s
+sys	0m0.008s
+
+Found 219 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 92 classes
+
+Done.
+
+Detailed log in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources_functions-clones-2024-01-18-13:00:40.log
+Results in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources_functions-consistent-clones/
+
+Thu 18 Jan 2024 13:00:48 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-consistent.cfg
+system=tests/regression/systems/java/jEdit
+threshold=0.30
+granularity=functions
+language=java
+transform=none
+rename=consistent
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:00:48 EST
+
+Using previously extracted functions from java files in nicadclones/jEdit/jEdit
+
+Extracted     7021 functions
+
+Applying consistent renaming to extracted functions from java files in nicadclones/jEdit/jEdit
+
+real	0m1.973s
+user	0m1.711s
+sys	0m0.223s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.082s
+user	0m0.072s
+sys	0m0.008s
+
+Found 363 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 68 classes
+
+Done.
+
+Detailed log in nicadclones/jEdit/jEdit_functions-clones-2024-01-18-13:00:48.log
+Results in nicadclones/jEdit/jEdit_functions-consistent-clones/
+
+Thu 18 Jan 2024 13:00:50 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-consistent.cfg
+system=tests/regression/systems/py/Django
+threshold=0.30
+granularity=functions
+language=py
+transform=none
+rename=consistent
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:00:50 EST
+
+Using previously extracted functions from py files in nicadclones/Django/Django
+
+Extracted     7068 functions
+
+Applying consistent renaming to extracted functions from py files in nicadclones/Django/Django
+
+real	0m2.188s
+user	0m1.924s
+sys	0m0.223s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.073s
+user	0m0.063s
+sys	0m0.007s
+
+Found 112 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 42 classes
+
+Done.
+
+Detailed log in nicadclones/Django/Django_functions-clones-2024-01-18-13:00:50.log
+Results in nicadclones/Django/Django_functions-consistent-clones/
+
+Thu 18 Jan 2024 13:00:52 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-consistent.cfg
+system=tests/regression/systems/swift/boltmobile
+threshold=0.30
+granularity=functions
+language=swift
+transform=none
+rename=consistent
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:00:52 EST
+
+Using previously extracted functions from swift files in nicadclones/boltmobile/boltmobile
+
+Extracted      227 functions
+
+Applying consistent renaming to extracted functions from swift files in nicadclones/boltmobile/boltmobile
+
+real	0m0.076s
+user	0m0.059s
+sys	0m0.014s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.010s
+user	0m0.003s
+sys	0m0.006s
+
+Found 7 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.010s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 2 classes
+
+Done.
+
+Detailed log in nicadclones/boltmobile/boltmobile_functions-clones-2024-01-18-13:00:52.log
+Results in nicadclones/boltmobile/boltmobile_functions-consistent-clones/
+
+Thu 18 Jan 2024 13:00:52 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-consistent.cfg
+system=tests/regression/systems/sol/smart_contracts
+threshold=0.30
+granularity=functions
+language=sol
+transform=none
+rename=consistent
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:00:52 EST
+
+Using previously extracted functions from sol files in nicadclones/smart_contracts/smart_contracts
+
+Extracted     8004 functions
+
+Applying consistent renaming to extracted functions from sol files in nicadclones/smart_contracts/smart_contracts
+
+real	0m0.746s
+user	0m0.487s
+sys	0m0.219s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.042s
+user	0m0.033s
+sys	0m0.008s
+
+Found 1469 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.013s
+user	0m0.005s
+sys	0m0.007s
+
+Clustered clone pairs into 137 classes
+
+Done.
+
+Detailed log in nicadclones/smart_contracts/smart_contracts_functions-clones-2024-01-18-13:00:52.log
+Results in nicadclones/smart_contracts/smart_contracts_functions-consistent-clones/
+
+Thu 18 Jan 2024 13:00:53 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-consistent.cfg
+system=tests/regression/systems/rust/nushell-main
+threshold=0.30
+granularity=functions
+language=rs
+transform=none
+rename=consistent
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:00:53 EST
+
+Using previously extracted functions from rs files in nicadclones/nushell-main/nushell-main
+
+Extracted     1743 functions
+
+Applying consistent renaming to extracted functions from rs files in nicadclones/nushell-main/nushell-main
+
+real	0m0.695s
+user	0m0.615s
+sys	0m0.066s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.024s
+user	0m0.016s
+sys	0m0.007s
+
+Found 196 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 63 classes
+
+Done.
+
+Detailed log in nicadclones/nushell-main/nushell-main_functions-clones-2024-01-18-13:00:53.log
+Results in nicadclones/nushell-main/nushell-main_functions-consistent-clones/
+
+Thu 18 Jan 2024 13:00:54 EST
+
+=====
+
+
+===== Blocks with consistent renaming =====
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-consistent.cfg
+system=tests/regression/systems/c/httpd-2.2.8
+threshold=0.30
+granularity=blocks
+language=c
+transform=none
+rename=consistent
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:00:54 EST
+
+Using previously extracted blocks from c files in nicadclones/httpd-2.2.8/httpd-2.2.8
+
+Extracted    21037 blocks
+
+Applying consistent renaming to extracted blocks from c files in nicadclones/httpd-2.2.8/httpd-2.2.8
+
+real	0m8.341s
+user	0m7.547s
+sys	0m0.661s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.568s
+user	0m0.556s
+sys	0m0.010s
+
+Found 766 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.013s
+user	0m0.004s
+sys	0m0.007s
+
+Clustered clone pairs into 274 classes
+
+Done.
+
+Detailed log in nicadclones/httpd-2.2.8/httpd-2.2.8_blocks-clones-2024-01-18-13:00:54.log
+Results in nicadclones/httpd-2.2.8/httpd-2.2.8_blocks-consistent-clones/
+
+Thu 18 Jan 2024 13:01:03 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-consistent.cfg
+system=tests/regression/systems/cs/RssBandit1.5.0.17sources
+threshold=0.30
+granularity=blocks
+language=cs
+transform=none
+rename=consistent
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:01:03 EST
+
+Using previously extracted blocks from cs files in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources
+
+Extracted    15697 blocks
+
+Applying consistent renaming to extracted blocks from cs files in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources
+
+real	0m9.261s
+user	0m8.713s
+sys	0m0.456s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.139s
+user	0m0.128s
+sys	0m0.008s
+
+Found 356 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.012s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 153 classes
+
+Done.
+
+Detailed log in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources_blocks-clones-2024-01-18-13:01:03.log
+Results in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources_blocks-consistent-clones/
+
+Thu 18 Jan 2024 13:01:12 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-consistent.cfg
+system=tests/regression/systems/java/jEdit
+threshold=0.30
+granularity=blocks
+language=java
+transform=none
+rename=consistent
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:01:12 EST
+
+Using previously extracted blocks from java files in nicadclones/jEdit/jEdit
+
+Extracted    15679 blocks
+
+Applying consistent renaming to extracted blocks from java files in nicadclones/jEdit/jEdit
+
+real	0m3.104s
+user	0m2.578s
+sys	0m0.446s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.210s
+user	0m0.200s
+sys	0m0.008s
+
+Found 1509 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.013s
+user	0m0.005s
+sys	0m0.007s
+
+Clustered clone pairs into 121 classes
+
+Done.
+
+Detailed log in nicadclones/jEdit/jEdit_blocks-clones-2024-01-18-13:01:12.log
+Results in nicadclones/jEdit/jEdit_blocks-consistent-clones/
+
+Thu 18 Jan 2024 13:01:16 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-consistent.cfg
+system=tests/regression/systems/py/Django
+threshold=0.30
+granularity=blocks
+language=py
+transform=none
+rename=consistent
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:01:16 EST
+
+Using previously extracted blocks from py files in nicadclones/Django/Django
+
+Extracted    20465 blocks
+
+Applying consistent renaming to extracted blocks from py files in nicadclones/Django/Django
+
+real	0m7.512s
+user	0m6.783s
+sys	0m0.611s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.220s
+user	0m0.210s
+sys	0m0.008s
+
+Found 134 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 47 classes
+
+Done.
+
+Detailed log in nicadclones/Django/Django_blocks-clones-2024-01-18-13:01:16.log
+Results in nicadclones/Django/Django_blocks-consistent-clones/
+
+Thu 18 Jan 2024 13:01:24 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-consistent.cfg
+system=tests/regression/systems/swift/boltmobile
+threshold=0.30
+granularity=blocks
+language=swift
+transform=none
+rename=consistent
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:01:24 EST
+
+Using previously extracted blocks from swift files in nicadclones/boltmobile/boltmobile
+
+Extracted      518 blocks
+
+Applying consistent renaming to extracted blocks from swift files in nicadclones/boltmobile/boltmobile
+
+real	0m0.108s
+user	0m0.081s
+sys	0m0.022s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.011s
+user	0m0.004s
+sys	0m0.006s
+
+Found 9 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.010s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 4 classes
+
+Done.
+
+Detailed log in nicadclones/boltmobile/boltmobile_blocks-clones-2024-01-18-13:01:24.log
+Results in nicadclones/boltmobile/boltmobile_blocks-consistent-clones/
+
+Thu 18 Jan 2024 13:01:24 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-consistent.cfg
+system=tests/regression/systems/rust/nushell-main
+threshold=0.30
+granularity=blocks
+language=rs
+transform=none
+rename=consistent
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:01:24 EST
+
+Using previously extracted blocks from rs files in nicadclones/nushell-main/nushell-main
+
+Extracted     7273 blocks
+
+Applying consistent renaming to extracted blocks from rs files in nicadclones/nushell-main/nushell-main
+
+real	0m1.583s
+user	0m1.325s
+sys	0m0.217s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.066s
+user	0m0.058s
+sys	0m0.007s
+
+Found 296 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 102 classes
+
+Done.
+
+Detailed log in nicadclones/nushell-main/nushell-main_blocks-clones-2024-01-18-13:01:24.log
+Results in nicadclones/nushell-main/nushell-main_blocks-consistent-clones/
+
+Thu 18 Jan 2024 13:01:25 EST
+
+=====
+
+
+===== Files with consistent renaming =====
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-consistent.cfg
+system=tests/regression/systems/c/httpd-2.2.8
+threshold=0.30
+granularity=files
+language=c
+transform=none
+rename=consistent
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:01:25 EST
+
+Using previously extracted files from c files in nicadclones/httpd-2.2.8/httpd-2.2.8
+
+Extracted      537 files
+
+Applying consistent renaming to extracted files from c files in nicadclones/httpd-2.2.8/httpd-2.2.8
+
+real	0m18.146s
+user	0m17.951s
+sys	0m0.118s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.190s
+user	0m0.180s
+sys	0m0.007s
+
+Found 7 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 5 classes
+
+Done.
+
+Detailed log in nicadclones/httpd-2.2.8/httpd-2.2.8_files-clones-2024-01-18-13:01:25.log
+Results in nicadclones/httpd-2.2.8/httpd-2.2.8_files-consistent-clones/
+
+Thu 18 Jan 2024 13:01:44 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-consistent.cfg
+system=tests/regression/systems/cs/RssBandit1.5.0.17sources
+threshold=0.30
+granularity=files
+language=cs
+transform=none
+rename=consistent
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:01:44 EST
+
+Using previously extracted files from cs files in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources
+
+Extracted      314 files
+
+Applying consistent renaming to extracted files from cs files in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources
+
+real	0m30.376s
+user	0m30.152s
+sys	0m0.080s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.098s
+user	0m0.088s
+sys	0m0.008s
+
+Found 6 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 4 classes
+
+Done.
+
+Detailed log in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources_files-clones-2024-01-18-13:01:44.log
+Results in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources_files-consistent-clones/
+
+Thu 18 Jan 2024 13:02:14 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-consistent.cfg
+system=tests/regression/systems/java/jEdit
+threshold=0.30
+granularity=files
+language=java
+transform=none
+rename=consistent
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:02:14 EST
+
+Using previously extracted files from java files in nicadclones/jEdit/jEdit
+
+Extracted      539 files
+
+Applying consistent renaming to extracted files from java files in nicadclones/jEdit/jEdit
+
+real	0m8.280s
+user	0m8.182s
+sys	0m0.071s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.087s
+user	0m0.078s
+sys	0m0.007s
+
+Found 1 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 1 classes
+
+Done.
+
+Detailed log in nicadclones/jEdit/jEdit_files-clones-2024-01-18-13:02:14.log
+Results in nicadclones/jEdit/jEdit_files-consistent-clones/
+
+Thu 18 Jan 2024 13:02:23 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-consistent.cfg
+system=tests/regression/systems/py/Django
+threshold=0.30
+granularity=files
+language=py
+transform=none
+rename=consistent
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:02:23 EST
+
+Using previously extracted files from py files in nicadclones/Django/Django
+
+Extracted     1334 files
+
+Applying consistent renaming to extracted files from py files in nicadclones/Django/Django
+
+real	0m8.023s
+user	0m7.882s
+sys	0m0.098s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.106s
+user	0m0.097s
+sys	0m0.008s
+
+Found 132 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 11 classes
+
+Done.
+
+Detailed log in nicadclones/Django/Django_files-clones-2024-01-18-13:02:23.log
+Results in nicadclones/Django/Django_files-consistent-clones/
+
+Thu 18 Jan 2024 13:02:31 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-consistent.cfg
+system=tests/regression/systems/swift/boltmobile
+threshold=0.30
+granularity=files
+language=swift
+transform=none
+rename=consistent
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:02:31 EST
+
+Using previously extracted files from swift files in nicadclones/boltmobile/boltmobile
+
+Extracted       51 files
+
+Applying consistent renaming to extracted files from swift files in nicadclones/boltmobile/boltmobile
+
+real	0m0.184s
+user	0m0.170s
+sys	0m0.009s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.006s
+
+Found 1 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.010s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 1 classes
+
+Done.
+
+Detailed log in nicadclones/boltmobile/boltmobile_files-clones-2024-01-18-13:02:31.log
+Results in nicadclones/boltmobile/boltmobile_files-consistent-clones/
+
+Thu 18 Jan 2024 13:02:31 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-consistent.cfg
+system=tests/regression/systems/sol/smart_contracts
+threshold=0.30
+granularity=files
+language=sol
+transform=none
+rename=consistent
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:02:31 EST
+
+Using previously extracted files from sol files in nicadclones/smart_contracts/smart_contracts
+
+Extracted      366 files
+
+Applying consistent renaming to extracted files from sol files in nicadclones/smart_contracts/smart_contracts
+
+real	0m1.695s
+user	0m1.638s
+sys	0m0.043s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.072s
+user	0m0.063s
+sys	0m0.007s
+
+Found 291 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.006s
+
+Clustered clone pairs into 43 classes
+
+Done.
+
+Detailed log in nicadclones/smart_contracts/smart_contracts_files-clones-2024-01-18-13:02:31.log
+Results in nicadclones/smart_contracts/smart_contracts_files-consistent-clones/
+
+Thu 18 Jan 2024 13:02:33 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-consistent.cfg
+system=tests/regression/systems/rust/nushell-main
+threshold=0.30
+granularity=files
+language=rs
+transform=none
+rename=consistent
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:02:33 EST
+
+Using previously extracted files from rs files in nicadclones/nushell-main/nushell-main
+
+Extracted      525 files
+
+Applying consistent renaming to extracted files from rs files in nicadclones/nushell-main/nushell-main
+
+real	0m2.026s
+user	0m1.977s
+sys	0m0.041s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.042s
+user	0m0.034s
+sys	0m0.007s
+
+Found 54 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 26 classes
+
+Done.
+
+Detailed log in nicadclones/nushell-main/nushell-main_files-clones-2024-01-18-13:02:33.log
+Results in nicadclones/nushell-main/nushell-main_files-consistent-clones/
+
+Thu 18 Jan 2024 13:02:35 EST
+
+=====
+
+
+===== Functions with filtering =====
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/filter-declarations.cfg
+system=tests/regression/systems/c/httpd-2.2.8
+threshold=0.30
+granularity=functions
+language=c
+transform=none
+rename=none
+filter=declaration
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:02:35 EST
+
+Using previously extracted functions from c files in nicadclones/httpd-2.2.8/httpd-2.2.8
+
+Extracted     5013 functions
+
+Applying filtering of declaration to extracted functions from c files in nicadclones/httpd-2.2.8/httpd-2.2.8
+
+real	0m2.197s
+user	0m2.001s
+sys	0m0.153s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.141s
+user	0m0.131s
+sys	0m0.007s
+
+Found 370 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.006s
+
+Clustered clone pairs into 154 classes
+
+Done.
+
+Detailed log in nicadclones/httpd-2.2.8/httpd-2.2.8_functions-clones-2024-01-18-13:02:35.log
+Results in nicadclones/httpd-2.2.8/httpd-2.2.8_functions-filter-clones/
+
+Thu 18 Jan 2024 13:02:37 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/filter-declarations.cfg
+system=tests/regression/systems/cs/RssBandit1.5.0.17sources
+threshold=0.30
+granularity=functions
+language=cs
+transform=none
+rename=none
+filter=declaration
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:02:37 EST
+
+Using previously extracted functions from cs files in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources
+
+Extracted     4481 functions
+
+Applying filtering of declaration to extracted functions from cs files in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources
+
+real	0m1.103s
+user	0m0.937s
+sys	0m0.131s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.046s
+user	0m0.037s
+sys	0m0.007s
+
+Found 186 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.010s
+user	0m0.003s
+sys	0m0.006s
+
+Clustered clone pairs into 74 classes
+
+Done.
+
+Detailed log in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources_functions-clones-2024-01-18-13:02:37.log
+Results in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources_functions-filter-clones/
+
+Thu 18 Jan 2024 13:02:39 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/filter-declarations.cfg
+system=tests/regression/systems/java/jEdit
+threshold=0.30
+granularity=functions
+language=java
+transform=none
+rename=none
+filter=declaration
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:02:39 EST
+
+Using previously extracted functions from java files in nicadclones/jEdit/jEdit
+
+Extracted     7021 functions
+
+Applying filtering of declaration to extracted functions from java files in nicadclones/jEdit/jEdit
+
+real	0m1.150s
+user	0m0.923s
+sys	0m0.189s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.068s
+user	0m0.059s
+sys	0m0.007s
+
+Found 131 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.010s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 54 classes
+
+Done.
+
+Detailed log in nicadclones/jEdit/jEdit_functions-clones-2024-01-18-13:02:39.log
+Results in nicadclones/jEdit/jEdit_functions-filter-clones/
+
+Thu 18 Jan 2024 13:02:40 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/filter-declarations.cfg
+system=tests/regression/systems/py/Django
+threshold=0.30
+granularity=functions
+language=py
+transform=none
+rename=none
+filter=declaration
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:02:40 EST
+
+Using previously extracted functions from py files in nicadclones/Django/Django
+
+Extracted     7068 functions
+
+Applying filtering of declaration to extracted functions from py files in nicadclones/Django/Django
+
+real	0m1.501s
+user	0m1.267s
+sys	0m0.193s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.076s
+user	0m0.065s
+sys	0m0.008s
+
+Found 60 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 37 classes
+
+Done.
+
+Detailed log in nicadclones/Django/Django_functions-clones-2024-01-18-13:02:40.log
+Results in nicadclones/Django/Django_functions-filter-clones/
+
+Thu 18 Jan 2024 13:02:41 EST
+
+=====
+
+
+===== Blocks with filtering =====
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/filter-declarations.cfg
+system=tests/regression/systems/c/httpd-2.2.8
+threshold=0.30
+granularity=blocks
+language=c
+transform=none
+rename=none
+filter=declaration
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:02:41 EST
+
+Using previously extracted blocks from c files in nicadclones/httpd-2.2.8/httpd-2.2.8
+
+Extracted    21037 blocks
+
+Applying filtering of declaration to extracted blocks from c files in nicadclones/httpd-2.2.8/httpd-2.2.8
+
+real	0m4.367s
+user	0m3.688s
+sys	0m0.561s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.425s
+user	0m0.412s
+sys	0m0.009s
+
+Found 621 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.012s
+user	0m0.004s
+sys	0m0.007s
+
+Clustered clone pairs into 244 classes
+
+Done.
+
+Detailed log in nicadclones/httpd-2.2.8/httpd-2.2.8_blocks-clones-2024-01-18-13:02:41.log
+Results in nicadclones/httpd-2.2.8/httpd-2.2.8_blocks-filter-clones/
+
+Thu 18 Jan 2024 13:02:46 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/filter-declarations.cfg
+system=tests/regression/systems/cs/RssBandit1.5.0.17sources
+threshold=0.30
+granularity=blocks
+language=cs
+transform=none
+rename=none
+filter=declaration
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:02:46 EST
+
+Using previously extracted blocks from cs files in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources
+
+Extracted    15697 blocks
+
+Applying filtering of declaration to extracted blocks from cs files in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources
+
+real	0m2.223s
+user	0m1.720s
+sys	0m0.411s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.125s
+user	0m0.115s
+sys	0m0.008s
+
+Found 332 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 137 classes
+
+Done.
+
+Detailed log in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources_blocks-clones-2024-01-18-13:02:46.log
+Results in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources_blocks-filter-clones/
+
+Thu 18 Jan 2024 13:02:49 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/filter-declarations.cfg
+system=tests/regression/systems/java/jEdit
+threshold=0.30
+granularity=blocks
+language=java
+transform=none
+rename=none
+filter=declaration
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:02:49 EST
+
+Using previously extracted blocks from java files in nicadclones/jEdit/jEdit
+
+Extracted    15679 blocks
+
+Applying filtering of declaration to extracted blocks from java files in nicadclones/jEdit/jEdit
+
+real	0m2.041s
+user	0m1.562s
+sys	0m0.402s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.162s
+user	0m0.152s
+sys	0m0.009s
+
+Found 1384 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.012s
+user	0m0.004s
+sys	0m0.007s
+
+Clustered clone pairs into 99 classes
+
+Done.
+
+Detailed log in nicadclones/jEdit/jEdit_blocks-clones-2024-01-18-13:02:49.log
+Results in nicadclones/jEdit/jEdit_blocks-filter-clones/
+
+Thu 18 Jan 2024 13:02:51 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/filter-declarations.cfg
+system=tests/regression/systems/py/Django
+threshold=0.30
+granularity=blocks
+language=py
+transform=none
+rename=none
+filter=declaration
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:02:51 EST
+
+Using previously extracted blocks from py files in nicadclones/Django/Django
+
+Extracted    20465 blocks
+
+Applying filtering of declaration to extracted blocks from py files in nicadclones/Django/Django
+
+real	0m3.799s
+user	0m3.153s
+sys	0m0.545s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.229s
+user	0m0.218s
+sys	0m0.009s
+
+Found 82 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.010s
+user	0m0.003s
+sys	0m0.006s
+
+Clustered clone pairs into 51 classes
+
+Done.
+
+Detailed log in nicadclones/Django/Django_blocks-clones-2024-01-18-13:02:51.log
+Results in nicadclones/Django/Django_blocks-filter-clones/
+
+Thu 18 Jan 2024 13:02:55 EST
+
+=====
+
+
+===== FIles with filtering =====
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/filter-declarations.cfg
+system=tests/regression/systems/c/httpd-2.2.8
+threshold=0.30
+granularity=files
+language=c
+transform=none
+rename=none
+filter=declaration
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:02:55 EST
+
+Using previously extracted files from c files in nicadclones/httpd-2.2.8/httpd-2.2.8
+
+Extracted      537 files
+
+Applying filtering of declaration to extracted files from c files in nicadclones/httpd-2.2.8/httpd-2.2.8
+
+real	0m2.685s
+user	0m2.596s
+sys	0m0.073s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.146s
+user	0m0.137s
+sys	0m0.008s
+
+Found 10 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.010s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 8 classes
+
+Done.
+
+Detailed log in nicadclones/httpd-2.2.8/httpd-2.2.8_files-clones-2024-01-18-13:02:55.log
+Results in nicadclones/httpd-2.2.8/httpd-2.2.8_files-filter-clones/
+
+Thu 18 Jan 2024 13:02:58 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/filter-declarations.cfg
+system=tests/regression/systems/cs/RssBandit1.5.0.17sources
+threshold=0.30
+granularity=files
+language=cs
+transform=none
+rename=none
+filter=declaration
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:02:58 EST
+
+Using previously extracted files from cs files in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources
+
+Extracted      314 files
+
+Applying filtering of declaration to extracted files from cs files in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources
+
+real	0m0.910s
+user	0m0.845s
+sys	0m0.052s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.029s
+user	0m0.021s
+sys	0m0.007s
+
+Found 33 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.010s
+user	0m0.003s
+sys	0m0.006s
+
+Clustered clone pairs into 18 classes
+
+Done.
+
+Detailed log in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources_files-clones-2024-01-18-13:02:58.log
+Results in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources_files-filter-clones/
+
+Thu 18 Jan 2024 13:02:59 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/filter-declarations.cfg
+system=tests/regression/systems/java/jEdit
+threshold=0.30
+granularity=files
+language=java
+transform=none
+rename=none
+filter=declaration
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:02:59 EST
+
+Using previously extracted files from java files in nicadclones/jEdit/jEdit
+
+Extracted      539 files
+
+Applying filtering of declaration to extracted files from java files in nicadclones/jEdit/jEdit
+
+real	0m0.975s
+user	0m0.913s
+sys	0m0.048s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.075s
+user	0m0.066s
+sys	0m0.007s
+
+Found 0 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 0 classes
+
+Done.
+
+Detailed log in nicadclones/jEdit/jEdit_files-clones-2024-01-18-13:02:59.log
+Results in nicadclones/jEdit/jEdit_files-filter-clones/
+
+Thu 18 Jan 2024 13:03:00 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/filter-declarations.cfg
+system=tests/regression/systems/py/Django
+threshold=0.30
+granularity=files
+language=py
+transform=none
+rename=none
+filter=declaration
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:03:00 EST
+
+Using previously extracted files from py files in nicadclones/Django/Django
+
+Extracted     1334 files
+
+Applying filtering of declaration to extracted files from py files in nicadclones/Django/Django
+
+real	0m1.561s
+user	0m1.475s
+sys	0m0.071s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.164s
+user	0m0.153s
+sys	0m0.008s
+
+Found 27 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.010s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 7 classes
+
+Done.
+
+Detailed log in nicadclones/Django/Django_files-clones-2024-01-18-13:03:00.log
+Results in nicadclones/Django/Django_files-filter-clones/
+
+Thu 18 Jan 2024 13:03:02 EST
+
+=====
+
+
+===== Functions with abstraction =====
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/abstract-expressions.cfg
+system=tests/regression/systems/c/httpd-2.2.8
+threshold=0.10
+granularity=functions
+language=c
+transform=none
+rename=none
+filter=none
+abstract=expression
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:03:02 EST
+
+Using previously extracted functions from c files in nicadclones/httpd-2.2.8/httpd-2.2.8
+
+Extracted     5013 functions
+
+Applying abstraction of expression to extracted functions from c files in nicadclones/httpd-2.2.8/httpd-2.2.8
+
+real	0m1.832s
+user	0m1.644s
+sys	0m0.160s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.10
+
+real	0m0.074s
+user	0m0.066s
+sys	0m0.007s
+
+Found 358 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 135 classes
+
+Done.
+
+Detailed log in nicadclones/httpd-2.2.8/httpd-2.2.8_functions-clones-2024-01-18-13:03:02.log
+Results in nicadclones/httpd-2.2.8/httpd-2.2.8_functions-abstract-clones/
+
+Thu 18 Jan 2024 13:03:04 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/abstract-expressions.cfg
+system=tests/regression/systems/cs/RssBandit1.5.0.17sources
+threshold=0.10
+granularity=functions
+language=cs
+transform=none
+rename=none
+filter=none
+abstract=expression
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:03:04 EST
+
+Using previously extracted functions from cs files in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources
+
+Extracted     4481 functions
+
+Applying abstraction of expression to extracted functions from cs files in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources
+
+real	0m0.884s
+user	0m0.720s
+sys	0m0.138s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.10
+
+real	0m0.034s
+user	0m0.024s
+sys	0m0.007s
+
+Found 114 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 71 classes
+
+Done.
+
+Detailed log in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources_functions-clones-2024-01-18-13:03:04.log
+Results in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources_functions-abstract-clones/
+
+Thu 18 Jan 2024 13:03:05 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/abstract-expressions.cfg
+system=tests/regression/systems/java/jEdit
+threshold=0.10
+granularity=functions
+language=java
+transform=none
+rename=none
+filter=none
+abstract=expression
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:03:05 EST
+
+Using previously extracted functions from java files in nicadclones/jEdit/jEdit
+
+Extracted     7021 functions
+
+Applying abstraction of expression to extracted functions from java files in nicadclones/jEdit/jEdit
+
+real	0m0.975s
+user	0m0.736s
+sys	0m0.194s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.10
+
+real	0m0.044s
+user	0m0.036s
+sys	0m0.007s
+
+Found 115 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.010s
+user	0m0.003s
+sys	0m0.006s
+
+Clustered clone pairs into 51 classes
+
+Done.
+
+Detailed log in nicadclones/jEdit/jEdit_functions-clones-2024-01-18-13:03:05.log
+Results in nicadclones/jEdit/jEdit_functions-abstract-clones/
+
+Thu 18 Jan 2024 13:03:06 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/abstract-expressions.cfg
+system=tests/regression/systems/py/Django
+threshold=0.10
+granularity=functions
+language=py
+transform=none
+rename=none
+filter=none
+abstract=expression
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:03:06 EST
+
+Using previously extracted functions from py files in nicadclones/Django/Django
+
+Extracted     7068 functions
+
+Applying abstraction of expression to extracted functions from py files in nicadclones/Django/Django
+
+real	0m1.216s
+user	0m0.978s
+sys	0m0.200s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.10
+
+real	0m0.045s
+user	0m0.037s
+sys	0m0.007s
+
+Found 80 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.010s
+user	0m0.003s
+sys	0m0.006s
+
+Clustered clone pairs into 43 classes
+
+Done.
+
+Detailed log in nicadclones/Django/Django_functions-clones-2024-01-18-13:03:06.log
+Results in nicadclones/Django/Django_functions-abstract-clones/
+
+Thu 18 Jan 2024 13:03:07 EST
+
+=====
+
+
+===== Blocks with abstraction =====
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/abstract-expressions.cfg
+system=tests/regression/systems/c/httpd-2.2.8
+threshold=0.10
+granularity=blocks
+language=c
+transform=none
+rename=none
+filter=none
+abstract=expression
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:03:07 EST
+
+Using previously extracted blocks from c files in nicadclones/httpd-2.2.8/httpd-2.2.8
+
+Extracted    21037 blocks
+
+Applying abstraction of expression to extracted blocks from c files in nicadclones/httpd-2.2.8/httpd-2.2.8
+
+real	0m3.558s
+user	0m2.883s
+sys	0m0.561s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.10
+
+real	0m0.296s
+user	0m0.284s
+sys	0m0.009s
+
+Found 1716 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.014s
+user	0m0.006s
+sys	0m0.007s
+
+Clustered clone pairs into 296 classes
+
+Done.
+
+Detailed log in nicadclones/httpd-2.2.8/httpd-2.2.8_blocks-clones-2024-01-18-13:03:07.log
+Results in nicadclones/httpd-2.2.8/httpd-2.2.8_blocks-abstract-clones/
+
+Thu 18 Jan 2024 13:03:11 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/abstract-expressions.cfg
+system=tests/regression/systems/cs/RssBandit1.5.0.17sources
+threshold=0.10
+granularity=blocks
+language=cs
+transform=none
+rename=none
+filter=none
+abstract=expression
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:03:11 EST
+
+Using previously extracted blocks from cs files in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources
+
+Extracted    15697 blocks
+
+Applying abstraction of expression to extracted blocks from cs files in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources
+
+real	0m1.852s
+user	0m1.367s
+sys	0m0.405s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.10
+
+real	0m0.077s
+user	0m0.067s
+sys	0m0.008s
+
+Found 279 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 135 classes
+
+Done.
+
+Detailed log in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources_blocks-clones-2024-01-18-13:03:11.log
+Results in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources_blocks-abstract-clones/
+
+Thu 18 Jan 2024 13:03:13 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/abstract-expressions.cfg
+system=tests/regression/systems/java/jEdit
+threshold=0.10
+granularity=blocks
+language=java
+transform=none
+rename=none
+filter=none
+abstract=expression
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:03:13 EST
+
+Using previously extracted blocks from java files in nicadclones/jEdit/jEdit
+
+Extracted    15679 blocks
+
+Applying abstraction of expression to extracted blocks from java files in nicadclones/jEdit/jEdit
+
+real	0m1.711s
+user	0m1.233s
+sys	0m0.398s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.10
+
+real	0m0.120s
+user	0m0.110s
+sys	0m0.008s
+
+Found 2251 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.014s
+user	0m0.006s
+sys	0m0.007s
+
+Clustered clone pairs into 139 classes
+
+Done.
+
+Detailed log in nicadclones/jEdit/jEdit_blocks-clones-2024-01-18-13:03:13.log
+Results in nicadclones/jEdit/jEdit_blocks-abstract-clones/
+
+Thu 18 Jan 2024 13:03:15 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/abstract-expressions.cfg
+system=tests/regression/systems/py/Django
+threshold=0.10
+granularity=blocks
+language=py
+transform=none
+rename=none
+filter=none
+abstract=expression
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:03:15 EST
+
+Using previously extracted blocks from py files in nicadclones/Django/Django
+
+Extracted    20465 blocks
+
+Applying abstraction of expression to extracted blocks from py files in nicadclones/Django/Django
+
+real	0m3.072s
+user	0m2.429s
+sys	0m0.539s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.10
+
+real	0m0.136s
+user	0m0.126s
+sys	0m0.009s
+
+Found 268 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 67 classes
+
+Done.
+
+Detailed log in nicadclones/Django/Django_blocks-clones-2024-01-18-13:03:15.log
+Results in nicadclones/Django/Django_blocks-abstract-clones/
+
+Thu 18 Jan 2024 13:03:18 EST
+
+=====
+
+
+===== Files with abstraction =====
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/abstract-expressions.cfg
+system=tests/regression/systems/c/httpd-2.2.8
+threshold=0.10
+granularity=files
+language=c
+transform=none
+rename=none
+filter=none
+abstract=expression
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:03:18 EST
+
+Using previously extracted files from c files in nicadclones/httpd-2.2.8/httpd-2.2.8
+
+Extracted      537 files
+
+Applying abstraction of expression to extracted files from c files in nicadclones/httpd-2.2.8/httpd-2.2.8
+
+real	0m2.473s
+user	0m2.381s
+sys	0m0.079s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.10
+
+real	0m0.091s
+user	0m0.081s
+sys	0m0.008s
+
+Found 2 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.010s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 2 classes
+
+Done.
+
+Detailed log in nicadclones/httpd-2.2.8/httpd-2.2.8_files-clones-2024-01-18-13:03:18.log
+Results in nicadclones/httpd-2.2.8/httpd-2.2.8_files-abstract-clones/
+
+Thu 18 Jan 2024 13:03:21 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/abstract-expressions.cfg
+system=tests/regression/systems/cs/RssBandit1.5.0.17sources
+threshold=0.10
+granularity=files
+language=cs
+transform=none
+rename=none
+filter=none
+abstract=expression
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:03:21 EST
+
+Using previously extracted files from cs files in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources
+
+Extracted      314 files
+
+Applying abstraction of expression to extracted files from cs files in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources
+
+real	0m0.985s
+user	0m0.913s
+sys	0m0.062s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.10
+
+real	0m0.043s
+user	0m0.035s
+sys	0m0.007s
+
+Found 14 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.010s
+user	0m0.003s
+sys	0m0.006s
+
+Clustered clone pairs into 5 classes
+
+Done.
+
+Detailed log in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources_files-clones-2024-01-18-13:03:21.log
+Results in nicadclones/RssBandit1.5.0.17sources/RssBandit1.5.0.17sources_files-abstract-clones/
+
+Thu 18 Jan 2024 13:03:22 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/abstract-expressions.cfg
+system=tests/regression/systems/java/jEdit
+threshold=0.10
+granularity=files
+language=java
+transform=none
+rename=none
+filter=none
+abstract=expression
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:03:22 EST
+
+Using previously extracted files from java files in nicadclones/jEdit/jEdit
+
+Extracted      539 files
+
+Applying abstraction of expression to extracted files from java files in nicadclones/jEdit/jEdit
+
+real	0m0.774s
+user	0m0.714s
+sys	0m0.051s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.10
+
+real	0m0.039s
+user	0m0.031s
+sys	0m0.007s
+
+Found 0 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.010s
+user	0m0.002s
+sys	0m0.006s
+
+Clustered clone pairs into 0 classes
+
+Done.
+
+Detailed log in nicadclones/jEdit/jEdit_files-clones-2024-01-18-13:03:22.log
+Results in nicadclones/jEdit/jEdit_files-abstract-clones/
+
+Thu 18 Jan 2024 13:03:23 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/abstract-expressions.cfg
+system=tests/regression/systems/py/Django
+threshold=0.10
+granularity=files
+language=py
+transform=none
+rename=none
+filter=none
+abstract=expression
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:03:23 EST
+
+Using previously extracted files from py files in nicadclones/Django/Django
+
+Extracted     1334 files
+
+Applying abstraction of expression to extracted files from py files in nicadclones/Django/Django
+
+real	0m1.200s
+user	0m1.114s
+sys	0m0.073s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.10
+
+real	0m0.048s
+user	0m0.039s
+sys	0m0.008s
+
+Found 136 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.010s
+user	0m0.003s
+sys	0m0.006s
+
+Clustered clone pairs into 4 classes
+
+Done.
+
+Detailed log in nicadclones/Django/Django_files-clones-2024-01-18-13:03:23.log
+Results in nicadclones/Django/Django_files-abstract-clones/
+
+Thu 18 Jan 2024 13:03:24 EST
+
+=====
+
+
+===== Java functions with custom normalization  =====
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/java-normalize-ifconditions.cfg
+system=tests/regression/systems/java/jEdit
+threshold=0.30
+granularity=functions
+language=java
+transform=none
+rename=none
+filter=none
+abstract=none
+normalize=java-normalize-ifconditions-functions
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:03:24 EST
+
+Using previously extracted functions from java files in nicadclones/jEdit/jEdit
+
+Extracted     7021 functions
+
+Applying custom normalization java-normalize-ifconditions-functions to extracted functions from java files in nicadclones/jEdit/jEdit
+
+real	0m0.962s
+user	0m0.741s
+sys	0m0.186s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.094s
+user	0m0.085s
+sys	0m0.008s
+
+Found 473 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.006s
+
+Clustered clone pairs into 62 classes
+
+Done.
+
+Detailed log in nicadclones/jEdit/jEdit_functions-clones-2024-01-18-13:03:24.log
+Results in nicadclones/jEdit/jEdit_functions-normalized-clones/
+
+Thu 18 Jan 2024 13:03:25 EST
+
+=====
+
+
+===== Java functions with clustering =====
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/default-report.cfg
+system=tests/regression/systems/java/jEdit
+threshold=0.30
+granularity=functions
+language=java
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=yes
+include=
+exclude=
+
+Thu 18 Jan 2024 13:03:25 EST
+
+Using previously extracted functions from java files in nicadclones/jEdit/jEdit
+
+Extracted     7021 functions
+
+Using previously blind renamed extracted functions from java files in nicadclones/jEdit/jEdit
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.085s
+user	0m0.077s
+sys	0m0.007s
+
+Found 811 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.012s
+user	0m0.004s
+sys	0m0.007s
+
+Clustered clone pairs into 92 classes
+
+Getting original sources for clones
+
+real	0m0.070s
+user	0m0.061s
+sys	0m0.008s
+
+Making HTML reports
+
+real	0m0.010s
+user	0m0.006s
+sys	0m0.003s
+
+Done.
+
+Detailed log in nicadclones/jEdit/jEdit_functions-clones-2024-01-18-13:03:25.log
+Results in nicadclones/jEdit/jEdit_functions-blind-clones/
+Report in nicadclones/jEdit/jEdit_functions-blind-clones/jEdit_functions-blind-clones-0.30-classes-withsource.html
+
+Thu 18 Jan 2024 13:03:25 EST
+
+=====
+
+
+===== Java function cross-clones =====
+
+NiCad Cross-Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/default-report.cfg
+system1=tests/regression/systems/java/JHotDraw54b1
+system2=tests/regression/systems/java/jEdit
+threshold=0.30
+granularity=functions
+language=java
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=yes
+include=
+exclude=
+
+Thu 18 Jan 2024 13:03:25 EST
+
+Extracting functions from java files in nicadclones/JHotDraw54b1/JHotDraw54b1
+
+real	0m1.784s
+user	0m0.708s
+sys	0m0.919s
+
+Extracted     2886 functions
+
+Thu 18 Jan 2024 13:03:27 EST
+
+Extracting functions from java files in nicadclones/JHotDraw54b1/jEdit
+
+real	0m4.574s
+user	0m2.538s
+sys	0m1.767s
+
+Extracted     7021 functions
+
+Applying blind renaming to extracted functions from java files in nicadclones/JHotDraw54b1/JHotDraw54b1
+
+real	0m0.300s
+user	0m0.205s
+sys	0m0.080s
+
+Applying blind renaming to extracted functions from java files in nicadclones/JHotDraw54b1/jEdit
+
+real	0m1.084s
+user	0m0.849s
+sys	0m0.199s
+
+Finding cross-clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.115s
+user	0m0.106s
+sys	0m0.007s
+
+Found 0 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 0 classes
+
+Getting original sources for clones
+
+real	0m0.005s
+user	0m0.001s
+sys	0m0.003s
+
+Making HTML reports
+
+real	0m0.005s
+user	0m0.001s
+sys	0m0.003s
+
+Done.
+
+Detailed log in nicadclones/JHotDraw54b1/JHotDraw54b1_functions-crossclones-2024-01-18-13:03:27.log
+Results in nicadclones/JHotDraw54b1/JHotDraw54b1_functions-blind-crossclones/
+Report in nicadclones/JHotDraw54b1/JHotDraw54b1_functions-blind-crossclones/JHotDraw54b1_functions-blind-crossclones-0.30-classes-withsource.html
+
+Thu 18 Jan 2024 13:03:33 EST
+
+=====
+
+
+===== C long paths and space names ====
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/default.cfg
+system=tests/regression/systems/robust/c/dir with spaces
+threshold=0.30
+granularity=functions
+language=c
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=yes
+include=
+exclude=
+
+Thu 18 Jan 2024 13:03:33 EST
+
+Extracting functions from c files in nicadclones/dir with spaces/dir with spaces
+
+real	0m0.023s
+user	0m0.008s
+sys	0m0.015s
+
+Extracted        2 functions
+
+Applying blind renaming to extracted functions from c files in nicadclones/dir with spaces/dir with spaces
+
+real	0m0.013s
+user	0m0.004s
+sys	0m0.007s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.010s
+user	0m0.002s
+sys	0m0.006s
+
+Found 1 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.010s
+user	0m0.002s
+sys	0m0.006s
+
+Clustered clone pairs into 1 classes
+
+Getting original sources for clones
+
+real	0m0.005s
+user	0m0.001s
+sys	0m0.003s
+
+Making HTML reports
+
+real	0m0.005s
+user	0m0.001s
+sys	0m0.003s
+
+Done.
+
+Detailed log in nicadclones/dir with spaces/dir with spaces_functions-clones-2024-01-18-13:03:33.log
+Results in nicadclones/dir with spaces/dir with spaces_functions-blind-clones/
+Report in nicadclones/dir with spaces/dir with spaces_functions-blind-clones/*_functions*-clones-0.30-*.html
+
+Thu 18 Jan 2024 13:03:33 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/default.cfg
+system=tests/regression/systems/robust/c/hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname
+threshold=0.30
+granularity=blocks
+language=c
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=yes
+include=
+exclude=
+
+Thu 18 Jan 2024 13:03:33 EST
+
+Extracting blocks from c files in nicadclones/hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname/hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname
+
+real	0m0.023s
+user	0m0.008s
+sys	0m0.015s
+
+Extracted        1 blocks
+
+Applying blind renaming to extracted blocks from c files in nicadclones/hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname/hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname
+
+real	0m0.013s
+user	0m0.004s
+sys	0m0.007s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.010s
+user	0m0.003s
+sys	0m0.006s
+
+Found 0 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.010s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 0 classes
+
+Getting original sources for clones
+
+real	0m0.005s
+user	0m0.001s
+sys	0m0.003s
+
+Making HTML reports
+
+real	0m0.005s
+user	0m0.001s
+sys	0m0.003s
+
+Done.
+
+Detailed log in nicadclones/hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname/hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_blocks-clones-2024-01-18-13:03:33.log
+Results in nicadclones/hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname/hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_blocks-blind-clones/
+Report in nicadclones/hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname/hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_blocks-blind-clones/hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_blocks-blind-clones-0.30-classes-withsource.html
+
+Thu 18 Jan 2024 13:03:33 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-blind.cfg
+system=tests/regression/systems/robust/c
+threshold=0.30
+granularity=functions
+language=c
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:03:33 EST
+
+Extracting functions from c files in nicadclones/c/c
+
+real	0m0.041s
+user	0m0.014s
+sys	0m0.025s
+
+Extracted        4 functions
+
+Applying blind renaming to extracted functions from c files in nicadclones/c/c
+
+real	0m0.013s
+user	0m0.004s
+sys	0m0.007s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.010s
+user	0m0.002s
+sys	0m0.006s
+
+Found 6 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 1 classes
+
+Done.
+
+Detailed log in nicadclones/c/c_functions-clones-2024-01-18-13:03:33.log
+Results in nicadclones/c/c_functions-blind-clones/
+
+Thu 18 Jan 2024 13:03:33 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-blind.cfg
+system=tests/regression/systems/robust/c
+threshold=0.30
+granularity=blocks
+language=c
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:03:33 EST
+
+Extracting blocks from c files in nicadclones/c/c
+
+real	0m0.040s
+user	0m0.014s
+sys	0m0.025s
+
+Extracted        4 blocks
+
+Applying blind renaming to extracted blocks from c files in nicadclones/c/c
+
+real	0m0.013s
+user	0m0.004s
+sys	0m0.007s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.010s
+user	0m0.002s
+sys	0m0.006s
+
+Found 6 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 1 classes
+
+Done.
+
+Detailed log in nicadclones/c/c_blocks-clones-2024-01-18-13:03:33.log
+Results in nicadclones/c/c_blocks-blind-clones/
+
+Thu 18 Jan 2024 13:03:33 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-consistent.cfg
+system=tests/regression/systems/robust/c
+threshold=0.30
+granularity=functions
+language=c
+transform=none
+rename=consistent
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:03:33 EST
+
+Using previously extracted functions from c files in nicadclones/c/c
+
+Extracted        4 functions
+
+Applying consistent renaming to extracted functions from c files in nicadclones/c/c
+
+real	0m0.014s
+user	0m0.005s
+sys	0m0.007s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.010s
+user	0m0.002s
+sys	0m0.006s
+
+Found 6 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.010s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 1 classes
+
+Done.
+
+Detailed log in nicadclones/c/c_functions-clones-2024-01-18-13:03:33.log
+Results in nicadclones/c/c_functions-consistent-clones/
+
+Thu 18 Jan 2024 13:03:33 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/rename-consistent.cfg
+system=tests/regression/systems/robust/c
+threshold=0.30
+granularity=blocks
+language=c
+transform=none
+rename=consistent
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:03:33 EST
+
+Using previously extracted blocks from c files in nicadclones/c/c
+
+Extracted        4 blocks
+
+Applying consistent renaming to extracted blocks from c files in nicadclones/c/c
+
+real	0m0.014s
+user	0m0.005s
+sys	0m0.007s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.010s
+user	0m0.002s
+sys	0m0.006s
+
+Found 6 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.010s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 1 classes
+
+Done.
+
+Detailed log in nicadclones/c/c_blocks-clones-2024-01-18-13:03:33.log
+Results in nicadclones/c/c_blocks-consistent-clones/
+
+Thu 18 Jan 2024 13:03:34 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/filter-declarations.cfg
+system=tests/regression/systems/robust/c
+threshold=0.30
+granularity=functions
+language=c
+transform=none
+rename=none
+filter=declaration
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:03:34 EST
+
+Using previously extracted functions from c files in nicadclones/c/c
+
+Extracted        4 functions
+
+Applying filtering of declaration to extracted functions from c files in nicadclones/c/c
+
+real	0m0.014s
+user	0m0.005s
+sys	0m0.007s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.010s
+user	0m0.002s
+sys	0m0.006s
+
+Found 6 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.010s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 1 classes
+
+Done.
+
+Detailed log in nicadclones/c/c_functions-clones-2024-01-18-13:03:34.log
+Results in nicadclones/c/c_functions-filter-clones/
+
+Thu 18 Jan 2024 13:03:34 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/filter-declarations.cfg
+system=tests/regression/systems/robust/c
+threshold=0.30
+granularity=blocks
+language=c
+transform=none
+rename=none
+filter=declaration
+abstract=none
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:03:34 EST
+
+Using previously extracted blocks from c files in nicadclones/c/c
+
+Extracted        4 blocks
+
+Applying filtering of declaration to extracted blocks from c files in nicadclones/c/c
+
+real	0m0.014s
+user	0m0.004s
+sys	0m0.007s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.009s
+user	0m0.002s
+sys	0m0.006s
+
+Found 6 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.010s
+user	0m0.003s
+sys	0m0.006s
+
+Clustered clone pairs into 1 classes
+
+Done.
+
+Detailed log in nicadclones/c/c_blocks-clones-2024-01-18-13:03:34.log
+Results in nicadclones/c/c_blocks-filter-clones/
+
+Thu 18 Jan 2024 13:03:34 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/abstract-expressions.cfg
+system=tests/regression/systems/robust/c
+threshold=0.10
+granularity=functions
+language=c
+transform=none
+rename=none
+filter=none
+abstract=expression
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:03:34 EST
+
+Using previously extracted functions from c files in nicadclones/c/c
+
+Extracted        4 functions
+
+Applying abstraction of expression to extracted functions from c files in nicadclones/c/c
+
+real	0m0.013s
+user	0m0.004s
+sys	0m0.007s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.10
+
+real	0m0.009s
+user	0m0.002s
+sys	0m0.006s
+
+Found 6 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 1 classes
+
+Done.
+
+Detailed log in nicadclones/c/c_functions-clones-2024-01-18-13:03:34.log
+Results in nicadclones/c/c_functions-abstract-clones/
+
+Thu 18 Jan 2024 13:03:34 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/abstract-expressions.cfg
+system=tests/regression/systems/robust/c
+threshold=0.10
+granularity=blocks
+language=c
+transform=none
+rename=none
+filter=none
+abstract=expression
+normalize=none
+cluster=yes
+report=no
+include=
+exclude=
+
+Thu 18 Jan 2024 13:03:34 EST
+
+Using previously extracted blocks from c files in nicadclones/c/c
+
+Extracted        4 blocks
+
+Applying abstraction of expression to extracted blocks from c files in nicadclones/c/c
+
+real	0m0.013s
+user	0m0.004s
+sys	0m0.007s
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.10
+
+real	0m0.010s
+user	0m0.002s
+sys	0m0.006s
+
+Found 6 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.010s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 1 classes
+
+Done.
+
+Detailed log in nicadclones/c/c_blocks-clones-2024-01-18-13:03:34.log
+Results in nicadclones/c/c_blocks-abstract-clones/
+
+Thu 18 Jan 2024 13:03:34 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/default-report.cfg
+system=tests/regression/systems/robust/c/dir with spaces
+threshold=0.30
+granularity=functions
+language=c
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=yes
+include=
+exclude=
+
+Thu 18 Jan 2024 13:03:34 EST
+
+Using previously extracted functions from c files in nicadclones/dir with spaces/dir with spaces
+
+Extracted        2 functions
+
+Using previously blind renamed extracted functions from c files in nicadclones/dir with spaces/dir with spaces
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.010s
+user	0m0.002s
+sys	0m0.006s
+
+Found 1 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 1 classes
+
+Getting original sources for clones
+
+real	0m0.005s
+user	0m0.001s
+sys	0m0.003s
+
+Making HTML reports
+
+real	0m0.005s
+user	0m0.001s
+sys	0m0.003s
+
+Done.
+
+Detailed log in nicadclones/dir with spaces/dir with spaces_functions-clones-2024-01-18-13:03:34.log
+Results in nicadclones/dir with spaces/dir with spaces_functions-blind-clones/
+Report in nicadclones/dir with spaces/dir with spaces_functions-blind-clones/*_functions*-clones-0.30-*.html
+
+Thu 18 Jan 2024 13:03:34 EST
+
+
+NiCad Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/default-report.cfg
+system=tests/regression/systems/robust/c/hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname
+threshold=0.30
+granularity=blocks
+language=c
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=yes
+include=
+exclude=
+
+Thu 18 Jan 2024 13:03:34 EST
+
+Using previously extracted blocks from c files in nicadclones/hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname/hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname
+
+Extracted        1 blocks
+
+Using previously blind renamed extracted blocks from c files in nicadclones/hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname/hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname
+
+Finding clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.010s
+user	0m0.002s
+sys	0m0.006s
+
+Found 0 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.010s
+user	0m0.003s
+sys	0m0.006s
+
+Clustered clone pairs into 0 classes
+
+Getting original sources for clones
+
+real	0m0.005s
+user	0m0.001s
+sys	0m0.003s
+
+Making HTML reports
+
+real	0m0.005s
+user	0m0.001s
+sys	0m0.003s
+
+Done.
+
+Detailed log in nicadclones/hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname/hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_blocks-clones-2024-01-18-13:03:34.log
+Results in nicadclones/hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname/hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_blocks-blind-clones/
+Report in nicadclones/hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname/hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_blocks-blind-clones/hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_blocks-blind-clones-0.30-classes-withsource.html
+
+Thu 18 Jan 2024 13:03:34 EST
+
+
+NiCad Cross-Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/default-report.cfg
+system1=tests/regression/systems/robust/c/dir with spaces
+system2=tests/regression/systems/robust/c/hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname
+threshold=0.30
+granularity=functions
+language=c
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=yes
+include=
+exclude=
+
+Thu 18 Jan 2024 13:03:34 EST
+
+Using previously extracted functions from c files in nicadclones/dir with spaces/dir with spaces
+
+Extracted        2 functions
+
+Thu 18 Jan 2024 13:03:34 EST
+
+Extracting functions from c files in nicadclones/dir with spaces/hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname
+
+real	0m0.024s
+user	0m0.009s
+sys	0m0.016s
+
+Extracted        2 functions
+
+Using previously blind renamed extracted functions from c files in nicadclones/dir with spaces/dir with spaces
+
+Applying blind renaming to extracted functions from c files in nicadclones/dir with spaces/hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname
+
+real	0m0.013s
+user	0m0.004s
+sys	0m0.007s
+
+Finding cross-clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.010s
+user	0m0.002s
+sys	0m0.006s
+
+Found 4 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 1 classes
+
+Getting original sources for clones
+
+real	0m0.005s
+user	0m0.001s
+sys	0m0.003s
+
+Making HTML reports
+
+real	0m0.005s
+user	0m0.001s
+sys	0m0.003s
+
+Done.
+
+Detailed log in nicadclones/dir with spaces/dir with spaces_functions-crossclones-2024-01-18-13:03:34.log
+Results in nicadclones/dir with spaces/dir with spaces_functions-blind-crossclones/
+Report in nicadclones/dir with spaces/dir with spaces_functions-blind-crossclones/*_functions*-crossclones-0.30-*.html
+
+Thu 18 Jan 2024 13:03:34 EST
+
+
+NiCad Cross-Clone Detector v7.0 (11.1.24)
+
+config=./lib/nicad/config/default-report.cfg
+system1=tests/regression/systems/robust/c/dir with spaces
+system2=tests/regression/systems/robust/c/hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname
+threshold=0.30
+granularity=blocks
+language=c
+transform=none
+rename=blind
+filter=none
+abstract=none
+normalize=none
+cluster=yes
+report=yes
+include=
+exclude=
+
+Thu 18 Jan 2024 13:03:34 EST
+
+Extracting blocks from c files in nicadclones/dir with spaces/dir with spaces
+
+real	0m0.023s
+user	0m0.008s
+sys	0m0.016s
+
+Extracted        2 blocks
+
+Thu 18 Jan 2024 13:03:34 EST
+
+Extracting blocks from c files in nicadclones/dir with spaces/hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname
+
+real	0m0.024s
+user	0m0.009s
+sys	0m0.015s
+
+Extracted        2 blocks
+
+Applying blind renaming to extracted blocks from c files in nicadclones/dir with spaces/dir with spaces
+
+real	0m0.013s
+user	0m0.004s
+sys	0m0.007s
+
+Applying blind renaming to extracted blocks from c files in nicadclones/dir with spaces/hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname_hugelnghumungousdirectoryname
+
+real	0m0.013s
+user	0m0.004s
+sys	0m0.007s
+
+Finding cross-clones between 10 and 2500 lines at UPI threshold 0.30
+
+real	0m0.010s
+user	0m0.002s
+sys	0m0.006s
+
+Found 4 clone pairs
+
+Clustering clone pairs into classes
+
+real	0m0.011s
+user	0m0.003s
+sys	0m0.007s
+
+Clustered clone pairs into 1 classes
+
+Getting original sources for clones
+
+real	0m0.005s
+user	0m0.001s
+sys	0m0.003s
+
+Making HTML reports
+
+real	0m0.005s
+user	0m0.001s
+sys	0m0.003s
+
+Done.
+
+Detailed log in nicadclones/dir with spaces/dir with spaces_blocks-crossclones-2024-01-18-13:03:34.log
+Results in nicadclones/dir with spaces/dir with spaces_blocks-blind-crossclones/
+Report in nicadclones/dir with spaces/dir with spaces_blocks-blind-crossclones/*_blocks*-crossclones-0.30-*.html
+
+Thu 18 Jan 2024 13:03:34 EST
+
+=====
+
+
+===== END =====

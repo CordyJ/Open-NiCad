@@ -1,0 +1,815 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://Grass_Raster_StreamExtraction.grass.ws.laits.gmu.edu" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://Grass_Raster_StreamExtraction.grass.ws.laits.gmu.edu" xmlns:intf="http://Grass_Raster_StreamExtraction.grass.ws.laits.gmu.edu" xmlns:tns1="http://grass.ws.laits.gmu.edu" xmlns:tns2="http://ws.laits.gmu.edu" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+	 <wsdl:types>
+
+		  <schema elementFormDefault="qualified" targetNamespace="http://Grass_Raster_StreamExtraction.grass.ws.laits.gmu.edu" xmlns="http://www.w3.org/2001/XMLSchema">
+
+			<!-- ELEMENTS -->
+
+			   <element name="CurvatureBasedMethodElement">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Name of the element to describe input parameters.
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element minOccurs="1" name="sourceURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of input elevation file. Default data format is GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element minOccurs="1" name="tcurv_threshold" type="xsd:float">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Threshold tangential curvature.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element minOccurs="1" name="flowaccum_threshold" type="xsd:int">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Threshold flow accumulation.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element default="GeoTIFF" minOccurs="1" name="outputFormatType" type="impl:FormatType">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Format of output file.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element default="Byte" minOccurs="0" name="outputGeoTiffType" nillable="true" type="tns1:GeoTiffFileType">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Type of output file if outputFormatType is specified as GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+			   <element name="CurvatureBasedMethodResponse">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Always return URL and Format of output file.
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element name="returnURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of output file to contain stream segments.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element name="returnFormat" type="xsd:string">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Format of output file.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+			   <element name="fault" type="tns2:WebServiceExceptionsType"/>
+
+			   <element name="FlowDirectionBasedMethodElement">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Name of the element to describe input parameters.
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element minOccurs="1" name="sourceURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of input elevation file. Default data format is GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element minOccurs="1" name="flowaccum_threshold" type="xsd:int">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Threshold flow accumulation.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element default="GeoTIFF" minOccurs="1" name="outputFormatType" type="impl:FormatType">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Format of output file.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element default="Byte" minOccurs="0" name="outputGeoTiffType" nillable="true" type="tns1:GeoTiffFileType">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Type of output file if outputFormatType is specified as GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+			   <element name="FlowDirectionBasedMethodResponse">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Always return URL and Format of output file.
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element name="returnURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of output file to contain stream segments.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element name="returnFormat" type="xsd:string">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Format of output file.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+			   <element name="SimplifiedCurvatureMethodElement">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Name of the element to describe input parameters.
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element minOccurs="1" name="sourceURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of input elevation file. Default data format is GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element minOccurs="1" name="tcurv_threshold" type="xsd:float">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Threshold tangential curvature.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element minOccurs="1" name="flowaccum_threshold" type="xsd:int">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Threshold flow accumulation.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element default="GeoTIFF" minOccurs="1" name="outputFormatType" type="impl:FormatType">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Format of output file.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element default="Byte" minOccurs="0" name="outputGeoTiffType" nillable="true" type="tns1:GeoTiffFileType">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Type of output file if outputFormatType is specified as GeoTIFF.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+			   <element name="SimplifiedCurvatureMethodResponse">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Always return URL and Format of output file.
+                         </documentation>
+
+				    </annotation>
+
+				    <complexType>
+
+					     <sequence>
+
+						      <element name="returnURL" type="xsd:anyURI">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        URL of output file to contain stream segments.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+						      <element name="returnFormat" type="xsd:string">
+
+							       <annotation>
+
+								        <documentation xml:lang="en">
+
+                        Format of output file.
+                                        </documentation>
+
+							       </annotation>
+
+						      </element>
+
+					     </sequence>
+
+				    </complexType>
+
+			   </element>
+
+			   <simpleType name="FormatType">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Format of output file.
+                         </documentation>
+
+				    </annotation>
+
+				    <restriction base="string">
+
+					     <enumeration value="GeoTIFF">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Format of output file will be GeoTIFF. GeoTIFF is a metadata format, which provides geographic information to associate with the image data.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="TIFF">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Format of output file will be TIFF. TIFF (Tagged Image File Format) is a flexible image format that normally saves 8 or 16 bits per color – red, green and blue – for a total of 24 or 48 bits. The TIFF file structure allows both the metadata and the image data to be encoded into the same file.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="ESRI_Shapefile">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Format of output file will be ESRI_Shapefile. A shapefile stores nontopological geometry and attribute information for the spatial features in a data set. The geometry for a feature is stored as a shape comprising a set of vector coordinates. 
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+				    </restriction>
+
+			   </simpleType>
+
+		  </schema>
+
+		  <schema elementFormDefault="qualified" targetNamespace="http://grass.ws.laits.gmu.edu" xmlns="http://www.w3.org/2001/XMLSchema">
+
+			   <simpleType name="GeoTiffFileType">
+
+				    <annotation>
+
+					     <documentation xml:lang="en">
+
+            Type of output file if the outputFormatType is specified as GeoTIFF.
+                         </documentation>
+
+				    </annotation>
+
+				    <restriction base="string">
+
+					     <enumeration value="Byte">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be Byte - 8-bit unsigned integer.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="Int16">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be Int16 - 16-bit signed integer.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="UInt16">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be UInt16 - 16-bit unsigned integer.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="UInt32">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be UInt32 - 32-bit unsigned integer.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="Int32">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be Int32 - 32-bit signed integer.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="Float32">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be Float32 - 32-bit floating point.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="Float64">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be Float64 - 64-bit floating point.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="CInt16">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be CInt16 - Complex 16-bit signed integer (ie. two Int16's one representing the real component, and one the imaginary component).
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="CInt32">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be CInt32 - Complex 32-bit signed integer.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="CFloat32">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be CFloat32 - Complex 32-bit floating point.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+					     <enumeration value="CFloat64">
+
+						      <annotation>
+
+							       <documentation xml:lang="en">
+
+                    Type of output GeoTIFF file will be CFloat64 - Complex 64-bit floating point.
+                                   </documentation>
+
+						      </annotation>
+
+					     </enumeration>
+
+				    </restriction>
+
+			   </simpleType>
+
+		  </schema>
+
+		  <schema elementFormDefault="qualified" targetNamespace="http://ws.laits.gmu.edu" xmlns="http://www.w3.org/2001/XMLSchema">
+
+			   <complexType name="WebServiceExceptionsType">
+
+				    <sequence>
+
+					     <element name="exception" type="xsd:string"/>
+
+				    </sequence>
+
+			   </complexType>
+
+		  </schema>
+
+	 </wsdl:types>
+
+	 <wsdl:message name="curvatureBasedMethodRequest">
+
+		  <wsdl:part element="impl:CurvatureBasedMethodElement" name="parameters"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="curvatureBasedMethodResponse">
+
+		  <wsdl:part element="impl:CurvatureBasedMethodResponse" name="return"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="flowDirectionBasedMethodRequest">
+
+		  <wsdl:part element="impl:FlowDirectionBasedMethodElement" name="parameters"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="flowDirectionBasedMethodResponse">
+
+		  <wsdl:part element="impl:FlowDirectionBasedMethodResponse" name="return"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="simplifiedCurvatureMethodRequest">
+
+		  <wsdl:part element="impl:SimplifiedCurvatureMethodElement" name="parameters"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="simplifiedCurvatureMethodResponse">
+
+		  <wsdl:part element="impl:SimplifiedCurvatureMethodResponse" name="return"/>
+
+	 </wsdl:message>
+
+	 <wsdl:message name="WebServiceExceptionsType">
+
+		  <wsdl:part element="impl:fault" name="fault"/>
+
+	 </wsdl:message>
+
+	 <wsdl:portType name="Grass_Raster_StreamExtractionPortType">
+
+		  <wsdl:operation name="curvatureBasedMethod">
+
+			   <wsdl:input message="impl:curvatureBasedMethodRequest" name="curvatureBasedMethodRequest"/>
+
+			   <wsdl:output message="impl:curvatureBasedMethodResponse" name="curvatureBasedMethodResponse"/>
+
+			   <wsdl:fault message="impl:WebServiceExceptionsType" name="WebServiceExceptionsType"/>
+
+		  </wsdl:operation>
+
+		  <wsdl:operation name="flowDirectionBasedMethod">
+
+			   <wsdl:input message="impl:flowDirectionBasedMethodRequest" name="flowDirectionBasedMethodRequest"/>
+
+			   <wsdl:output message="impl:flowDirectionBasedMethodResponse" name="flowDirectionBasedMethodResponse"/>
+
+			   <wsdl:fault message="impl:WebServiceExceptionsType" name="WebServiceExceptionsType"/>
+
+		  </wsdl:operation>
+
+		  <wsdl:operation name="simplifiedCurvatureMethod">
+
+			   <wsdl:input message="impl:simplifiedCurvatureMethodRequest" name="simplifiedCurvatureMethodRequest"/>
+
+			   <wsdl:output message="impl:simplifiedCurvatureMethodResponse" name="simplifiedCurvatureMethodResponse"/>
+
+			   <wsdl:fault message="impl:WebServiceExceptionsType" name="WebServiceExceptionsType"/>
+
+		  </wsdl:operation>
+
+	 </wsdl:portType>
+
+	 <wsdl:binding name="Grass_Raster_StreamExtractionSoapBinding" type="impl:Grass_Raster_StreamExtractionPortType">
+
+		  <wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+		  <wsdl:operation name="curvatureBasedMethod">
+
+			   <wsdl:documentation>
+Derive stream network from DEM based on topographic curvature. Use morphology based algorithm to compute curvature and flow accumulation, then threshold them to derive stream network. The processing could be slow and lengthy.   </wsdl:documentation>
+
+			   <wsdlsoap:operation/>
+
+			   <wsdl:input>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:input>
+
+			   <wsdl:output>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:output>
+
+			   <wsdl:fault name="WebServiceExceptionsType">
+
+				    <wsdlsoap:fault name="WebServiceExceptionsType" use="literal"/>
+
+			   </wsdl:fault>
+
+		  </wsdl:operation>
+
+		  <wsdl:operation name="flowDirectionBasedMethod">
+
+			   <wsdl:documentation>
+Derive stream network from DEM based on flow direction. Use r.watershed hydrological module in GRASS GIS software to compute flow accumulation, select a treshold to extract stream network from the accumulation.   </wsdl:documentation>
+
+			   <wsdlsoap:operation/>
+
+			   <wsdl:input>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:input>
+
+			   <wsdl:output>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:output>
+
+			   <wsdl:fault name="WebServiceExceptionsType">
+
+				    <wsdlsoap:fault name="WebServiceExceptionsType" use="literal"/>
+
+			   </wsdl:fault>
+
+		  </wsdl:operation>
+
+		  <wsdl:operation name="simplifiedCurvatureMethod">
+
+			   <wsdl:documentation>
+Derive stream network from DEM based on topographic curvature. To improve the speed of calculation, curvature is approximately derived by convoluting DEM with a 9×9 Laplacian filter.   </wsdl:documentation>
+
+			   <wsdlsoap:operation/>
+
+			   <wsdl:input>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:input>
+
+			   <wsdl:output>
+
+				    <wsdlsoap:body use="literal"/>
+
+			   </wsdl:output>
+
+			   <wsdl:fault name="WebServiceExceptionsType">
+
+				    <wsdlsoap:fault name="WebServiceExceptionsType" use="literal"/>
+
+			   </wsdl:fault>
+
+		  </wsdl:operation>
+
+	 </wsdl:binding>
+
+	 <wsdl:service name="Grass_Raster_StreamExtractionService">
+
+		  <wsdl:documentation>
+Extract stream network from digital elevation model (DEM). This service provides two methods for deriving stream network.  </wsdl:documentation>
+
+		  <wsdl:port binding="impl:Grass_Raster_StreamExtractionSoapBinding" name="Grass_Raster_StreamExtraction">
+
+			   <wsdlsoap:address location="http://65.123.203.154:8099/axis/services/Grass_Raster_StreamExtraction"/>
+
+		  </wsdl:port>
+
+	 </wsdl:service>
+
+	<!--WSDL created by Apache Axis version: 1.4
+Built on Apr 22, 2006 (06:55:48 PDT)-->
+
+</wsdl:definitions>

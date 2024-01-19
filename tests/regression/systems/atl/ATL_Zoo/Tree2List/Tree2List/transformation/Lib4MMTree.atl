@@ -1,0 +1,38 @@
+-- @name Lib for MMTree
+-- @version 1.0
+-- @domains 
+-- @authors Cyril Faure
+-- @date 01/06/2007
+-- @description this lib contains helpers usefull for MMTree
+-- @path MMTree=/Tree2List/metamodels/MMTree.ecore
+
+library Lib4MMTree;
+
+-- This helper returns true if the current tree element is the tree root
+helper context MMTree!Node def : isTreeNodeRoot() : Boolean =
+	self.refImmediateComposite().oclIsUndefined();
+	-- refImmediateComposite() is a reflective operation that returns the immediate composite (e.g. the immediate container) of self
+	-- So if there is no immediate composite then the current node is the root (we suppose in our example that there is only one root).
+
+-- We retrieve all the tree elements via a DFS starting from a given node 
+helper context MMTree!Node def : getAllChildren () : OrderedSet(MMTree!TreeElement) =
+	self.children->iterate( child ; elements : OrderedSet(MMTree!TreeElement) = 
+		OrderedSet{} | 
+		if child.oclIsTypeOf(MMTree!Node) then
+			elements.union(child.getAllChildren()) -- NODE : recursive call
+		else
+			elements.append(child) -- LEAF
+		endif
+		)
+	;
+
+-- This function sorts the leaves retrieved via the DFS 
+-- according to their size and to their position in the tree
+helper context MMTree!Node def : getLeavesInOrder() : OrderedSet (MMTree!Leaf) =
+	let leavesList : OrderedSet (MMTree!Leaf) = 
+		self.getAllChildren ()->select(currChild | currChild.oclIsTypeOf(MMTree!Leaf))
+	in 
+		leavesList->select(leaf | leaf.size = #big)
+		->union(leavesList->select(leaf | leaf.size = #medium))
+		->union(leavesList->select(leaf | leaf.size = #small))
+	;

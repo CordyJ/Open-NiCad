@@ -1,0 +1,750 @@
+--@atlcompiler	atl2006
+--@name			FLAME4UML2
+--@version		1.1
+--@domains		UML2, FLAME, metrics
+--@authors		Eric Vepa (evepa <at> sodius.com) for SODIUS (www.sodius.com)
+--@date			2007/08/02
+--@description	This library implements a subset of FLAME (Formal Library for Aiding Metrics Extraction) functions applied on UML2 models (from Eclipse UML2 Project). These functions navigate through the UML2 metamodel and are used by other metrics libraries.
+--@see			Baroni, A.L.: Formal Definition of Object-Oriented Design Metrics. Master Thesis, Vrije University, Brussel, Belgium, 2002.
+
+library UML22Measure; -- Library Template
+
+--@begin attribute helper coupledClasses
+--@comments Set of Classs to which the current Class is coupled (excluding inheritance).
+helper context UML2!Class
+def : coupledClasses : Set(UML2!Class) =
+    self.allAttributesTypes->union(self.allParametersTypes);
+--@end attribute helper coupledClasses
+
+--@begin attribute helper newFeatures
+--@comments Sequence of Features declared in the current Class. This definition excludes inherited Features (and consequently, it excludes overridden Features).
+helper context UML2!Class
+def : newFeatures : Sequence(UML2!Feature) =
+    self.newAttributes->union(self.newOperations);
+--@end attribute helper newFeatures
+
+--@begin attribute helper definedFeatures
+--@comments Sequence of Features declared in the Class, including overridden Features.
+helper context UML2!Class
+def : definedFeatures : Sequence(UML2!Feature) =
+    self.definedAttributes->union(self.definedOperations);
+--@end attribute helper definedFeatures
+
+--@begin attribute helper directlyInheritedFeatures
+--@comments Sequence of directly inherited Features.
+helper context UML2!Class
+def : directlyInheritedFeatures : Sequence(UML2!Feature) =
+    self.directlyInheritedAttributes->
+        union(self.directlyInheritedOperations);
+--@end attribute helper directlyInheritedFeatures
+
+--@begin attribute helper allInheritedFeatures
+--@comments Sequence containing all Features of the Class itself and all its inherited Features (both directly and indirectly).
+helper context UML2!Class
+def : allInheritedFeatures : Sequence(UML2!Feature) =
+    self.allInheritedAttributes->union(self.allInheritedOperations);
+--@end attribute helper allInheritedFeatures
+
+--@begin attribute helper overriddenFeatures
+--@comments Sequence of redefined Features in the Class.
+helper context UML2!Class
+def : overriddenFeatures : Sequence(UML2!Feature) =
+    self.overriddenAttributes->union(self.overriddenOperations);
+--@end attribute helper overriddenFeatures
+
+--@begin attribute helper allFeatures
+--@comments Sequence containing all Features of the Class itself and all its inherited Features.
+helper context UML2!Class
+def : allFeatures : Sequence(UML2!Feature) =
+    self.allAttributes->union(self.allOperations);
+--@end attribute helper allFeatures
+
+--@begin attribute helper newAttributes
+--@comments Sequence of Attributes declared in the current Class.
+helper context UML2!Class
+def : newAttributes : Sequence(UML2!Property) =
+    self.definedAttributes->
+        select(da|self.allInheritedAttributes->
+            collect(ia|ia.name)->excludes(da.name));
+--@end attribute helper newAttributes
+
+--@begin attribute helper definedAttributes
+--@comments Sequence of Properties declared in the Class, including overridden Properties.
+helper context UML2!Class
+def : definedAttributes : Sequence(UML2!Property) =
+    self.ownedAttribute;
+
+helper context UML2!Package
+def : definedAttributes : Sequence(UML2!Property) =
+    self.allClasses->collect(c|c.definedAttributes)->flatten();
+--@end attribute helper definedAttributes
+
+--@begin attribute helper directlyInheritedAttributes
+--@comments Sequence of directly inherited Properties.
+helper context UML2!Class
+def : directlyInheritedAttributes : Sequence(UML2!Property) =
+    self.parents->iterate(p; acc : Sequence(UML2!Property) = Sequence{}|
+        acc->union(p.newAttributes));
+--@end attribute helper directlyInheritedAttributes
+
+--@begin attribute helper allInheritedAttributes
+--@comments Sequence of all inherited Properties (both directly and indirectly).
+helper context UML2!Class
+def : allInheritedAttributes : Sequence(UML2!Property) =
+    self.directlyInheritedAttributes->
+        union(self.parents->collect(p|p.allInheritedAttributes)->flatten());
+--@end attribute helper allInheritedAttributes
+
+--@begin attribute helper overriddenAttributes
+--@comments Sequence of redefined Properties in the Class.
+helper context UML2!Class
+def : overriddenAttributes : Sequence(UML2!Property) =
+    self.definedAttributes->
+        select(da|self.allInheritedAttributes->
+            collect(ia|ia.name)->includes(da.name));
+--@end attribute helper overriddenAttributes
+
+--@begin attribute helper allAttributes
+--@comments Sequence containing all Properties of the Class itself and all its inherited Properties (both directly and indirectly).
+helper context UML2!Class
+def : allAttributes : Sequence(UML2!Property) =
+    self.definedAttributes->union(self.allInheritedAttributes->
+        reject(ia|self.overriddenAttributes->
+            collect(oa|oa.name)->includes(ia.name)));
+
+helper context UML2!Package
+def : allAttributes : Sequence(UML2!Property) =
+    self.allClasses->collect(c|c.allAttributes)->flatten();
+--@end attribute helper allAttributes
+
+--@begin attribute helper allAttributesTypes
+--@comments Set containing all Types of all Attribtues of the Class.
+helper context UML2!Class
+def : allAttributesTypes : Set(UML2!Class) =
+    self.allAttributes->collect(a|a.type)->flatten()->
+        select(t|t.oclIsTypeOf(UML2!Class))->asSet();
+--@end attribute helper allAttributesTypes
+
+--@begin attribute helper newOperations
+--@comments Sequence of Operations declared in the current Class.
+helper context UML2!Class
+def : newOperations : Sequence(UML2!Operation) =
+    self.definedOperations->
+        select(dop|self.allInheritedOperations->
+            collect(iop|iop.name)->excludes(dop.name));
+--@end attribute helper newOperations
+
+--@begin attribute helper definedOperations
+--@comments Sequence of Operations declared in the Class, including overridden Operations.
+helper context UML2!Class
+def : definedOperations : Sequence(UML2!Operation) =
+    self.ownedOperation;
+
+helper context UML2!Package
+def : definedOperations : Sequence(UML2!Operation) =
+    self.allClasses->collect(c|c.definedOperations)->flatten();
+--@end attribute helper definedOperations
+
+--@begin attribute helper directlyInheritedOperations
+--@comments Sequence of directly inherited Operations.
+helper context UML2!Class
+def : directlyInheritedOperations : Sequence(UML2!Operation) =
+    self.parents->iterate(p; acc : Sequence(UML2!Operation) = Sequence{}|
+        acc->union(p.newOperations));
+--@end attribute helper directlyInheritedOperations
+
+--@begin attribute helper allInheritedOperations
+--@comments Sequence containing all Operations of the Class itself and all its inherited Operations (both directly and indirectly).
+helper context UML2!Class
+def : allInheritedOperations : Sequence(UML2!Operation) =
+    self.directlyInheritedOperations->
+        union(self.parents->collect(p|p.allInheritedOperations)->flatten());
+--@end attribute helper allInheritedOperations
+
+--@begin attribute helper overriddenOperations
+--@comments Sequence of redefined Operations in the Class.
+helper context UML2!Class
+def : overriddenOperations : Sequence(UML2!Operation) =
+    self.definedOperations->
+        select(dop|self.allInheritedOperations->
+            collect(iop|iop.name)->includes(dop.name));
+--@end attribute helper overriddenOperations
+
+--@begin attribute helper allOperations
+--@comments Sequence containing all Operations of the Class itself and all its inherited Operations.
+helper context UML2!Class
+def : allOperations : Sequence(UML2!Operation) =
+    self.definedOperations->union(self.allInheritedOperations->
+            reject(iop|self.overriddenOperations->
+                collect(oop|oop.name)->includes(iop.name)));
+
+helper context UML2!Package
+def : allOperations : Sequence(UML2!Operation) =
+    self.allClasses->collect(c|c.allOperations)->flatten()->asSet();
+--@end attribute helper allOperations
+
+--@begin attribute helper allParameters
+--@comments Set containing all Parameters of all Operations of the Class.
+helper context UML2!Class
+def : allParameters : Set(UML2!Parameter) =
+    self.allOperations->collect(o|o.ownedParameter)->flatten()->
+        select(t|t.oclIsTypeOf(UML2!Class))->asSet();
+--@end attribute helper allParameters
+
+--@begin attribute helper allParametersTypes
+--@comments Set containing all Types of all Parameters of all Operations of the Class.
+helper context UML2!Class
+def : allParametersTypes : Set(UML2!Class) =
+    self.allParameters->collect(param|param.type)->flatten()->
+        select(t|t.oclIsTypeOf(UML2!Class))->asSet();
+
+helper context UML2!Operation
+def : allParametersTypes : Set(UML2!Class) =
+    self.ownedParameter->collect(param|param.type)->flatten()->
+        select(t|t.oclIsTypeOf(UML2!Class))->asSet();
+--@end attribute helper allParametersTypes
+
+--@begin attribute helper isRoot
+--@comments Indicates whether the Class has ascendants or not. A true value indicates it has no ascendants and a false value indicates it has ascendants.
+helper context UML2!Class
+def : isRoot : Boolean =
+    self.parents->isEmpty();
+--@end attribute helper isRoot
+
+--@begin attribute helper isLeaf
+--@comments Indicates whether the Class has descendants or not. A true value indicates it has no descendants and a false value indicates it has descendants.
+helper context UML2!Class
+def : isLeaf : Boolean =
+    self.children->isEmpty();
+--@end attribute helper isLeaf
+
+--@begin attribute helper children
+--@comments Set of directly derived Classs of the current Class.
+helper context UML2!Class
+def : children : Set(UML2!Class) =
+    UML2!Generalization.allInstances()->
+        select(g|g.general = self)->
+            collect(g|g.specific)->excluding(self)->asSet();
+--@end attribute helper children
+
+--@begin attribute helper descendants
+--@comments Set of all derived Classs (both directly and indirectly).
+helper context UML2!Class
+def : descendants : Set(UML2!Class) =
+    self.children->iterate(c; acc : Set(UML2!Class) = self.children|
+        acc->union(c.descendants));
+--@end attribute helper descendants
+
+--@begin attribute helper parents
+--@comments Set of Classs from which the current Class derives directly.
+helper context UML2!Class
+def : parents : Set(UML2!Class) =
+    self.generalization->collect(g|g.general)->excluding(self)->asSet();
+--@end attribute helper parents
+
+--@begin attribute helper ascendants
+--@comments Set of all classes from which the current Class derives (both directly and indirectly).
+helper context UML2!Class
+def : ascendants : Set(UML2!Class) =
+    self.parents->iterate(c; acc: Set(UML2!Class) = self.parents|
+        acc->union(c.ascendants));
+--@end attribute helper ascendants
+
+--@begin attribute helper client
+--@comments Set containing all direct clients of the NamedElement.
+helper context UML2!NamedElement
+def : client : Set(UML2!NamedElement) =
+    --@comments reference supplierDependency does not exist in this UML2 metamodel (using allInstances instead)
+    --self.supplierDependency->collect(d|d.client)->flatten()->asSet();
+    UML2!Dependency.allInstances()->
+        select(d|d.supplier->includes(self))->collect(d|d.client)->
+            flatten()->asSet();
+--@end attribute helper client
+
+--@begin attribute helper allClients
+--@comments Set containing all the NamedElements that are clients of this NamedElement, including the clients of these NamedElements. This is the transitive closure.
+helper context UML2!NamedElement
+def : allClients : Set(UML2!NamedElement) =
+    self.client->union(self.client->collect(ne|ne.allClients)->
+        flatten())->asSet();
+--@end attribute helper allClients
+
+--@begin attribute helper contents
+--@comments Sequence containing all PackageableElement contained by the Package.
+helper context UML2!Package
+def : contents : Sequence(UML2!PackageableElement) =
+    self.packagedElement;
+--@end attribute helper contents
+
+--@begin attribute helper allClasses
+--@comments Sequence of all Classes belonging to the current Package.
+helper context UML2!Package
+def : allClasses : Sequence(UML2!Class) =
+    self.contents->select(c|c.oclIsKindOf(UML2!Class));
+--@end attribute helper allClasses
+
+--@begin attribute helper internalBaseClasses
+--@comments Set of base Classes in the current Package.
+helper context UML2!Package
+def : internalBaseClasses : Set(UML2!Class) =
+    self.allClasses->iterate(c; acc : Set(UML2!Class) = Set{}|
+        acc->union(c.parents));
+--@end attribute helper internalBaseClasses
+
+--@begin attribute helper internalSupplierClasses
+--@comments Set of supplier Classes in the current Package.
+helper context UML2!Package
+def : internalSupplierClasses : Set(UML2!Class) =
+    self.supplierClasses(self);
+--@end attribute helper internalSupplierClasses
+
+--@begin attribute helper owner
+--@comments This attribute helper is not include in FLAME library.
+--@comments The package which contains this packageable element.
+helper context UML2!PackageableElement
+def : owner : UML2!Package =
+    let owners : Sequence(UML2!Package) =
+        UML2!Package.allInstances()->select(p|p.oclIsTypeOf(UML2!Package))->
+            select(p|p.contents->includes(self)) in
+    if owners->notEmpty()
+        then owners->first()
+        else OclUndefined
+    endif;
+--@end attribute helper owner
+
+--@begin helper AUN
+--@comments Attribute Use Number
+--@comments Number of NamedElement that use the Property (excludes the NamedElement where the Property is declared).
+helper context UML2!Property
+def : AUN() : Integer =
+	self.FUN();
+--@end helper AUN
+
+--@begin helper FCV
+--@comments Feature to Class Visibility
+--@comments Indicates if a Class can access the Feature.
+helper context UML2!Class
+def : FCV(f : UML2!Feature) : Boolean =
+	(f.visibility = #public) or
+		self.allFeatures->includes(f) or
+			((f.visibility = #protected) and
+				self.ascendants->exists(c|c.allFeatures->includes(f)));
+--@end helper FCV
+
+--@begin helper NAN
+--@comments New Attributes Number
+--@comments Number of new Properties belonging to the Class.
+helper context UML2!Class
+def : NAN() : Integer =
+	self.newAttributes->size();
+--@end helper NAN
+
+--@begin helper DAN
+--@comments Defined Attributes Number
+--@comments Number of defined Properties in the Class.
+helper context UML2!Class
+def : DAN() : Integer =
+	self.definedAttributes->size();
+--@end helper DAN
+
+--@begin helper IAN
+--@comments Inherited Attributes Number
+--@comments Number of inherited Properties in the Class.
+helper context UML2!Class
+def : IAN() : Integer =
+	self.allInheritedAttributes->size();
+--@end helper IAN
+
+--@begin helper OAN
+--@comments Overridden Attributes Number
+--@comments Number of overridden Properties in the Class.
+helper context UML2!Class
+def : OAN() : Integer =
+	self.overriddenAttributes->size();
+--@end helper OAN
+
+--@begin helper AAN
+--@comments Available Attributes Number
+--@comments Number of Properties in the Class.
+helper context UML2!Class
+def : AAN() : Integer =
+	self.allAttributes->size();
+--@end helper AAN
+
+--@begin helper NON
+--@comments New Operations Number
+--@comments Number of new Operations in the Class.
+helper context UML2!Class
+def : NON() : Integer =
+	self.newOperations->size();
+--@end helper NON
+
+--@begin helper DON
+--@comments Defined Operations Number
+--@comments Number of defined Operations in the Class.
+helper context UML2!Class
+def : DON() : Integer =
+	self.definedOperations->size();
+--@end helper DON
+
+--@begin helper ION
+--@comments Inherited Operations Number
+--@comments Number of inherited Operations in the Class.
+helper context UML2!Class
+def : ION() : Integer =
+	self.allInheritedOperations->size();
+--@end helper ION
+
+--@begin helper OON
+--@comments Overridden Operations Number
+--@comments Number of overridden Operations in the Class.
+helper context UML2!Class
+def : OON() : Integer =
+	self.overriddenOperations->size();
+--@end helper OON
+
+--@begin helper AON
+--@comments Available Operations Number
+--@comments Number of Operations in the Class.
+helper context UML2!Class
+def : AON() : Integer =
+	self.allOperations->size();
+--@end helper AON
+
+--@begin helper PRIAN
+--@comments PRIvate Attributes Number
+--@comments Number of private Properties in the Class.
+helper context UML2!Class
+def : PRIAN() : Integer =
+	self.allAttributes->select(a|a.visibility = #private)->size();
+--@end helper PRIAN
+
+--@begin helper PROAN
+--@comments PROtected Properties Number
+--@comments Number of protected Attributes in the Class.
+helper context UML2!Class
+def : PROAN() : Integer =
+	self.allAttributes->select(a|a.visibility = #protected)->size();
+--@end helper PROAN
+
+--@begin helper PUBAN
+--@comments PUBlic Properties Number
+--@comments Number of public Attributes in the Class.
+helper context UML2!Class
+def : PUBAN() : Integer =
+	self.allAttributes->select(a|a.visibility = #public)->size();
+--@end helper PUBAN
+
+--@begin helper PRION
+--@comments PRIvate Operations Number
+--@comments Number of private Operations in the Class.
+helper context UML2!Class
+def : PRION() : Integer =
+	self.allOperations->select(op|op.visibility = #private)->size();
+--@end helper PRION
+
+--@begin helper PROON
+--@comments PROtected Operations Number
+--@comments Number of protected Operations in the Class.
+helper context UML2!Class
+def : PROON() : Integer =
+	self.allOperations->select(op|op.visibility = #protected)->size();
+--@end helper PROON
+
+--@begin helper PUBON
+--@comments PUBlic Operations Number
+--@comments Number of public Operations in the Class.
+helper context UML2!Class
+def : PUBON() : Integer =
+	self.allOperations->select(op|op.visibility = #public)->size();
+--@end helper PUBON
+
+--@begin helper FUN
+--@comments Feature Use Number
+--@comments Number of NamedElement that use the Feature (excludes the NamedElement where the Feature is declared).
+helper context UML2!Feature
+def : FUN() : Integer =
+	self.allClients->size();
+--@end helper FUN
+
+--@begin helper CHIN
+--@comments CHIldren Number
+--@comments Number of directly derived Classs.
+helper context UML2!Class
+def : CHIN() : Integer =
+	self.children->size();
+--@end helper CHIN
+
+--@begin helper DESN
+--@comments DEScendants Number
+--@comments Number of all derived Classs (both directly and indirectly).
+helper context UML2!Class
+def : DESN() : Integer =
+	self.descendants->size();
+--@end helper DESN
+
+--@begin helper PARN
+--@comments PARents Number
+--@comments Number of Classs from which the current Class derives directly.
+helper context UML2!Class
+def : PARN() : Integer =
+	self.parents->size();
+--@end helper PARN
+
+--@begin helper ASCN
+--@comments ASCendants Number
+--@comments Number of Classs from which the current Class derives (both directly and indirectly).
+helper context UML2!Class
+def : ASCN() : Integer =
+	self.ascendants->size();
+--@end helper ASCN
+
+--@begin helper OUN
+--@comments Operation Use Number
+--@comments Number of NamedElement that use the Operation (excludes the NamedElement where the Feature is declared).
+helper context UML2!Operation
+def : OUN() : Integer =
+	self.FUN();
+--@end helper OUN
+
+--@begin helper isInternal
+--@comments Indicates if the Class received as parameter belongs to the considered Package.
+helper context UML2!Package
+def : isInternal(c : UML2!Class) : Boolean =
+	self.contents->includes(c);
+--@end helper isInternal
+
+--@begin helper baseClasses
+--@comments Set of base Classes (from the current Package) that belong to the Package "p".
+helper context UML2!Package
+def : baseClasses(p : UML2!Package) : Set(UML2!Class) =
+	self.internalBaseClasses->select(c|p.isInternal(c))->asSet();
+--@end helper baseClasses
+
+--@begin helper baseClassesInPackages
+--@comments Set of base Classes in both the current Package and the one bound to the parameter.
+helper context UML2!Package
+def : baseClassesInPackages(p : UML2!Package) : Set(UML2!Class) =
+	self.internalBaseClasses->union(p.internalBaseClasses);
+--@end helper baseClassesInPackages
+
+--@begin helper supplierClasses
+--@comments Set of supplier Classes (from the current Package) that belong to the Package "p"(excludes inheritance).
+helper context UML2!Package
+def : supplierClasses(p : UML2!Package) : Set(UML2!Class) =
+	self.allClasses->iterate(c; acc : Set(UML2!Class)= Set{}|
+		acc->union(c.coupledClasses))->select(c|p.isInternal(c))->asSet();
+--@end helper supplierClasses
+
+--@begin helper supplierClassesInPackages
+--@comments Set of supplier Classes in both the current Package and the one bound to the parameter.
+helper context UML2!Package
+def : supplierClassesInPackages(p : UML2!Package) : Set(UML2!Class) =
+	self.internalSupplierClasses->union(p.internalSupplierClasses);
+--@end helper supplierClassesInPackages
+
+--@begin helper relatedClasses
+--@comments Set of Classes from the "p" Package that are either base or supplier Classes.
+helper context UML2!Package
+def : relatedClasses(p : UML2!Package) : Set(UML2!Class) =
+	self.baseClasses(p)->union(self.supplierClasses(p));
+--@end helper relatedClasses
+
+--@begin helper CN
+--@comments Classes Number
+--@comments Number of Classes in the Package.
+helper context UML2!Package
+def : CN() : Integer =
+	self.allClasses->size();
+--@end helper CN
+
+--@begin helper PNAN
+--@comments Package New Attributes Number
+--@comments Number of new Properties in the Package.
+helper context UML2!Package
+def : PNAN() : Integer =
+	self.allClasses->iterate(c; acc : Integer = 0|acc + c.NAN);
+--@end helper PNAN
+
+--@begin helper PDAN
+--@comments Package Defined Attributes Number
+--@comments Number of defined Properties in the Package.
+helper context UML2!Package
+def : PDAN() : Integer =
+	self.allClasses->iterate(c; acc : Integer = 0|acc + c.DAN());
+--@end helper PDAN
+
+--@begin helper PIAN
+--@comments Package Inherited Attributes Number
+--@comments Number of Properties inherited in the Package.
+helper context UML2!Package
+def : PIAN() : Integer =
+	self.allClasses->iterate(c; acc : Integer = 0|acc + c.IAN());
+--@end helper PIAN
+
+--@begin helper POAN
+--@comments Package Overridden Attributes Number
+--@comments Number of overridden Properties in the Package.
+helper context UML2!Package
+def : POAN() : Integer =
+	self.allClasses->iterate(c; acc : Integer = 0|acc + c.OAN);
+--@end helper POAN
+
+--@begin helper PAAN
+--@comments Package Available Attributes Number
+--@comments Number of available Properties in the Package.
+helper context UML2!Package
+def : PAAN() : Integer =
+	self.allClasses->iterate(c; acc : Integer = 0|acc + c.AAN());
+--@end helper PAAN
+
+--@begin helper PNON
+--@comments Package New Operations Number
+--@comments Number of new Operations in the Package.
+helper context UML2!Package
+def : PNON() : Integer =
+	self.allClasses->iterate(c; acc : Integer = 0|acc + c.NON());
+--@end helper PNON
+
+--@begin helper PDON
+--@comments Package Defined Operations Number
+--@comments Number of defined Operations in the Package.
+helper context UML2!Package
+def : PDON() : Integer =
+	self.allClasses->iterate(c; acc : Integer = 0|acc + c.DON());
+--@end helper PDON
+
+--@begin helper PION
+--@comments Package Inherited Operations Number
+--@comments Number of inherited Operations in the Package.
+helper context UML2!Package
+def : PION() : Integer =
+	self.allClasses->iterate(c; acc : Integer = 0|acc + c.ION());
+--@end helper PION
+
+--@begin helper POON
+--@comments Package Overridden Operations Number
+--@comments Number of overridden Operations in the Package.
+helper context UML2!Package
+def : POON() : Integer =
+	self.allClasses->iterate(c; acc : Integer = 0|acc + c.OON());
+--@end helper POON
+
+--@begin helper PAON
+--@comments Package Available Operations Number
+--@comments Number of available Operations in the Package.
+helper context UML2!Package
+def : PAON() : Integer =
+	self.allClasses->iterate(c; acc : Integer = 0|acc + c.AON());
+--@end helper PAON
+
+--@begin helper EILN
+--@comments External Inheritance Links Number
+--@comments Number of inheritance relations where the derived Classes belong to the current Package and the base ones belong to the Package "p" given as parameter.
+helper context UML2!Package
+def : EILN(p : UML2!Package) : Integer =
+	self.allClasses->iterate(c; acc : Integer = 0|
+		acc + c.parents->select(g|p.isInternal(g))->size());
+--@end helper EILN
+
+--@begin attribute helper IILN
+--@comments Internal Inheritance Links Number
+--@comments Number of inheritance relations where the base and derived Classes belong to the current Package.
+helper context UML2!Package
+def : IILN : Integer =
+    self.allClasses->iterate(c; acc : Integer = 0|
+        acc + c.parents->select(g|self.isInternal(g))->size());
+--@end attribute helper IILN
+
+--@begin helper PILN
+--@comments Packages Inheritance Links Number
+--@comments Number of inheritance relations between the current package and the one received as parameter.
+helper context UML2!Package
+def : PILN(p : UML2!Package) : Integer =
+	self.IILN + self.EILN(p);
+--@end helper PILN
+
+--@begin helper ECLN
+--@comments External Coupling Links Number
+--@comments Number of coupling relations where the client Class belongs to the current Package and the supplier Class belongs to the Package "p" (excludes inheritance).
+helper context UML2!Package
+def : ECLN(p : UML2!Package) : Integer =
+	self.supplierClassesInPackages(p)->size();
+--@end helper ECLN
+
+--@begin helper ICLN
+--@comments Internal Coupling Links Number
+--@comments Number of distinct coupling relations where both the client and the supplier Classes belong to the current Package (excludes inheritance).
+helper context UML2!Package
+def : ICLN() : Integer =
+	self.internalSupplierClasses->size();
+--@end helper ICLN
+
+--@begin helper PCLN
+--@comments Packages Coupling Links Number
+--@comments Number of coupling relations between the current package and the one received as parameter.
+helper context UML2!Package
+def : PCLN(p : UML2!Package) : Integer =
+	self.ICLN() + self.ECLN(p);
+--@end helper PCLN
+
+--@begin helper AVN
+--@comments Attribute Visibility Number
+--@comments Number of Classes in the considered Package where the Property can be accessed.
+helper context UML2!Package
+def : AVN(a : UML2!Property) : Integer =
+	self.FVN(a);
+--@end helper AVN
+
+--@begin helper OVN
+--@comments Operation Visibility Number
+--@comments Number of Classes in the considered Package where the Operation can be accessed.
+helper context UML2!Package
+def : OVN(o : UML2!Operation) : Integer =
+	self.FVN(o);
+--@end helper OVN
+
+--@begin helper FVN
+--@comments Feature Visibility Number
+--@comments Number of Classes in the considered Package where the Feature can be accessed.
+helper context UML2!Package
+def : FVN(f : UML2!Feature) : Integer =
+	self.allClasses->iterate(c; acc : Integer = 0|
+		if c.FCV(f)
+			then acc + 1
+			else acc
+		endif);
+--@end helper FVN
+
+--@begin helper APV
+--@comments Attribute to Package Visibility
+--@comments Percentage of Classes in the considered Package where the Property can be accessed (excludes the Class where the Property is declared).
+helper context UML2!Package
+def : APV(a : UML2!Property) : Real =
+	if self.CN() > 1
+		then (self.AVN(a) - 1) / (self.CN() - 1)
+		else 0
+	endif;
+--@end helper APV
+
+--@begin helper OPV
+--@comments Operation to Package Visibility
+--@comments Percentage of Classes in the considered Package where the Operation can be accessed (excludes the class where the Operation is declared).
+helper context UML2!Package
+def : OPV(o : UML2!Operation) : Real =
+	if self.CN() > 1
+		then (self.OVN(o) - 1) / (self.CN() - 1)
+		else 0
+	endif;
+--@end helper OPV
+
+--@begin helper FPV
+--@comments Feature to Package Visibility
+--@comments Percentage of Classes in the considered Package where the Feature can be accessed (excludes the Class where the attribute is declared).
+helper context UML2!Package
+def : FPV(f : UML2!Feature) : Real =
+	if self.CN() > 1
+		then (self.FVN(f) - 1) / (self.CN() - 1)
+		else 0
+	endif;
+--@end helper FPV

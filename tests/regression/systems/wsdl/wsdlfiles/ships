@@ -1,0 +1,617 @@
+<definitions name='ShipsJaxWSService' targetNamespace='http://ships.ws.esimo/' xmlns='http://schemas.xmlsoap.org/wsdl/' xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' xmlns:tns='http://ships.ws.esimo/' xmlns:xsd='http://www.w3.org/2001/XMLSchema'>
+ <types>
+  <xs:schema targetNamespace='http://ships.ws.esimo/' version='1.0' xmlns:tns='http://ships.ws.esimo/' xmlns:xs='http://www.w3.org/2001/XMLSchema'>
+   <xs:element name='getCountriesKeys' type='tns:getCountriesKeys'/>
+   <xs:element name='getCountriesKeysResponse' type='tns:getCountriesKeysResponse'/>
+   <xs:element name='getCountriesNames' type='tns:getCountriesNames'/>
+   <xs:element name='getCountriesNamesResponse' type='tns:getCountriesNamesResponse'/>
+   <xs:element name='getCruisesByShipId' type='tns:getCruisesByShipId'/>
+   <xs:element name='getCruisesByShipIdResponse' type='tns:getCruisesByShipIdResponse'/>
+   <xs:element name='getDepKeys' type='tns:getDepKeys'/>
+   <xs:element name='getDepKeysResponse' type='tns:getDepKeysResponse'/>
+   <xs:element name='getDepNames' type='tns:getDepNames'/>
+   <xs:element name='getDepNamesResponse' type='tns:getDepNamesResponse'/>
+   <xs:element name='getMaxCruiseDate' type='tns:getMaxCruiseDate'/>
+   <xs:element name='getMaxCruiseDateResponse' type='tns:getMaxCruiseDateResponse'/>
+   <xs:element name='getMinCruiseDate' type='tns:getMinCruiseDate'/>
+   <xs:element name='getMinCruiseDateResponse' type='tns:getMinCruiseDateResponse'/>
+   <xs:element name='getObservationByShipId' type='tns:getObservationByShipId'/>
+   <xs:element name='getObservationByShipIdResponse' type='tns:getObservationByShipIdResponse'/>
+   <xs:element name='getObservationGeo' type='tns:getObservationGeo'/>
+   <xs:element name='getObservationGeoResponse' type='tns:getObservationGeoResponse'/>
+   <xs:element name='getOrgsKeys' type='tns:getOrgsKeys'/>
+   <xs:element name='getOrgsKeysResponse' type='tns:getOrgsKeysResponse'/>
+   <xs:element name='getOrgsNames' type='tns:getOrgsNames'/>
+   <xs:element name='getOrgsNamesResponse' type='tns:getOrgsNamesResponse'/>
+   <xs:element name='getPlatfKeys' type='tns:getPlatfKeys'/>
+   <xs:element name='getPlatfKeysResponse' type='tns:getPlatfKeysResponse'/>
+   <xs:element name='getPlatfNames' type='tns:getPlatfNames'/>
+   <xs:element name='getPlatfNamesResponse' type='tns:getPlatfNamesResponse'/>
+   <xs:element name='getShipsDetails' type='tns:getShipsDetails'/>
+   <xs:element name='getShipsDetailsResponse' type='tns:getShipsDetailsResponse'/>
+   <xs:element name='getShipsIDByCountryName' type='tns:getShipsIDByCountryName'/>
+   <xs:element name='getShipsIDByCountryNameResponse' type='tns:getShipsIDByCountryNameResponse'/>
+   <xs:element name='getShipsIDByDepName' type='tns:getShipsIDByDepName'/>
+   <xs:element name='getShipsIDByDepNameResponse' type='tns:getShipsIDByDepNameResponse'/>
+   <xs:element name='getShipsIDByOrgName' type='tns:getShipsIDByOrgName'/>
+   <xs:element name='getShipsIDByOrgNameResponse' type='tns:getShipsIDByOrgNameResponse'/>
+   <xs:element name='getShipsIDByPlatfID' type='tns:getShipsIDByPlatfID'/>
+   <xs:element name='getShipsIDByPlatfIDResponse' type='tns:getShipsIDByPlatfIDResponse'/>
+   <xs:element name='getShipsIDBySearch' type='tns:getShipsIDBySearch'/>
+   <xs:element name='getShipsIDBySearchResponse' type='tns:getShipsIDBySearchResponse'/>
+   <xs:complexType name='getObservationByShipId'>
+    <xs:sequence>
+     <xs:element minOccurs='0' name='arg0' type='xs:string'/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name='getObservationByShipIdResponse'>
+    <xs:sequence>
+     <xs:element maxOccurs='unbounded' minOccurs='0' name='return' type='xs:string'/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name='getObservationGeo'>
+    <xs:sequence>
+     <xs:element minOccurs='0' name='arg0' type='xs:string'/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name='getObservationGeoResponse'>
+    <xs:sequence>
+     <xs:element maxOccurs='unbounded' minOccurs='0' name='return' type='xs:string'/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name='getCruisesByShipId'>
+    <xs:sequence>
+     <xs:element minOccurs='0' name='arg0' type='xs:string'/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name='getCruisesByShipIdResponse'>
+    <xs:sequence>
+     <xs:element maxOccurs='unbounded' minOccurs='0' name='return' type='xs:string'/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name='getMinCruiseDate'>
+    <xs:sequence>
+     <xs:element minOccurs='0' name='arg0' type='xs:string'/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name='getMinCruiseDateResponse'>
+    <xs:sequence>
+     <xs:element minOccurs='0' name='return' type='xs:string'/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name='getMaxCruiseDate'>
+    <xs:sequence>
+     <xs:element minOccurs='0' name='arg0' type='xs:string'/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name='getMaxCruiseDateResponse'>
+    <xs:sequence>
+     <xs:element minOccurs='0' name='return' type='xs:string'/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name='getCountriesNames'>
+    <xs:sequence/>
+   </xs:complexType>
+   <xs:complexType name='getCountriesNamesResponse'>
+    <xs:sequence>
+     <xs:element maxOccurs='unbounded' minOccurs='0' name='return' type='xs:string'/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name='getCountriesKeys'>
+    <xs:sequence/>
+   </xs:complexType>
+   <xs:complexType name='getCountriesKeysResponse'>
+    <xs:sequence>
+     <xs:element maxOccurs='unbounded' minOccurs='0' name='return' type='xs:string'/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name='getShipsIDByCountryName'>
+    <xs:sequence>
+     <xs:element minOccurs='0' name='arg0' type='xs:string'/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name='getShipsIDByCountryNameResponse'>
+    <xs:sequence>
+     <xs:element maxOccurs='unbounded' minOccurs='0' name='return' type='xs:string'/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name='getShipsIDByOrgName'>
+    <xs:sequence>
+     <xs:element minOccurs='0' name='arg0' type='xs:string'/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name='getShipsIDByOrgNameResponse'>
+    <xs:sequence>
+     <xs:element maxOccurs='unbounded' minOccurs='0' name='return' type='xs:string'/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name='getOrgsKeys'>
+    <xs:sequence/>
+   </xs:complexType>
+   <xs:complexType name='getOrgsKeysResponse'>
+    <xs:sequence>
+     <xs:element maxOccurs='unbounded' minOccurs='0' name='return' type='xs:string'/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name='getOrgsNames'>
+    <xs:sequence/>
+   </xs:complexType>
+   <xs:complexType name='getOrgsNamesResponse'>
+    <xs:sequence>
+     <xs:element maxOccurs='unbounded' minOccurs='0' name='return' type='xs:string'/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name='getDepKeys'>
+    <xs:sequence/>
+   </xs:complexType>
+   <xs:complexType name='getDepKeysResponse'>
+    <xs:sequence>
+     <xs:element maxOccurs='unbounded' minOccurs='0' name='return' type='xs:string'/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name='getDepNames'>
+    <xs:sequence/>
+   </xs:complexType>
+   <xs:complexType name='getDepNamesResponse'>
+    <xs:sequence>
+     <xs:element maxOccurs='unbounded' minOccurs='0' name='return' type='xs:string'/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name='getShipsIDByDepName'>
+    <xs:sequence>
+     <xs:element minOccurs='0' name='arg0' type='xs:string'/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name='getShipsIDByDepNameResponse'>
+    <xs:sequence>
+     <xs:element maxOccurs='unbounded' minOccurs='0' name='return' type='xs:string'/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name='getPlatfNames'>
+    <xs:sequence/>
+   </xs:complexType>
+   <xs:complexType name='getPlatfNamesResponse'>
+    <xs:sequence>
+     <xs:element maxOccurs='unbounded' minOccurs='0' name='return' type='xs:string'/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name='getPlatfKeys'>
+    <xs:sequence/>
+   </xs:complexType>
+   <xs:complexType name='getPlatfKeysResponse'>
+    <xs:sequence>
+     <xs:element maxOccurs='unbounded' minOccurs='0' name='return' type='xs:string'/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name='getShipsIDByPlatfID'>
+    <xs:sequence>
+     <xs:element minOccurs='0' name='arg0' type='xs:string'/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name='getShipsIDByPlatfIDResponse'>
+    <xs:sequence>
+     <xs:element maxOccurs='unbounded' minOccurs='0' name='return' type='xs:string'/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name='getShipsIDBySearch'>
+    <xs:sequence>
+     <xs:element minOccurs='0' name='arg0' type='xs:string'/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name='getShipsIDBySearchResponse'>
+    <xs:sequence>
+     <xs:element maxOccurs='unbounded' minOccurs='0' name='return' type='xs:string'/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name='getShipsDetails'>
+    <xs:sequence>
+     <xs:element minOccurs='0' name='arg0' type='xs:string'/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name='getShipsDetailsResponse'>
+    <xs:sequence>
+     <xs:element minOccurs='0' name='return' type='tns:shipDetails'/>
+    </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name='shipDetails'>
+    <xs:sequence>
+     <xs:element minOccurs='0' name='countries' type='xs:string'/>
+     <xs:element minOccurs='0' name='country' type='xs:string'/>
+     <xs:element minOccurs='0' name='countryId' type='xs:decimal'/>
+     <xs:element minOccurs='0' name='dept' type='xs:string'/>
+     <xs:element minOccurs='0' name='deptId' type='xs:decimal'/>
+     <xs:element minOccurs='0' name='NIOCCode' type='xs:string'/>
+     <xs:element minOccurs='0' name='NODCCode' type='xs:string'/>
+     <xs:element minOccurs='0' name='NODCWDC_ACode' type='xs:string'/>
+     <xs:element minOccurs='0' name='OCLUSACode' type='xs:string'/>
+     <xs:element minOccurs='0' name='org' type='xs:string'/>
+     <xs:element minOccurs='0' name='org1' type='xs:string'/>
+     <xs:element minOccurs='0' name='org2' type='xs:string'/>
+     <xs:element minOccurs='0' name='org3' type='xs:string'/>
+     <xs:element minOccurs='0' name='orgId' type='xs:decimal'/>
+     <xs:element minOccurs='0' name='orgId1' type='xs:decimal'/>
+     <xs:element minOccurs='0' name='orgId2' type='xs:decimal'/>
+     <xs:element minOccurs='0' name='orgId3' type='xs:decimal'/>
+     <xs:element minOccurs='0' name='orgs' type='xs:decimal'/>
+     <xs:element minOccurs='0' name='platform' type='xs:string'/>
+     <xs:element minOccurs='0' name='platformId' type='xs:decimal'/>
+     <xs:element minOccurs='0' name='shipCallSign' type='xs:string'/>
+     <xs:element minOccurs='0' name='shipId' type='xs:decimal'/>
+     <xs:element minOccurs='0' name='shipNameEng' type='xs:string'/>
+     <xs:element minOccurs='0' name='shipNameRus' type='xs:string'/>
+    </xs:sequence>
+   </xs:complexType>
+  </xs:schema>
+ </types>
+ <message name='ShipsJaxWS_getShipsIDByDepName'>
+  <part element='tns:getShipsIDByDepName' name='getShipsIDByDepName'></part>
+ </message>
+ <message name='ShipsJaxWS_getDepKeys'>
+  <part element='tns:getDepKeys' name='getDepKeys'></part>
+ </message>
+ <message name='ShipsJaxWS_getCountriesKeys'>
+  <part element='tns:getCountriesKeys' name='getCountriesKeys'></part>
+ </message>
+ <message name='ShipsJaxWS_getShipsIDByPlatfIDResponse'>
+  <part element='tns:getShipsIDByPlatfIDResponse' name='getShipsIDByPlatfIDResponse'></part>
+ </message>
+ <message name='ShipsJaxWS_getShipsDetails'>
+  <part element='tns:getShipsDetails' name='getShipsDetails'></part>
+ </message>
+ <message name='ShipsJaxWS_getMinCruiseDateResponse'>
+  <part element='tns:getMinCruiseDateResponse' name='getMinCruiseDateResponse'></part>
+ </message>
+ <message name='ShipsJaxWS_getCruisesByShipIdResponse'>
+  <part element='tns:getCruisesByShipIdResponse' name='getCruisesByShipIdResponse'></part>
+ </message>
+ <message name='ShipsJaxWS_getDepNames'>
+  <part element='tns:getDepNames' name='getDepNames'></part>
+ </message>
+ <message name='ShipsJaxWS_getCruisesByShipId'>
+  <part element='tns:getCruisesByShipId' name='getCruisesByShipId'></part>
+ </message>
+ <message name='ShipsJaxWS_getShipsIDByDepNameResponse'>
+  <part element='tns:getShipsIDByDepNameResponse' name='getShipsIDByDepNameResponse'></part>
+ </message>
+ <message name='ShipsJaxWS_getOrgsKeys'>
+  <part element='tns:getOrgsKeys' name='getOrgsKeys'></part>
+ </message>
+ <message name='ShipsJaxWS_getShipsDetailsResponse'>
+  <part element='tns:getShipsDetailsResponse' name='getShipsDetailsResponse'></part>
+ </message>
+ <message name='ShipsJaxWS_getDepKeysResponse'>
+  <part element='tns:getDepKeysResponse' name='getDepKeysResponse'></part>
+ </message>
+ <message name='ShipsJaxWS_getObservationByShipIdResponse'>
+  <part element='tns:getObservationByShipIdResponse' name='getObservationByShipIdResponse'></part>
+ </message>
+ <message name='ShipsJaxWS_getObservationGeoResponse'>
+  <part element='tns:getObservationGeoResponse' name='getObservationGeoResponse'></part>
+ </message>
+ <message name='ShipsJaxWS_getDepNamesResponse'>
+  <part element='tns:getDepNamesResponse' name='getDepNamesResponse'></part>
+ </message>
+ <message name='ShipsJaxWS_getObservationGeo'>
+  <part element='tns:getObservationGeo' name='getObservationGeo'></part>
+ </message>
+ <message name='ShipsJaxWS_getShipsIDBySearch'>
+  <part element='tns:getShipsIDBySearch' name='getShipsIDBySearch'></part>
+ </message>
+ <message name='ShipsJaxWS_getShipsIDByOrgNameResponse'>
+  <part element='tns:getShipsIDByOrgNameResponse' name='getShipsIDByOrgNameResponse'></part>
+ </message>
+ <message name='ShipsJaxWS_getCountriesKeysResponse'>
+  <part element='tns:getCountriesKeysResponse' name='getCountriesKeysResponse'></part>
+ </message>
+ <message name='ShipsJaxWS_getObservationByShipId'>
+  <part element='tns:getObservationByShipId' name='getObservationByShipId'></part>
+ </message>
+ <message name='ShipsJaxWS_getShipsIDByPlatfID'>
+  <part element='tns:getShipsIDByPlatfID' name='getShipsIDByPlatfID'></part>
+ </message>
+ <message name='ShipsJaxWS_getOrgsNamesResponse'>
+  <part element='tns:getOrgsNamesResponse' name='getOrgsNamesResponse'></part>
+ </message>
+ <message name='ShipsJaxWS_getShipsIDByCountryName'>
+  <part element='tns:getShipsIDByCountryName' name='getShipsIDByCountryName'></part>
+ </message>
+ <message name='ShipsJaxWS_getPlatfKeys'>
+  <part element='tns:getPlatfKeys' name='getPlatfKeys'></part>
+ </message>
+ <message name='ShipsJaxWS_getShipsIDByCountryNameResponse'>
+  <part element='tns:getShipsIDByCountryNameResponse' name='getShipsIDByCountryNameResponse'></part>
+ </message>
+ <message name='ShipsJaxWS_getPlatfNamesResponse'>
+  <part element='tns:getPlatfNamesResponse' name='getPlatfNamesResponse'></part>
+ </message>
+ <message name='ShipsJaxWS_getPlatfNames'>
+  <part element='tns:getPlatfNames' name='getPlatfNames'></part>
+ </message>
+ <message name='ShipsJaxWS_getShipsIDBySearchResponse'>
+  <part element='tns:getShipsIDBySearchResponse' name='getShipsIDBySearchResponse'></part>
+ </message>
+ <message name='ShipsJaxWS_getPlatfKeysResponse'>
+  <part element='tns:getPlatfKeysResponse' name='getPlatfKeysResponse'></part>
+ </message>
+ <message name='ShipsJaxWS_getMinCruiseDate'>
+  <part element='tns:getMinCruiseDate' name='getMinCruiseDate'></part>
+ </message>
+ <message name='ShipsJaxWS_getMaxCruiseDate'>
+  <part element='tns:getMaxCruiseDate' name='getMaxCruiseDate'></part>
+ </message>
+ <message name='ShipsJaxWS_getShipsIDByOrgName'>
+  <part element='tns:getShipsIDByOrgName' name='getShipsIDByOrgName'></part>
+ </message>
+ <message name='ShipsJaxWS_getMaxCruiseDateResponse'>
+  <part element='tns:getMaxCruiseDateResponse' name='getMaxCruiseDateResponse'></part>
+ </message>
+ <message name='ShipsJaxWS_getCountriesNamesResponse'>
+  <part element='tns:getCountriesNamesResponse' name='getCountriesNamesResponse'></part>
+ </message>
+ <message name='ShipsJaxWS_getCountriesNames'>
+  <part element='tns:getCountriesNames' name='getCountriesNames'></part>
+ </message>
+ <message name='ShipsJaxWS_getOrgsKeysResponse'>
+  <part element='tns:getOrgsKeysResponse' name='getOrgsKeysResponse'></part>
+ </message>
+ <message name='ShipsJaxWS_getOrgsNames'>
+  <part element='tns:getOrgsNames' name='getOrgsNames'></part>
+ </message>
+ <portType name='ShipsJaxWS'>
+  <operation name='getCountriesKeys' parameterOrder='getCountriesKeys'>
+   <input message='tns:ShipsJaxWS_getCountriesKeys'></input>
+   <output message='tns:ShipsJaxWS_getCountriesKeysResponse'></output>
+  </operation>
+  <operation name='getCountriesNames' parameterOrder='getCountriesNames'>
+   <input message='tns:ShipsJaxWS_getCountriesNames'></input>
+   <output message='tns:ShipsJaxWS_getCountriesNamesResponse'></output>
+  </operation>
+  <operation name='getCruisesByShipId' parameterOrder='getCruisesByShipId'>
+   <input message='tns:ShipsJaxWS_getCruisesByShipId'></input>
+   <output message='tns:ShipsJaxWS_getCruisesByShipIdResponse'></output>
+  </operation>
+  <operation name='getDepKeys' parameterOrder='getDepKeys'>
+   <input message='tns:ShipsJaxWS_getDepKeys'></input>
+   <output message='tns:ShipsJaxWS_getDepKeysResponse'></output>
+  </operation>
+  <operation name='getDepNames' parameterOrder='getDepNames'>
+   <input message='tns:ShipsJaxWS_getDepNames'></input>
+   <output message='tns:ShipsJaxWS_getDepNamesResponse'></output>
+  </operation>
+  <operation name='getMaxCruiseDate' parameterOrder='getMaxCruiseDate'>
+   <input message='tns:ShipsJaxWS_getMaxCruiseDate'></input>
+   <output message='tns:ShipsJaxWS_getMaxCruiseDateResponse'></output>
+  </operation>
+  <operation name='getMinCruiseDate' parameterOrder='getMinCruiseDate'>
+   <input message='tns:ShipsJaxWS_getMinCruiseDate'></input>
+   <output message='tns:ShipsJaxWS_getMinCruiseDateResponse'></output>
+  </operation>
+  <operation name='getObservationByShipId' parameterOrder='getObservationByShipId'>
+   <input message='tns:ShipsJaxWS_getObservationByShipId'></input>
+   <output message='tns:ShipsJaxWS_getObservationByShipIdResponse'></output>
+  </operation>
+  <operation name='getObservationGeo' parameterOrder='getObservationGeo'>
+   <input message='tns:ShipsJaxWS_getObservationGeo'></input>
+   <output message='tns:ShipsJaxWS_getObservationGeoResponse'></output>
+  </operation>
+  <operation name='getOrgsKeys' parameterOrder='getOrgsKeys'>
+   <input message='tns:ShipsJaxWS_getOrgsKeys'></input>
+   <output message='tns:ShipsJaxWS_getOrgsKeysResponse'></output>
+  </operation>
+  <operation name='getOrgsNames' parameterOrder='getOrgsNames'>
+   <input message='tns:ShipsJaxWS_getOrgsNames'></input>
+   <output message='tns:ShipsJaxWS_getOrgsNamesResponse'></output>
+  </operation>
+  <operation name='getPlatfKeys' parameterOrder='getPlatfKeys'>
+   <input message='tns:ShipsJaxWS_getPlatfKeys'></input>
+   <output message='tns:ShipsJaxWS_getPlatfKeysResponse'></output>
+  </operation>
+  <operation name='getPlatfNames' parameterOrder='getPlatfNames'>
+   <input message='tns:ShipsJaxWS_getPlatfNames'></input>
+   <output message='tns:ShipsJaxWS_getPlatfNamesResponse'></output>
+  </operation>
+  <operation name='getShipsDetails' parameterOrder='getShipsDetails'>
+   <input message='tns:ShipsJaxWS_getShipsDetails'></input>
+   <output message='tns:ShipsJaxWS_getShipsDetailsResponse'></output>
+  </operation>
+  <operation name='getShipsIDByCountryName' parameterOrder='getShipsIDByCountryName'>
+   <input message='tns:ShipsJaxWS_getShipsIDByCountryName'></input>
+   <output message='tns:ShipsJaxWS_getShipsIDByCountryNameResponse'></output>
+  </operation>
+  <operation name='getShipsIDByDepName' parameterOrder='getShipsIDByDepName'>
+   <input message='tns:ShipsJaxWS_getShipsIDByDepName'></input>
+   <output message='tns:ShipsJaxWS_getShipsIDByDepNameResponse'></output>
+  </operation>
+  <operation name='getShipsIDByOrgName' parameterOrder='getShipsIDByOrgName'>
+   <input message='tns:ShipsJaxWS_getShipsIDByOrgName'></input>
+   <output message='tns:ShipsJaxWS_getShipsIDByOrgNameResponse'></output>
+  </operation>
+  <operation name='getShipsIDByPlatfID' parameterOrder='getShipsIDByPlatfID'>
+   <input message='tns:ShipsJaxWS_getShipsIDByPlatfID'></input>
+   <output message='tns:ShipsJaxWS_getShipsIDByPlatfIDResponse'></output>
+  </operation>
+  <operation name='getShipsIDBySearch' parameterOrder='getShipsIDBySearch'>
+   <input message='tns:ShipsJaxWS_getShipsIDBySearch'></input>
+   <output message='tns:ShipsJaxWS_getShipsIDBySearchResponse'></output>
+  </operation>
+ </portType>
+ <binding name='ShipsJaxWSBinding' type='tns:ShipsJaxWS'>
+  <soap:binding style='document' transport='http://schemas.xmlsoap.org/soap/http'/>
+  <operation name='getCountriesKeys'>
+   <soap:operation soapAction=''/>
+   <input>
+    <soap:body use='literal'/>
+   </input>
+   <output>
+    <soap:body use='literal'/>
+   </output>
+  </operation>
+  <operation name='getCountriesNames'>
+   <soap:operation soapAction=''/>
+   <input>
+    <soap:body use='literal'/>
+   </input>
+   <output>
+    <soap:body use='literal'/>
+   </output>
+  </operation>
+  <operation name='getCruisesByShipId'>
+   <soap:operation soapAction=''/>
+   <input>
+    <soap:body use='literal'/>
+   </input>
+   <output>
+    <soap:body use='literal'/>
+   </output>
+  </operation>
+  <operation name='getDepKeys'>
+   <soap:operation soapAction=''/>
+   <input>
+    <soap:body use='literal'/>
+   </input>
+   <output>
+    <soap:body use='literal'/>
+   </output>
+  </operation>
+  <operation name='getDepNames'>
+   <soap:operation soapAction=''/>
+   <input>
+    <soap:body use='literal'/>
+   </input>
+   <output>
+    <soap:body use='literal'/>
+   </output>
+  </operation>
+  <operation name='getMaxCruiseDate'>
+   <soap:operation soapAction=''/>
+   <input>
+    <soap:body use='literal'/>
+   </input>
+   <output>
+    <soap:body use='literal'/>
+   </output>
+  </operation>
+  <operation name='getMinCruiseDate'>
+   <soap:operation soapAction=''/>
+   <input>
+    <soap:body use='literal'/>
+   </input>
+   <output>
+    <soap:body use='literal'/>
+   </output>
+  </operation>
+  <operation name='getObservationByShipId'>
+   <soap:operation soapAction=''/>
+   <input>
+    <soap:body use='literal'/>
+   </input>
+   <output>
+    <soap:body use='literal'/>
+   </output>
+  </operation>
+  <operation name='getObservationGeo'>
+   <soap:operation soapAction=''/>
+   <input>
+    <soap:body use='literal'/>
+   </input>
+   <output>
+    <soap:body use='literal'/>
+   </output>
+  </operation>
+  <operation name='getOrgsKeys'>
+   <soap:operation soapAction=''/>
+   <input>
+    <soap:body use='literal'/>
+   </input>
+   <output>
+    <soap:body use='literal'/>
+   </output>
+  </operation>
+  <operation name='getOrgsNames'>
+   <soap:operation soapAction=''/>
+   <input>
+    <soap:body use='literal'/>
+   </input>
+   <output>
+    <soap:body use='literal'/>
+   </output>
+  </operation>
+  <operation name='getPlatfKeys'>
+   <soap:operation soapAction=''/>
+   <input>
+    <soap:body use='literal'/>
+   </input>
+   <output>
+    <soap:body use='literal'/>
+   </output>
+  </operation>
+  <operation name='getPlatfNames'>
+   <soap:operation soapAction=''/>
+   <input>
+    <soap:body use='literal'/>
+   </input>
+   <output>
+    <soap:body use='literal'/>
+   </output>
+  </operation>
+  <operation name='getShipsDetails'>
+   <soap:operation soapAction=''/>
+   <input>
+    <soap:body use='literal'/>
+   </input>
+   <output>
+    <soap:body use='literal'/>
+   </output>
+  </operation>
+  <operation name='getShipsIDByCountryName'>
+   <soap:operation soapAction=''/>
+   <input>
+    <soap:body use='literal'/>
+   </input>
+   <output>
+    <soap:body use='literal'/>
+   </output>
+  </operation>
+  <operation name='getShipsIDByDepName'>
+   <soap:operation soapAction=''/>
+   <input>
+    <soap:body use='literal'/>
+   </input>
+   <output>
+    <soap:body use='literal'/>
+   </output>
+  </operation>
+  <operation name='getShipsIDByOrgName'>
+   <soap:operation soapAction=''/>
+   <input>
+    <soap:body use='literal'/>
+   </input>
+   <output>
+    <soap:body use='literal'/>
+   </output>
+  </operation>
+  <operation name='getShipsIDByPlatfID'>
+   <soap:operation soapAction=''/>
+   <input>
+    <soap:body use='literal'/>
+   </input>
+   <output>
+    <soap:body use='literal'/>
+   </output>
+  </operation>
+  <operation name='getShipsIDBySearch'>
+   <soap:operation soapAction=''/>
+   <input>
+    <soap:body use='literal'/>
+   </input>
+   <output>
+    <soap:body use='literal'/>
+   </output>
+  </operation>
+ </binding>
+ <service name='ShipsJaxWSService'>
+  <port binding='tns:ShipsJaxWSBinding' name='ShipsJaxWSPort'>
+   <soap:address location='http://data.oceaninfo.ru:80/shipsws'/>
+  </port>
+ </service>
+</definitions>

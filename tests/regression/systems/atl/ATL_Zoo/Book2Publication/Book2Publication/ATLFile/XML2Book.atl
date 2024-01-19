@@ -1,0 +1,30 @@
+module XML2Book;
+create OUT : Book from IN : XML;
+
+helper context XML!Element def: getAttrVal(name : String) : String =
+	self.children->select(c | c.oclIsKindOf(XML!Attribute) and c.name = name)->first().value;
+
+rule Book {
+	from
+		e : XML!Element (
+			e.name = 'book'
+		)
+	to
+		b : Book!Book (
+			title <- e.getAttrVal('title'),
+			chapters <- e.children->select(c | c.oclIsKindOf(XML!Element))->asSequence()
+		)
+}
+
+rule Chapter {
+	from
+		e : XML!Element (
+			e.name = 'chapter'
+		)
+	to
+		c : Book!Chapter (
+			title <- e.getAttrVal('title'),
+			nbPages <- e.getAttrVal('nbPages').toInteger(),
+			author <- e.getAttrVal('author')
+		)
+}

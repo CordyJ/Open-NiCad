@@ -1,0 +1,228 @@
+module XML2PetriNet;
+create OUT : PetriNet from IN : XML;
+
+
+-------------------------------------------------------------------------------
+-- HELPERS --------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-- This helper computes the Set containing all the XML!Element of the input
+-- XML model that are named 'place'.
+-- CONTEXT: thisModule
+-- RETURN:	Set(XML!Element)
+helper def: allPlaces : Set(XML!Element) = 
+	XML!Element.allInstances()
+		->select(e | e.name = 'place');
+
+
+-- This helper computes the Set containing all the XML!Element of the input
+-- XML model that are named 'transition'.
+-- CONTEXT: thisModule
+-- RETURN:	Set(XML!Element)
+helper def: allTransitions : Set(XML!Element) = 
+	XML!Element.allInstances()
+		->select(e | e.name = 'transition');
+
+
+-- This helper computes the Set containing all the XML!Element of the input
+-- XML model that are named 'arc'.
+-- CONTEXT: thisModule
+-- RETURN:	Set(XML!Element)
+helper def: allArcs : Set(XML!Element) = 
+	XML!Element.allInstances()
+		->select(e | e.name = 'arc');
+
+
+-- This helper computes the name value of an input XML!Element.
+-- For this purpose, it first selects among its elements children the one
+-- named 'name'. It then selects, among children of this new element, the one
+-- named 'text'. It then selects the XML!Text child of this last element and
+-- returns its value.
+-- CONTEXT: XML!Element
+-- RETURN:	String
+helper context XML!Element def : getName() : String =
+	self.children
+		->select(c | c.oclIsTypeOf(XML!Element) and c.name = 'name')
+		->first().children
+		->select(c | c.oclIsTypeOf(XML!Element) and c.name = 'text')
+		->first().children
+		->first().value;
+
+
+-- This helper calculates the value of a given attribute (identified by the
+-- name provided as a parameter) of the contextual XML!Element.
+-- To this end, it selects among its attribute children the one which has the
+-- name provided in parameter, and returns its value.
+-- CONTEXT: XML!Element
+-- IN:		String
+-- RETURN:	String
+helper context XML!Element def : getAttributeValue(name : String) : String = 
+	self.children
+		->select(c | c.oclIsTypeOf(XML!Attribute) and c.name = name)
+		->first().value;
+
+
+-- This helper calculates the value of the 'id' attribute of the contextual
+-- XML!Element. For this purpose, it calls the 'getAttributeValue' with 'id'
+-- as parameter.
+-- CONTEXT: XML!Element
+-- RETURN:	String
+helper context XML!Element def : getId() : String =
+	self.getAttributeValue('id');
+
+
+-- This helper calculates the value of the 'target' attribute of the contextual
+-- XML!Element. For this purpose, it calls the 'getAttributeValue' with
+-- 'target' as parameter.
+-- CONTEXT: XML!Element
+-- RETURN:	String
+helper context XML!Element def : getTarget() : String =
+	self.getAttributeValue('target');
+
+
+-- This helper calculates the value of the 'source' attribute of the contextual
+-- XML!Element. For this purpose, it calls the 'getAttributeValue' with
+-- 'source' as parameter.
+-- CONTEXT: XML!Element
+-- RETURN:	String
+helper context XML!Element def : getSource() : String =
+	self.getAttributeValue('source');
+
+
+-------------------------------------------------------------------------------
+-- RULES ----------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-- Rule 'Main'
+-- This rule generates a PetriNet element from the XML!Element called 'net'.
+-- Name of the generated PetriNet is computed by the 'getName' helper.
+-- Its places, transitions and arcs respectively correspond to the elements
+-- generated for the XML!Elements named 'place', 'transition', and 'arc'.
+rule Main {
+	from
+        xml_net : XML!Element (
+        	xml_net.name = 'net'
+        )
+	to 
+		pn : PetriNet!PetriNet (
+			name <- xml_net.getName(),
+			places <- thisModule.allPlaces,
+			transitions <- thisModule.allTransitions,
+			arcs <- thisModule.allArcs
+		)
+}
+
+
+-- Rule 'State'
+-- This rule generates a Place element for each XML!Element called 'place'.
+-- Name of the generated Place is computed by the 'getName' helper.
+-- Its incoming arcs correspond to the elements generated for the XML!Element
+-- named 'arc' whose target is the input 'place' XML!Element.
+-- Its outgoing arcs correspond to the elements generated for the XML!Element
+-- named 'arc' whose source is the input 'place' XML!Element.
+rule Place {
+	from
+        xml_place :  XML!Element (
+        	xml_place.name = 'place'
+        )
+	to 
+		pn_p : PetriNet!Place (
+			name <- xml_place.getName(),
+			incoming <- thisModule.allArcs
+							->select(a | a.getTarget() = xml_place.getId()),
+			outgoing <- thisModule.allArcs
+							->select(a | a.getSource() = xml_place.getId())
+		)
+}
+
+
+-- Rule 'Transition'
+-- This rule generates a Transition element for each XML!Element called
+-- 'transition'.
+-- Generated Place accepts an empty string as name.
+-- Its incoming arcs correspond to the elements generated for the XML!Element
+-- named 'arc' whose target is the input 'transition' XML!Element.
+-- Its outgoing arcs correspond to the elements generated for the XML!Element
+-- named 'arc' whose source is the input 'transition' XML!Element.
+rule Transition {
+	from
+        xml_trans :  XML!Element (
+        	xml_trans.name = 'transition'
+        )
+	to
+		pn_t : PetriNet!Transition (
+			name <- '',
+			incoming <- thisModule.allArcs
+							->select(a | a.getTarget() = xml_trans.getId()),
+			outgoing <- thisModule.allArcs
+							->select(a | a.getSource() = xml_trans.getId())
+		)
+}
+
+
+-- Rule 'PlaceToTransArc'
+-- This rule generates a PlaceToTransArc element for each XML!Element called
+-- 'arc' whose source is a 'place' XML!Element.
+-- The source of the generated PlaceToTransArc corresponds to the element
+-- generated for the 'place' XML!Element whose 'id' is equal to the source of
+-- the input 'arc' XML!Element.
+-- The target of the generated PlaceToTransArc corresponds to the element
+-- generated for the 'transition' XML!Element whose 'id' is equal to the target
+-- of the input 'arc' XML!Element.
+rule PlaceToTransArc {
+	from
+        xml_arc :  XML!Element (
+        	if xml_arc.name = 'arc' then
+				thisModule.allPlaces
+					->collect(p | p.getId())
+					->includes(xml_arc.getSource())
+			else
+				false
+			endif
+        )
+	to
+		pn_a : PetriNet!PlaceToTransArc (
+			weight <- 1,
+			source <- thisModule.allPlaces
+						->select(b | b.getId() = xml_arc.getSource())
+						->first(),
+			target <- thisModule.allTransitions
+						->select(b | b.getId() = xml_arc.getTarget())
+						->first()
+		)
+}
+
+
+-- Rule 'TransToPlaceArc'
+-- This rule generates a TransToPlaceArc element for each XML!Element called
+-- 'arc' whose source is an 'transition' XML!Element.
+-- The source of the generated TransToPlaceArc corresponds to the element
+-- generated for the 'transition' XML!Element whose 'id' is equal to the source
+-- of the input 'arc' XML!Element.
+-- The target of the generated TransToPlaceArc corresponds to the element
+-- generated for the 'place' XML!Element whose 'id' is equal to the target of
+-- the input 'arc' XML!Element.
+rule TransToPlaceArc {
+	from
+        xml_arc :  XML!Element (
+        	if xml_arc.name = 'arc' then
+				thisModule.allTransitions
+					->collect(p | p.getId())
+					->includes(xml_arc.getSource())
+			else
+				false
+			endif
+        )
+	to
+		pn_a : PetriNet!TransToPlaceArc (
+			weight <- 1,
+			source <- thisModule.allTransitions
+						->select(b | b.getId() = xml_arc.getSource())
+						->first(),
+			target <- thisModule.allPlaces
+						->select(b | b.getId() = xml_arc.getTarget())
+						->first()
+		)
+}

@@ -1,0 +1,34 @@
+-- @name Tree structure to List structure
+-- @version 1.0
+-- @domains 
+-- @authors Cyril Faure
+-- @date 01/06/2007
+-- @description "toy example" of model transformation usually made with a DFS (Depth First Search) imperative algorithms
+-- @see http://en.wikipedia.org/wiki/Depth-first_search
+-- @path MMTree=/Tree2List/metamodels/MMTree.ecore
+-- @path MMElementList=/Tree2List/metamodels/MMElementList.ecore
+
+module Tree2List;
+create elmList : MMElementList from aTree : MMTree;
+
+uses Lib4MMTree;
+
+-- we want to process the tree via DFS and create an ordered list containing :
+-- all big leafs, then all medium leafs, then all small leafs. We add the
+-- constraint we want all three "sublists" to be ordered on the DFS traversal order
+-- Note : the nodes (other than the tree root) are not kept in the destination model
+
+-- The transformation is done with only one matched rule. For each element of its elements reference, we create a MMElementList!CommonElement. 
+-- Each element of this list is computed via a distinct keyword which creates a CommonElement for each Leaf of a list we compute via an helper.
+rule TreeNodeRoot2RootElement { 
+	from 	-- should be unique
+		rt : MMTree!Node (rt.isTreeNodeRoot()) 
+	to
+		lstRt : MMElementList!RootElement (
+			name <- rt.name,
+			elements <- elmLst
+		),
+		elmLst : distinct MMElementList!CommonElement foreach(leaf in rt.getLeavesInOrder())(
+			name <- leaf.name
+		)
+}

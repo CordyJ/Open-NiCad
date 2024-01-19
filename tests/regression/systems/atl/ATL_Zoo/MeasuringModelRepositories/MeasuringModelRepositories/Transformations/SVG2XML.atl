@@ -1,0 +1,170 @@
+--@name SVG2XML
+--@version 1.0
+--@domains SVG, Pie chart
+--@authors Eric Vepa (eric.vepa <at> gmail.com)
+--@date 2006/08/04
+--@description XML extractor for SVG pie charts.
+--@see
+--@comments
+
+module SVG2XML; -- Module Template
+create OUT : XML from IN : SVG;
+
+--@begin helper scale
+--@comments returns the string value for a scale transformation attribute
+helper context SVG!Scale def : scale() : String =
+	'scale(' + self.sx.toString() +
+	if self.sy = self.sx
+		then ''
+		else ',' + self.sy.toString()
+	endif + ')';
+--@end helper scale
+
+--@begin helper translate
+--@comments returns the string value for a translate transformation attribute
+helper context SVG!Translate def : translate() : String =
+	'translate(' + self.tx.toString() + ',' + self.ty.toString() + ')';
+--@end helper translate
+
+--@begin helper rotate
+--@comments returns the string value for a rotate transformation attribute
+helper context SVG!Rotate def : rotate() : String =
+	'rotate(' + self.angle.toString() + ')';
+--@end helper rotate
+
+--@begin rule Svg2Root
+rule Svg2Root {
+	from
+		svg:SVG!Svg
+	to
+		root:XML!Root (
+			name <- 'svg',
+			children <- xmlns,
+			children <- version,
+			children <- thisModule.Attribute('width', if not svg.size.oclIsUndefined() then svg.size.width.toString() else '100%' endif),
+			children <- thisModule.Attribute('height', if not svg.size.oclIsUndefined() then svg.size.height.toString() else '100%' endif),
+			children <- svg.children
+		),
+		xmlns:XML!Attribute (
+			name <- 'xmlns',
+			value <- svg.namespace
+		),
+		version:XML!Attribute (
+			name <- 'version',
+			value <- svg.version
+		)
+}	
+--@end rule Svg2Root
+
+--@begin rule G2Element
+rule G2Element {
+	from
+		g:SVG!G
+	using {
+		transforms : Sequence(SVG!Transform) = g.attribute->select(a|a.oclIsKindOf(SVG!Transform));
+		transformValue : String = transforms->iterate(transf; str:String=''|str +
+			if transf.oclIsTypeOf(SVG!Scale)
+				then transf.scale()
+				else if transf.oclIsTypeOf(SVG!Translate)
+					then transf.translate()
+					else if transf.oclIsTypeOf(SVG!Rotate)
+						then transf.rotate()
+						else ''
+					endif
+				endif
+			endif +
+			if transf <> transforms->last()
+				then ' '
+				else ''
+			endif);	
+	}
+	to
+		elmt:XML!Element (
+			name <- 'g',
+			children <- thisModule.Attribute('transform', if transforms->notEmpty() then transformValue else '' endif),
+			children <- thisModule.Attribute('fill', if not g.fill.oclIsUndefined() then g.fill else 'black' endif),
+			children <- g.groupContent
+		)
+}	
+--@end rule G2Element
+
+--@begin rule Rect2Element
+rule Rect2Element {
+	from
+		rect:SVG!Rect
+	to
+		elmt:XML!Element (
+			name <- 'rect',
+			children <- thisModule.Attribute('x', if not rect.position.oclIsUndefined() then rect.position.x.toString() else '0' endif),
+			children <- thisModule.Attribute('y', if not rect.position.oclIsUndefined() then rect.position.y.toString() else '0' endif),
+			children <- thisModule.Attribute('width', if not rect.size.oclIsUndefined() then rect.size.width.toString() else '100%' endif),
+			children <- thisModule.Attribute('height', if not rect.size.oclIsUndefined() then rect.size.height.toString() else '100%' endif),
+			children <- thisModule.Attribute('fill', if not rect.fill.oclIsUndefined() then rect.fill else 'black' endif),
+			children <- thisModule.Attribute('stroke', if not rect.stroke.oclIsUndefined() then rect.stroke else 'none' endif)
+		)
+}	
+--@end rule Rect2Element
+
+--@begin rule Circle2Element
+rule Circle2Element {
+	from
+		circ:SVG!Circle
+	to
+		elmt:XML!Element (
+			name <- 'circle',
+			children <- thisModule.Attribute('x', if not circ.position.oclIsUndefined() then circ.position.x.toString() else '0' endif),
+			children <- thisModule.Attribute('y', if not circ.position.oclIsUndefined() then circ.position.y.toString() else '0' endif),
+			children <- thisModule.Attribute('r', if not circ.size.oclIsUndefined() then circ.size.width.toString() else '100%' endif),
+			children <- thisModule.Attribute('fill', if not circ.fill.oclIsUndefined() then circ.fill else 'black' endif),
+			children <- thisModule.Attribute('stroke', if not circ.stroke.oclIsUndefined() then circ.stroke else 'none' endif)
+		)
+}	
+--@end rule Circle2Element
+
+--@begin rule Path2Element
+rule Path2Element {
+	from
+		path:SVG!Path
+	to
+		elmt:XML!Element (
+			name <- 'path',
+			children <- thisModule.Attribute('d', path.d),
+			children <- thisModule.Attribute('fill', if not path.fill.oclIsUndefined() then path.fill else 'black' endif),
+			children <- thisModule.Attribute('stroke', if not path.stroke.oclIsUndefined() then path.stroke else 'none' endif)
+		)
+}	
+--@end rule Path2Element
+
+--@begin rule Text2Element
+rule Text2Element {
+	from
+		text:SVG!Text
+	to
+		elmt:XML!Element (
+			name <- 'text',
+			children <- thisModule.Attribute('x', if not text.position.oclIsUndefined() then text.position.x.toString() else '0' endif),
+			children <- thisModule.Attribute('y', if not text.position.oclIsUndefined() then text.position.y.toString() else '0' endif),
+			children <- thisModule.Attribute('stroke', if not text.stroke.oclIsUndefined() then text.stroke else 'none' endif),
+			children <-	thisModule.Attribute('font-size', if not text.fontSize.oclIsUndefined() then text.fontSize else 'medium' endif),
+			--@comments text-anchor value stored in lengthAdjust attribute
+			children <- thisModule.Attribute('text-anchor', if not text.lengthAdjust.oclIsUndefined() then text.lengthAdjust else 'start' endif),
+			children <- txt
+		),
+		txt:XML!Text (
+			value <- text.content
+		)
+}	
+--@end rule Text2Element
+
+--@begin lazy rule Attribute
+lazy rule Attribute {
+	from
+		attrName:String,
+		attrValue:String
+	to
+		attr:XML!Attribute (
+			name <- attrName,
+			value <- attrValue
+		)
+}	
+--@end lazy rule Attribute

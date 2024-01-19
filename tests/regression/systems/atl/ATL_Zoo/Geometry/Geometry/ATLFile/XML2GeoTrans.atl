@@ -1,0 +1,53 @@
+--
+-- Written in January 2005 by Peter Rosenthal
+--
+
+module XML2GeoTrans;
+create OUT : GeoTrans from IN : XML;
+
+helper context XML!Element def: getAttrVal(name : String) : String =
+	if (self.children->select(c | c.oclIsKindOf(XML!Attribute) and c.name = name)->size()=0) then
+		''
+	else
+		self.children->select(c | c.oclIsKindOf(XML!Attribute) and c.name = name)->first().value
+	endif
+;
+
+rule GeoTransfos {
+	from
+		e : XML!Element (
+			e.name = 'GeoTransfos'		
+		)
+	to
+		out : GeoTrans!GeoTransfos (
+			name <- e.getAttrVal('name'),
+			transfos <-  e.children->select( c | c.name = 'GeoTransfo' )
+		)
+}
+
+rule GeoTransfo {
+	from
+		e : XML!Element (
+			e.name = 'GeoTransfo'		
+		)
+	to
+		out : GeoTrans!GeoTransfo (
+			name <- e.getAttrVal('name'),
+			subGeoTransfos <-  e.children->select( c | c.name = 'GeoTransfo' ),
+			params <-  e.children->select( c | c.name = 'Param' )
+		--	freeze <- e.getAttrVal('freeze')			
+		)
+}
+
+rule Param {
+	from
+		e : XML!Element (
+			e.name = 'Param'		
+		)
+	to
+		out : GeoTrans!Param (
+			name <- e.getAttrVal('name'),
+			param <- e.getAttrVal('param').toReal()
+			
+		)
+}

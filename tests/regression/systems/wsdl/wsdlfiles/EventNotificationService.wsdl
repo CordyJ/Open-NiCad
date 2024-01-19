@@ -1,0 +1,318 @@
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/"
+  xmlns:faults="http://echo.nasa.gov/echo/v9/faults"
+  xmlns:echo="http://echo.nasa.gov/echo/v9"
+  xmlns:order="http://echo.nasa.gov/order/fulfillment/v9"
+  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+  targetNamespace="http://echo.nasa.gov/echo/v9">
+  <documentation>
+    <p xmlns="">
+      Allows for the management of event notification subscriptions and
+      delivery options. Event notification subscriptions allow third
+      party applications to be notified by ECHO when an internal event
+      occurs, such as a catalog modification (item added, removed, or
+      updated) or an extended services modification (web service added,
+      removed, or updated).
+    </p>
+    <p xmlns="">
+      The event notification framework supports the delivery of the
+      notifications in various ways, including FTP push, email, and a
+      web service callback. The event notification API is custom to
+      ECHO, however it is inspired by other WS standards such as
+      WS-Eventing and WS-Notification.
+    </p>
+  </documentation>
+  <types>
+    <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+      elementFormDefault="qualified"
+      targetNamespace="http://echo.nasa.gov/echo/v9">
+      <xs:import namespace="http://echo.nasa.gov/echo/v9/faults"
+        schemaLocation="EchoExceptions.xsd" />
+      <xs:include schemaLocation="EventNotificationServiceMessages.xsd" />
+    </xs:schema>
+  </types>
+  <message name="CreateEventSubscriptions">
+    <part element="echo:CreateEventSubscriptions" name="parameters" />
+  </message>
+  <message name="CreateEventSubscriptionsResponse">
+    <part element="echo:CreateEventSubscriptionsResponse"
+      name="parameters" />
+  </message>
+  <message name="RenewEventSubscriptions">
+    <part element="echo:RenewEventSubscriptions" name="parameters" />
+  </message>
+  <message name="RenewEventSubscriptionsResponse">
+    <part element="echo:RenewEventSubscriptionsResponse"
+      name="parameters" />
+  </message>
+  <message name="GetEventSubscriptions">
+    <part element="echo:GetEventSubscriptions" name="parameters" />
+  </message>
+  <message name="GetEventSubscriptionsResponse">
+    <part element="echo:GetEventSubscriptionsResponse"
+      name="parameters" />
+  </message>
+  <message name="GetEventSubscriptionNames">
+    <part element="echo:GetEventSubscriptionNames" name="parameters" />
+  </message>
+  <message name="GetEventSubscriptionNamesResponse">
+    <part element="echo:GetEventSubscriptionNamesResponse"
+      name="parameters" />
+  </message>
+  <message name="RemoveEventSubscriptions">
+    <part element="echo:RemoveEventSubscriptions" name="parameters" />
+  </message>
+  <message name="RemoveEventSubscriptionsResponse">
+    <part element="echo:RemoveEventSubscriptionsResponse"
+      name="parameters" />
+  </message>
+
+  <message name="InternalFault">
+    <part element="faults:InternalFault" name="parameters" />
+  </message>
+  <message name="AuthorizationFault">
+    <part element="faults:AuthorizationFault" name="parameters" />
+  </message>
+  <message name="DuplicateIdFault">
+    <part element="faults:DuplicateIdFault" name="parameters" />
+  </message>
+  <message name="DataSizeLimitFault">
+    <part element="faults:DataSizeLimitFault" name="parameters" />
+  </message>
+  <message name="InvalidArgumentFault">
+    <part element="faults:InvalidArgumentFault" name="parameters" />
+  </message>
+  <message name="InvalidStateFault">
+    <part element="faults:InvalidStateFault" name="parameters" />
+  </message>
+  <message name="ItemNotFoundFault">
+    <part element="faults:ItemNotFoundFault" name="parameters" />
+  </message>
+  <message name="ParseFault">
+    <part element="faults:ParseFault" name="parameters" />
+  </message>
+  <message name="RemovalFault">
+    <part element="faults:RemovalFault" name="parameters" />
+  </message>
+  <message name="UnsupportedFeatureFault">
+    <part element="faults:UnsupportedFeatureFault" name="parameters" />
+  </message>
+  <message name="ValidationFault">
+    <part element="faults:ValidationFault" name="parameters" />
+  </message>
+  <message name="InvalidURLFault">
+    <part element="faults:InvalidURLFault" name="parameters" />
+  </message>
+  <portType name="EventNotificationServicePort">
+    <operation name="CreateEventSubscriptions">
+      <documentation>
+        Creates the given subscriptions for the current user. The
+        subscriptions will be assigned a new guid and the guids will be
+        returned. If the expiration date exceeds the maximum allowed
+        duration for a subscription the expiration date will be set to
+        the maximum and the creation will succeed.
+      </documentation>
+      <input message="echo:CreateEventSubscriptions" />
+      <output message="echo:CreateEventSubscriptionsResponse" />
+      <fault message="echo:InternalFault" name="InternalFault" />
+      <fault message="echo:AuthorizationFault"
+        name="AuthorizationFault" />
+      <fault message="echo:ItemNotFoundFault" name="ItemNotFoundFault" />
+      <fault message="echo:InvalidArgumentFault"
+        name="InvalidArgumentFault" />
+      <fault message="echo:DuplicateIdFault" name="DuplicateIdFault" />
+      <fault message="echo:InvalidStateFault" name="InvalidStateFault" />
+    </operation>
+    <operation name="RenewEventSubscriptions">
+      <documentation>
+        Renews the subscriptions with the given guids. If the given
+        expiration date is beyon the allowed maximum, the subscriptions
+        will be renewed to the maximum. The actual date that the
+        subscriptions have been renewed to will be returned.
+      </documentation>
+      <input message="echo:RenewEventSubscriptions" />
+      <output message="echo:RenewEventSubscriptionsResponse" />
+      <fault message="echo:InternalFault" name="InternalFault" />
+      <fault message="echo:AuthorizationFault"
+        name="AuthorizationFault" />
+      <fault message="echo:ItemNotFoundFault" name="ItemNotFoundFault" />
+      <fault message="echo:InvalidArgumentFault"
+        name="InvalidArgumentFault" />
+    </operation>
+    <operation name="GetEventSubscriptions">
+      <documentation>
+        Returns the subscriptions with the given guids. The user must
+        own the subscription. The guids are required.
+      </documentation>
+      <input message="echo:GetEventSubscriptions" />
+      <output message="echo:GetEventSubscriptionsResponse" />
+      <fault message="echo:InternalFault" name="InternalFault" />
+      <fault message="echo:AuthorizationFault"
+        name="AuthorizationFault" />
+      <fault message="echo:ItemNotFoundFault" name="ItemNotFoundFault" />
+      <fault message="echo:InvalidArgumentFault"
+        name="InvalidArgumentFault" />
+    </operation>
+    <operation name="GetEventSubscriptionNames">
+      <documentation>
+        Returns the subscription names with the given guids. The user
+        must own the subscriptions. If the guids are not specified, all
+        the names will be returned.
+      </documentation>
+      <input message="echo:GetEventSubscriptionNames" />
+      <output message="echo:GetEventSubscriptionNamesResponse" />
+      <fault message="echo:InternalFault" name="InternalFault" />
+      <fault message="echo:AuthorizationFault"
+        name="AuthorizationFault" />
+      <fault message="echo:ItemNotFoundFault" name="ItemNotFoundFault" />
+      <fault message="echo:InvalidArgumentFault"
+        name="InvalidArgumentFault" />
+    </operation>
+    <operation name="RemoveEventSubscriptions">
+      <documentation>
+        <p>
+          Removes the subscriptions with the given guids. The user must
+          own the subscription or be an admin. The guids are required.
+          The subscriptions will be immediately removed and no future
+          notifications will be delivered for the removed subscriptions.
+        </p>
+        <p>
+          If this operation is called by an ECHO Administrator, an event
+          will be sent to the endTo endpoint if there is one configured
+          in the removed subscriptions. The event will be delivered to
+          all removed subscriptions.
+        </p>
+      </documentation>
+      <input message="echo:RemoveEventSubscriptions" />
+      <output message="echo:RemoveEventSubscriptionsResponse" />
+      <fault message="echo:InternalFault" name="InternalFault" />
+      <fault message="echo:AuthorizationFault"
+        name="AuthorizationFault" />
+      <fault message="echo:ItemNotFoundFault" name="ItemNotFoundFault" />
+      <fault message="echo:InvalidArgumentFault"
+        name="InvalidArgumentFault" />
+    </operation>
+  </portType>
+  <binding name="EventNotificationServicePort"
+    type="echo:EventNotificationServicePort">
+    <soap:binding style="document"
+      transport="http://schemas.xmlsoap.org/soap/http" />
+    <operation name="CreateEventSubscriptions">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+      <fault name="DuplicateIdFault">
+        <soap:fault name="DuplicateIdFault" use="literal" />
+      </fault>
+      <fault name="InvalidStateFault">
+        <soap:fault name="InvalidStateFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="RenewEventSubscriptions">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="GetEventSubscriptions">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="GetEventSubscriptionNames">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+    </operation>
+    <operation name="RemoveEventSubscriptions">
+      <soap:operation soapAction="" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="AuthorizationFault">
+        <soap:fault name="AuthorizationFault" use="literal" />
+      </fault>
+      <fault name="InternalFault">
+        <soap:fault name="InternalFault" use="literal" />
+      </fault>
+      <fault name="InvalidArgumentFault">
+        <soap:fault name="InvalidArgumentFault" use="literal" />
+      </fault>
+      <fault name="ItemNotFoundFault">
+        <soap:fault name="ItemNotFoundFault" use="literal" />
+      </fault>
+    </operation>
+  </binding>
+  <service name="EventNotificationService">
+    <port binding="echo:EventNotificationServicePort"
+      name="EventNotificationServicePort">
+      <soap:address
+        location="https://api.echo.nasa.gov:443/echo-v9/EventNotificationServicePortImpl" />
+    </port>
+  </service>
+</definitions>

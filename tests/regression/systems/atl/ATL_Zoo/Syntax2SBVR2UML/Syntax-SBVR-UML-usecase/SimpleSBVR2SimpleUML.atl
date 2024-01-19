@@ -1,0 +1,187 @@
+-- @atlcompiler atl2006
+
+-- ******************************************************************************
+-- Copyright (c) 2009 INRIA. 
+-- All rights reserved. This program and the accompanying materials 
+-- are made available under the terms of the Eclipse Public License v1.0 
+-- which accompanies this distribution, and is available at
+-- http://www.eclipse.org/legal/epl-v10.html
+-- 
+-- Contributors: 
+-- 	INRIA - Initial implementation
+--  
+-- ******************************************************************************
+
+--@author Mathias Kleiner (mathias.kleiner@inria.fr)
+
+
+module SimpleSBVR2SimpleUML; -- Module Template
+create  OUT : SimpleUML from IN : SimpleSBVR;
+
+-- =============================================================================
+-- SBVR2UML
+-- Version 1.0
+-- Release date : 16/03/2009
+-- Author : Mathias Kleiner (mathias.kleiner@inria.fr)
+-- =============================================================================
+	
+-- Classes
+
+rule ObjectType2Class {
+	
+	from
+		s : SimpleSBVR!ObjectType
+	to
+		t : SimpleUML!Class (
+		
+			name <- s.representations->first().text.value
+		)
+		
+}
+
+-- DataTypes
+
+abstract rule DataType2DataType {
+	
+	from
+		s : SimpleSBVR!DataType
+	to
+		t : SimpleUML!DataType (
+		
+		)
+}
+
+-- PrimitiveTypes
+
+rule NonNegativeInteger2PrimitiveType extends DataType2DataType {
+	
+	from
+		s : SimpleSBVR!NonNegativeInteger
+	to
+		t : SimpleUML!PrimitiveType (
+		
+			name <- 'Integer'
+		)
+}
+
+rule NonEmptyString2PrimitiveType extends DataType2DataType {
+	
+	from
+		s : SimpleSBVR!NonEmptyString
+	to
+		t : SimpleUML!PrimitiveType (
+		
+			name <- 'String'
+		)
+}
+
+-- FactTypes
+
+-- Associations
+
+rule AssociativeFactType2Association  {
+	
+	from
+		s : SimpleSBVR!AssociativeFactType
+	to
+		t : SimpleUML!Association (
+			
+			name <- s.representations->first().text.value,
+			memberEnd <- Set{property1,property2}
+		),
+		property1 : SimpleUML!Property (
+			
+			name <- s.role1.nounConcept.representations->first().text.value,
+			type <- s.role1.nounConcept,
+			association <- t,
+			lowerValue <- s.getLowerValueForAssociativeFactType(s.role1),
+			upperValue <- s.getUpperValueForAssociativeFactType(s.role1),
+			classifier <- s.role2.nounConcept
+		),
+		property2 : SimpleUML!Property (
+			
+			name <- s.role2.nounConcept.representations->first().text.value,
+			type <- s.role2.nounConcept,
+			association <- t,
+			lowerValue <- s.getLowerValueForAssociativeFactType(s.role2),
+			upperValue <- s.getUpperValueForAssociativeFactType(s.role2),
+			classifier <- s.role1.nounConcept
+		)
+}
+
+-- Categorizations (Generalizations)
+
+rule CategorizationFactType2Generalization  {
+	
+	from
+		s : SimpleSBVR!CategorizationFactType
+	to
+		t : SimpleUML!Generalization (
+			
+			specific <- s.role1.nounConcept,
+			general <- s.role2.nounConcept
+		)
+}
+
+-- Properties (Attributes)
+
+rule IsPropertyOfFactType2Property  {
+	
+	from
+		s : SimpleSBVR!IsPropertyOfFactType
+	to
+		t : SimpleUML!Property (
+			
+			classifier <- s.role1.nounConcept,
+			type <- s.role2.nounConcept,
+			name <- s.role2.nounConcept.representations->first().text.value
+		)
+}
+--
+-- Objectifications (Instance specifications)
+
+rule ObjectificationFactType2InstanceSpecification  {
+	
+	from
+		s : SimpleSBVR!ObjectificationFactType
+	to
+		t : SimpleUML!InstanceSpecification (
+			
+			classifier <- s.role2.nounConcept,
+			name <- s.role1.nounConcept.representations->first().text.value
+		)
+}
+
+-- Helpers
+
+-- Those 2 helpers allow to retrieve the lower/upper values for an association, when there is an appropriate Quantification associated to the AssociativeFactType's Role
+
+helper context SimpleSBVR!AssociativeFactType def : getLowerValueForAssociativeFactType(ftr : SimpleSBVR!FactTypeRole) : Integer =
+	
+	let exact : SimpleSBVR!ExactlyNQuantification = SimpleSBVR!ExactlyNQuantification.allInstancesFrom('IN')->select(
+			i | i.scopesOver.isBasedOn = self and i.introducedVariable.rangesOver = ftr.nounConcept
+		)->first() in 
+	if(not exact.oclIsUndefined()) then exact.cardinality.value
+	else
+		let least : SimpleSBVR!AtLeastNQuantification = SimpleSBVR!AtLeastNQuantification.allInstancesFrom('IN')->select(
+				i | i.scopesOver.isBasedOn = self and i.introducedVariable.rangesOver = ftr.nounConcept
+			)->first() in 
+		if(not least.oclIsUndefined()) then least.minCardinality.value
+		else OclUndefined
+		endif
+	endif;
+
+helper context SimpleSBVR!AssociativeFactType def : getUpperValueForAssociativeFactType(ftr : SimpleSBVR!FactTypeRole) : Integer =
+	
+	let exact : SimpleSBVR!ExactlyNQuantification = SimpleSBVR!ExactlyNQuantification.allInstancesFrom('IN')->select(
+		i | i.scopesOver.isBasedOn = self and i.introducedVariable.rangesOver = ftr.nounConcept
+	)->first() in 
+	if(not exact.oclIsUndefined()) then exact.cardinality.value
+	else
+		let most : SimpleSBVR!AtMostNQuantification = SimpleSBVR!AtMostNQuantification.allInstancesFrom('IN')->select(
+			i | i.scopesOver.isBasedOn = self and i.introducedVariable.rangesOver = ftr.nounConcept
+	)->first() in 
+		if(not most.oclIsUndefined()) then most.maxCardinality.value
+		else OclUndefined
+		endif
+	endif;

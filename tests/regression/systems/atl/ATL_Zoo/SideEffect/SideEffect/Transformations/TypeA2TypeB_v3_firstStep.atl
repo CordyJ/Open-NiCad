@@ -1,0 +1,29 @@
+-- @path TypeA=/SideEffect/Metamodels/TypeA.ecore
+-- @path TypeB=/SideEffect/Metamodels/TypeB.ecore
+
+module TypeA2TypeB;
+create b : TypeB from a : TypeA;
+
+rule RootA2RootB {
+	from
+		rtA : TypeA!RootA
+	to
+		rtB : TypeB!RootB (
+			defs <- rtA.elms->iterate(e; res : Set(TypeA!ElementA) = Set {} |
+				if (res->collect(f | f.name)->includes(e.name)) then
+					res
+				else
+					res->including(e)
+				endif
+				)->collect(e | thisModule.Definition(e))
+		)
+}
+
+lazy rule Definition {
+	from
+		s : TypeA!ElementA
+	to
+		t : TypeB!DefinitionB(
+			name <- s.name
+		)
+}

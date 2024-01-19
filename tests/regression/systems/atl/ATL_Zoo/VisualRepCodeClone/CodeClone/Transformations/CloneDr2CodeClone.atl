@@ -1,0 +1,68 @@
+--@atlcompiler	atl2006
+--@name			CloneDr2CodeClone
+--@version		1.0
+--@domains		CloneDr, CodeClone
+--@authors		Yu Sun
+--@email        yusun@cis.uab.edu
+--@date			2007/12/02
+--@description	This transformation is used to transform the output of CloneDr into generic Code Clone DSL model.
+
+
+module CloneDr2CodeClone; -- Module Template
+create OUT : CodeClone from IN : CloneDr, IN2 : FileInfo;
+
+helper context CloneDr!CDUnit
+def : getFile() : CodeClone!File = 
+	(
+			CodeClone!File.allInstances() -> flatten() -> select(e | e.fileName = self.fileName) -> first()
+	);
+
+rule FileInfo2FileList {
+	from 
+		fi : FileInfo!FileInfo
+	to
+		fl : CodeClone!FileList (
+			files <- fi.file
+		)
+}
+
+rule File2File {
+	from 
+		f : FileInfo!File
+	to
+		ff : CodeClone!File (
+			fileName <- f.name,
+			totalFileLines <- f.totallines
+		)
+}
+
+rule CloneDr2CodeClone {
+	from
+		ss : CloneDr!CloneDr
+	to
+		codeClone : CodeClone!CodeClone (
+			sourceToolName <- 'CloneDr.',
+			groups <- ss.groups
+		)
+}
+
+rule CDGroup2CloneGroup {
+	from
+		ssg : CloneDr!CDGroup
+	to
+		cloneGroup : CodeClone!CloneGroup (
+			totalUnits <- ssg.units -> size(),
+			units <- ssg.units
+		)
+}
+
+rule CDUnit2CloneUnit {
+	from
+		ssu : CloneDr!CDUnit
+	to
+		cloneUnit : CodeClone!CloneUnit (
+			startLine <- ssu.startLine.toInteger(),
+			endLine <- ssu.endLine.toInteger(),
+			file <- ssu.getFile()
+		)
+}

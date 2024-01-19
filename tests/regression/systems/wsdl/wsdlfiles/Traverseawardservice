@@ -1,0 +1,587 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="Traverseawardservice" targetNamespace="http://webservices.traverse/wsdl" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:typens="Traverseawardservice" xmlns:types="http://webservices.traverse" xmlns:wsdlns="http://webservices.traverse/wsdl" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+  <types>
+    <xsd:schema targetNamespace="http://webservices.traverse" xmlns="http://www.w3.org/2001/XMLSchema">
+      <xsd:element name="Lms809sAwardService">
+      <xsd:complexType>
+         <xsd:choice>
+
+          <xsd:element name="request">
+           <xsd:complexType>
+            <xsd:sequence>
+             <xsd:element name="ImportMemberAward">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element minOccurs="0" name="IssueeFirstName">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="25"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="IssueeLastName">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="30"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="DsgnPartnerIdentifier">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="3"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="FlightDate">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:integer">
+                   <xsd:totalDigits value="8"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="FlightNumber">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="4"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ImportMemberAwardPackage">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element minOccurs="0" name="FkAwardHandlingCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="1"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element minOccurs="0" name="PnrIdentifier">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="6"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ImportAwardPackageRule">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element minOccurs="0" name="MileageDeductionAmount">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:integer">
+                   <xsd:totalDigits value="9"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ImportAwardPackage">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element minOccurs="0" name="Code">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="8"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ImportMemberAccount">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element minOccurs="0" name="Identifier">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="16"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ImportProgram">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element minOccurs="0" name="Identifier">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="3"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ImportFutureUseAtmSupplied">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element minOccurs="0" name="GenericText">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="254"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+            </xsd:sequence>
+
+            <xsd:attribute name="command" type="xsd:string"/>
+            <xsd:attribute name="clientId" type="xsd:string"/>
+            <xsd:attribute name="clientPassword" type="xsd:string"/>
+            <xsd:attribute name="nextLocation" type="xsd:string"/>
+            <xsd:attribute name="exitState" type="xsd:integer"/>
+            <xsd:attribute name="dialect" type="xsd:string"/>
+            <xsd:attribute name="comCfg" type="xsd:string"/>
+            <xsd:attribute name="serverLocation" type="xsd:string"/>
+            <xsd:attribute name="servletPath" type="xsd:string"/>
+            <xsd:attribute name="fileEncoding" type="xsd:string"/>
+            <xsd:attribute name="tracing" type="xsd:boolean"/>
+
+           </xsd:complexType>
+          </xsd:element>
+
+          <xsd:element name="response">
+           <xsd:complexType>
+            <xsd:sequence>
+             <xsd:element name="ExportAddressFields">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element name="StreetAddressLine1Text">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="50"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="StreetAddressLine2Text">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="50"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="StreetAddressLine3Text">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="50"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="StreetAddressLine4Text">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="50"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="CityName">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="30"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="StateProvinceName">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="20"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="PostalCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="10"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="FkCountryCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="2"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ExportAwardPackage">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element name="Code">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="8"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="Description">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="30"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="GroupExport">
+              <xsd:complexType>
+               <xsd:sequence>
+                <xsd:element maxOccurs="4" minOccurs="0" name="row">
+                 <xsd:complexType>
+                  <xsd:sequence>
+                   <xsd:element name="RepeatExportAward">
+                    <xsd:complexType>
+                     <xsd:sequence>
+
+                      <xsd:element name="FkAwardTypeCode">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                         <xsd:maxLength value="1"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                      <xsd:element name="Description">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                         <xsd:maxLength value="20"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                      <xsd:element name="CertificateExpirationDate">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:integer">
+                         <xsd:totalDigits value="8"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                      <xsd:element name="TicketDesignatorCode">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                         <xsd:maxLength value="13"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                     </xsd:sequence>
+                    </xsd:complexType>
+                   </xsd:element>
+                   <xsd:element name="RepeatExportPartner">
+                    <xsd:complexType>
+                     <xsd:sequence>
+
+                      <xsd:element name="Name">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                         <xsd:maxLength value="30"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                     </xsd:sequence>
+                    </xsd:complexType>
+                   </xsd:element>
+                   <xsd:element name="RepeatExportMemberAward">
+                    <xsd:complexType>
+                     <xsd:sequence>
+
+                      <xsd:element name="IssueeFirstName">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                         <xsd:maxLength value="25"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                      <xsd:element name="IssueeLastName">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                         <xsd:maxLength value="30"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                      <xsd:element name="DsgnPartnerIdentifier">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                         <xsd:maxLength value="3"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                      <xsd:element name="AirlineNumber">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                         <xsd:maxLength value="3"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                      <xsd:element name="AirlineFormNumber">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                         <xsd:maxLength value="2"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                      <xsd:element name="CertificateSerialNumber">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:integer">
+                         <xsd:totalDigits value="7"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                      <xsd:element name="CertificateCheckDigit1">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                         <xsd:maxLength value="1"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                      <xsd:element name="CertificateCheckDigit2">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                         <xsd:maxLength value="1"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                      <xsd:element name="FlightDate">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:integer">
+                         <xsd:totalDigits value="8"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                      <xsd:element name="FlightNumber">
+                       <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                         <xsd:maxLength value="4"/>
+                        </xsd:restriction>
+                       </xsd:simpleType>
+                      </xsd:element>
+
+                     </xsd:sequence>
+                    </xsd:complexType>
+                   </xsd:element>
+                  </xsd:sequence>
+                 </xsd:complexType>
+                </xsd:element>
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ExportMemberAwardPackage">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element name="FkAwardHandlingCode">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="1"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="PnrIdentifier">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="6"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ExportAwardPackageRule">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element name="MileageDeductionAmount">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:integer">
+                   <xsd:totalDigits value="9"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ExportMemberAccount">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element name="Identifier">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="16"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+                <xsd:element name="DsgnPrizeEligibleMileBalance">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:integer">
+                   <xsd:totalDigits value="9"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ExportProgram">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element name="Identifier">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="3"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+             <xsd:element name="ExportFutureUseAtmSupplied">
+              <xsd:complexType>
+               <xsd:sequence>
+
+                <xsd:element name="GenericText">
+                 <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                   <xsd:maxLength value="254"/>
+                  </xsd:restriction>
+                 </xsd:simpleType>
+                </xsd:element>
+
+               </xsd:sequence>
+              </xsd:complexType>
+             </xsd:element>
+            </xsd:sequence>
+
+            <xsd:attribute name="command" type="xsd:string"/>
+            <xsd:attribute name="exitState" type="xsd:integer"/>
+            <xsd:attribute name="exitStateType">
+             <xsd:simpleType>
+              <xsd:restriction base="xsd:string">
+               <xsd:enumeration value="OK"/>
+               <xsd:enumeration value="Informational"/>
+               <xsd:enumeration value="Warning"/>
+               <xsd:enumeration value="Error"/>
+              </xsd:restriction>
+             </xsd:simpleType>
+            </xsd:attribute>
+            <xsd:attribute name="exitStateMsg" type="xsd:string"/>
+
+           </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="error">
+           <xsd:complexType>
+            <xsd:sequence>
+             <xsd:element minOccurs="0" name="number" type="xsd:string"/>
+             <xsd:element minOccurs="0" name="type" type="xsd:string"/>
+             <xsd:element minOccurs="0" name="description" type="xsd:string"/>
+             <xsd:element minOccurs="0" name="trace" type="xsd:string"/>
+            </xsd:sequence>
+           </xsd:complexType>
+          </xsd:element>
+         </xsd:choice>
+      </xsd:complexType>
+      </xsd:element>
+    </xsd:schema>
+  </types>
+
+  <message name="Lms809sAwardServiceIn">
+    <part element="types:Lms809sAwardService" name="Lms809sAwardService"/>
+  </message>
+  <message name="Lms809sAwardServiceOut">
+    <part element="types:Lms809sAwardService" name="Lms809sAwardService"/>
+  </message>
+
+
+  <portType name="TraverseawardservicePort">
+    <operation name="Lms809sAwardService">
+      <input message="wsdlns:Lms809sAwardServiceIn"/>
+      <output message="wsdlns:Lms809sAwardServiceOut"/>
+    </operation>
+
+  </portType>
+
+  <binding name="TraverseawardserviceBinding" type="wsdlns:TraverseawardservicePort">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="Lms809sAwardService">
+      <soap:operation soapAction="Traverseawardservice"/>
+      <input>
+        <soap:body namespace="https://emergo2.sabre.com/traverseWS/services/Traverseawardservice" use="literal"/>
+      </input>
+      <output>
+        <soap:body namespace="https://emergo2.sabre.com/traverseWS/services/Traverseawardservice" use="literal"/>
+      </output>
+    </operation>
+  </binding>
+
+  <service name="Traverseawardservice">
+    <documentation>
+Traverse Award Service
+    </documentation>
+    <port binding="wsdlns:TraverseawardserviceBinding" name="TraverseawardservicePort">
+      <soap:address location="https://emergo2.sabre.com/traverseWS/services/Traverseawardservice"/>
+    </port>
+  </service>
+</definitions>

@@ -1,0 +1,94 @@
+module PNML2PetriNet;
+create OUT : PetriNet from IN : PNML;
+
+-- The PetriNet rule generates a PetriNet which corresponds to the input NetElement included in the PNMLDocument. 
+-- Name of the generated PetriNet is copied from the one of the input NetElement, by recovering the value of the PNML Label included in the PNML Name of the NetElement.
+-- Its set of Elements is the corresponding set named “elementsSet” calculated in the using clause.
+-- And its set of Arcs is the corresponding set named “arcsSet” calculated in the using clause.
+rule PetriNet {
+	from
+		n : PNML!PNMLDocument
+	using{
+			elementsSet : Set(PetriNet!Element) =
+				PNML!NetContentElement.allInstances();
+	
+			arcsSet : Set(PetriNet!Arc) =
+				PNML!Arc.allInstances();			
+		}
+	to
+		p : PetriNet!PetriNet
+		(
+			location <- n.location,
+			name <- n.nets.first().name.labels.first().text,
+			elements <- elementsSet,
+			arcs <- arcsSet
+		)
+}
+
+-- The Place rule generates a Place which corresponds to the input Place. 
+-- Name of the generated Place is copied from the one of the input Place , by recovering the value of the PNML Label included in the PNML Name of the PNML Place.
+rule Place {
+	from
+		n : PNML!Place
+	to
+		p : PetriNet!Place
+		(
+			location <- n.location,
+			name <- n.name.labels.first().text,
+			net <- n.net.document
+		)
+}
+
+-- The Transition rule generates a Transition which corresponds to the input Transition . 
+-- Name of the generated Transition is copied from the one of the input Transition , by recovering the value of the PNML Label included in the PNML Name of the PNML Transition .
+rule Transition {
+	from
+		n : PNML!Transition
+	to
+		p : PetriNet!Transition
+		(
+			location <- n.location,
+			name <- n.name.labels.first().text,
+			net <- n.net.document
+		)
+}
+
+-- The PlaceToTransition rule generates a PlaceToTransition which corresponds to the input Arc which has a Place for source and a Transition for Target. 
+-- Name of the generated PlaceToTransition is copied from the one of the input Arc, by recovering the value of the PNML Label included in the PNML Name of the PNML Arc.
+-- Its from and to references are also copied from the input Arc and correspond respectively to the source and target references.
+rule PlaceToTransition {
+	from
+		n : PNML!Arc 
+		(	-- arc source must be a place and arc target a transition
+			n.source.oclIsKindOf(PNML!Place) and n.target.oclIsKindOf(PNML!Transition)
+		)
+	to
+		p : PetriNet!PlaceToTransition
+		(
+			location <- n.location,
+			name <- n.name.labels.first().text,
+			net <- n.net.document,
+			"from" <- n.source,
+			"to" <- n.target
+		)
+}
+
+-- The TransitionToPlace rule generates a TransitionToPlace which corresponds to the input Arc which has a Transition for source and a Place for Target.
+-- Name of the generated TransitionToPlace is copied from the one of the input Arc, by recovering the value of the PNML Label included in the PNML Name of the PNML Arc.
+-- Its from and to references are also copied from the input Arc and correspond respectively to the source and target references.
+rule TransitionToPlace {
+	from
+		n : PNML!Arc 
+		(	-- arc source must be a transition and arc target a place
+			n.source.oclIsKindOf(PNML!Transition) and n.target.oclIsKindOf(PNML!Place)
+		)
+	to
+		p : PetriNet!TransitionToPlace
+		(
+			location <- n.location,
+			name <- n.name.labels.first().text,
+			net <- n.net.document,
+			"from" <- n.source,
+			"to" <- n.target
+		)
+}

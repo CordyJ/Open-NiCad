@@ -1,0 +1,181 @@
+-- @name		Replacing inheritance by association
+-- @version		1.0
+-- @domains		Catalogue of Model Transformations
+-- @authors		Baudry Julien (jul.baudry<at>gmail.com)
+-- @date		2006/08/02
+-- @description	The purpose of this transformation is to replace inheritances by associations
+-- @see http://www.dcs.kcl.ac.uk/staff/kcl/tcat.pdf   
+-- @see section 1.1, page 2
+-- @see author of article : K. Lano
+
+module Replace; -- Module Template
+create OUT : KM3target from IN : KM3;
+
+--@begin rule Metamodel
+--entrypoint rule Metamodel() {
+--	do {
+--		KM3!Metamodel.allInstances().debug('metamodels');
+--		KM3!Package.allInstances().debug('packages');
+--		KM3!Class.allInstances().debug('classes');
+--	}
+--}
+--@end rule Metamodel
+
+--@begin rule Metamodel
+rule Metamodel {
+	from
+		inputMm:KM3!Metamodel
+	to
+		outputMm:KM3target!Metamodel (
+			location <- inputMm.location,
+			contents <- inputMm.contents
+		)
+}
+--@end rule Metamodel
+
+--@begin rule Package
+rule Package {
+	from
+		inputPkg:KM3!Package
+	to
+		outputPkg:KM3target!Package (
+			name <- inputPkg.name,
+			contents <- inputPkg.contents
+		)
+}
+--@end rule Package
+
+--@begin rule ClassA
+rule ClassA {
+	from
+		inputA:KM3!Class (
+			inputA.supertypes.isEmpty()
+		)
+	to
+		outputA:KM3target!Class (
+			name <- inputA.name,
+			isAbstract <- inputA.isAbstract
+		)
+}
+--@end rule ClassA
+
+--@begin rule ClassB
+rule ClassB {
+	from
+		inputB:KM3!Class (
+			not(inputB.supertypes.isEmpty())
+		)
+	to
+		outputB:KM3target!Class (
+			name <- inputB.name,
+			isAbstract <- inputB.isAbstract,
+			structuralFeatures <- inputB.supertypes->iterate(a;acc : Sequence(KM3!StructuralFeature) = Sequence{}|
+																acc->including(thisModule.Inherit2Association(a,inputB))
+															)
+		)
+}
+--@end rule ClassB
+
+--@begin Inherit2Association
+lazy rule Inherit2Association {
+	from
+		supertype:KM3!Class,
+		children:KM3!Class
+	to
+		refChildren : KM3target!Reference (
+			name <- 'inherit'+supertype.name,
+			opposite <- refSupertype,
+			owner <- children,
+			type <- supertype,
+			lower <- 1,
+			upper <- 1
+		),
+
+		refSupertype : KM3target!Reference( 
+			name <- 'children'+children.name,
+			opposite <- refChildren,
+			owner <- supertype,
+			type <- children,
+			lower <- 1,
+			upper <- 1
+		)	
+}
+--@end Inherit2Association
+
+--@begin rule attribute 
+rule attribute {
+	from
+		inputAtt:KM3!Attribute 
+	to
+		outputAtt:KM3target!Attribute(
+			name <- inputAtt.name,
+			isOrdered <- inputAtt.isOrdered,
+			isUnique <- inputAtt.isUnique,
+			location <- inputAtt.location,
+			lower <- inputAtt.lower,
+			upper <- inputAtt.upper,
+			type <- inputAtt.type,
+			owner <- inputAtt.owner
+			
+		)
+}
+--@end rule attribute
+
+--@begin rule DataType
+rule DataType {
+from
+		inputData:KM3!DataType
+	to
+		outputData:KM3target!DataType(
+			name <- inputData.name,
+			location <- inputData.location
+		)
+}
+--@end rule DataType
+
+--@begin reference
+rule reference {
+	from
+		inputRef:KM3!Reference 
+	to
+		outputRef:KM3target!Reference (
+			name <- inputRef.name,
+			isOrdered <- inputRef.isOrdered,
+			isUnique <- inputRef.isUnique,
+			location <- inputRef.location,
+			lower <- inputRef.lower,
+			upper <- inputRef.upper,
+			type <- inputRef.type,
+			owner <- inputRef.owner,
+			opposite <- inputRef.opposite
+		)
+}
+--@end reference
+
+--@begin enumeration
+rule enumeration {
+	from
+		inputEnum:KM3!Enumeration 
+	to
+		outputEnum:KM3target!Enumeration (
+			location <- inputEnum.location,
+			name  <- inputEnum.name,
+			package  <- inputEnum.package
+		)
+
+}
+--@end enumeration
+
+--@begin literal
+rule literal {
+	from
+		inputEnum:KM3!EnumLiteral
+	to
+		outputEnum:KM3target!EnumLiteral (
+			location <- inputEnum.location,
+			name  <- inputEnum.name,
+			enum  <- inputEnum.enum
+		)
+
+}
+--@end literal

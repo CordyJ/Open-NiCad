@@ -1,0 +1,18 @@
+#!/bin/bash
+# NiCad 7.0 utility - split NiCad clone class source reports into clone source files
+# J.R. Cordy, Queen's University, March 2013
+
+if [ ! -f "${1%.*}.xml" ]
+then
+    echo "Usage: nicadsplit nicadclones/system-name/system-name_granularity-clones/system-name_granularity-clones-threshold-classes-withsource.xml"
+    echo "  (output in nicadclones/system-name/system-name_granularity-clones/system-name_granularity-clones-threshold-classes-withsource/*)"
+    echo ""
+    exit 99
+fi
+
+echo "Splitting clone class source report into clone source files"
+./scripts/splitclasses.sh "${1}"
+
+echo "Done, output in ${1%.*}"
+
+# Rev 15.1.24

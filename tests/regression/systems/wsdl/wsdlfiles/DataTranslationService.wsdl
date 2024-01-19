@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<definitions name="DataTranslationService" targetNamespace="http://spdf.gsfc.nasa.gov" xmlns:tns="http://spdf.gsfc.nasa.gov" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:ns2="http://java.sun.com/jax-rpc-ri/internal" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/">
+
+  <types>
+    <schema targetNamespace="http://spdf.gsfc.nasa.gov" xmlns:tns="http://spdf.gsfc.nasa.gov" xmlns:soap11-enc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ns2="http://java.sun.com/jax-rpc-ri/internal" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns="http://www.w3.org/2001/XMLSchema">
+      <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+      <import namespace="http://java.sun.com/jax-rpc-ri/internal"/>
+      <complexType name="ArrayOfdatahandler">
+        <complexContent>
+          <restriction base="soap11-enc:Array">
+            <attribute ref="soap11-enc:arrayType" wsdl:arrayType="ns2:datahandler[]"/>
+          </restriction>
+        </complexContent>
+      </complexType>
+      <complexType name="ArrayOfstring">
+        <complexContent>
+          <restriction base="soap11-enc:Array">
+            <attribute ref="soap11-enc:arrayType" wsdl:arrayType="string[]"/>
+          </restriction>
+        </complexContent>
+      </complexType>
+    </schema>
+
+    <schema targetNamespace="http://java.sun.com/jax-rpc-ri/internal" xmlns:tns="http://java.sun.com/jax-rpc-ri/internal" xmlns:soap11-enc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns="http://www.w3.org/2001/XMLSchema">
+      <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+      <import namespace="http://spdf.gsfc.nasa.gov"/>
+      <simpleType name="datahandler">
+        <restriction base="base64Binary"/></simpleType>
+    </schema>
+  </types>
+
+  <message name="DataTranslationIF_isDeployed"/>
+  <message name="DataTranslationIF_isDeployedResponse">
+    <part name="result" type="xsd:string"/></message>
+  <message name="DataTranslationIF_translateFile">
+    <part name="DataHandler_1" type="ns2:datahandler"/>
+    <part name="String_2" type="xsd:string"/>
+    <part name="String_3" type="xsd:string"/>
+    <part name="String_4" type="xsd:string"/></message>
+  <message name="DataTranslationIF_translateFileResponse">
+    <part name="result" type="xsd:string"/></message>
+  <message name="DataTranslationIF_translateFiles">
+    <part name="arrayOfDataHandler_1" type="tns:ArrayOfdatahandler"/>
+    <part name="arrayOfString_2" type="tns:ArrayOfstring"/>
+    <part name="arrayOfString_3" type="tns:ArrayOfstring"/>
+    <part name="String_4" type="xsd:string"/></message>
+  <message name="DataTranslationIF_translateFilesResponse">
+    <part name="result" type="tns:ArrayOfstring"/></message>
+  <message name="DataTranslationIF_translateFileswithMappings">
+    <part name="arrayOfDataHandler_1" type="tns:ArrayOfdatahandler"/>
+    <part name="arrayOfString_2" type="tns:ArrayOfstring"/>
+    <part name="arrayOfString_3" type="tns:ArrayOfstring"/>
+    <part name="arrayOfDataHandler_4" type="tns:ArrayOfdatahandler"/>
+    <part name="arrayOfString_5" type="tns:ArrayOfstring"/>
+    <part name="arrayOfString_6" type="tns:ArrayOfstring"/>
+    <part name="String_7" type="xsd:string"/></message>
+  <message name="DataTranslationIF_translateFileswithMappingsResponse">
+    <part name="result" type="tns:ArrayOfstring"/></message>
+  <message name="DataTranslationIF_translateFilewithMapping">
+    <part name="DataHandler_1" type="ns2:datahandler"/>
+    <part name="String_2" type="xsd:string"/>
+    <part name="String_3" type="xsd:string"/>
+    <part name="DataHandler_4" type="ns2:datahandler"/>
+    <part name="String_5" type="xsd:string"/>
+    <part name="String_6" type="xsd:string"/>
+    <part name="String_7" type="xsd:string"/></message>
+  <message name="DataTranslationIF_translateFilewithMappingResponse">
+    <part name="result" type="xsd:string"/></message>
+  <message name="DataTranslationIF_translateRemoteFile">
+    <part name="String_1" type="xsd:string"/>
+    <part name="String_2" type="xsd:string"/>
+    <part name="String_3" type="xsd:string"/></message>
+  <message name="DataTranslationIF_translateRemoteFileResponse">
+    <part name="result" type="xsd:string"/></message>
+  <message name="DataTranslationIF_translateRemoteFiles">
+    <part name="arrayOfString_1" type="tns:ArrayOfstring"/>
+    <part name="arrayOfString_2" type="tns:ArrayOfstring"/>
+    <part name="String_3" type="xsd:string"/></message>
+  <message name="DataTranslationIF_translateRemoteFilesResponse">
+    <part name="result" type="tns:ArrayOfstring"/></message>
+  <message name="DataTranslationIF_translateRemoteFileswithMappings">
+    <part name="arrayOfString_1" type="tns:ArrayOfstring"/>
+    <part name="arrayOfString_2" type="tns:ArrayOfstring"/>
+    <part name="arrayOfString_3" type="tns:ArrayOfstring"/>
+    <part name="arrayOfString_4" type="tns:ArrayOfstring"/>
+    <part name="String_5" type="xsd:string"/></message>
+  <message name="DataTranslationIF_translateRemoteFileswithMappingsResponse">
+    <part name="result" type="tns:ArrayOfstring"/></message>
+  <message name="DataTranslationIF_translateRemoteFilewithMapping">
+    <part name="String_1" type="xsd:string"/>
+    <part name="String_2" type="xsd:string"/>
+    <part name="String_3" type="xsd:string"/>
+    <part name="String_4" type="xsd:string"/></message>
+  <message name="DataTranslationIF_translateRemoteFilewithMappingResponse">
+    <part name="result" type="xsd:string"/></message>
+
+  <portType name="DataTranslationIF">
+    <operation name="isDeployed">
+      <input message="tns:DataTranslationIF_isDeployed"/>
+      <output message="tns:DataTranslationIF_isDeployedResponse"/></operation>
+    <operation name="translateFile" parameterOrder="DataHandler_1 String_2 String_3 String_4">
+      <input message="tns:DataTranslationIF_translateFile"/>
+      <output message="tns:DataTranslationIF_translateFileResponse"/></operation>
+    <operation name="translateFiles" parameterOrder="arrayOfDataHandler_1 arrayOfString_2 arrayOfString_3 String_4">
+      <input message="tns:DataTranslationIF_translateFiles"/>
+      <output message="tns:DataTranslationIF_translateFilesResponse"/></operation>
+    <operation name="translateFileswithMappings" parameterOrder="arrayOfDataHandler_1 arrayOfString_2 arrayOfString_3 arrayOfDataHandler_4 arrayOfString_5 arrayOfString_6 String_7">
+      <input message="tns:DataTranslationIF_translateFileswithMappings"/>
+      <output message="tns:DataTranslationIF_translateFileswithMappingsResponse"/></operation>
+    <operation name="translateFilewithMapping" parameterOrder="DataHandler_1 String_2 String_3 DataHandler_4 String_5 String_6 String_7">
+      <input message="tns:DataTranslationIF_translateFilewithMapping"/>
+      <output message="tns:DataTranslationIF_translateFilewithMappingResponse"/></operation>
+    <operation name="translateRemoteFile" parameterOrder="String_1 String_2 String_3">
+      <input message="tns:DataTranslationIF_translateRemoteFile"/>
+      <output message="tns:DataTranslationIF_translateRemoteFileResponse"/></operation>
+    <operation name="translateRemoteFiles" parameterOrder="arrayOfString_1 arrayOfString_2 String_3">
+      <input message="tns:DataTranslationIF_translateRemoteFiles"/>
+      <output message="tns:DataTranslationIF_translateRemoteFilesResponse"/></operation>
+    <operation name="translateRemoteFileswithMappings" parameterOrder="arrayOfString_1 arrayOfString_2 arrayOfString_3 arrayOfString_4 String_5">
+      <input message="tns:DataTranslationIF_translateRemoteFileswithMappings"/>
+      <output message="tns:DataTranslationIF_translateRemoteFileswithMappingsResponse"/></operation>
+    <operation name="translateRemoteFilewithMapping" parameterOrder="String_1 String_2 String_3 String_4">
+      <input message="tns:DataTranslationIF_translateRemoteFilewithMapping"/>
+      <output message="tns:DataTranslationIF_translateRemoteFilewithMappingResponse"/></operation>
+  </portType>
+
+  <binding name="DataTranslationIFBinding" type="tns:DataTranslationIF">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="rpc"/>
+    <operation name="isDeployed">
+      <soap:operation soapAction=""/>
+      <input>
+        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" use="encoded" namespace="http://spdf.gsfc.nasa.gov"/></input>
+      <output>
+        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" use="encoded" namespace="http://spdf.gsfc.nasa.gov"/></output></operation>
+    <operation name="translateFile">
+      <soap:operation soapAction=""/>
+      <input>
+        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" use="encoded" namespace="http://spdf.gsfc.nasa.gov"/></input>
+      <output>
+        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" use="encoded" namespace="http://spdf.gsfc.nasa.gov"/></output></operation>
+    <operation name="translateFiles">
+      <soap:operation soapAction=""/>
+      <input>
+        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" use="encoded" namespace="http://spdf.gsfc.nasa.gov"/></input>
+      <output>
+        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" use="encoded" namespace="http://spdf.gsfc.nasa.gov"/></output></operation>
+    <operation name="translateFileswithMappings">
+      <soap:operation soapAction=""/>
+      <input>
+        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" use="encoded" namespace="http://spdf.gsfc.nasa.gov"/></input>
+      <output>
+        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" use="encoded" namespace="http://spdf.gsfc.nasa.gov"/></output></operation>
+    <operation name="translateFilewithMapping">
+      <soap:operation soapAction=""/>
+      <input>
+        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" use="encoded" namespace="http://spdf.gsfc.nasa.gov"/></input>
+      <output>
+        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" use="encoded" namespace="http://spdf.gsfc.nasa.gov"/></output></operation>
+    <operation name="translateRemoteFile">
+      <soap:operation soapAction=""/>
+      <input>
+        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" use="encoded" namespace="http://spdf.gsfc.nasa.gov"/></input>
+      <output>
+        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" use="encoded" namespace="http://spdf.gsfc.nasa.gov"/></output></operation>
+    <operation name="translateRemoteFiles">
+      <soap:operation soapAction=""/>
+      <input>
+        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" use="encoded" namespace="http://spdf.gsfc.nasa.gov"/></input>
+      <output>
+        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" use="encoded" namespace="http://spdf.gsfc.nasa.gov"/></output></operation>
+    <operation name="translateRemoteFileswithMappings">
+      <soap:operation soapAction=""/>
+      <input>
+        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" use="encoded" namespace="http://spdf.gsfc.nasa.gov"/></input>
+      <output>
+        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" use="encoded" namespace="http://spdf.gsfc.nasa.gov"/></output></operation>
+    <operation name="translateRemoteFilewithMapping">
+      <soap:operation soapAction=""/>
+      <input>
+        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" use="encoded" namespace="http://spdf.gsfc.nasa.gov"/></input>
+      <output>
+        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" use="encoded" namespace="http://spdf.gsfc.nasa.gov"/></output></operation>
+  </binding>
+
+  <service name="DataTranslationService">
+    <port name="DataTranslationIFPort" binding="tns:DataTranslationIFBinding">
+      <soap:address location="http://translators.gsfc.nasa.gov/dt/dtservice"/>
+    </port>
+  </service>
+</definitions>

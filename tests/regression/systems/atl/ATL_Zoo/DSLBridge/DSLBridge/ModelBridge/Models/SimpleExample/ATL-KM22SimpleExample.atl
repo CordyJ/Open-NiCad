@@ -1,0 +1,51 @@
+module KM22SimpleExample;
+create OUT : SimpleExample from IN : KM2;
+
+uses KM2Tools;
+
+rule ConceptA {
+  from
+    me : KM2!ModelElement
+    (
+      me.name = 'ConceptA'
+    )
+  to
+    c : SimpleExample!ConceptA(
+      Bs <- me.getSet('Bs'),
+      Cs <- me.getSet('Cs')
+    )
+}
+
+rule BReferencesC {
+  from
+    me : KM2!ModelElement
+    (
+      me.name = 'BReferencesC'
+    )
+  to
+    c : SimpleExample!BReferencesC(
+      Property <- me.getStringProperty('Property')
+    )
+}
+
+rule ConceptC {
+  from
+    me : KM2!ModelElement
+    (
+      me.name = 'ConceptC'
+    )
+  to
+    c : SimpleExample!ConceptC(
+      ReferringBs <- me.getRefSet('ReferringBs')
+    )
+}
+
+rule ConceptB {
+  from
+    me : KM2!ModelElement
+    (
+      me.name = 'ConceptB'
+    )
+  to
+    c : SimpleExample!ConceptB
+}

@@ -1,0 +1,183 @@
+--@name Table2SVG
+--@version 1.0
+--@domains Table, SVG, Bar chart
+--@authors Eric Vepa (eric.vepa <at> gmail.com)
+--@date 2006/08/04
+--@description This transformation is used to transform generic tables into SVG bar charts. Each entry table is a two columns table (two cells per row). The first row contains two cells with a String (the first cell contains the String 'Bar Chart' and the second cell, the name of the chart). The other rows contains one cell with a name as String and an other cell with the value as Double.
+
+module Table2SVG; -- Module Template
+create OUT : SVG from IN : Table;
+
+--@begin attribute helper allValidTables
+--@comments returns all valid tables, ie tables which can be represented as bar chart
+helper def : allValidTables : Sequence(Table!Table) =
+	Table!Table.allInstances()->select(t|t.rows->first().cells->first().content = 'Bar Chart')->
+		asSet()->sortedBy(t|t.rows->first().cells->at(2).content);
+--@end attribute helper allValidTables
+
+--@begin helper maxSizeName
+--@comments returns the max size of all name of a table
+helper context Table!Table def : maxSizeName() : Integer =
+	self.rows->subSequence(2,self.rows->size())->iterate(row; max:Integer=0|
+		let value : Integer =
+			let point : Integer = row.cells->at(2).content->indexOf('.') in
+				(row.cells->first().content + row.cells->at(2).content->substring(1,point+2))->size() + 2 in
+				if value > max
+					then value
+					else max
+				endif)*7;
+--@end helper maxSizeName
+
+--@begin attribute helper prevRectWidth
+--@comments returns the previous value of SVG rect width
+helper def : prevRectWidth : Integer = 0;
+--@end attribute helper prevRectWidth
+
+--@begin entrypoint rule SvgFile
+--@comments creates the SVG file with one svg tag
+helper def: svgFile : SVG!SvgFile = OclUndefined;
+
+entrypoint rule SvgFile() {
+	to
+		svgFile:SVG!SvgFile (
+			tag <- svg
+		),
+		svg:SVG!Svg (
+			size <- svgSize,
+			namespace <- 'http://www.w3.org/2000/svg',
+			version <- '1.1'
+		),
+		svgSize:SVG!Dimension (
+			width <- thisModule.allValidTables->iterate(table; sum:Integer=0|
+				sum + table.maxSizeName() + 170),
+			height <- thisModule.allValidTables->iterate(table; max:Integer=0|
+				if (table.rows.size()-1) > max
+					then (table.rows.size()-1)
+					else max
+				endif)*10 + 50)
+	do {
+		thisModule.svgFile <- svgFile;
+		for (table in thisModule.allValidTables) {
+			thisModule.Table2BarChart(table);
+		}
+	}
+}
+--@end entrypoint rule SvgFile
+--
+--@begin lazy rule Table2BarChart
+--@comments creates a bar chart (SVG group) for one valid table
+lazy rule Table2BarChart {
+	from
+		table:Table!Table (
+			table.rows->first().cells->first().content = 'Bar Chart'
+		)
+	using {
+		rows : Sequence(Table!Row) = table.rows->subSequence(2,table.rows->size());
+		scaleFactor : Real = 135/rows->iterate(row; max:Real=0|
+			if row.cells->at(2).content.toReal() > max
+				then row.cells->at(2).content.toReal()
+				else max
+			endif);
+	}
+	to
+		g:SVG!G (
+			attribute <- transl,
+			attribute <- scale,
+			groupContent <- text,
+			groupContent <- rect,
+			groupContent <- axis,
+			groupContent <- rows->iterate(row; acc:Sequence(SVG!G)=Sequence{}|
+				acc->including(thisModule.Row2Bar(rows.indexOf(row),scaleFactor,row)))
+		),
+		rect:SVG!Rect (
+			size <- rectSize,
+			position <- rectCoord,
+			fill <- 'none',
+			stroke <- 'blue'
+		),
+		rectSize:SVG!Dimension (
+			width <- 5+table.maxSizeName()+5+145+5,
+			height <- (table.rows.size()+1)*10
+		),
+		rectCoord:SVG!AbsoluteCoord (
+			x <- 0-table.maxSizeName()-5,
+			y <- 0-5
+		),
+		transl:SVG!Translate (
+			tx <- table.maxSizeName()+10 + thisModule.prevRectWidth,
+			ty <- 10
+		),
+		scale:SVG!Scale (
+			sx <- 1,
+			sy <- scale.sx
+		),
+		axis:SVG!Path (
+			d <- 'M145,0 H0 V' + (table.rows.size()*10).toString() + ',0 z',
+			fill <- 'none',
+			stroke <- 'black'
+		),
+		text:SVG!Text (
+			position <- textCoord,
+			stroke <- 'blue',
+			fontSize <- '12',
+			--@comments text-anchor value strored in lengthAdjust attribute
+			lengthAdjust <- 'middle',
+			content <- table.rows->first().cells->at(2).content
+		),
+		textCoord:SVG!AbsoluteCoord (
+			x <- rectSize.width/2-table.maxSizeName(),
+			y <- rectSize.height+10
+		)
+		
+	do {
+		thisModule.prevRectWidth <- thisModule.prevRectWidth + rectSize.width + 5;
+		thisModule.svgFile.tag.children <- g;
+	}
+}
+--@end lazy rule Table2BarChart
+
+--@begin lazy rule Row2Bar
+--@comments creates a bar (SVG line) for the row at position given
+lazy rule Row2Bar {
+	from
+		position:Integer,
+		scaleFactor:Real,
+		row:Table!Row
+	using {
+		value : String =
+			let point : Integer = row.cells->at(2).content->indexOf('.') in
+				row.cells->at(2).content->substring(1,point+2);
+	}
+	to
+		g:SVG!G (
+			groupContent <- text,
+			groupContent <- bar
+		),
+		bar:SVG!Rect (
+			size <- barSize,
+			position <- barCoord,
+			fill <- 'blue',
+			stroke <- 'black'
+		),
+		barSize:SVG!Dimension (
+			width <- row.cells->at(2).content.toReal()*scaleFactor,
+			height <- 10
+		),
+		barCoord:SVG!AbsoluteCoord (
+			x <- 0,
+			y <-barSize.height*(position-1)
+		),
+		text:SVG!Text (
+			position <- txtCoord,
+			stroke <- 'blue',
+			fontSize <- '8',
+			--@comments text-anchor value strored in lengthAdjust attribute
+			lengthAdjust <- 'end',
+			content <- row.cells->first().content + ' (' + value + ')'
+		),
+		txtCoord:SVG!AbsoluteCoord (
+			x <- 0-5,
+			y <- barCoord.y+barSize.height-1
+		)
+}
+--@end lazy rule Row2Bar

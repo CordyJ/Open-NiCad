@@ -1,0 +1,423 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<wsdl:definitions
+    targetNamespace="http://ls.amazonaws.com/doc/2007-06-05/"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:wsa="http://www.w3.org/2005/08/addressing"
+    xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"
+    xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/08/addressing/policy"
+    xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+    xmlns:tns="http://ls.amazonaws.com/doc/2007-06-05/">
+
+  <wsp:Policy wsu:Id="CertificateOverTransportPolicy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:TransportBinding xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <wsp:Policy>
+            <sp:TransportToken>
+              <wsp:Policy>
+                <sp:HttpsToken RequireClientCertificate="false"/>
+              </wsp:Policy>
+            </sp:TransportToken>
+            <sp:AlgorithmSuite>
+              <wsp:Policy>
+                <sp:Basic256/>
+              </wsp:Policy>
+            </sp:AlgorithmSuite>
+            <sp:Layout>
+              <wsp:Policy>
+                <sp:Lax/>
+              </wsp:Policy>
+            </sp:Layout>
+            <sp:IncludeTimestamp/>
+          </wsp:Policy>
+        </sp:TransportBinding>
+        <sp:EndorsingSupportingTokens xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <wsp:Policy>
+            <sp:X509Token sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/AlwaysToRecipient">
+              <wsp:Policy>
+                <sp:RequireThumbprintReference />
+                <sp:WssX509V3Token10 />
+              </wsp:Policy>
+            </sp:X509Token>
+          </wsp:Policy>
+        </sp:EndorsingSupportingTokens>
+        <sp:Wss10 xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <wsp:Policy>
+            <sp:MustSupportRefKeyIdentifier />
+            <sp:MustSupportRefIssuerSerial />
+          </wsp:Policy>
+        </sp:Wss10>
+        <wsap:UsingAddressing/>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+
+  <wsdl:types>
+    <xs:schema
+   targetNamespace="http://ls.amazonaws.com/doc/2007-06-05/"
+   xmlns:xs="http://www.w3.org/2001/XMLSchema"
+   xmlns:tns="http://ls.amazonaws.com/doc/2007-06-05/"
+   elementFormDefault="qualified">
+
+
+      <!-- **************************** AmazonLS Interface *************************** -->
+
+
+      <!-- ******************************* AmazonLS Types ************************* -->
+
+
+      <!-- ActivateDesktopProduct Action -->
+      <xs:element name="ActivateDesktopProduct">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="ActivationKey" type="xs:string" />
+            <xs:element name="ProductToken" type="xs:string" />
+            <xs:element name="TokenExpiration" type="xs:duration" minOccurs="0" maxOccurs="1" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+      <!-- ActivateDesktopProduct Action Response -->
+      <xs:element name="ActivateDesktopProductResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="tns:ActivateDesktopProductResult" />
+            <xs:element ref="tns:ResponseMetadata"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+      <!-- ActivateHostedProduct Action -->
+      <xs:element name="ActivateHostedProduct">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="ActivationKey" type="xs:string" />
+            <xs:element name="ProductToken" type="xs:string" />
+            <xs:element name="TokenExpiration" type="xs:duration" minOccurs="0" maxOccurs="1" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+      <!-- ActivateHostedProduct Action Response -->
+      <xs:element name="ActivateHostedProductResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="tns:ActivateHostedProductResult" />
+            <xs:element ref="tns:ResponseMetadata"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+      <!-- VerifyProductSubscriptionByTokens Action -->
+      <xs:element name="VerifyProductSubscriptionByTokens">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="UserToken" type="xs:string" />
+            <xs:element name="ProductToken" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+      <!-- VerifyProductSubscriptionByTokens Action Response -->
+      <xs:element name="VerifyProductSubscriptionByTokensResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="tns:VerifyProductSubscriptionByTokensResult" />
+            <xs:element ref="tns:ResponseMetadata"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+      <!-- VerifyProductSubscriptionByPid Action -->
+      <xs:element name="VerifyProductSubscriptionByPid">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="PersistentIdentifier" type="xs:string" />
+            <xs:element name="ProductCode" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+      <!-- VerifyProductSubscriptionByPid Action Response -->
+      <xs:element name="VerifyProductSubscriptionByPidResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="tns:VerifyProductSubscriptionByPidResult" />
+            <xs:element ref="tns:ResponseMetadata"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+      <!-- GetActiveSubscriptionsByPid Action -->
+      <xs:element name="GetActiveSubscriptionsByPid">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="PersistentIdentifier" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+      <!-- GetActiveSubscriptionsByPid Action Response -->
+      <xs:element name="GetActiveSubscriptionsByPidResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="tns:GetActiveSubscriptionsByPidResult" />
+            <xs:element ref="tns:ResponseMetadata"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+      <!-- ******************************** AWS Types *********************************** -->
+
+      <xs:element name="ActivateDesktopProductResult">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="UserToken" type="xs:string" />
+            <xs:element name="AWSAccessKeyId" type="xs:string" />
+            <xs:element name="SecretAccessKey" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+      <xs:element name="ActivateHostedProductResult">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="UserToken" type="xs:string" />
+            <xs:element name="PersistentIdentifier" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+      <xs:element name="VerifyProductSubscriptionByTokensResult">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Subscribed" type="xs:boolean" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+      <xs:element name="VerifyProductSubscriptionByPidResult">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Subscribed" type="xs:boolean" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+      <xs:element name="GetActiveSubscriptionsByPidResult">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="ProductCode" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+      <xs:element name="ResponseMetadata">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="RequestId" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+      <!-- // REST Error Response // -->
+      <xs:element name="ErrorResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="tns:Error" maxOccurs="unbounded"/>
+            <xs:element name="RequestId" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Error">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Type">
+              <xs:simpleType>
+                <xs:restriction base="xs:string">
+                  <xs:enumeration value="Receiver"/>
+                  <xs:enumeration value="Sender"/>
+                </xs:restriction>
+              </xs:simpleType>
+            </xs:element>
+            <xs:element name="Code" type="xs:string"/>
+            <xs:element name="Message" type="xs:string"/>
+            <xs:element name="Detail" minOccurs="0">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+                </xs:sequence>
+                <xs:anyAttribute namespace="##other" processContents="lax"/>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:schema>
+
+  </wsdl:types>
+
+
+  <!-- ******************************** Messages ********************************* -->
+
+  <wsdl:message name="ActivateDesktopProductRequestMsg">
+    <wsdl:part name="body" element="tns:ActivateDesktopProduct"/>
+  </wsdl:message>
+  <wsdl:message name="ActivateDesktopProductResponseMsg">
+    <wsdl:part name="body" element="tns:ActivateDesktopProductResponse"/>
+  </wsdl:message>
+
+  <wsdl:message name="ActivateHostedProductRequestMsg">
+    <wsdl:part name="body" element="tns:ActivateHostedProduct"/>
+  </wsdl:message>
+  <wsdl:message name="ActivateHostedProductResponseMsg">
+    <wsdl:part name="body" element="tns:ActivateHostedProductResponse"/>
+  </wsdl:message>
+
+  <wsdl:message name="VerifyProductSubscriptionByTokensRequestMsg">
+    <wsdl:part name="body" element="tns:VerifyProductSubscriptionByTokens"/>
+  </wsdl:message>
+  <wsdl:message name="VerifyProductSubscriptionByTokensResponseMsg">
+    <wsdl:part name="body" element="tns:VerifyProductSubscriptionByTokensResponse"/>
+  </wsdl:message>
+
+  <wsdl:message name="VerifyProductSubscriptionByPidRequestMsg">
+    <wsdl:part name="body" element="tns:VerifyProductSubscriptionByPid"/>
+  </wsdl:message>
+  <wsdl:message name="VerifyProductSubscriptionByPidResponseMsg">
+    <wsdl:part name="body" element="tns:VerifyProductSubscriptionByPidResponse"/>
+  </wsdl:message>
+
+  <wsdl:message name="GetActiveSubscriptionsByPidRequestMsg">
+    <wsdl:part name="body" element="tns:GetActiveSubscriptionsByPid"/>
+  </wsdl:message>
+  <wsdl:message name="GetActiveSubscriptionsByPidResponseMsg">
+    <wsdl:part name="body" element="tns:GetActiveSubscriptionsByPidResponse"/>
+  </wsdl:message>
+
+
+  <!-- ********************************* Ports *********************************** -->
+
+  <wsdl:portType name="AmazonLSPortType">
+
+    <wsdl:operation name="ActivateDesktopProduct">
+      <wsdl:documentation>
+        Allows a distributed devpay product to retrieve an HMAC key pair and user token that can be subsequently used for an end user against other AWS services.
+      </wsdl:documentation>
+      <wsdl:input message="tns:ActivateDesktopProductRequestMsg" wsa:Action="urn:ActivateDesktopProduct"/>
+      <wsdl:output message="tns:ActivateDesktopProductResponseMsg" wsa:Action="urn:ActivateDesktopProduct:Response"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="ActivateHostedProduct">
+      <wsdl:documentation>
+        Allows a controlled devpay product to retrieve a user token. Note this is an authenticated request, and as such it must be signed.
+      </wsdl:documentation>
+      <wsdl:input message="tns:ActivateHostedProductRequestMsg" wsa:Action="urn:ActivateHostedProduct"/>
+      <wsdl:output message="tns:ActivateHostedProductResponseMsg" wsa:Action="urn:ActivateHostedProduct:Response"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="VerifyProductSubscriptionByTokens">
+      <wsdl:documentation>
+        Allows a product to determine if the user represented by the UserToken still has an active subscription.  Note this is an authenticated request, and as such it must be signed.
+      </wsdl:documentation>
+      <wsdl:input message="tns:VerifyProductSubscriptionByTokensRequestMsg" wsa:Action="urn:VerifyProductSubscriptionByTokens"/>
+      <wsdl:output message="tns:VerifyProductSubscriptionByTokensResponseMsg" wsa:Action="urn:VerifyProductSubscriptionByTokens:Response"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="VerifyProductSubscriptionByPid">
+      <wsdl:documentation>
+        Allows a PersistentIdentifier owner to determine if the user represented by the PersistentIdentifier still has an active subscription.  Note this is an authenticated request, and as such it must be signed.
+      </wsdl:documentation>
+      <wsdl:input message="tns:VerifyProductSubscriptionByPidRequestMsg" wsa:Action="urn:VerifyProductSubscriptionByPid"/>
+      <wsdl:output message="tns:VerifyProductSubscriptionByPidResponseMsg" wsa:Action="urn:VerifyProductSubscriptionByPid:Response"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="GetActiveSubscriptionsByPid">
+      <wsdl:documentation>
+        Gets all products that an end user is currently subscribed to for products owned by the requesting party.  Note this is an authenticated request, and as such it must be signed.
+      </wsdl:documentation>
+      <wsdl:input message="tns:GetActiveSubscriptionsByPidRequestMsg" wsa:Action="urn:GetActiveSubscriptionsByPid"/>
+      <wsdl:output message="tns:GetActiveSubscriptionsByPidResponseMsg" wsa:Action="urn:GetActiveSubscriptionsByPid:Response"/>
+    </wsdl:operation>
+
+  </wsdl:portType>
+
+
+  <!-- ******************************** Bindings ********************************** -->
+
+  <wsdl:binding name="AmazonLSBinding" type="tns:AmazonLSPortType">
+
+    <wsp:PolicyReference URI="#CertificateOverTransportPolicy"/>
+
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+    <wsdl:operation name="ActivateDesktopProduct">
+      <soap:operation soapAction="ActivateDesktopProduct"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+
+    <wsdl:operation name="ActivateHostedProduct">
+      <soap:operation soapAction="ActivateHostedProduct"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+
+    <wsdl:operation name="VerifyProductSubscriptionByTokens">
+      <soap:operation soapAction="VerifyProductSubscriptionByTokens"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+
+    <wsdl:operation name="VerifyProductSubscriptionByPid">
+      <soap:operation soapAction="VerifyProductSubscriptionByTokens"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+
+    <wsdl:operation name="GetActiveSubscriptionsByPid">
+      <soap:operation soapAction="GetActiveSubscriptionsByPid"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+
+  </wsdl:binding>
+
+
+  <!-- ******************************** Service ********************************** -->
+
+  <wsdl:service name="AmazonLS">
+    <wsdl:documentation>
+      The LS web service allows DevPay clients to interact with the AWS Auth System.
+      DevPay enabled products can retrieve new identity components for an end user
+      and product subscription information.
+    </wsdl:documentation>
+    <wsdl:port name="AmazonLSPort" binding="tns:AmazonLSBinding">
+      <soap:address location="https://ls.amazonaws.com"/>
+    </wsdl:port>
+  </wsdl:service>
+
+</wsdl:definitions>

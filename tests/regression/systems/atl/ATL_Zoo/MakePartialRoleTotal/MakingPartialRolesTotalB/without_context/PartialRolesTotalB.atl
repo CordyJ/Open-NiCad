@@ -1,0 +1,192 @@
+-- @name	 Making partial role total (a)
+-- @version		1.0
+-- @domains		Catalogue of Model Transformations
+-- @authors		Baudry Julien (jul.baudry<at>gmail.com)
+-- @date		2006/08/02
+-- @description	The purpose of this transformation is to making a patial role total
+-- @see http://www.dcs.kcl.ac.uk/staff/kcl/tcat.pdf   
+-- @see section 2.14, page 23
+-- @see author of article : K. Lano
+
+module PartialRolesTotalB; -- Module Template
+create OUT : KM3Target from IN : KM3;
+
+helper context KM3!Class def: hasChild : Boolean =
+	KM3!Class.allInstances()->select(c|c.supertypes->notEmpty())->exists(r|r.supertypes.first() = self)
+	;
+
+
+--@begin rule Metamodel
+rule Metamodel {
+	from
+		inputMm:KM3!Metamodel
+	to
+		outputMm:KM3Target!Metamodel (
+			location <- inputMm.location,
+			contents <- inputMm.contents
+		)
+}
+--@end rule Metamodel
+
+--@begin rule Package
+rule Package {
+	from
+		inputPkg:KM3!Package
+	to
+		outputPkg:KM3Target!Package (
+			name <- inputPkg.name,
+			contents <- inputPkg.contents
+		)
+}
+--@end rule Package
+
+
+--@begin rule Class
+rule Class {
+	from
+		inputC:KM3!Class
+		( 		not( inputC.structuralFeatures->select(r|r.oclIsTypeOf(KM3!Reference))->exists(r|r.upper=1)
+					and inputC.structuralFeatures->select(r|r.oclIsTypeOf(KM3!Reference))->exists(r|r.lower=0)
+					and inputC.structuralFeatures->select(r|r.oclIsTypeOf(KM3!Reference))->exists(r|r.opposite.upper=1)
+					and inputC.structuralFeatures->select(r|r.oclIsTypeOf(KM3!Reference))->exists(r|r.opposite.lower=1)
+					and inputC.hasChild
+				)
+				and
+				not( inputC.structuralFeatures->select(r|r.oclIsTypeOf(KM3!Reference))->exists(r|r.upper=1)
+					and inputC.structuralFeatures->select(r|r.oclIsTypeOf(KM3!Reference))->exists(r|r.lower=1)
+					and inputC.structuralFeatures->select(r|r.oclIsTypeOf(KM3!Reference))->exists(r|r.opposite.upper=1)
+					and inputC.structuralFeatures->select(r|r.oclIsTypeOf(KM3!Reference))->exists(r|r.opposite.lower=0)
+					and inputC.structuralFeatures->select(r|r.oclIsTypeOf(KM3!Reference))->exists(c|c.type.hasChild)
+				)
+				and
+				not( inputC.supertypes->exists(r|r.structuralFeatures->select(r|r.oclIsTypeOf(KM3!Reference))->exists(r|r.upper=1))
+					and inputC.supertypes->exists(r|r.structuralFeatures->select(r|r.oclIsTypeOf(KM3!Reference))->exists(r|r.lower=0))
+					and inputC.supertypes->exists(r|r.structuralFeatures->select(r|r.oclIsTypeOf(KM3!Reference))->exists(r|r.opposite.upper=1))
+					and inputC.supertypes->exists(r|r.structuralFeatures->select(r|r.oclIsTypeOf(KM3!Reference))->exists(r|r.opposite.lower=1))
+					and inputC.supertypes->notEmpty()
+				)
+			)
+			to
+		outputC:KM3Target!Class (
+			isAbstract <- inputC.isAbstract,
+			supertypes <- inputC.supertypes,
+			name <- inputC.name,
+			location <- inputC.location,
+			package <- inputC.package,
+			structuralFeatures <- inputC.structuralFeatures
+		)
+}
+--@end rule Class
+
+
+--@begin rule Reference
+rule Reference {
+	from
+		inputRef : KM3!Reference
+			( 	not( inputRef.upper=1
+					and inputRef.lower=0
+					and inputRef.opposite.upper=1
+					and inputRef.opposite.lower=1
+					and inputRef.owner.hasChild
+				)
+				and
+				not( inputRef.upper=1
+					and inputRef.lower=1
+					and inputRef.opposite.upper=1
+					and inputRef.opposite.lower=0
+					and inputRef.type.hasChild
+				)
+			)
+	to
+		outputRef : KM3Target!Reference (
+			package <- inputRef.package,
+			name <- inputRef.name,
+			lower <- inputRef.lower,
+			upper <- inputRef.upper,
+			isOrdered <- inputRef.isOrdered,
+			isUnique <- inputRef.isUnique,
+			owner <- inputRef.owner,
+			type <- inputRef.type,
+			isContainer <- inputRef.isContainer,
+			opposite <- inputRef.opposite
+		)
+}
+--@end rule Attribute
+
+--@begin rule Merging
+rule PartialRoles {
+	from
+		inputSuperType : KM3!Class,
+		inputChild : KM3!Class,
+		inputClass : KM3!Class,
+		inputRef : KM3!Reference,
+		inputRef2 : KM3!Reference
+	( (inputChild.supertypes->includes(inputSuperType)
+		and inputRef.owner = inputSuperType
+		and inputRef2.owner = inputClass
+		and inputRef.upper = 1
+		and inputRef.lower = 0
+		and not inputRef.isContainer
+		and inputRef2.upper = 1
+		and inputRef2.lower = 1
+		and not inputRef2.isContainer
+		and inputRef.opposite=inputRef2
+		)
+	)
+	to
+		outputSuperType: KM3Target!Class(
+			isAbstract <- inputSuperType.isAbstract,
+			supertypes <- inputSuperType.supertypes,
+			name <- inputSuperType.name,
+			location <- inputSuperType.location,
+			package <- inputSuperType.package,
+			structuralFeatures <- inputSuperType.structuralFeatures->select(r| r<>inputRef)
+			),
+		outputClass: KM3Target!Class(
+			isAbstract <- inputClass.isAbstract,
+			supertypes <- inputClass.supertypes,
+			name <- inputClass.name,
+			location <- inputClass.location,
+			package <- inputClass.package,
+			structuralFeatures <- inputClass.structuralFeatures->select(r|r<>inputRef2),
+			structuralFeatures <- outputRef2
+			),
+		outputRef: KM3Target!Reference(
+			package <- inputRef.package,
+			name <- inputRef.name,
+			lower <- 1,
+			upper <- 1,
+			isOrdered <- inputRef.isOrdered,
+			isUnique <- inputRef.isUnique,
+			owner <- outputChild,
+			type <- outputClass,
+			isContainer <- false,
+			opposite <- outputRef2
+			),
+		outputChild: KM3Target!Class(
+			isAbstract <- inputChild.isAbstract,
+			supertypes <- inputChild.supertypes,
+			name <- inputChild.name,
+			location <- inputChild.location,
+			package <- inputChild.package,
+			structuralFeatures <- inputChild.structuralFeatures,
+			structuralFeatures <- outputRef
+			),
+		outputRef2: KM3Target!Reference(
+			package <- inputRef2.package,
+			name <- inputRef2.name,
+			lower <- 1,
+			upper <- 1,
+			isOrdered <- inputRef2.isOrdered,
+			isUnique <- inputRef2.isUnique,
+			owner <- inputRef2.owner,
+			type <- outputChild,
+			isContainer <- false,
+			opposite <- outputRef
+			)		
+		
+}
+
+
+
+

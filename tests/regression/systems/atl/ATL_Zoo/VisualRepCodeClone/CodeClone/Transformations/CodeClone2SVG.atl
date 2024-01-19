@@ -1,0 +1,133 @@
+--@atlcompiler	atl2006
+--@name			CodeClone2SVG
+--@version		1.0
+--@domains		CodeClone, SVG
+--@authors		Yu Sun
+--@email        yusun@cis.uab.edu
+--@date			2007/10/10
+--@description	This transformation is used to transform the generic Code Clone DSL model to SVG model.
+
+module CodeClone2SVG; -- Module Template
+create OUT : SVG  from IN : CodeClone;
+
+helper context CodeClone!CloneUnit
+def : maxLine() : Integer = 
+	(
+	    CodeClone!CloneUnit.allInstances()->flatten()->iterate(e; res : Integer = -1 |
+	    											if e.file.totalFileLines > res then e.file.totalFileLines
+													   else res 
+													   endif)
+	);
+
+
+rule CodeClone2Svg {
+	from
+		cc : CodeClone!CodeClone
+	to
+		s : SVG!Svg (
+			width <- 1000,              
+     	    height <- cc.groups -> flatten() -> iterate(e; res : Integer = 0 |
+     	    										res + e.totalUnits) * 90 + 
+				      cc.groups -> size() * 80 + 100,  
+			version <- '1.1',              
+			standalone <- 'no',  
+			children <- group,
+			children <- cc.groups
+		),
+		
+		group : SVG!Group (
+			translate_x <- 0,
+			translate_y <- 0,
+			components <- text
+		),
+			
+		text : SVG!Text (	
+			x <- 220,                    
+			y <- 20,                             
+			font_family <- 'Arial Black',             
+			font_size <- 16,                             
+			contend <- 'Code Clone Analysis Result by ' + cc.sourceToolName    
+		)
+}
+
+
+rule CloneGroup2Group {
+	from 
+		 cg : CodeClone!CloneGroup
+	to 
+		g : SVG!Group (
+			translate_x <- 0,
+			translate_y <- (cg.parent.groups.subSequence(1,cg.parent.groups.indexOf(cg)-1)->size()) * 80 + 90 * (cg.parent.groups.subSequence(1,cg.parent.groups.indexOf(cg)-1) -> flatten() -> iterate(e; res : Integer = 0 | res + e.totalUnits)),             
+			components <- text,
+			components <- cg.units,
+			components <- rect
+		),
+		
+		text : SVG!Text (
+			x <- 20,         
+			y <- 45,            
+			font_size <- 16,          
+			font_family <- 'Arial',             
+			fill <- 'blue',                             
+			contend <- 'Clone Group ' + cg.parent.groups -> indexOf(cg)  -> toString()                  
+		),
+		
+		rect : SVG!Rect (
+			x <- 1,                 
+			y <- 50,                 
+			rx <- 10,              
+			ry <- 10,                
+			width <- 998,          
+			height <- 25 + 90 * cg.units->size()    ,      
+			fill <- 'none',            
+			stroke <- 'blue',          
+			stroke_width <- 2          
+		)	
+}
+
+rule CloneUint2Shape {
+	from
+		 cu : CodeClone!CloneUnit
+	to
+		g : SVG!Group (			
+			translate_x <- 0,           
+			translate_y <- (cu.parent.units -> indexOf(cu) - 1) * 90,                          
+			components <- text,       
+			components <- rect,         
+			components <- rect2            
+		),
+		
+		text : SVG!Text (
+			x <- 25,             
+			y <- 75,              
+			font_size <- 12,     
+			fill <- 'blue',              
+			font_family <- 'Arial',    
+			contend <- cu.file.fileName  + '  (Total Lines: ' + cu.file.totalFileLines -> toString() + ')'
+		),
+		
+		rect : SVG!Rect (
+				x <- 20,        
+				y <- 80,         
+				rx <- 10,        
+				ry <- 10,         
+				width <- (950 / cu.maxLine() * cu.file.totalFileLines).floor(),       
+				height <- 60,         
+				fill <- 'yellow',         
+				stroke <- 'blue',            
+				stroke_width <- 3,           
+				opacity <- 0.5,                  
+				title <- cu.file.fileName
+		),
+		
+		rect2 : SVG!Rect (
+				x <- 20 + (950 / cu.maxLine() * cu.startLine).floor(),              
+				y <- 83,            
+				width <- (950 / cu.maxLine() * (cu.endLine - cu.startLine)).floor(),          
+				height <- 54,       
+				fill <- 'red',      
+				opacity <- 0.75,    
+				title <- 'Line ' + cu.startLine->toString() + ' to ' + cu.endLine->toString() + ' (' + (cu.endLine - cu.startLine + 1)->toString() + ' lines)'
+		)
+}
+

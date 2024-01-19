@@ -1,0 +1,105 @@
+<?xml version="1.0"?>
+
+<!-- WSDL description Flash-db's News Search. -->
+
+<definitions name="urn:NewsSearch"
+             targetNamespace="urn:NewsSearch"
+             xmlns:typens="urn:NewsSearch"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
+             xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+             xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+  <!-- Results expected for News Search.. -->
+
+  <types>
+    <xsd:schema xmlns="http://www.w3.org/2001/XMLSchema" 
+                targetNamespace="urn:NewsSearch">
+            
+      <xsd:complexType name="NewsSearchResult">
+        <xsd:all>
+			<xsd:element name="newsElements" type="typens:NewsElementArray" /> 
+        </xsd:all>
+      </xsd:complexType>
+      
+      <xsd:complexType name="NewsElement">
+        <xsd:all>
+          <xsd:element name="URL" 			type="xsd:string"/>
+          <xsd:element name="title" 		type="xsd:string"/>
+          <xsd:element name="source" 		type="xsd:string"/>
+          <xsd:element name="date" 			type="xsd:string"/>
+        </xsd:all>
+      </xsd:complexType>
+      
+      <xsd:complexType name="NewsElementArray">
+        <xsd:complexContent>
+          <xsd:restriction base="soapenc:Array">
+             <xsd:attribute ref="soapenc:arrayType" wsdl:arrayType="typens:NewsElement[]"/>
+          </xsd:restriction>
+        </xsd:complexContent>
+      </xsd:complexType>
+
+    </xsd:schema>
+  </types> 
+
+
+
+  <!-- Messages for News Search - doNewsSearch. -->
+
+  <message name="doNewsSearch">
+    <part name="username"       type="xsd:string"/>
+    <part name="password"       type="xsd:string"/>
+    <part name="query"        	type="xsd:string"/>
+  </message>
+
+  <message name="doNewsSearchResponse">
+    <part name="return"         type="typens:NewsSearchResult"/>           
+  </message>
+
+
+
+  <!-- Port for News Search -->
+
+  <portType name="NewsSearchPort">
+
+    <operation name="doNewsSearch">
+      <input message="typens:doNewsSearch"/>
+      <output message="typens:doNewsSearchResponse"/>
+    </operation>
+
+  </portType>
+
+
+
+
+  <!-- Binding for News Search -->
+
+  <binding name="NewsSearchBinding" type="typens:NewsSearchPort">
+    <soap:binding style="rpc"
+                  transport="http://schemas.xmlsoap.org/soap/http"/>
+
+    <operation name="doNewsSearch">
+      <soap:operation soapAction="urn:NewsSearchAction"/>
+      <input>
+        <soap:body use="encoded"
+                   namespace="urn:NewsSearch"
+                   encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </input>
+      <output>
+        <soap:body use="encoded"
+                   namespace="urn:NewsSearch"
+                   encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </output>
+    </operation>
+  </binding>
+
+  <!-- Endpoint for News Search -->
+  <service name="NewsSearchService">
+   <documentation>The news search service by flash-db returns an array of 10 recent news articles matching your query.</documentation> 
+    <port name="NewsSearchPort" binding="typens:NewsSearchBinding">
+      <soap:address location="http://www.flash-db.com/services/ws/newsSearch.php"/>
+    </port>
+  </service>
+
+</definitions>

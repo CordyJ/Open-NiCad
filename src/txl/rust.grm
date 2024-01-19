@@ -1,0 +1,3023 @@
+% TXL Basis Grammar for Rust 
+% James R. Cordy, September 2020
+
+% Copyright 2020, Huawei Technologies Co. Ltd.
+
+% Adapted from the Rust Reference, 2018 edition, as of 10 Sep 2020
+% https://doc.rust-lang.org/reference/
+% Copyright 2010-2020, The Rust Project Developers
+
+% Revision History:
+%
+% v1.1 - 13 Nov 2020 -JRC
+%	Corrected erroneous specification of TypePathSegment
+%	Simplified block grammar to remove redundant final expression in [Statements]
+%
+% v1.0 - 17 Sep 2020 - JRC
+%       Validated to Rust compiler source and test suite 
+%       Validated to top 20 Rust applications in GitHub 
+%
+% v0.1 - 9 Sep 2020 - JRC
+%       Initial revision 
+
+% NOTE: nonterminal naming convention in this grammar follows the Rust 
+%       reference grammar [CamelCase] standard rather than TXL [under_score] standard
+
+% Rust source files are crates
+define program
+    [Crate]
+end define
+
+% Compounds
+
+compounds
+    % Commented-out compounds conflict with necessary single-character symbols
+    % These must be handled specially in the grammar using [SPOFF] and [SPON]
+    '!= '%= 
+    % '&& 
+    '&= '*= '+= '-= '-> '..  '...  '..=
+    '/= ':: 
+    % '<< 
+    '<<= '<= '== '=> 
+    % '>= '>> '>>= 
+    '^= '|= '||
+end compounds
+
+% Keywords
+
+keys
+    % KW_AS : as, KW_BREAK : break, KW_CONST : const, KW_CONTINUE : continue, KW_CRATE : crate,
+    % KW_ELSE : else, KW_ENUM : enum, KW_EXTERN : extern, KW_FALSE : false, KW_FN : fn,
+    % KW_FOR : for, KW_IF : if, KW_IMPL : impl, KW_IN : in, KW_LET : let,
+    % KW_LOOP : loop, KW_MATCH : match, KW_MOD : mod, KW_MOVE : move, KW_MUT : mut,
+    % KW_PUB : pub, KW_REF : ref, KW_RETURN : return, KW_SELFVALUE : self, KW_SELFTYPE : Self,
+    % KW_STATIC : static, KW_STRUCT : struct, KW_SUPER : super, KW_TRAIT : trait, KW_TRUE : true,
+    % KW_TYPE : type, KW_UNSAFE : unsafe, KW_USE : use, KW_WHERE : where, KW_WHILE : while,
+    'as 'break 'const 'continue 'crate 'else 'enum 'extern 'false 'fn
+    'for 'if 'impl 'in 'let 'loop 'match 'mod 'move 'mut
+    'pub 'ref 'return 'self 'Self 'static 'struct 'super 'trait 'true
+    'type 'unsafe 'use 'where 'while
+
+    % 2018+
+    % KW_ASYNC : async, KW_AWAIT : await, KW_DYN : dyn,
+    'async 'await 'dyn
+
+    % Reserved for future
+    % KW_ABSTRACT : abstract % KW_BECOME : become % KW_BOX : box % KW_DO : do % KW_FINAL : final,
+    % KW_MACRO : macro % KW_OVERRIDE : override % KW_PRIV : priv % KW_TYPEOF : typeof % KW_UNSIZED : unsized,
+    % KW_VIRTUAL : virtual % KW_YIELD : yield,
+    'abstract 'become 'box 'do 'final 'macro 'override 'priv 'typeof 'unsized 'virtual 'yield
+
+    % Reserved for future 2018+
+    % KW_TRY : try
+    'try
+
+    % Weak keywords
+    % KW_UNION : union, KW_STATICLIFETIME : static
+    'union 'static
+end keys
+
+% Identifiers
+
+% NON_KEYWORD_IDENTIFIER : IDENTIFIER_OR_KEYWORD Except a strict or reserved keyword
+% IDENTIFIER : NON_KEYWORD_IDENTIFIER | RAW_IDENTIFIER
+
+tokens
+    % Includes: European (8-bit) foreign language identifiers and some common 16-bit Greek symbols
+    % To do: full UTF-8 (Asian, Cyrillic, ...) foreign language identifiers
+    id      "[_\aÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿŠŽ™šžŸ¡µ(α)(ε)(𝛁)(π)(℠)(ç)(С)][_\a\dÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿŠŽ™šžŸ¡µ(α)(ε)(𝛁)(π)(℠)(ç)(С)]*"
+end tokens
+
+define IDENTIFIER
+    % IDENTIFIER_OR_KEYWORD :
+    %       [a-z A-Z] [a-z A-Z 0-9 _]*
+    %    | _ [a-z A-Z 0-9 _]+
+    % RAW_IDENTIFIER : r# IDENTIFIER_OR_KEYWORD Except crate, self, super, Self
+        [id]    % (same as TXL default)
+    |   'r [SPOFF] '# [key] [SPON]
+    |   'r [SPOFF] '# [id] [SPON]
+    |   'union | 'static | 'try % weak keywords
+end define
+
+define IDENTIFIER_OR_KEYWORD
+        [IDENTIFIER]
+    |   [key]
+end define
+
+% Comments
+
+% LINE_COMMENT :
+%       // (~[/ !] | //) ~\n*
+%    | //
+% 
+% BLOCK_COMMENT :
+%       /* (~[* !] | ** | BlockCommentOrDoc) (BlockCommentOrDoc | ~*/)* */
+%    | /**/
+%    | /***/
+%
+% INNER_LINE_DOC :
+%    //! ~[\n IsolatedCR]*
+%       TXL approx:     "//!#[\n\r]*"
+% 
+% INNER_BLOCK_DOC :
+%    /*! ( BlockCommentOrDoc | ~[*/ IsolatedCR] )* */
+%       TXL approx:     "/\*![BCD#[(\*/)\r]]*\*/"
+% 
+% OUTER_LINE_DOC :
+%    /// (~/ ~[\n IsolatedCR]*)?
+%       TXL approx:     "///(#[\n\r]*)?"
+% 
+% OUTER_BLOCK_DOC :
+%    /** (~* | BlockCommentOrDoc ) (BlockCommentOrDoc | ~[*/ IsolatedCR])* */
+%       TXL approx:     "/\*\*[BCD#\*][BCD#[(\*/)\r]*\*/"
+% 
+% BlockCommentOrDoc :
+%       BLOCK_COMMENT
+%    | OUTER_BLOCK_DOC
+%    | INNER_BLOCK_DOC
+%       TXL approx:     "[(/\*[(\*\*)#[\*!]][#(\*/)]*\*/)(/\*\*[#\*][#[(\*/)\r]*\*/)(/\*![#[(\*/)\r]]*\*/)]"
+% 
+% IsolatedCR :
+%    A \r not followed by a \n
+%       TXL approx:     "\r"
+
+tokens
+    % Simplified to allow for only one level of nesting
+    comment     "//#n*" 
+            |   "/\*[(/\*#(\*/)*\*/)#(\*/)]*\*/"
+end tokens
+
+% Literals
+
+% CHAR_LITERAL :
+%    ' ( ~[' \ \n \r \t] | QUOTE_ESCAPE | ASCII_ESCAPE | UNICODE_ESCAPE ) '
+% 
+% QUOTE_ESCAPE :
+%    \' | \"
+% 
+% ASCII_ESCAPE :
+%       \x OCT_DIGIT HEX_DIGIT
+%    | \n | \r | \t | \\ | \0
+% 
+% UNICODE_ESCAPE :
+%    \u{ ( HEX_DIGIT _* )1..6 }
+%
+
+tokens
+    charlit     "'\\\c'"
+            |   "'\\x\d[\dabcdefABCDEF]'"
+            |   "'\\u{[\dabcdefABCDEF]+}'"
+                % Careful, unicode chars cannot begin with an ASCII letter
+            |   "'#['\"\\\t\r\n_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ]#'?#'?#'?'"        
+            |   "'#\\'"
+end tokens
+
+define CHAR_LITERAL
+    [charlit]   
+end define
+
+% STRING_LITERAL :
+%    " (
+%       ~[" \ IsolatedCR]
+%       | QUOTE_ESCAPE
+%       | ASCII_ESCAPE
+%       | UNICODE_ESCAPE
+%       | STRING_CONTINUE
+%    )* "
+% 
+% STRING_CONTINUE :
+%    \ followed by \n
+% 
+% RAW_STRING_LITERAL :
+%    r RAW_STRING_CONTENT
+% 
+% RAW_STRING_CONTENT :
+%       " ( ~ IsolatedCR )* (non-greedy) "
+%    | # RAW_STRING_CONTENT #
+% 
+% BYTE_LITERAL :
+%    b' ( ASCII_FOR_CHAR | BYTE_ESCAPE ) '
+% 
+% ASCII_FOR_CHAR :
+%    any ASCII (i.e. 0x00 to 0x7F), except ', \, \n, \r or \t
+% 
+% BYTE_ESCAPE :
+%       \x HEX_DIGIT HEX_DIGIT
+%    | \n | \r | \t | \\ | \0
+% 
+% BYTE_STRING_LITERAL :
+%    b" ( ASCII_FOR_STRING | BYTE_ESCAPE | STRING_CONTINUE )* "
+% 
+% ASCII_FOR_STRING :
+%    any ASCII (i.e 0x00 to 0x7F), except ", \ and IsolatedCR
+% 
+% RAW_BYTE_STRING_LITERAL :
+%    br RAW_BYTE_STRING_CONTENT
+% 
+% RAW_BYTE_STRING_CONTENT :
+%       " ASCII* (non-greedy) "
+%    | # RAW_BYTE_STRING_CONTENT #
+% 
+% ASCII :
+%    any ASCII (i.e. 0x00 to 0x7F)
+
+define STRING_LITERAL
+    [stringlit]         % (Covered by TXL default)
+end define
+
+tokens
+    % Simplified to allow for up to four markers
+    RAW_STRING_LITERAL          "r\"#\"*\""
+                        |       "r\#\"#(\"\#)*\"\#"
+                        |       "r\#\#\"#(\"\#\#)*\"\#\#"
+                        |       "r\#\#\#\"#(\"\#\#\#)*\"\#\#\#"
+                        |       "r\#\#\#\#\"#(\"\#\#\#\#)*\"\#\#\#\#"
+    BYTE_LITERAL                "b'[(\\\c)#']*'"
+    BYTE_STRING_LITERAL         "b\"[(\\\c)#\"]*\""
+    RAW_BYTE_STRING_LITERAL     "br\"#\"*\""
+                        |       "br\#\"#(\"\#)*\"\#"
+                        |       "br\#\#\"#(\"\#\#)*\"\#\#"
+                        |       "br\#\#\#\"#(\"\#\#\#)*\"\#\#\#"
+                        |       "br\#\#\#\#\"#(\"\#\#\#\#)*\"\#\#\#\#"
+end tokens
+
+% INTEGER_LITERAL :
+%    ( DEC_LITERAL | BIN_LITERAL | OCT_LITERAL | HEX_LITERAL ) INTEGER_SUFFIX?
+% 
+% DEC_LITERAL :
+%    DEC_DIGIT (DEC_DIGIT|_)*
+% 
+% BIN_LITERAL :
+%    0b (BIN_DIGIT|_)* BIN_DIGIT (BIN_DIGIT|_)*
+% 
+% OCT_LITERAL :
+%    0o (OCT_DIGIT|_)* OCT_DIGIT (OCT_DIGIT|_)*
+% 
+% HEX_LITERAL :
+%    0x (HEX_DIGIT|_)* HEX_DIGIT (HEX_DIGIT|_)*
+% 
+% BIN_DIGIT : [0-1]
+% 
+% OCT_DIGIT : [0-7]
+% 
+% DEC_DIGIT : [0-9]
+% 
+% HEX_DIGIT : [0-9 a-f A-F]
+% 
+% INTEGER_SUFFIX :
+%       u8 | u16 | u32 | u64 | u128 | usize
+%    | i8 | i16 | i32 | i64 | i128 | isize
+
+tokens
+    float_number "\d[\d_]*[((.\d[\d_]*)?([eE][+-]?[\d_]+)?[(f32)(f64)])(.\d[\d_]*([eE][+-]?[\d_]+)?)([eE][+-]?[\d_]+)]"
+            % 10. allowed as long as not followed by . or identifier
+        |        "\d[\d_]*.#\:[.\a]"    
+end tokens
+
+tokens
+    integer_number "[(0b[01_]+)(0o[01234567_]+)(0x[\dabcdefABCDEF_]+)(\d[\d_]*)][(u8)(u16)(u32)(u64)(u128)(usize)(i8)(i16)(i32)(i64)(i128)(isize)]?"
+end tokens
+
+define INTEGER_LITERAL
+    [integer_number]
+end define
+
+% TUPLE_INDEX: 
+%    INTEGER_LITERAL
+
+define TUPLE_INDEX
+    [INTEGER_LITERAL]
+end define
+
+% FLOAT_LITERAL :
+%       DEC_LITERAL . (not immediately followed by ., _ or an identifier)
+%    | DEC_LITERAL FLOAT_EXPONENT
+%    | DEC_LITERAL . DEC_LITERAL FLOAT_EXPONENT?
+%    | DEC_LITERAL (. DEC_LITERAL)? FLOAT_EXPONENT? FLOAT_SUFFIX
+% 
+% FLOAT_EXPONENT :
+%    (e|E) (+|-)? (DEC_DIGIT|_)* DEC_DIGIT (DEC_DIGIT|_)*
+% 
+% FLOAT_SUFFIX :
+%    f32 | f64
+
+define FLOAT_LITERAL
+    [float_number]
+end define
+
+define TUPLE_INDEX
+    ... | [FLOAT_LITERAL] [INTEGER_LITERAL?]    % observed .1.1, 0. 0 - JRC
+end define
+
+% BOOLEAN_LITERAL :
+%       true
+%    | false
+
+define BOOLEAN_LITERAL
+        'true
+    |   'false
+end define
+
+% Specials
+
+% LIFETIME_TOKEN :
+%       ' IDENTIFIER_OR_KEYWORD
+%    | '_
+
+define LIFETIME_TOKEN
+        '' [SPOFF] [IDENTIFIER_OR_KEYWORD] [SPON]
+    |   '' [SPOFF] '_ [SPON]
+end define
+
+% LIFETIME_OR_LABEL :
+%       ' NON_KEYWORD_IDENTIFIER
+
+define LIFETIME_OR_LABEL
+    '' [SPOFF] [IDENTIFIER] [SPON]
+end define
+
+% UTF8BOM : \uFEFF
+% SHEBANG : #! ~[[ \n] ~\n*
+
+tokens
+    UTF8BOM     "﻿"
+    SHEBANG     "\#!#[\[\n]*"
+end tokens
+
+% SimplePath :
+%    ::? SimplePathSegment (:: SimplePathSegment)*
+
+define SimplePath
+    [':: ?] [SimplePathSegment] [COLON_COLON_SimplePathSegment*]
+end define
+
+define COLON_COLON_SimplePathSegment
+    ':: [SimplePathSegment]
+end define
+
+% SimplePathSegment :
+%    IDENTIFIER | super | self | crate | $crate
+
+define SimplePathSegment
+    [IDENTIFIER] | 'super | 'self | 'crate | '$crate
+end define
+
+% PathInExpression :
+%    ::? PathExprSegment (:: PathExprSegment)*
+
+define PathInExpression
+    [':: ?] [PathExprSegment] [COLON_COLON_PathExprSegment*]
+end define
+
+define COLON_COLON_PathExprSegment
+    ':: [PathExprSegment]
+end define
+
+% PathExprSegment :
+%    PathIdentSegment (:: GenericArgs)?
+
+define PathExprSegment
+    [PathIdentSegment] [COLON_COLON_GenericArgs?]
+end define
+
+define COLON_COLON_GenericArgs
+    ':: [GenericArgs]
+end define
+
+% PathIdentSegment :
+%    IDENTIFIER | super | self | Self | crate | $crate
+
+define PathIdentSegment
+        [IDENTIFIER] | 'super | 'self | 'Self | 'crate | '$crate
+    |   '$ [SPOFF] [IDENTIFIER] [SPON]          % observed - JRC
+end define
+
+% GenericArgs :
+%       < >
+%    | < GenericArgsLifetimes ,? >
+%    | < GenericArgsTypes ,? >
+%    | < GenericArgsBindings ,? >
+%    | < GenericArgsTypes , GenericArgsBindings ,? >
+%    | < GenericArgsLifetimes , GenericArgsTypes ,? >
+%    | < GenericArgsLifetimes , GenericArgsBindings ,? >
+%    | < GenericArgsLifetimes , GenericArgsTypes , GenericArgsBindings ,? >
+
+define GenericArgs
+    '< [GenericArg,] [', ?] '>
+end define
+
+% GenericArgsLifetimes :
+%    Lifetime (, Lifetime)*
+
+% GenericArgsTypes :
+%    Type (, Type)*
+
+% GenericArgsBindings :
+%    GenericArgsBinding (, GenericArgsBinding)*
+
+% GenericArgsBinding :
+%    IDENTIFIER = Type
+
+define GenericArgsBinding
+        [IDENTIFIER] '= [Type]
+    |   [IDENTIFIER] ': [Type]  % observed JRC
+end define
+
+define GenericArg
+        [Lifetime]
+    |   [Type]
+    |   [GenericArgsBinding]
+    |   [BlockExpression]       % observed JRC
+    |   [LiteralExpression]     % observed JRC
+end define
+
+% QualifiedPathInExpression :
+%    QualifiedPathType (:: PathExprSegment)+
+
+define QualifiedPathInExpression
+    [QualifiedPathType] [COLON_COLON_PathExprSegment+]
+end define
+
+% QualifiedPathType :
+%    < Type (as TypePath)? >
+
+define QualifiedPathType 
+    '< [Type] [AS_TypePath?] '>
+end define
+
+define AS_TypePath
+    'as [TypePath]
+end define
+
+% QualifiedPathInType :
+%    QualifiedPathType (:: TypePathSegment)+
+
+define QualifiedPathInType
+    [QualifiedPathType] [COLON_COLON_TypePathSegment+]
+end define
+
+define COLON_COLON_TypePathSegment
+    ':: [TypePathSegment]
+end define
+
+% TypePath :
+%    ::? TypePathSegment (:: TypePathSegment)*
+
+define TypePath
+    [':: ?] [TypePathSegment] [COLON_COLON_TypePathSegment*]
+end define
+
+% TypePathSegment :
+%    PathIdentSegment ::? (GenericArgs | TypePathFn)?
+% CORRECTION:
+%    PathIdentSegment ((::? GenericArgs) | TypePathFn)?
+
+define TypePathSegment
+   [PathIdentSegment] [GenericArgs_or_TypePathFn?]
+end define
+
+define GenericArgs_or_TypePathFn
+   [COLON_COLON_GenericArgs] | [GenericArgs] | [TypePathFn]
+end define
+
+% TypePathFn :
+% ( TypePathFnInputs? ) (-> Type)?
+
+define TypePathFn
+    '( [TypePathFnInputs?] ') [ARROW_Type?]
+end define
+
+define ARROW_Type
+    '-> [Type]
+end define
+
+% TypePathFnInputs :
+% Type (, Type)* ,?
+
+define TypePathFnInputs
+    [Type,+] [', ?]
+end define
+
+% MacroInvocation :
+%    SimplePath ! DelimTokenTree
+
+define MacroInvocation
+    [SimplePath] [SPOFF] '! [SPON] [DelimTokenTree]
+end define
+
+% DelimTokenTree :
+%       ( TokenTree* )
+%    | [ TokenTree* ]
+%    | { TokenTree* }
+
+define DelimTokenTree
+        '( [TokenTree*] ') 
+    |   '[ [TokenTree*] '] 
+    |   '{ [TokenTree*] '} 
+end define
+
+% TokenTree :
+%    Token except delimiters | DelimTokenTree
+
+define TokenTree
+        [not Delimiters] [token_or_key]
+    |   [DelimTokenTree]
+end define
+
+define token_or_key
+        '; [NL]
+    |   '$ [SPOFF] [IDENTIFIER_OR_KEYWORD] [SPON]
+    |   '' [SPOFF] [IDENTIFIER_OR_KEYWORD] [SPON]
+    |   '' [SPOFF] '_ [SPON]
+    |   [SPOFF] ': [SPON]
+    |   'r [SPOFF] '# [id] [SPON]
+    |   'r [SPOFF] '# [key] [SPON]
+    |   [token] | [key]
+end define
+
+% MacroInvocationSemi :
+%       SimplePath ! ( TokenTree* ) ;
+%    | SimplePath ! [ TokenTree* ] ;
+%    | SimplePath ! { TokenTree* }
+
+define MacroInvocationSemi
+        [SimplePath] [SPOFF] '! [SPON] '( [TokenTree*] ') [SEMI_or_EndOfBlock]  [NL]
+    |   [SimplePath] [SPOFF] '! [SPON] '[ [TokenTree*] '] [SEMI_or_EndOfBlock]  [NL]
+    |   [SimplePath] [SPOFF] '! [SPON] '{ [TokenTree*] '}
+end define
+
+define SEMI_or_EndOfBlock
+    '; | [see '}]
+end define
+
+% MacroRulesDefinition :
+%    macro_rules ! IDENTIFIER MacroRulesDef
+
+define MacroRulesDefinition
+    'macro_rules [SPOFF] '! [SPON] [IDENTIFIER] [MacroRulesDef]
+end define
+
+% MacroRulesDef :
+%       ( MacroRules ) ;
+%    | [ MacroRules ] ;
+%    | { MacroRules }
+
+define MacroRulesDef
+        '( [IN][NL] [MacroRules] [EX][NL] ') '; [NL]
+    |   '[ [IN][NL] [MacroRules] [EX][NL] '] '; [NL]
+    |   '{ [IN][NL] [MacroRules] [EX][NL] '} [NL]
+end define
+
+% MacroRules :
+%    MacroRule ( ; MacroRule )* ;?
+
+define MacroRules
+    [MacroRule] [SEMI_MacroRule*] ['; ?]
+end define
+
+define SEMI_MacroRule
+    ';  [NL] [MacroRule]
+end define
+
+% MacroRule :
+%    MacroMatcher => MacroTranscriber
+
+define MacroRule
+    [MacroMatcher] '=> [MacroTranscriber]
+end define
+
+% MacroMatcher :
+%       ( MacroMatch* )
+%    | [ MacroMatch* ]
+%    | { MacroMatch* }
+
+define MacroMatcher
+        '( [IN][NL] [MacroMatch*] [EX][NL] ')
+    |   '[ [IN][NL] [MacroMatch*] [EX][NL] ']
+    |   '{ [IN][NL] [MacroMatch*] [EX][NL] '}
+end define
+
+% MacroMatch :
+%       Token except $ and delimiters
+%    | MacroMatcher
+%    | $ IDENTIFIER : MacroFragSpec
+%    | $ ( MacroMatch+ ) MacroRepSep? MacroRepOp
+
+define MacroMatch
+        ', [NL]
+    |   [not '$] [not Delimiters] [token_or_key]
+    |   [MacroMatcher] 
+    |   '$ [SPOFF] [IDENTIFIER_OR_KEYWORD] [SPON] ': [MacroFragSpec] 
+    |   '$ [SPOFF] '( [SPON] [MacroMatch+] ') [MacroRepSep?] [MacroRepOp] 
+end define
+
+define Delimiters
+        '( | ') | '[ | '] | '{ | '}
+end define
+
+% MacroFragSpec :
+%       block | expr | ident | item | lifetime | literal
+%    | meta | pat | path | stmt | tt | ty | vis
+
+define MacroFragSpec
+        'block | 'expr | 'ident | 'item | 'lifetime | 'literal
+    |   'meta | 'pat | 'path | 'stmt | 'tt | 'ty | 'vis
+end define
+
+% MacroRepSep :
+%    Token except delimiters and repetition operators
+
+define MacroRepSep
+    [not Delimiters] [not RepetitionOperators] [token_or_key] 
+end define
+
+define RepetitionOperators
+    '* | '+ | '?
+end define
+
+% MacroRepOp :
+%    * | + | ?
+
+define MacroRepOp
+    '* | '+ | '?
+end define
+
+% MacroTranscriber :
+%    DelimTokenTree
+
+define MacroTranscriber
+    [DelimTokenTree]
+end define
+
+% Crate :
+%    UTF8BOM?
+%    SHEBANG?
+%    InnerAttribute*
+%    Item*
+
+define Crate
+    [UTF8BOM_NL?]
+    [SHEBANG_NL?]
+    [InnerAttribute*]
+    [Item*]
+end define
+
+define UTF8BOM_NL
+    [UTF8BOM] [NL]
+end define
+
+define SHEBANG_NL
+    [SHEBANG] [NL]
+end define
+
+% ConfigurationPredicate :
+%       ConfigurationOption
+%    | ConfigurationAll
+%    | ConfigurationAny
+%    | ConfigurationNot
+
+define ConfigurationPredicate
+        [ConfigurationOption]
+    |   [ConfigurationAll]
+    |   [ConfigurationAny]
+    |   [ConfigurationNot]
+end define
+
+% ConfigurationOption :
+%    IDENTIFIER (= (STRING_LITERAL | RAW_STRING_LITERAL))?
+
+define ConfigurationOption
+    [IDENTIFIER] [EQUALS_STRING_LITERAL_or_RAW_STRING_LITERAL?]
+end define
+
+define EQUALS_STRING_LITERAL_or_RAW_STRING_LITERAL
+    '= [STRING_LITERAL_or_RAW_STRING_LITERAL]
+end define
+
+% ConfigurationAll
+%    all ( ConfigurationPredicateList? )
+
+define ConfigurationAll
+    'all '( [ConfigurationPredicateList?] ')
+end define
+
+% ConfigurationAny
+%    any ( ConfigurationPredicateList? )
+
+define ConfigurationAny
+    'any '( [ConfigurationPredicateList?] ')
+end define
+
+% ConfigurationNot
+%    not ( ConfigurationPredicate )
+
+define ConfigurationNot
+    'not '( [ConfigurationPredicate] ')
+end define
+
+% ConfigurationPredicateList
+%    ConfigurationPredicate (, ConfigurationPredicate)* ,?
+
+define ConfigurationPredicateList
+    [ConfigurationPredicate,+] [', ?]
+end define
+
+% CfgAttrAttribute :
+%    cfg ( ConfigurationPredicate )
+%
+% CfgAttrAttribute :
+%    cfg_attr ( ConfigurationPredicate , CfgAttrs? )
+
+define CfgAttrAttribute
+        'cfg '( [ConfigurationPredicate] ')
+    |   'cfg_attr '( [ConfigurationPredicate] , [CfgAttrs?] ')
+end redefine
+
+% CfgAttrs :
+%    Attr (, Attr)* ,?
+
+define CfgAttrs
+    [Attr,+] [', ?]
+end define
+
+% Item:
+%    OuterAttribute*
+%       VisItem
+%    | MacroItem
+
+define Item
+        [OuterAttribute*]
+        [VisItem_or_MacroItem]
+end define
+
+define VisItem_or_MacroItem
+        [VisItem]
+    |   [MacroItem]
+end define
+
+% VisItem:
+%    Visibility?
+%    (
+%          Module
+%       | ExternCrate
+%       | UseDeclaration
+%       | Function
+%       | TypeAlias
+%       | Struct
+%       | Enumeration
+%       | Union
+%       | ConstantItem
+%       | StaticItem
+%       | Trait
+%       | Implementation
+%       | ExternBlock
+%    )
+
+define VisItem
+    [Visibility?]
+    [VisibleItem] [NL]
+end define
+
+define VisibleItem
+        [Module]
+    |   [ExternCrate]
+    |   [UseDeclaration]
+    |   [Function]
+    |   [TypeAlias]
+    |   [Struct]
+    |   [Enumeration]
+    |   [Union]
+    |   [ConstantItem]
+    |   [StaticItem]
+    |   [Trait]
+    |   [Implementation]
+    |   [ExternBlock]
+    |   [Macro]
+end define
+
+% MacroItem:
+%       MacroInvocationSemi
+%    | MacroRulesDefinition
+
+define MacroItem
+        [MacroInvocationSemi]
+    |   [MacroRulesDefinition]
+end define
+
+% Module :
+%       mod IDENTIFIER ;
+%    | mod IDENTIFIER {
+%         InnerAttribute*
+%         Item*
+%       }
+
+define Module
+        'mod [IDENTIFIER] ';    
+    |   'mod [IDENTIFIER] '{    [IN][NL]
+            [InnerAttribute*]
+            [Item*]             [EX]
+        '}
+end define
+
+% ExternCrate :
+%    extern crate CrateRef AsClause? ;
+
+define ExternCrate
+    'extern 'crate [CrateRef] [AsClause?] ';    [NL]
+end define
+
+% CrateRef :
+%    IDENTIFIER | self
+
+define CrateRef
+    [IDENTIFIER] | 'self
+end define
+
+% AsClause :
+%    as ( IDENTIFIER | _ )
+
+define AsClause
+    'as [IDENTIFIER_or_UNDERSCORE] 
+end define
+
+define IDENTIFIER_or_UNDERSCORE
+    [IDENTIFIER] | '_
+end define
+
+% UseDeclaration :
+%    use UseTree ;
+
+define UseDeclaration
+    'use [UseTree] ';
+end define
+
+% UseTree :
+%       (SimplePath? ::)? *
+%    | (SimplePath? ::)? { (UseTree ( , UseTree )* ,?)? }
+%    | SimplePath ( as ( IDENTIFIER | _ ) )?
+
+define UseTree
+        [SimplePath_COLON_COLON?] '*
+    |   [SimplePath_COLON_COLON?] '{ [UseTree,] [', ?] '}
+    |   [SimplePath] [AS_IDENTIFIER_OR_UNDERSCORE?]
+end define
+
+define AS_IDENTIFIER_OR_UNDERSCORE
+    'as [IDENTIFIER_or_UNDERSCORE] 
+end define
+
+define SimplePath_COLON_COLON
+    [SimplePath?] '::
+end define
+
+% Function :
+%    FunctionQualifiers fn IDENTIFIER Generics?
+%       ( FunctionParameters? )
+%       FunctionReturnType? WhereClause?
+%       BlockExpression
+
+define Function
+    [FunctionQualifiers] 'fn [IDENTIFIER] [Generics?] '( [FunctionParameters?] ')
+        [FunctionReturnType?] [WhereClause?]
+    [SEMI_or_BlockExpression]   % observed - JRC
+end define
+
+% FunctionQualifiers :
+%    AsyncConstQualifiers? unsafe? (extern Abi?)?
+
+define FunctionQualifiers
+    [AsyncConstQualifiers?] ['unsafe ?] [EXTERN_Abi?] 
+end define
+
+define EXTERN_Abi
+    'extern [Abi?]
+end define
+
+% AsyncConstQualifiers :
+%    async | const
+
+define AsyncConstQualifiers
+        'async | 'const
+    |   'default | 'crate       % observed - JRC
+end define
+
+% Abi :
+%    STRING_LITERAL | RAW_STRING_LITERAL
+
+define Abi
+    [STRING_LITERAL_or_RAW_STRING_LITERAL]
+end define
+
+define STRING_LITERAL_or_RAW_STRING_LITERAL
+    [STRING_LITERAL] | [RAW_STRING_LITERAL]
+end define
+
+% FunctionParameters :
+%    FunctionParam (, FunctionParam)* ,?
+
+define FunctionParameters
+    [FunctionParam,+] [', ?]
+end define
+
+% FunctionParam :
+%    OuterAttribute* Pattern : Type
+
+define FunctionParam
+        [OuterAttribute*] [Pattern] ': [Type]
+    |   [OuterAttribute*] [Pattern] ': '...     % observed - JRC
+end define
+
+% FunctionReturnType :
+%    -> Type
+
+define FunctionReturnType
+    '-> [Type]
+end define
+
+% TypeAlias :
+%    type IDENTIFIER Generics? WhereClause? = Type ;
+
+define TypeAlias
+    'type [IDENTIFIER] [Generics?] [WhereClause?] '= [Type] ';  
+end define
+
+% Struct :
+%       StructStruct
+%    | TupleStruct
+
+define Struct
+        [StructStruct]
+    |   [TupleStruct]
+end define
+
+% StructStruct :
+%    struct IDENTIFIER  Generics? WhereClause? ( { StructFields? } | ; )
+
+define StructStruct
+        'struct [IDENTIFIER] [Generics?] [WhereClause?] ';
+    |   'struct [IDENTIFIER] [Generics?] [WhereClause?] 
+        '{                      [IN]
+            [StructFields?]     [EX][NL]
+        '}
+end define
+
+% TupleStruct :
+%    struct IDENTIFIER  Generics? ( TupleFields? ) WhereClause? ;
+
+define TupleStruct
+    'struct [IDENTIFIER]  [Generics?] '( [TupleFields?] ') [WhereClause?] ';
+end define
+
+% StructFields :
+%    StructField (, StructField)* ,?
+
+define StructFields
+    [NL] [StructField,+] [', ?]
+end define
+
+% StructField :
+%    OuterAttribute*
+%    Visibility?
+%    IDENTIFIER : Type
+
+define StructField
+    [OuterAttribute*]
+    [Visibility?]
+    [IDENTIFIER] ': [Type]
+end define
+
+% TupleFields :
+%    TupleField (, TupleField)* ,?
+
+define TupleFields
+    [TupleField,+] [', ?]
+end define
+
+% TupleField :
+%    OuterAttribute*
+%    Visibility?
+%    Type
+
+define TupleField
+    [OuterAttribute*]
+    [Visibility?]
+    [Type]
+end define
+
+% Enumeration :
+%    enum IDENTIFIER  Generics? WhereClause? { EnumItems? }
+
+define Enumeration
+    'enum [IDENTIFIER]  [Generics?] [WhereClause?] '{ [EnumItems?] '}
+end define
+
+% EnumItems :
+%    EnumItem ( , EnumItem )* ,?
+
+define EnumItems
+    [EnumItem,+] [', ?]
+end define
+
+% EnumItem :
+%    OuterAttribute* Visibility?
+%    IDENTIFIER ( EnumItemTuple | EnumItemStruct | EnumItemDiscriminant )?
+
+define EnumItem
+    [OuterAttribute*] 
+    [Visibility?]
+    [IDENTIFIER] [EnumBody?]
+end define
+
+define EnumBody
+    [EnumItemTuple] | [EnumItemStruct] | [EnumItemDiscriminant] 
+end define
+
+% EnumItemTuple :
+%    ( TupleFields? )
+
+define EnumItemTuple
+    '( [TupleFields?] ')
+end define
+
+% EnumItemStruct :
+%    { StructFields? }
+
+define EnumItemStruct
+    '{ [StructFields?] '}
+end define
+
+% EnumItemDiscriminant :
+%    = Expression
+
+define EnumItemDiscriminant
+    '= [Expression]
+end define
+
+% Union :
+%    union IDENTIFIER Generics? WhereClause? {StructFields }
+
+define Union
+    'union [IDENTIFIER] [Generics?] [WhereClause?] 
+    '{                          [IN][NL]
+        [StructFields?]         [EX]
+    '}
+end define
+
+% ConstantItem :
+%    const ( IDENTIFIER | _ ) : Type = Expression ;
+
+define ConstantItem
+    'const [IDENTIFIER_or_UNDERSCORE] ': [Type] '= [Expression] ';
+end define
+
+% StaticItem :
+%    static mut? IDENTIFIER : Type = Expression ;
+
+define StaticItem
+    'static ['mut ?] [IDENTIFIER] ': [Type] '= [Expression] ';
+end define
+
+% Trait :
+%    unsafe? trait IDENTIFIER  Generics? ( : TypeParamBounds? )? WhereClause? {
+%      TraitItem*
+%    }
+
+define Trait
+    ['unsafe ?] ['auto ?] 'trait [IDENTIFIER]  [Generics?] [COLON_TypeParamBounds?] [WhereClause?] 
+        [Trait_Body]
+end define
+
+define Trait_Body
+    '{                  [IN][NL]
+        [TraitItem*]    [EX]
+    '}
+|
+    '= [WhereClause_or_Type] '; % observed - JRC
+end define
+
+define WhereClause_or_Type
+    [WhereClause] | [Type] [WhereClause?]
+end define
+
+% TraitItem :
+%    OuterAttribute* Visibility? (
+%          TraitFunc
+%       | TraitMethod
+%       | TraitConst
+%       | TraitType
+%       | MacroInvocationSemi
+%    )
+
+define TraitItem
+    [OuterAttribute*] 
+    [Visibility?] 
+    [VisibleTraitItem]
+end define
+
+define VisibleTraitItem
+        [TraitFunc]
+    |   [TraitMethod]
+    |   [TraitConst]
+    |   [TraitType]
+    |   [MacroInvocationSemi]
+end define
+
+% TraitFunc :
+%       TraitFunctionDecl ( ; | BlockExpression )
+
+define TraitFunc
+    [TraitFunctionDecl] [SEMI_or_BlockExpression] 
+end define
+
+define SEMI_or_BlockExpression
+    ';  [NL] | [BlockExpression] [NL]
+end define
+
+% TraitMethod :
+%       TraitMethodDecl ( ; | BlockExpression )
+
+define TraitMethod
+    [TraitMethodDecl] [SEMI_or_BlockExpression] 
+end define
+
+% TraitFunctionDecl :
+%    FunctionQualifiers fn IDENTIFIER Generics?
+%       ( TraitFunctionParameters? )
+%       FunctionReturnType? WhereClause?
+
+define TraitFunctionDecl
+    [FunctionQualifiers] 'fn [IDENTIFIER] [Generics?] '( [TraitFunctionParameters?] ')
+        [FunctionReturnType?] [WhereClause?]
+end define
+
+% TraitMethodDecl :
+%    FunctionQualifiers fn IDENTIFIER Generics?
+%       ( SelfParam (, TraitFunctionParam)* ,? )
+%       FunctionReturnType? WhereClause?
+
+define TraitMethodDecl
+    [FunctionQualifiers] 'fn [IDENTIFIER] [Generics?] '( [SelfParam] [COMMA_TraitFunctionParam*] [', ?] ')
+        [FunctionReturnType?] [WhereClause?]
+end define
+
+define COMMA_TraitFunctionParam
+    ', [TraitFunctionParam]
+end define
+
+% TraitFunctionParameters :
+%    TraitFunctionParam (, TraitFunctionParam)* ,?
+
+define TraitFunctionParameters
+    [TraitFunctionParam,+] [', ?]
+end define
+
+% TraitFunctionParam† :
+%    OuterAttribute* ( Pattern : )? Type
+
+define TraitFunctionParam
+    [OuterAttribute*] [Pattern_COLON?] [Type]
+end define
+
+define Pattern_COLON
+    [Pattern] ':
+end define
+
+% TraitConst :
+%    const IDENTIFIER : Type ( = Expression )? ;
+
+define TraitConst
+    'const [IDENTIFIER] ': [Type] [EQUALS_Expression?] ';       [NL]
+end define
+
+define EQUALS_Expression
+    '= [Expression]
+end define
+
+% TraitType :
+%    type IDENTIFIER ( : TypeParamBounds? )? ;
+
+define TraitType
+    'type [IDENTIFIER] [COLON_TypeParamBounds?] 
+        [EQUALS_Type?]  % observed - JRC
+        '; [NL]
+end define
+
+% Implementation :
+%    InherentImpl | TraitImpl
+
+define Implementation
+    [InherentImpl] | [TraitImpl]
+end define
+
+% InherentImpl :
+%    impl Generics? Type WhereClause? {
+%       InnerAttribute*
+%       InherentImplItem*
+%    }
+
+define InherentImpl
+    'impl [Generics?] [Type] [WhereClause?] 
+    '{                          [IN][NL]
+        [InnerAttribute*]
+        [InherentImplItem*]     [EX]
+    '}
+end define
+
+% InherentImplItem :
+%    OuterAttribute* (
+%          MacroInvocationSemi
+%       | ( Visibility? ( ConstantItem | Function | Method ) )
+%    )
+
+define InherentImplItem
+    [OuterAttribute*] 
+    [MacroInvocationSemi_or_VisibleImplItem]
+end define
+
+define MacroInvocationSemi_or_VisibleImplItem 
+        [MacroInvocationSemi]
+    |   [Visibility?] 
+        [VisibleImplItem] [NL]
+end define
+
+define VisibleImplItem
+    [ConstantItem] | [Function] | [Method] 
+end define
+
+% TraitImpl :
+%    unsafe? impl Generics? !? TypePath for Type
+%    WhereClause?
+%    {
+%       InnerAttribute*
+%       TraitImplItem*
+%    }
+
+define TraitImpl
+    ['unsafe ?] 'impl [Generics?] ['! ?] [TypePath] 'for [Type]
+    [WhereClause?]
+    '{                          [IN][NL]
+        [InnerAttribute*]
+        [TraitImplItem*]        [EX]
+    '}
+end define
+
+% TraitImplItem :
+%    OuterAttribute* (
+%          MacroInvocationSemi
+%       | ( Visibility? ( TypeAlias | ConstantItem | Function | Method ) )
+%    )
+
+define TraitImplItem
+    [OuterAttribute*] 
+    [MacroInvocationSemi_or_VisibleTraitImplItem]
+end define
+
+define MacroInvocationSemi_or_VisibleTraitImplItem
+        [MacroInvocationSemi]
+    |   [Visibility?] 
+        [VisibleTraitImplItem] [NL]
+end define
+
+define VisibleTraitImplItem
+    [TypeAlias] | [ConstantItem] | [Function] | [Method] 
+end define
+
+% ExternBlock :
+%    extern Abi? {
+%       InnerAttribute*
+%       ExternalItem*
+%    }
+
+define ExternBlock
+        'extern [Abi?] 
+        '{                              [IN][NL]
+                [InnerAttribute*]
+                [ExternalItem*]         [EX]
+        '}
+    |
+        'extern "C" [DelimTokenTree]
+end define
+
+% ExternalItem :
+%    OuterAttribute* (
+%          MacroInvocationSemi
+%       | ( Visibility? ( ExternalStaticItem | ExternalFunctionItem ) )
+%    )
+
+define ExternalItem
+    [OuterAttribute*] 
+    [MacroInvocationSemi_or_VisibleExternalItem]
+end define
+
+define MacroInvocationSemi_or_VisibleExternalItem
+        [MacroInvocationSemi]
+    |   [Visibility?] 
+        [VisibleExternalItem]
+end define
+
+define VisibleExternalItem
+    [ExternalStaticItem] | [ExternalFunctionItem] 
+|   [ExternalTypeItem]  % observed - JRC
+end define
+
+define ExternalTypeItem
+    'type [IDENTIFIER] '; [NL]
+end define
+
+% ExternalStaticItem :
+%    static mut? IDENTIFIER : Type ;
+
+define ExternalStaticItem
+    'static ['mut ?] [IDENTIFIER] ': [Type] 
+    [EQUALS_Expression?]        % observed - JRC
+    ';  [NL]
+end define
+
+% ExternalFunctionItem :
+%    fn IDENTIFIER Generics?
+%    ( ( NamedFunctionParameters | NamedFunctionParametersWithVariadics )? )
+%    FunctionReturnType? WhereClause? ;
+
+define ExternalFunctionItem
+    'fn [IDENTIFIER] [Generics?] '( [NamedFunctionParameters_or_NamedFunctionParametersWithVariadics?] ')
+        [FunctionReturnType?] [WhereClause?] 
+    [SEMI_or_BlockExpression]   % observed - JRC
+end define
+
+define NamedFunctionParameters_or_NamedFunctionParametersWithVariadics 
+    [NamedFunctionParameters] | [NamedFunctionParametersWithVariadics] 
+end define
+
+% NamedFunctionParameters :
+%    NamedFunctionParam ( , NamedFunctionParam )* ,?
+
+define NamedFunctionParameters
+    [NamedFunctionParam,+] [', ?]
+end define
+
+% NamedFunctionParam :
+%    OuterAttribute* ( IDENTIFIER | _ ) : Type
+
+define NamedFunctionParam
+    [OuterAttribute*] [IDENTIFIER_or_UNDERSCORE] ': [Type]
+end define
+
+% NamedFunctionParametersWithVariadics :
+%    ( NamedFunctionParam , )* NamedFunctionParam , OuterAttribute* ...
+
+define NamedFunctionParametersWithVariadics
+    [NamedFunctionParam,+] ', [OuterAttribute*] '...
+end define
+
+% Generics :
+%    < GenericParams >
+
+define Generics
+    '< [GenericParams] '>
+end define
+
+% GenericParams :
+%       LifetimeParams
+%    | ( LifetimeParam , )* TypeParams
+
+define GenericParams
+        [LifetimeParams]
+    |   [LifetimeParam,] [', ?] [TypeParams]
+end define
+
+% LifetimeParams :
+%    ( LifetimeParam , )* LifetimeParam?
+
+define LifetimeParams
+    [LifetimeParam,] [', ?]
+end define
+
+% LifetimeParam :
+%    OuterAttribute? LIFETIME_OR_LABEL ( : LifetimeBounds )?
+
+define LifetimeParam
+    [OuterAttribute?] [LIFETIME_OR_LABEL] [COLON_LifetimeBounds?]
+end define
+
+define COLON_LifetimeBounds
+    ': [LifetimeBounds]
+end define
+
+% TypeParams:
+%    ( TypeParam , )* TypeParam?
+
+define TypeParams
+    [TypeParam,] [', ?]
+end define
+
+% TypeParam :
+%    OuterAttribute? IDENTIFIER ( : TypeParamBounds? )? ( = Type )?
+
+define TypeParam
+    [OuterAttribute?] 
+    [mut_or_const?]     % observed - JRC
+    [IDENTIFIER] [COLON_TypeParamBounds?] [EQUALS_Type?] 
+end define
+
+define COLON_TypeParamBounds
+    ': [TypeParamBounds?]
+end define 
+
+define EQUALS_Type
+    '= [Type] 
+end define
+
+% WhereClause :
+%    where ( WhereClauseItem , )* WhereClauseItem ?
+
+define WhereClause
+    'where [WhereClauseItem,] [', ?]
+end define
+
+% WhereClauseItem :
+%       LifetimeWhereClauseItem
+%    | TypeBoundWhereClauseItem
+
+define WhereClauseItem
+        [LifetimeWhereClauseItem]
+    |   [TypeBoundWhereClauseItem]
+end define
+
+% LifetimeWhereClauseItem :
+%    Lifetime : LifetimeBounds
+
+define LifetimeWhereClauseItem
+    [Lifetime] ': [LifetimeBounds]
+end define
+
+% TypeBoundWhereClauseItem :
+%    ForLifetimes? Type : TypeParamBounds?
+
+define TypeBoundWhereClauseItem
+    [ForLifetimes?] [Type] ': [TypeParamBounds?]
+end define
+
+% ForLifetimes :
+%    for < LifetimeParams >
+
+define ForLifetimes
+    'for '< [LifetimeParams] '>
+end define
+
+% Method :
+%    FunctionQualifiers fn IDENTIFIER Generics?
+%       ( SelfParam (, FunctionParam)* ,? )
+%       FunctionReturnType? WhereClause?
+%       BlockExpression
+
+define Method
+    [FunctionQualifiers] 'fn [IDENTIFIER] [Generics?] '( [SelfParam] [COMMA_FunctionParam*] [', ?] ')
+        [FunctionReturnType?] [WhereClause?]
+    [BlockExpression] 
+end define
+
+define COMMA_FunctionParam
+    ', [FunctionParam]
+end define
+
+% SelfParam :
+%    OuterAttribute* ( ShorthandSelf | TypedSelf )
+
+define SelfParam
+    [OuterAttribute*]
+    [ShorthandSelf_or_TypedSelf]
+end define
+
+define ShorthandSelf_or_TypedSelf
+    [ShorthandSelf] | [TypedSelf]
+end define
+
+% ShorthandSelf :
+%    (& | & Lifetime)? mut? self
+
+define ShorthandSelf
+    [AND_Lifetime?] ['mut ?] 'self
+end define
+
+define AND_Lifetime
+    '& [Lifetime?]
+end define
+
+% TypedSelf :
+%    mut? self : Type
+
+define TypedSelf
+    ['mut ?] 'self ': [Type]
+end define
+
+% Macros - observed JRC
+
+define Macro
+    [FunctionQualifiers] 'macro [IDENTIFIER] [Generics?] '( [MacroParameters?] ')
+        [FunctionReturnType?] [WhereClause?]
+    [MacroBody] 
+end define
+
+define MacroBody
+    [DelimTokenTree]    
+end define
+
+define MacroParameters
+    [TokenTree*]
+end define
+
+% Visibility :
+%       pub
+%    | pub ( crate )
+%    | pub ( self )
+%    | pub ( super )
+%    | pub ( in SimplePath )
+
+define Visibility
+        'pub [VisibilityConstraint?]
+    |   'crate          % observed - JRC
+    |   'default        % observed - JRC
+end define
+
+define VisibilityConstraint
+        '( [VisibilityScope] ')
+end define
+
+define VisibilityScope
+        'crate | 'self | 'super 
+    |   'in [SimplePath] 
+end define
+
+% InnerAttribute :
+%    # ! [ Attr ]
+
+define InnerAttribute
+    [SHEBANG] [SPOFF] '[ [SPON] [Attr] '] [NL] 
+end define
+
+% OuterAttribute :
+%    # [ Attr ]
+
+define OuterAttribute
+    '# [SPOFF] '[ [SPON] [Attr] '] [NL]
+end define
+
+% Attr :
+%    SimplePath AttrInput?
+
+define Attr
+    [SimplePath] [AttrInput?]
+end define
+
+% AttrInput :
+%       DelimTokenTree
+%    | = LiteralExpression without suffix
+
+define AttrInput
+        [DelimTokenTree]
+    |   '= [LiteralExpressionWithoutSuffix]
+end define
+
+
+define LiteralExpressionWithoutSuffix
+    [LiteralExpression]  % not sure how to implement "without suffix"
+end define
+
+% MetaItem :
+%       SimplePath
+%    | SimplePath = LiteralExpression without suffix
+%    | SimplePath ( MetaSeq? )
+
+define MetaItem
+        [SimplePath]
+    |   [SimplePath] '= [LiteralExpressionWithoutSuffix]
+    |   [SimplePath] '( [MetaSeq?] ')
+end define
+
+% MetaSeq :
+%    MetaItemInner ( , MetaItemInner )* ,?
+
+define MetaSeq
+    [MetaItemInner,+] [', ?]
+end define
+
+% MetaItemInner :
+%       MetaItem
+%    | LiteralExpression without suffix
+
+define MetaItemInner
+        [MetaItem]
+    |   [LiteralExpressionWithoutSuffix]
+end define
+
+% MetaWord:
+%    IDENTIFIER
+
+define MetaWord
+    [IDENTIFIER]
+end define
+
+% MetaNameValueStr:
+%    IDENTIFIER = (STRING_LITERAL | RAW_STRING_LITERAL)
+
+define MetaNameValueStr
+    [IDENTIFIER] '= [STRING_LITERAL_or_RAW_STRING_LITERAL]
+end define
+
+% MetaListPaths:
+%    IDENTIFIER ( ( SimplePath (, SimplePath)* ,? )? )
+
+define MetaListPaths
+    [IDENTIFIER] '( [SimplePath,] [', ?] ')
+end define
+
+% MetaListIdents:
+%    IDENTIFIER ( ( IDENTIFIER (, IDENTIFIER)* ,? )? )
+
+define MetaListIdents
+    [IDENTIFIER] '( [IDENTIFIER,] [', ?] ')
+end define
+
+% MetaListNameValueStr:
+%    IDENTIFIER ( ( MetaNameValueStr (, MetaNameValueStr)* ,? )? )
+
+define MetaListNameValueStr
+    [IDENTIFIER] '( [MetaNameValueStr,] [', ?] ')
+end define
+
+% Statement :
+%       ;
+%    | Item
+%    | LetStatement
+%    | ExpressionStatement
+%    | MacroInvocationSemi
+
+define Statement
+        ';      [NL]
+    |   [Item]
+    |   [LetStatement]
+    |   [ExpressionStatement]
+    |   [MacroInvocationSemi]
+end define
+
+% LetStatement :
+%    OuterAttribute* let Pattern ( : Type )? (= Expression )? ;
+
+define LetStatement
+    [OuterAttribute*] 'let [Pattern] [COLON_Type?] [EQUALS_Expression?] ';      [NL]
+end define
+
+define COLON_Type
+    ': [Type]
+end define
+
+% ExpressionStatement :
+%       ExpressionWithoutBlock ;
+%    | ExpressionWithBlock ;?
+
+define ExpressionStatement
+        % Simplified to address ambiguities 
+        [Expression] ['; ?] [NL]
+end define
+
+% Expression :
+%       ExpressionWithoutBlock
+%    | ExpressionWithBlock
+
+define Expression
+        % Refactored to address ambiguities in original
+        [Prefix_Expressions*] [ExpressionWithOrWithoutBlock] [Infix_Postfix_Expressions*]
+end define
+
+define ExpressionWithOrWithoutBlock
+        [ExpressionWithoutBlock] | [ExpressionWithBlock]
+end define
+
+define Prefix_Expressions
+        [Prefix_OperatorExpression]
+    |   [Prefix_RangeExpression]
+end define
+
+define Infix_Postfix_Expressions
+        % Left recursive cases
+        [Infix_OperatorExpression]
+    |   [Infix_RangeExpression]
+    |   [Postfix_OperatorExpression]
+    |   [Postfix_IndexExpression]
+    |   [Postfix_TupleIndexingExpression]
+    |   [Postfix_CallExpression]
+    |   [Postfix_FieldExpression]
+    |   [Postfix_RangeExpression]
+    |   [Postfix_AwaitExpression]
+    |   [Postfix_StructExpression]
+    |   [Postfix_EnumerationVariantExpression]
+end define
+
+% ExpressionWithoutBlock :
+%    OuterAttribute*†
+%    (
+%          LiteralExpression
+%       | PathExpression
+%       | OperatorExpression
+%       | GroupedExpression
+%       | ArrayExpression
+%       | AwaitExpression
+%       | IndexExpression
+%       | TupleExpression
+%       | TupleIndexingExpression
+%       | StructExpression
+%       | EnumerationVariantExpression
+%       | CallExpression
+%       | MethodCallExpression
+%       | FieldExpression
+%       | ClosureExpression
+%       | ContinueExpression
+%       | BreakExpression
+%       | RangeExpression
+%       | ReturnExpression
+%       | MacroInvocation
+%    )
+
+define ExpressionWithoutBlock
+    [OuterAttribute*]
+    [OuterExpressionWithoutBlock]
+end define
+
+define OuterExpressionWithoutBlock 
+        [LiteralExpression]
+    |   [PathExpression] 
+    |   [GroupedExpression]
+    |   [ArrayExpression]
+    |   [TupleExpression]
+    |   [ClosureExpression]
+    |   [ContinueExpression]
+    |   [BreakExpression]
+    |   [RangeFullExpression]
+    |   [ReturnExpression]
+    |   [YieldExpression]
+    |   [BoxExpression]
+    |   [MacroInvocation]
+end define
+
+define YieldExpression
+    'yield [Expression?]
+end define
+
+define BoxExpression
+    'box [Expression]
+end define
+
+% ExpressionWithBlock :
+%    OuterAttribute*†
+%    (
+%          BlockExpression
+%       | AsyncBlockExpression
+%       | UnsafeBlockExpression
+%       | LoopExpression
+%       | IfExpression
+%       | IfLetExpression
+%       | MatchExpression
+%    )
+
+define ExpressionWithBlock
+    [OuterAttribute*]
+    [OuterExpressionWithBlock]
+end define
+
+define OuterExpressionWithBlock
+        [BlockExpression]
+    |   [AsyncBlockExpression]
+    |   [UnsafeBlockExpression]
+    |   [LoopExpression]
+    |   [IfExpression]
+    |   [IfLetExpression]
+    |   [MatchExpression]
+    |   [TryExpression]         % observed - JRC
+end define
+
+% LiteralExpression :
+%       CHAR_LITERAL
+%    | STRING_LITERAL
+%    | RAW_STRING_LITERAL
+%    | BYTE_LITERAL
+%    | BYTE_STRING_LITERAL
+%    | RAW_BYTE_STRING_LITERAL
+%    | INTEGER_LITERAL
+%    | FLOAT_LITERAL
+%    | BOOLEAN_LITERAL
+
+define LiteralExpression
+        [CHAR_LITERAL]
+    |   [STRING_LITERAL]
+    |   [RAW_STRING_LITERAL]
+    |   [BYTE_LITERAL]
+    |   [BYTE_STRING_LITERAL]
+    |   [RAW_BYTE_STRING_LITERAL]
+    |   [INTEGER_LITERAL]
+    |   [FLOAT_LITERAL]
+    |   [BOOLEAN_LITERAL]
+end define
+
+% PathExpression :
+%       PathInExpression
+%    | QualifiedPathInExpression
+
+define PathExpression
+        [PathInExpression]
+    |   [QualifiedPathInExpression]
+end define
+
+% BlockExpression :
+%    {
+%       InnerAttribute*
+%       Statements?
+%    }
+
+define BlockExpression
+    [LoopLabel?]        % observed - JRC
+    '{                          [IN][NL]
+        [InnerAttribute*]
+        [Statements]            [EX]
+    '}
+end define
+
+% Statements :
+%       Statement+
+%    | Statement+ ExpressionWithoutBlock
+%    | ExpressionWithoutBlock
+
+define Statements
+    [Statement*]        
+end define
+
+% AsyncBlockExpression :
+%    async move? BlockExpression
+
+define AsyncBlockExpression
+    'async ['move ?] [BlockExpression]
+end define
+
+% UnsafeBlockExpression :
+%    unsafe BlockExpression
+
+define UnsafeBlockExpression
+    'unsafe [BlockExpression]
+end define
+
+% OperatorExpression :
+%       BorrowExpression
+%    | DereferenceExpression
+%    | ErrorPropagationExpression
+%    | NegationExpression
+%    | ArithmeticOrLogicalExpression
+%    | ComparisonExpression
+%    | LazyBooleanExpression
+%    | TypeCastExpression
+%    | AssignmentExpression
+%    | CompoundAssignmentExpression
+
+define Prefix_OperatorExpression
+        [Prefix_BorrowExpression]
+    |   [Prefix_DereferenceExpression]
+    |   [Prefix_NegationExpression]
+end define
+
+define Infix_OperatorExpression 
+        [Infix_ArithmeticOrLogicalExpression]
+    |   [Infix_ComparisonExpression]
+    |   [Infix_LazyBooleanExpression]
+    |   [Infix_AssignmentExpression]
+    |   [Infix_CompoundAssignmentExpression]
+end define
+
+define Postfix_OperatorExpression
+        [Postfix_ErrorPropagationExpression]
+    |   [Postfix_TypeCastExpression]
+end define
+
+% BorrowExpression :
+%       (&|&&) Expression
+%    | (&|&&) mut Expression
+
+define Prefix_BorrowExpression
+    [AND_or_AND_AND] ['raw ?] [mut_or_const?]   % observed - JRC
+end define
+
+define AND_or_AND_AND
+    '& | '& [SPOFF] '& [SPON]
+end define
+
+% DereferenceExpression :
+%    * Expression
+
+define Prefix_DereferenceExpression
+    '* [SPOFF] ['* *] [SPON] 
+end define
+
+% ErrorPropagationExpression :
+%    Expression ?
+
+define Postfix_ErrorPropagationExpression
+    '?
+end define
+
+% NegationExpression :
+%       - Expression
+%    | ! Expression
+
+define Prefix_NegationExpression
+        '- 
+    |   '! 
+end define
+
+% ArithmeticOrLogicalExpression :
+%       Expression + Expression
+%    | Expression - Expression
+%    | Expression * Expression
+%    | Expression / Expression
+%    | Expression % Expression
+%    | Expression & Expression
+%    | Expression | Expression
+%    | Expression ^ Expression
+%    | Expression << Expression
+%    | Expression >> Expression
+
+define Infix_ArithmeticOrLogicalExpression
+        '+ [Expression]
+    |   '- [Expression]
+    |   '* [Expression]
+    |   '/ [Expression]
+    |   '% [Expression]
+    |   '& [Expression]
+    |   '| [Expression]
+    |   '^ [Expression]
+    |   '< [SPOFF] '< [SPON] [Expression]
+    |   '> [SPOFF] '> [SPON] [Expression]
+end define
+
+% ComparisonExpression :
+%       Expression == Expression
+%    | Expression != Expression
+%    | Expression > Expression
+%    | Expression < Expression
+%    | Expression >= Expression
+%    | Expression <= Expression
+
+define Infix_ComparisonExpression
+        '== [Expression]
+    |   '!= [Expression]
+    |   '> [Expression]
+    |   '< [Expression]
+    |   '> [SPOFF] '= [SPON] [Expression]
+    |   '<= [Expression]
+end define
+
+% LazyBooleanExpression :
+%       Expression || Expression
+%    | Expression && Expression
+
+define Infix_LazyBooleanExpression
+        '|| [Expression]
+    |   '& [SPOFF] '& [SPON] [Expression]
+    |   'or [Expression]
+    |   'and [Expression]
+end define
+
+define LazyBooleanExpression
+    [OuterExpressionWithoutBlock] [Infix_LazyBooleanExpression]
+end define
+
+% TypeCastExpression :
+%    Expression as TypeNoBounds
+
+define Postfix_TypeCastExpression
+    'as [TypeNoBounds]
+|   ': [TypeNoBounds]   % observed - JRC
+end define
+
+% AssignmentExpression :
+%    Expression = Expression
+
+define Infix_AssignmentExpression
+    '= [Expression]
+end define
+
+% CompoundAssignmentExpression :
+%       Expression += Expression
+%    | Expression -= Expression
+%    | Expression *= Expression
+%    | Expression /= Expression
+%    | Expression %= Expression
+%    | Expression &= Expression
+%    | Expression |= Expression
+%    | Expression ^= Expression
+%    | Expression <<= Expression
+%    | Expression >>= Expression
+
+define Infix_CompoundAssignmentExpression
+        '+= [Expression]
+    |   '-= [Expression]
+    |   '*= [Expression]
+    |   '/= [Expression]
+    |   '%= [Expression]
+    |   '&= [Expression]
+    |   '|= [Expression]
+    |   '^= [Expression]
+    |   '<<= [Expression]
+    |   '> [SPOFF] '>= [SPON] [Expression]
+end define
+
+% GroupedExpression :
+%    ( InnerAttribute* Expression )
+
+define GroupedExpression
+    '( [InnerAttribute*] [Expression] ')
+end define
+
+% ArrayExpression :
+%    [ InnerAttribute* ArrayElements? ]
+
+define ArrayExpression
+    '[ [InnerAttribute*] [ArrayElements?] ']
+end define
+
+% ArrayElements :
+%       Expression ( , Expression )* ,?
+%    | Expression ; Expression
+
+define ArrayElements
+        [Expression,+] [', ?]
+    |   [Expression] '; [Expression]
+end define
+
+% IndexExpression :
+%    Expression [ Expression ]
+
+define Postfix_IndexExpression
+    '[ [Expression] ']
+end define
+
+% TupleExpression :
+%    ( InnerAttribute* TupleElements? )
+
+define TupleExpression
+    '( [InnerAttribute*] [TupleElements?] ')
+end define
+
+% TupleElements :
+%    ( Expression , )+ Expression?
+
+define TupleElements
+    [Expression,+] [', ?]
+end define
+
+% TupleIndexingExpression :
+%    Expression . TUPLE_INDEX
+
+define Postfix_TupleIndexingExpression
+    '. [TUPLE_INDEX]
+end define
+
+% StructExpression :
+%       StructExprStruct
+%    | StructExprTuple
+%    | StructExprUnit
+
+define Postfix_StructExpression
+        [Postfix_StructExprStruct]
+    |   [Postfix_StructExprTuple]
+end define
+
+% StructExprStruct :
+%    PathInExpression { InnerAttribute* (StructExprFields | StructBase)? }
+
+define StructExprStruct
+    [PathInExpression] '{ [IN] [InnerAttribute*] [StructExprFields_or_StructBase?] [EX][NL] '}
+end define
+
+define Postfix_StructExprStruct
+    '{ [IN] [InnerAttribute*] [StructExprFields_or_StructBase?] [EX][NL] '} 
+    [not 'else]         % resolves misparse of if statements - JRC
+end define
+
+define StructExprFields_or_StructBase
+    [StructExprFields] | [StructBase]
+end define
+
+% StructExprFields :
+%    StructExprField (, StructExprField)* (, StructBase | ,?)
+
+define StructExprFields
+    [StructExprField,+] [COMMA_StructBase?] [', ?]
+end define
+
+define COMMA_StructBase
+    ', [StructBase] 
+end define
+
+% StructExprField :
+%       IDENTIFIER
+%    | (IDENTIFIER | TUPLE_INDEX) : Expression
+
+define StructExprField
+        [NL] [OuterAttribute*]          % observed - JRC
+        [IDENTIFIER]
+    |   [NL] [OuterAttribute*]          % observed - JRC
+        [IDENTIFIER_or_TUPLE_INDEX] ': [Expression]
+end define
+
+
+define IDENTIFIER_or_TUPLE_INDEX
+    [IDENTIFIER] | [TUPLE_INDEX]
+end define
+
+% StructBase :
+%    .. Expression
+
+define StructBase
+    '.. [Expression]
+end define
+
+% StructExprTuple :
+%    PathInExpression (
+%       InnerAttribute*
+%       ( Expression (, Expression)* ,? )?
+%    )
+
+define Postfix_StructExprTuple
+    '(
+        [InnerAttribute*]
+        [Expression,] [', ?]
+    ')
+end define
+
+% StructExprUnit : PathInExpression
+
+define Postfix_StructExprUnit 
+    [empty]
+end define
+
+% EnumerationVariantExpression :
+%       EnumExprStruct
+%    | EnumExprTuple
+%    | EnumExprFieldless
+
+define Postfix_EnumerationVariantExpression
+        [Postfix_EnumExprStruct]
+    |   [Postfix_EnumExprTuple]
+end define
+
+% EnumExprStruct :
+%    PathInExpression { EnumExprFields? }
+
+define Postfix_EnumExprStruct
+    '{ [EnumExprFields?] '} 
+    [not 'else]         % resolves misparse of if statements - JRC
+end define
+
+% EnumExprFields :
+%       EnumExprField (, EnumExprField)* ,?
+
+define EnumExprFields
+    [EnumExprField,+] [', ?]
+end define
+
+% EnumExprField :
+%       IDENTIFIER
+%    | (IDENTIFIER | TUPLE_INDEX) : Expression
+
+define EnumExprField
+        [IDENTIFIER]
+    |   [IDENTIFIER_or_TUPLE_INDEX] ': [Expression]
+end define
+
+% EnumExprTuple :
+%    PathInExpression (
+%       ( Expression (, Expression)* ,? )?
+%    )
+
+define Postfix_EnumExprTuple
+    '(
+        [Expression,] [', ?] 
+    ')
+end define
+
+% EnumExprFieldless : PathInExpression
+
+define Postfix_EnumExprFieldless 
+    [empty]
+end define
+
+% CallExpression :
+%    Expression ( CallParams? )
+
+define Postfix_CallExpression
+    '( [CallParams?] ')
+end define
+
+% CallParams :
+%    Expression ( , Expression )* ,?
+
+define CallParams
+    [CallParam,+] [', ?]
+end define
+
+define CallParam
+    [OuterAttribute*]   % observed - JRC
+    [Expression]
+end define
+
+% MethodCallExpression :
+%    Expression . PathExprSegment (CallParams? )
+
+% FieldExpression :
+%    Expression . IDENTIFIER
+
+define Postfix_FieldExpression
+    '. [PathExprSegment]        % generalized with CallExpession to include method call - JRC
+end define
+
+% ClosureExpression :
+%    move?
+%    ( || | | ClosureParameters? | )
+%    (Expression | -> TypeNoBounds BlockExpression)
+
+define ClosureExpression
+    ['static?]          % observed - JRC
+    ['async?]           % observed - JRC
+    ['move ?]
+    [OR_OR_or_OR_ClosureParameters_OR]
+    [Expression_or_ARROW_TypeNoBounds_BlockExpression]
+end define
+
+define  OR_OR_or_OR_ClosureParameters_OR
+        '|| 
+    |   '| [ClosureParameters?] '|
+end define
+
+define Expression_or_ARROW_TypeNoBounds_BlockExpression
+        [Expression] 
+    |   '-> [TypeNoBounds] [BlockExpression]
+end define
+
+% ClosureParameters :
+%    ClosureParam (, ClosureParam)* ,?
+
+define ClosureParameters
+    [ClosureParam,+] [', ?]
+end define
+
+% ClosureParam :
+%    OuterAttribute* Pattern ( : Type )?
+
+define ClosureParam
+    [OuterAttribute*] 
+    [Pattern] [COLON_Type?] 
+end define
+
+% LoopExpression :
+%    LoopLabel? (
+%          InfiniteLoopExpression
+%       | PredicateLoopExpression
+%       | PredicatePatternLoopExpression
+%       | IteratorLoopExpression
+%    )
+
+define LoopExpression
+    [LoopLabel?] 
+    [UnlabelledLoopExpression]
+end define
+
+define UnlabelledLoopExpression 
+        [InfiniteLoopExpression]
+    |   [PredicateLoopExpression]
+    |   [PredicatePatternLoopExpression]
+    |   [IteratorLoopExpression]
+end define
+
+% InfiniteLoopExpression :
+%    loop BlockExpression
+
+define InfiniteLoopExpression
+    'loop [BlockExpression]
+end define
+
+% PredicateLoopExpression :
+%    while Expression excepExpression except struct expression BlockExpression
+
+define PredicateLoopExpression
+    'while [ExpressionExceptStructExpression] 
+        [BlockExpression]
+end define
+
+define ExpressionExceptStructExpression
+    % Generalized for TXL
+    [Expression]
+end define
+
+% PredicatePatternLoopExpression :
+%    while let MatchArmPatterns = Expression except struct or lazy boolean operator expression BlockExpression
+
+define PredicatePatternLoopExpression
+    'while 'let [MatchArmPatterns] '= [ExpressionExceptStructOrLazyBooleanOperatorExpression] 
+        [BlockExpression]
+end define
+
+define ExpressionExceptStructOrLazyBooleanOperatorExpression
+    % Generalized for TXL
+    [Expression]
+end define
+
+% IteratorLoopExpression :
+%    for Pattern in Expression except struct expression BlockExpression
+
+define IteratorLoopExpression
+    'for [Pattern] 'in [ExpressionExceptStructExpression] 
+        [BlockExpression]
+end define
+
+% LoopLabel :
+%    LIFETIME_OR_LABEL :
+
+define LoopLabel
+    [LIFETIME_OR_LABEL] ':
+end define
+
+% BreakExpression :
+%    break LIFETIME_OR_LABEL? Expression?
+
+define BreakExpression
+    'break [LIFETIME_OR_LABEL?] [Expression?]
+end define
+
+% ContinueExpression :
+%    continue LIFETIME_OR_LABEL?
+
+define ContinueExpression
+    'continue [LIFETIME_OR_LABEL?]
+end define
+
+% RangeExpression :
+%       RangeExpr
+%    | RangeFromExpr
+%    | RangeToExpr
+%    | RangeFullExpr
+%    | RangeInclusiveExpr
+%    | RangeToInclusiveExpr
+
+define Prefix_RangeExpression
+        [Prefix_RangeToExpr]
+    |   [Prefix_RangeToInclusiveExpr]
+end define
+
+define Infix_RangeExpression
+        [Infix_RangeExpr]
+    |   [Infix_RangeInclusiveExpr]
+end define
+
+define Postfix_RangeExpression
+        [Postfix_RangeFromExpr]
+end define
+
+% RangeExpr :
+%    Expression .. Expression
+
+define Infix_RangeExpr
+    '.. [Expression]
+end define
+
+% RangeFromExpr :
+%    Expression ..
+
+define Postfix_RangeFromExpr
+    '..
+end define
+
+% RangeToExpr :
+%    .. Expression
+
+define Prefix_RangeToExpr
+    '.. 
+end define
+
+% RangeFullExpr :
+%    ..
+
+define RangeFullExpression
+    '..
+end define
+
+% RangeInclusiveExpr :
+%    Expression ..= Expression
+
+define Infix_RangeInclusiveExpr
+    '..= [Expression]
+end define
+
+% RangeToInclusiveExpr :
+%    ..= Expression
+
+define Prefix_RangeToInclusiveExpr
+    '..= 
+end define
+
+% IfExpression :
+%    if Expression except struct expression BlockExpression
+%    (else ( BlockExpression | IfExpression | IfLetExpression ) )?
+
+define IfExpression
+    'if [ExpressionExceptStructExpression] 
+        [BlockExpression]
+    [ElseExpression?]
+end define
+
+define ElseExpression
+    'else [BlockExpression_or_IfExpression_or_IfLetExpression?]
+end define
+
+define BlockExpression_or_IfExpression_or_IfLetExpression
+    [BlockExpression] | [IfExpression] | [IfLetExpression] 
+end define
+
+% IfLetExpression :
+%    if let MatchArmPatterns = Expression except struct or lazy boolean operator expression BlockExpression
+%    (else ( BlockExpression | IfExpression | IfLetExpression ) )?
+
+define IfLetExpression
+    'if 'let [MatchArmPatterns] '= [ExpressionExceptStructExpressionOrLazyBooleanExpression] 
+        [BlockExpression]
+    [ElseExpression?]
+end define
+
+define ExpressionExceptStructExpressionOrLazyBooleanExpression
+    % Generalized for TXL
+    [Expression]
+end define
+
+% MatchExpression :
+%    match Expression except struct expression {
+%       InnerAttribute*
+%       MatchArms?
+%    }
+
+define MatchExpression
+    'match [ExpressionExceptStructExpression] 
+    '{                          [IN]
+        [InnerAttribute*]
+        [MatchArms?]            [EX][NL]
+    '}
+end define
+
+% MatchArms :
+%    ( MatchArm => ( ExpressionWithoutBlock , | ExpressionWithBlock ,? ) )*
+%    MatchArm => Expression ,?
+
+define MatchArms
+    [MatchArm_ARROW_Expression+] 
+end define
+
+define MatchArm_ARROW_Expression
+    [NL] [MatchArm] '=> [Expression] [', ?]
+end define
+
+% MatchArm :
+%    OuterAttribute* MatchArmPatterns MatchArmGuard?
+
+define MatchArm
+    [OuterAttribute*] [MatchArmPatterns] [MatchArmGuard?]
+end define
+
+% MatchArmPatterns :
+%    |? Pattern ( | Pattern )*
+
+define MatchArmPatterns
+    % Generalized into Pattern as observed 
+    [MatchArmPattern,+] [', ?]
+end define
+
+define MatchArmPattern
+    [Pattern]
+end define
+
+define OR_MatchArmPatterns
+    '| [MatchArmPattern,+]
+end define
+
+% MatchArmGuard :
+%    if Expression
+
+define MatchArmGuard
+    'if [Expression]
+end define
+
+% Try Expression - observed
+
+define TryExpression
+    'try [BlockExpression] 
+    [CatchExpression?]
+end define
+
+define CatchExpression
+    'catch [BlockExpression]
+end define
+
+% ReturnExpression :
+%    return Expression?
+
+define ReturnExpression
+    'return [Expression?]
+end define
+
+% AwaitExpression :
+%    Expression . await
+
+define Postfix_AwaitExpression
+    '. 'await
+end define
+
+% Pattern :
+%       LiteralPattern
+%    | IdentifierPattern
+%    | WildcardPattern
+%    | RangePattern
+%    | ReferencePattern
+%    | StructPattern
+%    | TupleStructPattern
+%    | TuplePattern
+%    | GroupedPattern
+%    | SlicePattern
+%    | PathPattern
+%    | MacroInvocation
+
+define Pattern
+        [Prefix_AlternativePattern?] [BasePattern] [Postfix_AlternativePattern?]
+end define
+
+define BasePattern
+        [LiteralPattern]
+    |   [WildcardPattern]
+    |   [RangePattern]
+    |   [ReferencePattern]
+    |   [StructPattern]
+    |   [TupleStructPattern]
+    |   [TuplePattern]
+    |   [GroupedPattern]
+    |   [SlicePattern]
+    |   [PathPattern]           % includes IdentifierPattern
+    |   [BoxPattern]            % observed - JRC
+    |   [MacroInvocation]
+end define
+
+% LiteralPattern :
+%       BOOLEAN_LITERAL
+%    | CHAR_LITERAL
+%    | BYTE_LITERAL
+%    | STRING_LITERAL
+%    | RAW_STRING_LITERAL
+%    | BYTE_STRING_LITERAL
+%    | RAW_BYTE_STRING_LITERAL
+%    | -? INTEGER_LITERAL
+%    | -? FLOAT_LITERAL
+
+define LiteralPattern
+        [BOOLEAN_LITERAL]
+    |   [CHAR_LITERAL]
+    |   [BYTE_LITERAL]
+    |   [STRING_LITERAL]
+    |   [RAW_STRING_LITERAL]
+    |   [BYTE_STRING_LITERAL]
+    |   [RAW_BYTE_STRING_LITERAL]
+    |   ['- ?] [INTEGER_LITERAL]
+    |   ['- ?] [FLOAT_LITERAL]
+end define
+
+% IdentifierPattern :
+%       ref? mut? IDENTIFIER (@ Pattern ) ?
+
+% WildcardPattern :
+%    _
+
+define WildcardPattern
+    '_
+end define
+
+% RangePattern :
+%      RangePatternBound ..= RangePatternBound
+%    | RangePatternBound ... RangePatternBound          
+
+define RangePattern
+        [RangePatternBound] [SP] '..= [RangePatternBound]
+    |   [RangePatternBound] [SP] '... [SP] [RangePatternBound]
+    |   [RangePatternBound] [SP] '.. [SP] [RangePatternBound]   % observed - JRC
+    |   [SP] '.. [SP]                                           % observed - JRC
+end define
+
+% RangePatternBound :
+%       CHAR_LITERAL
+%    | BYTE_LITERAL
+%    | -? INTEGER_LITERAL
+%    | -? FLOAT_LITERAL
+%    | PathInExpression
+%    | QualifiedPathInExpression
+
+define RangePatternBound
+        [CHAR_LITERAL]
+    |   [BYTE_LITERAL]
+    |   ['- ?] [INTEGER_LITERAL]
+    |   ['- ?] [FLOAT_LITERAL]
+    |   [PathInExpression]
+    |   [QualifiedPathInExpression]
+end define
+
+% ReferencePattern :
+%    (&|&&) mut? Pattern
+
+define ReferencePattern
+    [AND_or_AND_AND] ['mut ?] [Pattern]
+end define
+
+% StructPattern :
+%    PathInExpression {
+%       StructPatternElements ?
+%    }
+
+define StructPattern
+    [PathInExpression] 
+    '{                                  [IN][NL]
+        [StructPatternElements?]        [EX]
+    '}
+end define
+
+% StructPatternElements :
+%       StructPatternFields (, | , StructPatternEtCetera)?
+%    | StructPatternEtCetera
+
+define StructPatternElements
+        [StructPatternFields] [COMMA_StructPatternEtCetera?] 
+    |   [StructPatternEtCetera]
+end define
+
+define COMMA_StructPatternEtCetera
+    ', [StructPatternEtCetera?]
+end define
+
+% StructPatternFields :
+%    StructPatternField (, StructPatternField) *
+
+define StructPatternFields
+    [StructPatternField,+]
+end define
+
+% StructPatternField :
+%    OuterAttribute *
+%    (
+%          TUPLE_INDEX : Pattern
+%       | IDENTIFIER : Pattern
+%       | ref? mut? IDENTIFIER
+%    )
+
+define StructPatternField
+    [OuterAttribute*]
+    [OuterStructPatternField]
+end define
+
+define OuterStructPatternField
+        [TUPLE_INDEX] ': [Pattern]
+    |   [IDENTIFIER] ': [Pattern]
+    |   ['box ?]        % observed - JRC
+        ['ref ?] ['mut ?] [IDENTIFIER]
+end define
+
+% StructPatternEtCetera :
+%    OuterAttribute *
+%    ..
+
+define StructPatternEtCetera
+    [OuterAttribute*] '..
+end define
+
+% TupleStructPattern :
+%    PathInExpression ( TupleStructItems? )
+
+define TupleStructPattern
+    [PathInExpression] '( [TupleStructItems?] ')
+end define
+
+% TupleStructItems :
+%       Pattern ( , Pattern )* ,?
+%    | (Pattern ,)* .. (, Pattern)* ,?
+
+define TupleStructItems
+        [Pattern,+] [', ?]
+    |   [Pattern_COMMA*] '.. [COMMA_Pattern*] [', ?]
+end define
+
+define Pattern_COMMA
+    [Pattern] ',
+end define
+
+define COMMA_Pattern
+    ', [Pattern] 
+end define
+
+% TuplePattern :
+%    ( TuplePatternItems? )
+
+define TuplePattern
+    '( [TuplePatternItems?] ')
+end define
+
+% TuplePatternItems :
+%       Pattern ,
+%    | Pattern (, Pattern)+ ,?
+%    | (Pattern ,)* .. (, Pattern)* ,?
+
+define TuplePatternItems
+        [Pattern,+] [', ?]
+    |   [Pattern_COMMA*] '.. [COMMA_Pattern*] [', ?]
+end define
+
+% GroupedPattern :
+%    ( Pattern )
+
+define GroupedPattern
+    '( [Pattern] ')
+end define
+
+% SlicePattern :
+%    [ Pattern (, Pattern)* ,? ]
+
+define SlicePattern
+    '[ [SlicePatternItems?] ']
+end define
+
+define SlicePatternItems        % observed - JRC
+        [Pattern,+] [', ?]
+    |   [Pattern_COMMA*] '.. [COMMA_Pattern*] [', ?]
+end define
+
+% Alternative Patterns
+define Prefix_AlternativePattern        % observed - JRC
+    '|
+end define
+
+define Postfix_AlternativePattern
+    '| [Pattern]
+end define
+
+define AlternativePattern       % observed - JRC
+        [OR_Pattern]
+    |   [Pattern] [OR_Pattern]
+end define
+
+define OR_Pattern
+    '| [Pattern]
+end define
+
+% Box Patterns
+define BoxPattern               % observed - JRC
+    'box [Pattern] 
+end define
+
+% PathPattern :
+%       PathInExpression
+%    | QualifiedPathInExpression
+
+define PathPattern
+        % Generalized to include IdentifierPattern 
+        ['ref ?] ['mut ?] [PathInExpression] [AT_Pattern?]
+    |   [QualifiedPathInExpression]
+end define
+
+define AT_Pattern
+    '@ [Pattern]
+end define
+
+% Type :
+%       TypeNoBounds
+%    | ImplTraitType
+%    | TraitObjectType
+
+define Type
+        [TypeNoBounds]
+    |   [ImplTraitType]
+    |   [TraitObjectType]
+end define
+
+% TypeNoBounds :
+%       ParenthesizedType
+%    | ImplTraitTypeOneBound
+%    | TraitObjectTypeOneBound
+%    | TypePath
+%    | TupleType
+%    | NeverType
+%    | RawPointerType
+%    | ReferenceType
+%    | ArrayType
+%    | SliceType
+%    | InferredType
+%    | QualifiedPathInType
+%    | BareFunctionType
+%    | MacroInvocation
+
+define TypeNoBounds
+        [ParenthesizedType]
+    |   [ImplTraitTypeOneBound]
+    |   [TraitObjectTypeOneBound]
+    |   [TypePath]
+    |   [TupleType]
+    |   [NeverType]
+    |   [RawPointerType]
+    |   [ReferenceType]
+    |   [ArrayType]
+    |   [SliceType]
+    |   [InferredType]
+    |   [QualifiedPathInType]
+    |   [BareFunctionType]
+    |   [MacroInvocation]
+end define
+
+% ParenthesizedType :
+%    ( [Type] )
+
+define ParenthesizedType
+    '( [Type] ')
+end define
+
+% NeverType : !
+
+define NeverType 
+    '!
+end define
+
+% TupleType :
+%       ( )
+%    | ( ( Type , )+ Type? )
+
+define TupleType
+        '( ')
+    |   '( [Type,] [', ?] )
+end define
+
+% ArrayType :
+%    [ Type ; Expression ]
+
+
+define ArrayType
+    '[ [Type] '; [Expression] ']
+end define
+
+% SliceType :
+%    [ Type ]
+
+define SliceType
+    '[ [Type] ']
+end define
+
+% ReferenceType :
+%    & Lifetime? mut? TypeNoBounds
+
+define ReferenceType
+    '& [SPOFF] ['& *] [SPON] [Lifetime?] ['mut ?] [TypeNoBounds]
+end define
+
+% RawPointerType :
+%    * ( mut | const ) TypeNoBounds
+
+define RawPointerType
+    '* [SPOFF] ['* *] [SPON] [mut_or_const] [TypeNoBounds]
+end define
+
+define mut_or_const
+    'mut | 'const 
+end define
+
+% BareFunctionType :
+%    ForLifetimes? FunctionQualifiers fn
+%       ( FunctionParametersMaybeNamedVariadic? ) BareFunctionReturnType?
+
+define BareFunctionType
+    [ForLifetimes?] [FunctionQualifiers] 'fn '( [FunctionParametersMaybeNamedVariadic?] ') [BareFunctionReturnType?]
+end define
+
+% BareFunctionReturnType:
+%    -> TypeNoBounds
+
+define BareFunctionReturnType
+    '-> [TypeNoBounds]
+end define
+
+% FunctionParametersMaybeNamedVariadic :
+%    MaybeNamedFunctionParameters | MaybeNamedFunctionParametersVariadic
+
+define FunctionParametersMaybeNamedVariadic
+    [MaybeNamedFunctionParameters] | [MaybeNamedFunctionParametersVariadic]
+end define
+
+% MaybeNamedFunctionParameters :
+%    MaybeNamedParam ( , MaybeNamedParam )* ,?
+
+define MaybeNamedFunctionParameters
+    [MaybeNamedParam,+] [', ?]
+end define
+
+% MaybeNamedParam :
+%    OuterAttribute* ( ( IDENTIFIER | _ ) : )? Type
+
+define MaybeNamedParam
+    [OuterAttribute*] [IDENTIFIER_or_UNDERSCORE_COLON?] [Type]
+end define
+
+define IDENTIFIER_or_UNDERSCORE_COLON
+    [IDENTIFIER_or_UNDERSCORE] ':
+end define
+
+% MaybeNamedFunctionParametersVariadic :
+%    ( MaybeNamedParam , )* MaybeNamedParam , OuterAttribute* ...
+
+define MaybeNamedFunctionParametersVariadic
+    [MaybeNamedParam,+] ', [OuterAttribute*] '...
+end define
+
+% TraitObjectType :
+%    dyn? TypeParamBounds
+
+define TraitObjectType
+    ['dyn ?] [TypeParamBounds]
+end define
+
+% TraitObjectTypeOneBound :
+%    dyn? TraitBound
+
+define TraitObjectTypeOneBound
+    ['dyn ?] [TraitBound]
+end define
+
+% ImplTraitType : impl TypeParamBounds
+
+define ImplTraitType 
+    'impl [TypeParamBounds]
+end define
+
+% ImplTraitTypeOneBound : impl TraitBound
+
+define ImplTraitTypeOneBound 
+    'impl [TraitBound]
+end define
+
+% InferredType : _
+
+define InferredType 
+    '_
+end define
+
+% TypeParamBounds :
+%    TypeParamBound ( + TypeParamBound )* +?
+
+define TypeParamBounds
+    [TypeParamBound] [PLUS_TypeParamBound*] ['+ ?]
+end define
+
+define PLUS_TypeParamBound
+    '+ [TypeParamBound]
+end define
+
+% TypeParamBound :
+%       Lifetime | TraitBound
+
+define TypeParamBound
+    [Lifetime] | [TraitBound]
+end define
+
+% TraitBound :
+%       ?? ForLifetimes? TypePath
+%    | ( ?? ForLifetimes? TypePath )
+
+define TraitBound
+        ['? ?] [ForLifetimes?] [TypePath]
+    |   '( ['? ?] [ForLifetimes?] [TypePath] ')
+    |   '{ ['? ?] [ForLifetimes?] [TypePath] '}         % observed - JRC
+end define
+
+% LifetimeBounds :
+%    ( Lifetime + )* Lifetime?
+
+define LifetimeBounds
+    [Lifetime_PLUS*] [Lifetime?]
+end define
+
+define Lifetime_PLUS
+    [Lifetime] '+
+end define
+
+% Lifetime :
+%       LIFETIME_OR_LABEL
+%    | 'static
+%    | '_
+
+define Lifetime
+        [LIFETIME_OR_LABEL]
+    |   '' [SPOFF] 'static [SPON]
+    |   '' [SPOFF] '_ [SPON]
+end define
+

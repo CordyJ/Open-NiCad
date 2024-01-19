@@ -1,0 +1,229 @@
+module KM22DSLModel;
+create OUT : DSLModel  from IN1 : KM2, IN2 : KM3, IN3 : DSL;
+
+-------------------------------------------------------------------------------------------
+-- HELPERS --------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------
+
+-- This helper returns a Sequence of KM2!Property that corresponds to DSLModel!Property
+-- From the name (type) of the CONTEXT it makes a Sequence of KM3!Attribute present in 
+-- the metamodel and then select in the CONTEXT properties the corresponding KM2!Property.
+-- CONTEXT: KM2!ModelElement
+-- RETURN: Sequence(KM2!Property)
+helper context KM2!ModelElement def: getProperties() : Sequence(KM2!Property) =
+let a : Sequence(KM3!Attribute) =
+	KM3!Class.allInstances()->select( c | c.name = self.name )
+	->collect(p | p.structuralFeatures)->flatten()
+	->select( a | a.oclIsTypeOf(KM3!Attribute))->asSequence()
+in
+	a->iterate(e;acc : Sequence(KM2!Property) = Sequence{} | 
+	if 	self.properties->select( p | p.name = e.name )->first().oclIsUndefined()
+		then acc
+		else acc -> including(self.properties->select( p | p.name = e.name )->first())
+	endif);
+
+-- This helper returns a Sequence of KM2!Property that corresponds to references in the metamodel
+-- CONTEXT: KM2!ModelElement
+-- RETURN: Sequence(KM2!Property)
+helper context KM2!ModelElement def: getPropertyReference() : Sequence(KM2!Property) =
+	let a : Sequence(KM3!Reference) =
+		KM3!Class.allInstances()->select( c | c.name = self.name )->collect(p | p.structuralFeatures)
+		->flatten()->select( a | a.oclIsTypeOf(KM3!Reference) )->select(b | not b.isContainer )->asSequence()
+	in
+		a->iterate(e;acc : Sequence(KM2!Property) = Sequence{} | 
+			if 	self.properties->select( p | p.name = e.name )->first().oclIsUndefined()
+				then acc
+				else acc -> including(self.properties->select( p | p.name = e.name )->first())
+			endif);
+
+-- This helper returns a Sequence of KM2!Property that corresponds to compositions in the metamodel
+-- CONTEXT: KM2!ModelElement
+-- RETURN: Sequence(KM2!Property)
+helper context KM2!ModelElement def: getPropertyContainer() : Sequence(KM2!Property) =
+	let a : Sequence(KM3!Reference) =
+		KM3!Class.allInstances()->select( c | c.name = self.name )->collect(p | p.structuralFeatures)
+		->flatten()->select( a | a.oclIsTypeOf(KM3!Reference) )->select(b | b.isContainer )->asSequence()
+	in
+		a->iterate(e;acc : Sequence(KM2!Property) = Sequence{} | 
+			if 	self.properties->select( p | p.name = e.name )->first().oclIsUndefined()
+				then acc
+				else acc -> including(self.properties->select( p | p.name = e.name )->first())
+			endif);
+
+-- This helper tests if a KM2!Property corresponds to a container reference in the KM3 metamodel
+-- CONTEXT: KM2!Property
+-- RETURN: Boolean
+helper context KM2!Property def: isContainer() : Boolean =
+	let a : KM3!Reference =
+		KM3!Class.allInstances()->select( c | c.name = self.owner.name )->collect(p | p.structuralFeatures)->flatten()
+		->select( a | a.oclIsTypeOf(KM3!Reference))->select( r | r.name = self.name)->first()
+	in if a.oclIsUndefined() then false else a.isContainer endif;
+
+-- This helper tests if a KM2!Property corresponds to a reference in the KM3 metamodel
+-- CONTEXT: KM2!Property
+-- RETURN: Boolean
+helper context KM2!Property def: isReference() : Boolean =
+	let a : KM3!Reference =
+		KM3!Class.allInstances()->select( c | c.name = self.owner.name )->collect(p | p.structuralFeatures)->flatten()
+		->select( a | a.oclIsTypeOf(KM3!Reference))->select( r | r.name = self.name)->first()
+	in if a.oclIsUndefined() then false else not a.isContainer endif;
+
+-- This helper tests if a KM2!Property is an attribute
+-- CONTEXT: KM2!Property
+-- RETURN: Boolean
+helper context KM2!Property def: isAttribute() : Boolean =
+	let a : KM3!Reference =
+		KM3!Class.allInstances()->select( c | c.name = self.owner.name )->collect(p | p.structuralFeatures)->flatten()
+		->select( a | a.oclIsTypeOf(KM3!Attribute))->select( r | r.name = self.name)->first()
+	in if a.oclIsUndefined() then false else true endif;
+
+-- This helper returns a Sequence of KM2!ModelElementRefVal contains in a SetVal or in a Value
+-- CONTEXT: KM2!Property
+-- RETURN: Sequence(KM2!ModelElementRefVal)
+helper context KM2!Property def: getRefVal() : Sequence(KM2!ModelElementRefVal) = 
+	if self.value.oclIsTypeOf(KM2!SetVal) then
+		self.value.contents->asSequence()
+	else
+		self.value->asSequence()
+	endif;
+
+-- This helper select from a KM2!Property the corresponding DSL!Relationship in DSL metamodel.
+-- CONTEXT: KM2!Property
+-- RETURN: DSL!Relationship
+helper context KM2!Property def: getRelationship() : DSL!Relationship =
+	let a : DSL!Role =
+		DSL!Role.allInstances()->select(e | e.name = self.name )->first()
+	in a.relation;
+
+-- This helper returns a DSL!Role, from a KM2!Property we select the corresponding DSL!Relationship
+-- and like a KM2!Property has normally the same name as a DSL!Role it returns the DSL!Role with 
+-- different name
+-- CONTEXT: KM2!Property
+-- RETURN: DSL!Role
+helper context KM2!Property def: getOpposite() : DSL!Role =
+	self.getRelationship().roles->select( e | e.name <> self.name )->first();
+
+helper def: referenceLinks() : Set(KM2!Property) =
+	KM2!Property.allInstances()->select( e | e.isReference() )->asSet().debug('Set of References');
+
+------------------------------------------------------------------------------------------
+-- RULES ---------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------
+
+rule Model {
+	from
+		km : KM2!Model
+	using {
+			allRef : Set(KM2!Property) = thisModule.referenceLinks();
+		}
+	to
+		dm : DSLModel!Model (
+			domainModel <- km.metamodel,
+			contents <- Sequence{km.contents,mel}
+		),
+		mel : distinct DSLModel!ModelElementLink foreach ( r in allRef ) (
+				type <- r.getRelationship().name--,
+--				links <- 
+		)
+}
+
+rule ModelElement {
+	from
+		kme : KM2!ModelElement
+	to
+		me : DSLModel!ModelElement (
+			type <- kme.name,
+			id <- kme.id,
+			properties <- kme.getProperties(),
+			embeddinglinks <- kme.getPropertyContainer(),
+			referencelinks <- kme.getPropertyReference()
+		)
+}
+
+-- From a reference property we create an ElementLink for each ModelELementRefVal in the property
+rule ReferenceLink {
+	from
+		kp : KM2!Property (
+			kp.isReference()
+		)
+	to
+		e : distinct DSLModel!ReferenceLink foreach (rv in kp.getRefVal()) (
+			type <- kp.getRelationship().name,
+			roles <- rv
+		)
+}
+
+rule Role {
+	from
+		m : KM2!ModelElementRefVal 
+	using {
+			powner : KM2!Property = if m.owner.oclIsUndefined()
+										then m.set.owner
+										else m.owner
+									endif;
+		}
+	to
+		r1 : DSLModel!Role (
+			name <- powner.getOpposite().name,
+			element <- powner.owner
+		),
+		r2 : DSLModel!Role (			
+			name <- powner.name,
+			element <- m.element,
+			owner <- r1.owner
+		)
+}
+
+rule EmbeddingLink {
+	from
+		kp : KM2!Property (
+			kp.isContainer() 
+		)
+	to
+		p : DSLModel!EmbeddingLink (
+			name <- kp.getRelationship().name,
+			elements <- if kp.value.oclIsTypeOf(KM2!SetVal) 
+							then kp.value.contents->asSequence()->flatten()->collect(d | d.element)->asSequence()
+							else kp.value.element 
+						endif
+		)
+}
+
+rule Property {
+	from
+		kp : KM2!Property(
+			kp.isAttribute()
+		)
+	to
+		p : DSLModel!Property (
+			name <- kp.name,
+			value <- kp.value
+		)
+}
+
+rule BooleanValue {
+	from
+		kb : KM2!BooleanVal
+	to
+		b : DSLModel!BooleanValue(
+			value <- kb.value
+		)
+}
+
+rule StringValue {
+	from
+		ks : KM2!StringVal
+	to
+		s : DSLModel!StringValue (
+			value <- ks.value
+		)
+}
+
+rule IntegerValue {
+	from
+		ki : KM2!IntegerVal
+	to
+		i : DSLModel!IntegerValue(
+			value <- ki.value
+		)
+}

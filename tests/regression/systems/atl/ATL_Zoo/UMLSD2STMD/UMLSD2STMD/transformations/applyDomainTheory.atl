@@ -1,0 +1,42 @@
+-- title: UMLSD2STMD
+-- release: 0.1
+-- date: 18 oktober 2006
+
+-- author:      Bas Graaf
+--                      SWERL SoftWare Evolution Research Lab
+--                      Delft University of Technology
+--                      b.s.graaf@tudelft.nl
+
+module applyDomainTheory; -- Module Template
+create  OUT : UML refining IN : UML;
+
+helper def: constrainedCallActions: Set(UML!CallAction) =
+	UML!CallAction->allInstances()->select(ca|ca.operation->asSequence()->first().constraint->notEmpty())
+;
+rule Diagram {
+	from d_in:UML!Diagram
+	to d_out:UML!Diagram(
+		name <- d_in.name,
+		zoom <- d_in.zoom,
+		isVisible <- d_in.isVisible,
+		position <- d_in.position,
+		size <- d_in.size,
+		viewport <- d_in.viewport,
+		semanticModel <- d_in.semanticModel,
+		contained <- d_in.contained,
+		owner <- d_in.owner)
+}
+
+rule Model {
+	from m_in:UML!Model
+	to m_out: UML!Model (
+		name <- m_in.name,
+		ownedElement <- m_in.ownedElement)
+}
+rule ConstrainedCallAction {
+	from ca_in:UML!CallAction(
+		thisModule.constrainedCallActions->includes(ca_in))
+	to ca_out:UML!CallAction(
+		operation <- ca_in.operation,
+		constraint <- ca_in.operation->asSequence()->first().constraint->union(ca_in.constraint))
+}

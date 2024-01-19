@@ -1,0 +1,372 @@
+--@atlcompiler	atl2006
+--@name			UML22Measure
+--@version		1.1
+--@domains		UML2, measurement data, metrics
+--@authors		Eric Vepa (evepa <at> sodius.com) for SODIUS (www.sodius.com)
+--@date			2007/08/02
+--@description	This transformation is used to collect measurement data on a UML2 model, using libraries implementing some metrics (MOOD, MOOD2, MOOSE, EMOOSE  and QMOOD).
+--@see			Baroni, A.L.: Formal Definition of Object-Oriented Design Metrics. Master Thesis, Vrije University, Brussel, Belgium, 2002.
+
+module UML22Measure; -- Module Template
+create OUT : Measure from IN : UML2;
+
+uses FLAME4UML2;
+uses MOOD4UML2;
+uses EMOOSE4UML2;
+uses QMOOD4UML2;
+
+--@begin attribute helpers measureLevel
+--@comments Defines the measure level among {#package,#class}. 
+--@comments The package level allows measures on packages.
+--@comments The class level allows measures on packages and classes.
+helper def : measureLevel : Measure!ElementKind = #class;
+--@end attribute helper measureLevel
+
+--@begin attribute helper root
+--@comments The root measure set.
+helper def : root : Measure!RootMeasureSet = OclUndefined;
+--@end attribute helper root
+
+--@begin attribute helper MetricByName
+--@comments The map of metrics by name.
+helper def : MetricByName : Map(String, Measure!Metric) = Map{};
+--@end attribute helper MetricByName
+
+--@begin helper defaultName
+--@comments Returns the name of the named element or "Anonymous".
+helper context UML2!NamedElement
+def : defaultName() : String =
+	if self.name.oclIsUndefined()
+		then 'Anonymous'
+		else self.name
+	endif;
+--@end helper defaultName
+
+--@begin entrypoint rule Metrics
+--@comments Registers the MOOD, MOOD2, MOOSE, EMOOSE  and QMOOD metrics implemented in libraries.
+entrypoint rule Metrics() {
+	to
+		root : Measure!RootMeasureSet (
+			modelType <- #UML2
+		)
+	do {
+		thisModule.root <- root;
+		
+		if ((thisModule.measureLevel = #package) or
+			(thisModule.measureLevel = #class)) {
+			-- ==================================================
+			-- MOOD Metrics : Intra-Specification Level Metrics =
+			-- ==================================================
+			root.categories <- thisModule.Category('MOOD',
+					'Metrics for Object-Oriented Design');
+			thisModule.Metric('MOOD','AIF','Attributes Inheritance Factor');
+			thisModule.Metric('MOOD','OIF','Operations Inheritance Factor');
+			thisModule.Metric('MOOD','AHF','Attributes Hiding Factor');
+			thisModule.Metric('MOOD','OHF','Operations Hiding Factor');
+			thisModule.Metric('MOOD','BPF','Behavioral Polymorphism Factor');
+			thisModule.Metric('MOOD','CCF','Class Coupling Factor');
+			thisModule.Metric('MOOD','ICF','Internal Coupling Factor');
+				
+			-- ===================================================
+			-- MOOD2 Metrics : Intra-Specification Level Metrics =
+			-- ===================================================
+			root.categories <- thisModule.Category('MOOD2',
+				'Metrics for Object-Oriented Design 2');
+			thisModule.Metric('MOOD2','IIF','Internal Inheritance Factor');
+			thisModule.Metric('MOOD2','AHEF',
+				'Attributes Hiding Effectiveness Factor');
+			thisModule.Metric('MOOD2','OHEF',
+				'Operations Hiding Effectiveness Factor');
+		}
+		
+		if (thisModule.measureLevel = #class) {
+			-- ===============
+			-- MOOSE Metrics =
+			-- ===============
+			root.categories <- thisModule.Category('MOOSE',
+				'Metrics for Object-Oriented Software Engineering');
+			thisModule.Metric('MOOSE','DIT','Depth of Inheritance Tree');
+			thisModule.Metric('MOOSE','NOC','Number of Children');
+			thisModule.Metric('MOOSE','CBO','Coupling Between Objects');
+			thisModule.Metric('MOOSE','RFC','Response for a Class');
+		
+			-- ================
+			-- EMOOSE Metrics =
+			-- ================
+			root.categories <- thisModule.Category('EMOOSE','Extended MOOSE');
+			thisModule.Metric('EMOOSE','SIZE2','Number of local Attributes ' +
+				'and Operations defined in the Class');
+		}
+		
+		if ((thisModule.measureLevel = #package) or
+			(thisModule.measureLevel = #class)) {
+			-- ===============
+			-- QMOOD Metrics =
+			-- ===============
+			root.categories <- thisModule.Category('QMOOD',
+				'Quality Model for Object-Oriented Design');
+			thisModule.Metric('QMOOD','DSC','Design Size in Classes');
+			thisModule.Metric('QMOOD','NOH','Number of Hierarchies');
+			thisModule.Metric('QMOOD','NIC','Number of Independent Classes');
+			thisModule.Metric('QMOOD','NSI','Number of Single Inheritance');
+			thisModule.Metric('QMOOD','NNC','Number of Internal Classes');
+			thisModule.Metric('QMOOD','NAC','Number of Abstract Classes');
+			thisModule.Metric('QMOOD','NLC','Number of Leaf Classes');
+			thisModule.Metric('QMOOD','ADI','Average Depth of Inheritance');
+			thisModule.Metric('QMOOD','AWI','Average Width of Inheritance');
+			thisModule.Metric('QMOOD','ANA','Average Number of Ancestors');
+		}			
+		
+		if (thisModule.measureLevel = #class) {
+			thisModule.Metric('QMOOD','MFA',
+				'Measure of Functional Abstraction');
+			thisModule.Metric('QMOOD','MAA','Measure of Attribute Abstraction');
+			thisModule.Metric('QMOOD','MAT','Measure of Abstraction');
+			thisModule.Metric('QMOOD','MOA','Measure of Aggregation');
+			thisModule.Metric('QMOOD','MRM','Modeled Relationship Measure');
+			thisModule.MetricWithPreferredValue('QMOOD','DAM','Data Access Metric','>75');
+			thisModule.MetricWithPreferredValue('QMOOD','OAM','Operation Access Metric','>75');
+			thisModule.MetricWithPreferredValue('QMOOD','MAM','Member Access Metric','>75');
+			thisModule.Metric('QMOOD','NOA','Number of Ancestors');
+			thisModule.Metric('QMOOD','NOM','Number of Methods');
+			thisModule.Metric('QMOOD','CIS','Class Interface Size');
+			thisModule.Metric('QMOOD','NPT','Number of Unique Parameter Types');
+			thisModule.Metric('QMOOD','NPM','Number of Parameters per Method');
+			thisModule.Metric('QMOOD','NOD','Number of Attributes');
+			thisModule.Metric('QMOOD','NAD','Number of Abstract Data Types');
+			thisModule.Metric('QMOOD','NPA','Number of Public Attributes');
+			thisModule.Metric('QMOOD','CSM','Class Size Metric');
+			thisModule.Metric('QMOOD','CAM','Cohesion Among Methods of Class');
+			thisModule.Metric('QMOOD','DCC','Direct Class Coupling');
+			thisModule.Metric('QMOOD','MCC','Maximum Class Coupling');
+			thisModule.Metric('QMOOD','DAC','Direct Attribute Based Coupling');
+			thisModule.Metric('QMOOD','DPC','Direct Parameter Based Coupling');
+			thisModule.Metric('QMOOD','MPC','Maximum Parameter Based Coupling');
+			thisModule.Metric('QMOOD','CCD','Class Complexity Based on Data');
+			thisModule.Metric('QMOOD','CCP',
+				'Class Complexity Based on Method Parameters');
+			thisModule.Metric('QMOOD','CCM',
+				'Class Complexity Based on Members');
+		}
+	}
+}
+--@end entrypoint rule Metrics
+
+--@begin  rule Package2MeasureSet
+--@comments Collects measurement data on the model (default package) or a package (measureLevel must be set to #package or #class).
+rule Package2MeasureSet {
+	from
+		ne : UML2!Package (
+			(ne.oclIsTypeOf(UML2!Package) or ne.oclIsTypeOf(UML2!Model)) and
+			((thisModule.measureLevel = #package) or
+			(thisModule.measureLevel = #class))
+		)
+	to
+		ms : Measure!MeasureSet (
+			elementName <-
+				if ne.CN() > 0
+					then ne.defaultName().debug('Processing metrics on package')
+					else ne.defaultName()
+				endif,
+	   		elementType <-
+				if (ne.oclIsTypeOf(UML2!Model))
+		   			then #model
+					else #package
+				endif,
+			subsets <- ne.contents,
+			subsets <- ne.allClasses->collect(c|thisModule.Class2MeasureSet(c))
+		)
+	do {
+		if (ne.oclIsTypeOf(UML2!Model)) {
+			thisModule.root.measureSets <- ms;
+		}
+		
+		if (ne.CN() > 0) {
+			-- ==================================================
+			-- MOOD Metrics : Intra-Specification Level Metrics =
+			-- ==================================================
+			ms.measures <- thisModule.PercentageMeasure('AIF',ne.AIF());
+			ms.measures <- thisModule.PercentageMeasure('OIF',ne.OIF());
+			ms.measures <- thisModule.PercentageMeasure('AHF',ne.AHF());
+			ms.measures <- thisModule.PercentageMeasure('OHF',ne.OHF());
+			ms.measures <- thisModule.PercentageMeasure('BPF',ne.BPF());
+			ms.measures <- thisModule.PercentageMeasure('CCF',ne.CCF());
+			ms.measures <- thisModule.PercentageMeasure('ICF',ne.ICF());
+				
+			-- =============================================================
+			-- MOOD2 Metrics : Intra and Inter-Specification Level Metrics =
+			-- =============================================================
+			ms.measures <- thisModule.PercentageMeasure('IIF',ne.IIF());
+			ms.measures <- thisModule.PercentageMeasure('AHEF',ne.AHEF());
+			ms.measures <- thisModule.PercentageMeasure('OHEF',ne.OHEF());
+		
+			-- ===============
+			-- QMOOD Metrics =
+			-- ===============
+			ms.measures <- thisModule.IntegerMeasure('DSC',ne.DSC());
+			ms.measures <- thisModule.IntegerMeasure('NOH',ne.NOH());
+			ms.measures <- thisModule.IntegerMeasure('NIC',ne.NIC());
+			ms.measures <- thisModule.IntegerMeasure('NSI',ne.NSI());
+			ms.measures <- thisModule.IntegerMeasure('NNC',ne.NNC());
+			ms.measures <- thisModule.IntegerMeasure('NAC',ne.NAC());
+			ms.measures <- thisModule.IntegerMeasure('NLC',ne.NLC());
+			ms.measures <- thisModule.DoubleMeasure('ADI',ne.ADI());
+			ms.measures <- thisModule.DoubleMeasure('AWI',ne.AWI());
+			ms.measures <- thisModule.DoubleMeasure('ANA',ne.ANA());
+		}
+	}
+}
+--@end rule Package2MeasureSet
+
+--@begin lazy rule Class2MeasureSet
+--@comments Collects measurement data on a class (measureLevel must be set to #class).
+lazy rule Class2MeasureSet {
+	from
+		ne : UML2!Class (
+			ne.oclIsTypeOf(UML2!Class) and
+			thisModule.measureLevel = #class
+		)
+	to
+		ms : Measure!MeasureSet (
+			elementName <- ne.defaultName().debug('Processing metrics on class'),
+	   		elementType <- #class,
+			subsets <- ne.nestedClassifier
+		)
+	do {
+		-- ===============
+		-- MOOSE Metrics =
+		-- ===============
+		ms.measures <- thisModule.IntegerMeasure('DIT',ne.DIT());
+		ms.measures <- thisModule.IntegerMeasure('NOC',ne.NOC());
+		ms.measures <- thisModule.IntegerMeasure('CBO',ne.CBO());
+		ms.measures <- thisModule.IntegerMeasure('RFC',ne.RFC());
+	
+		-- ================
+		-- EMOOSE Metrics =
+		-- ================
+		ms.measures <- thisModule.IntegerMeasure('SIZE2',ne.SIZE2());
+		
+		-- ===============
+		-- QMOOD Metrics =
+		-- ===============
+		ms.measures <- thisModule.PercentageMeasure('MFA',ne.MFA());
+		ms.measures <- thisModule.PercentageMeasure('MAA',ne.MAA());
+		ms.measures <- thisModule.PercentageMeasure('MAT',ne.MAT());
+		ms.measures <- thisModule.IntegerMeasure('MOA',ne.MOA());
+		ms.measures <- thisModule.IntegerMeasure('MRM',ne.MRM());
+		ms.measures <- thisModule.PercentageMeasure('DAM',ne.DAM());
+		ms.measures <- thisModule.PercentageMeasure('OAM',ne.OAM());
+		ms.measures <- thisModule.PercentageMeasure('MAM',ne.MAM());
+		ms.measures <- thisModule.IntegerMeasure('NOA',ne.NOA());
+		ms.measures <- thisModule.IntegerMeasure('NOM',ne.NOM());
+		ms.measures <- thisModule.IntegerMeasure('CIS',ne.CIS());
+		ms.measures <- thisModule.IntegerMeasure('NPT',ne.NPT());
+		ms.measures <- thisModule.DoubleMeasure('NPM',ne.NPM());
+		ms.measures <- thisModule.IntegerMeasure('NOD',ne.NOD());
+		ms.measures <- thisModule.IntegerMeasure('NAD',ne.NAD());
+		ms.measures <- thisModule.IntegerMeasure('NPA',ne.NPA());
+		ms.measures <- thisModule.IntegerMeasure('CSM',ne.CSM());
+		ms.measures <- thisModule.DoubleMeasure('CAM',ne.CAM());
+		ms.measures <- thisModule.IntegerMeasure('DCC',ne.DCC());
+		ms.measures <- thisModule.IntegerMeasure('MCC',ne.MCC());
+		ms.measures <- thisModule.IntegerMeasure('DAC',ne.DAC());
+		ms.measures <- thisModule.IntegerMeasure('DPC',ne.DPC());
+		ms.measures <- thisModule.IntegerMeasure('MPC',ne.MPC());
+		ms.measures <- thisModule.IntegerMeasure('CCD',ne.CCD());
+		ms.measures <- thisModule.IntegerMeasure('CCP',ne.CCP());
+		ms.measures <- thisModule.IntegerMeasure('CCM',ne.CCM());
+	}
+}
+--@end lazy rule Class2MeasureSet
+		
+--@begin called rule Category
+--@comments Creates a category for metric classification with a name and a description.
+rule Category(name : String, desc : String) {
+	to
+		cat : Measure!Category (
+			name <- name,
+			desc <- desc
+		)
+	do {
+		cat;
+	}
+}
+--@end called rule Category
+		
+--@begin called rule Metric
+--@comments Creates a metric for a category with a name and a description (the default preferred value for the metric is set to not equal to zero ['!=0']).
+rule Metric(catName : String, name : String, desc : String) {
+	to
+		metric : Measure!Metric (
+			name <- name,
+			desc <- desc,
+			preferredValue <- '!=0',
+			category <- thisModule.root.categories->
+				select(cat|cat.name = catName)->first()
+		)
+	do {
+		thisModule.MetricByName <-
+			thisModule.MetricByName.including(metric.name,metric);
+	}
+}
+--@end called rule Metric
+		
+--@begin called rule MetricWithPreferredValue
+--@comments Creates a metric for a category with a name, a description and a preferred value for the metric (an operator [<, <=, =, !=, >=, >] followed by a number).
+rule MetricWithPreferredValue(catName : String, name : String, desc : String, preferredValue : String) {
+	to
+		metric : Measure!Metric (
+			name <- name,
+			desc <- desc,
+			preferredValue <- preferredValue,
+			category <- thisModule.root.categories->
+				select(cat|cat.name = catName)->first()
+		)
+	do {
+		thisModule.MetricByName <-
+			thisModule.MetricByName.including(metric.name,metric);
+	}
+}
+--@end called rule MetricWithPreferredValue
+		
+--@begin called rule IntegerMeasure
+--@comments Stores an Integer measure for the metric which name and value are given.
+rule IntegerMeasure(name : String, value : Integer) {
+	to
+		meas : Measure!IntegerMeasure (
+			metric <- thisModule.MetricByName.get(name),
+			value <- value
+		)
+	do {
+		meas;
+	}
+}
+--@end called rule IntegerMeasure
+		
+--@begin called rule DoubleMeasure
+--@comments Stores a Double measure for the metric which name and value are given.
+rule DoubleMeasure(name : String, value : Real) {
+	to
+		meas : Measure!DoubleMeasure (
+			metric <- thisModule.MetricByName.get(name),
+			value <- value
+		)
+	do {
+		meas;
+	}
+}
+--@end called rule DoubleMeasure
+		
+--@begin called rule PercentageMeasure
+--@comments Stores a Percentage measure for the metric which name and value are given.
+rule PercentageMeasure(name : String, value : Real) {
+	to
+		meas : Measure!PercentageMeasure (
+			metric <- thisModule.MetricByName.get(name),
+			value <- value
+		)
+	do {
+		meas;
+	}
+}
+--@end called rule PercentageMeasure
