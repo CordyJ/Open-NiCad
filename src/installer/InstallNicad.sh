@@ -48,21 +48,20 @@ then
     echo ""
     echo "Enabling Nicad commands in MacOS"
     spctl --remove --label "NICAD" >& /dev/null
-    spctl --add --label "NICAD" $NICADBIN/*
     spctl --add --label "NICAD" $NICADLIB/*/*.x
     spctl --enable --label "NICAD"
 fi
 
 # Test Nicad
 echo ""
-echo "Testing Nicad"
+echo "Testing Nicad exists"
 echo ""
 sleep 1
 
-$NICADBIN/nicad functions java tests/examples/JHotDraw default-report
+$NICADBIN/nicad
 
 echo ""
 echo "Done."
 echo ""
 
-# Rev 15.1.24
+# Rev 19.1.24
