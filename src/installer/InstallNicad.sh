@@ -9,7 +9,7 @@ sleep 1
 # Install locations
 DEFAULT=true
 NICADBIN=/usr/local/bin
-NICADLIB=/usr/local/lib/txl
+NICADLIB=/usr/local/lib/nicad
 
 # Localization
 unset noclobber
