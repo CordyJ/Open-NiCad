@@ -1,6 +1,6 @@
 % TXL Python grammar
 % Mykhaylo Sorochan and Jim Cordy, November 2008
-% Version 1.6, July 2020
+% Version 1.7, April 2023
 
 % Copyright 2008 Mykhaylo Sorochan and James R. Cordy, 
 % after the standard Python 2.5 reference grammar, 
@@ -30,6 +30,7 @@
 
 % v1.7, Jim Cordy, July 2020.
 %    Added Python 3.8 type hints and format strings
+%    Added None to [literal]
 
 % v1.6, Jim Cordy, July 2020.
 %    Updated to Python 3.8 syntax, adding async, -> to [funcdef], := to [condition]
@@ -81,13 +82,13 @@
 tokens 
     % Python string forms - shortstrings are already captured by [stringlit] and [charlit]
     % All may be preceded by a stringprefix, see [stringliteral] below
-    longstringlit	"\"\"\"#[(\"\"\")]*\"\"\""
-    longcharlit		"'''#[(''')]*'''"
+    longstringlit       "\"\"\"#[(\"\"\")]*\"\"\""
+    longcharlit         "'''#[(''')]*'''"
 
     % Python number forms - decimal integers and floating point forms are already captured by [number]
     hexinteger   "0[Xx][\dABCDEFabcdef]+" 
     octinteger   "0o?[01234567]+" 
-    pointfloat   "\d*.\d+([Ee][+-]?\d+)?"		% other forms covered by [floatnumber]
+    pointfloat   "\d*.\d+([Ee][+-]?\d+)?"               % other forms covered by [floatnumber]
                  | "\d+.\d*([Ee][+-]?\d+)?"
 end tokens 
 
@@ -107,7 +108,7 @@ end keys
 % Compound operators
 compounds 
     == += -= *= /= '%= &= |=  ^= <<= >>= **= //= ** >> 
-    -> :=	% python 3.8 - JRC 11jul20
+    -> :=       % python 3.8 - JRC 11jul20
 end compounds 
 
 % Python comments are # to end-of-line
@@ -127,8 +128,8 @@ define file_input
 end define 
 
 define statement_or_newline
-     	[endofline+]	% avoid deep long backtracks - JRC 30jun15
-    |	[statement] 
+        [endofline+]    % avoid deep long backtracks - JRC 30jun15
+    |   [statement] 
 end define
 
 define decorator 
@@ -158,9 +159,9 @@ define docstring
 end define
 
 define funcdef_header
-    ['async ?]			% python 3.8 - JRC 11jul20
+    ['async ?]                  % python 3.8 - JRC 11jul20
     'def [id] [parameters] 
-	[arrow_expression ?] 	% python 3.8 - JRC 11jul20
+        [arrow_expression ?]    % python 3.8 - JRC 11jul20
 end define
 
 define arrow_expression
@@ -204,13 +205,13 @@ define fplist
 end define 
 
 define statement 
-    	[simple_statement] [endofline] 
+        [simple_statement] [endofline] 
     |   [compound_statement] 
 end define 
 
 define simple_statement 
-    	[small_statement] [repeat semicolon_small_statement] [opt ';] 
-    |	[comment]
+        [small_statement] [repeat semicolon_small_statement] [opt ';] 
+    |   [comment]
 end define 
 
 define semicolon_small_statement 
@@ -218,14 +219,14 @@ define semicolon_small_statement
 end define 
 
 define small_statement 
-    	[expr_statement] 
+        [expr_statement] 
     |   [print_statement]  
     |   [del_statement] 
     |   [pass_statement] 
     |   [flow_statement] 
     |   [import_statement] 
     |   [global_statement] 
-    |   [nonlocal_statement] 	% python 3.8 - JRC 11jul20
+    |   [nonlocal_statement]    % python 3.8 - JRC 11jul20
     |   [exec_statement] 
     |   [assert_statement] 
 end define 
@@ -245,14 +246,14 @@ define augassign
 end define 
 
 define assign_value
-	[yield_expr] 
+        [yield_expr] 
     |   [testlist] 
 end define 
 
 % For normal assignments, additional restrictions enforced by the interpreter 
 define print_statement 
-        'print [opt '>>] [list test] [opt ',] 	
-    |	'print [SPOFF] '( [SPON] [IN] [arglist] [repeat endofline] ') [EX]  % Python 3 - JRC 30jun15
+        'print [opt '>>] [list test] [opt ',]   
+    |   'print [SPOFF] '( [SPON] [IN] [arglist] [repeat endofline] ') [EX]  % Python 3 - JRC 30jun15
 end define 
 
 define del_statement 
@@ -359,7 +360,7 @@ define nonlocal_statement
 end define 
 
 define exec_statement 
-    	'exec [expression] [opt in_test] [opt comma_test]
+        'exec [expression] [opt in_test] [opt comma_test]
 end define
 
 define in_test
@@ -405,7 +406,7 @@ define while_statement
 end define 
 
 define for_statement 
-    ['async ?] 				% python 3.8 - JRC 11jul20
+    ['async ?]                          % python 3.8 - JRC 11jul20
     'for [exprlist] 'in [testlist] ': 
         [suite] 
     [opt else_clause] 
@@ -413,7 +414,7 @@ end define
 
 define try_statement 
     'try ': 
-    	[suite] 
+        [suite] 
     [repeat except_clause_suite] 
     [opt else_clause] 
     [opt finally_clause] 
@@ -430,7 +431,7 @@ define except_clause_suite
 end define 
 
 define with_statement 
-    ['async ?] 				% python 3.8 - JRC 11jul20
+    ['async ?]                          % python 3.8 - JRC 11jul20
     'with [test] [opt with_var] ': 
         [suite] 
 end define 
@@ -454,13 +455,13 @@ define as_or_comma_test
 end define 
 
 define suite 
-	[block]
+        [block]
     |   [simple_statement] [endofline]
 end define 
 
 define block
     [indent] [endofline] 
-	[docstring ?]
+        [docstring ?]
         [repeat statement_or_newline*] 
     [dedent] 
 end define
@@ -507,7 +508,7 @@ end define
 
 define condition
     [test] 
-    [colon_equals_test ?]		% python 3.8 - JRC 11jul20
+    [colon_equals_test ?]               % python 3.8 - JRC 11jul20
 end define
 
 define colon_equals_test
@@ -588,7 +589,7 @@ define shiftop_shift_expr
 end define
 
 define shift_op
-	'<< | '>>
+        '<< | '>>
 end define 
 
 define arith_expr 
@@ -600,7 +601,7 @@ define op_arith_expr
 end define 
 
 define arith_op
-	'+ | '-
+        '+ | '-
 end define
 
 define term 
@@ -612,7 +613,7 @@ define op_term
 end define
 
 define term_op
-	'* | '/ | '% | '// 
+        '* | '/ | '% | '// 
 end define 
 
 define factor 
@@ -634,7 +635,7 @@ end define
 define atom 
         [id] 
     |   [literal] 
-    |	'( [IN] [repeat endofline] [opt yield_expr] [repeat endofline] ') [EX] 
+    |   '( [IN] [repeat endofline] [opt yield_expr] [repeat endofline] ') [EX] 
     |   '( [IN] [repeat endofline] [testplist_gexp] [repeat endofline] ') [EX] 
     |   '[ [IN] [repeat endofline] [opt listmaker] '] [EX]
     |   '{ [IN] [repeat endofline] [opt dictmaker] [repeat endofline] '} [EX] 
@@ -647,8 +648,8 @@ define listmaker
 end define 
 
 define testplist_gexp 
-      	[list test+] [opt endofline] [opt ',] 
-    |	[test] [opt endofline] [gen_for] 
+        [list test+] [opt endofline] [opt ',] 
+    |   [test] [opt endofline] [gen_for] 
 end define 
 
 define lambdef 
@@ -705,12 +706,12 @@ define arglist
 end define
 
 define star_test
-	[repeat endofline] '* [test] [opt ',]	% added comma - JRC 30jun15
-    |	[repeat endofline] '** [test] [opt ',]
+        [repeat endofline] '* [test] [opt ',]   % added comma - JRC 30jun15
+    |   [repeat endofline] '** [test] [opt ',]
 end define
 
 define comma_opt_star_test
-	', [opt star_test] [opt comma_opt_star_test]
+        ', [opt star_test] [opt comma_opt_star_test]
 end define
 
 define argument 
@@ -718,7 +719,7 @@ define argument
 end define
 
 define argument_value
-	[repeat endofline] [opt gen_for] 
+        [repeat endofline] [opt gen_for] 
     |   '= [repeat endofline] [test]  
 end define 
 
@@ -763,9 +764,10 @@ end define
 
 % Python literals
 define literal
-	[stringliteral] [repeat more_stringliteral]
-    |	[integerliteral]
-    |	[floatliteral]	
+        [stringliteral] [repeat more_stringliteral]
+    |   [integerliteral]
+    |   [floatliteral]  
+    |   'None
 end define
 
 define more_stringliteral
@@ -773,20 +775,20 @@ define more_stringliteral
 end define
 
 define stringliteral 
-	[stringprefix] [SPOFF] [string] [SPON]
-    |	[string] 
+        [stringprefix] [SPOFF] [string] [SPON]
+    |   [string] 
 end define
 
 define stringprefix 
-    	'r |  'u |  'ur |  'R |  'U |  'UR |  'Ur |  'uR 
-    |	'b |  'br
-    |	'f
+        'r |  'u |  'ur |  'R |  'U |  'UR |  'Ur |  'uR 
+    |   'b |  'br
+    |   'f
 end define 
 
 define string
         [stringlit] 
     |   [charlit] 
-    |	[longstringlit] 
+    |   [longstringlit] 
     |   [longcharlit] 
 end define 
 
@@ -795,23 +797,23 @@ define integerliteral
 end define
 
 define integer
-	[integernumber] 
+        [integernumber] 
     |   [hexinteger]
     |   [octinteger]
 end define 
 
 define long
-	[SPOFF] 'l [SPON]
-    |	[SPOFF] 'L [SPON]
+        [SPOFF] 'l [SPON]
+    |   [SPOFF] 'L [SPON]
 end define
 
 define floatliteral
-	[number] [opt imag]
-    |   [pointfloat] [opt imag]	
+        [number] [opt imag]
+    |   [pointfloat] [opt imag] 
 end define
 
 define imag
-	[SPOFF] 'j [SPON]
-    |	[SPOFF] 'J [SPON]
+        [SPOFF] 'j [SPON]
+    |   [SPOFF] 'J [SPON]
 end define
 

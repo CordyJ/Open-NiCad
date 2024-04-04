@@ -1,5 +1,5 @@
 % TXL Java Grammar
-% Version 5.0, November 2023
+% Version 5.0, April 2024
 
 % Copyright 2001-2023 James R. Cordy, Xinping Guo and Thomas R. Dean
 
@@ -29,12 +29,13 @@
 
 % Modification Log:
 
-% v5.0, Jim Cordy, November 2023.
+% v5.0, Jim Cordy, April 2024.
 %   Added support for Java 15 textblocks.
 %   Added support for Java 14 records.
 %   Added missing Java 14 modifiers and annotations in some contexts. 
 %   Added missing wildcard type parameters and arguments.
 %   Minor bug fixes to identifiers and strings.
+%   Changed default line width to 1024 to avoid NiCad extraction problems.
 
 % v4.4, Jim Cordy, December 2020.
 %   Added support for Java 14 pattern matching for instanceof. 
@@ -115,7 +116,7 @@
 
 % Lexical conventions of Java 
 
-#pragma -width 128 -id "$"
+#pragma -width 1024 -id "$"
 
 tokens
     space   "[ \t]+"
