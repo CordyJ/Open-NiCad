@@ -13,7 +13,7 @@ usage() {
 }
 
 echo ""
-echo "NiCad Cross-Clone Detector v7.0 (11.1.24)"
+echo "NiCad Cross-Clone Detector v7.0 (4.4.24)"
 echo ""
 
 # check we have an installation
