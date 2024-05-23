@@ -38,7 +38,7 @@ Unix-like systems with a GCC compiler and an OpenTxl distribution.
    everyone on the computer (for example, if you have a research group 
    all working on the same compute server), use the command:
 
-      sudo ./Install.sh 
+      sudo ./InstallNicad.sh 
 
 Using NiCad
 -----------
@@ -192,4 +192,4 @@ Turing+ can be downloaded from:
  
       https://github.com/CordyJ/TuringPlus/releases
 
-Rev 15.1.24
+Rev 23.5.24
