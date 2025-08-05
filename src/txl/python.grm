@@ -133,7 +133,7 @@ define statement_or_newline
 end define
 
 define decorator 
-    '@ [dotted_name] [opt decorator_arglist] [endofline] [repeat endofline]
+    '@ [SPOFF] [dotted_name] [opt decorator_arglist] [endofline] [repeat endofline]
 end define
 
 % The [SPOFF] '( [SPON] suppresses TXL default output spacing before (
@@ -151,7 +151,7 @@ define decorated
 end define 
 
 define funcdef 
-    [funcdef_header] ': [suite] 
+    [funcdef_header] [SPOFF] ': [suite] 
 end define 
 
 define docstring
@@ -170,7 +170,7 @@ end define
 
 define parameters 
     [SPOFF] '( [SPON] [opt varargslist] [repeat endofline] ') 
-end define 
+end define
 
 define varargslist 
         [repeat fpdef_test_comma] [repeat endofline] '* [id] 
@@ -197,7 +197,7 @@ define fpdef
 end define 
 
 define type_hint
-    ': [test]
+   [SPOFF] ': [test]
 end define
 
 define fplist 
@@ -248,6 +248,7 @@ end define
 define assign_value
         [yield_expr] 
     |   [testlist] 
+    |   'await [testlist] % added(new) to handle await (async) calls
 end define 
 
 % For normal assignments, additional restrictions enforced by the interpreter 
@@ -714,8 +715,9 @@ define comma_opt_star_test
         ', [opt star_test] [opt comma_opt_star_test]
 end define
 
-define argument 
-        [repeat endofline] [test] [opt argument_value] [repeat endofline]
+define argument
+        [repeat endofline] '... [repeat endofline] % added (new) to handle mandatory endpoint alias 
+    |   [repeat endofline] [test] [opt argument_value] [repeat endofline]
 end define
 
 define argument_value
@@ -816,4 +818,3 @@ define imag
         [SPOFF] 'j [SPON]
     |   [SPOFF] 'J [SPON]
 end define
-
