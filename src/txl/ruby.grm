@@ -38,10 +38,10 @@
 
 comments
 	'#
-	=begin =end
 end comments
 
 tokens
+    embedded_document "=begin#[(=end)]*=end"
 	ignore	...
 	   |	"\\\n"
 	   |	"\r"
@@ -162,8 +162,8 @@ define modifier_not_colon
 end define
 
 define paren_call_args
-	'( [IN] [terminator?] [call_args] [', ?] [terminator?] [paren_or_here_doc] [EX]
-    |	'( [paren_or_here_doc]
+	[SPOFF] '( [SPON] [IN] [terminator?] [call_args] [', ?] [terminator?] [paren_or_here_doc] [EX]
+    |	[SPOFF] '( [SPON] [paren_or_here_doc]
 end define
 
 define paren_or_here_doc
@@ -197,8 +197,8 @@ define actual_arg
 end define
 
 define key_arg_colon
-	[identifier] ':
-    |	[key] ':
+	[identifier] [SPOFF] ': [SPON]
+    |	[key] [SPOFF] ': [SPON]
 end define
 
 define comma_assocs
@@ -206,7 +206,7 @@ define comma_assocs
 end define
 
 define block_arg
-	'& [arg]
+	'& [SPOFF] [arg] [SPON]
 end define
 
 define comma_block_arg
@@ -350,12 +350,12 @@ end define
 
 define function_call_subscript_or_field_selection
     	[terminator?] [selector] [terminator?] [selection]
-    |	'[ [args?] [terminator?] ']
+    |	[SPOFF] '[ [SPON] [args?] [terminator?] ']
     |	'[]
 end define
 
 define selector
-	'. | '&. | '::
+	[SPOFF] '. [SPON] | [SPOFF] '&. [SPON] | [SPOFF] ':: [SPON]
 end define
 
 define field_selection
@@ -523,7 +523,7 @@ define module_definition
 end define 
 
 define namespace
-	[identifier?] '::
+	[identifier?] [SPOFF] ':: [SPON]
 end define
 
 define method_definition
@@ -840,7 +840,7 @@ define assoc
 end define
 
 define arrow_or_colon
-	'=> | ':
+	'=> | [SPOFF] ': [SPON]
 end define
 
 compounds
@@ -877,7 +877,7 @@ define terminator
 end define
 
 define semicolon_newline
-	'; | [newline] | [comment]
+	'; | [newline] | [comment] | [embedded_document]
 end define
 
 define LAZY
